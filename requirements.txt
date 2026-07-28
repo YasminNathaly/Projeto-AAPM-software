@@ -1,0 +1,39 @@
+# ==========================================
+# BASE DA API E SERVIDOR WEB
+# ==========================================
+fastapi
+uvicorn[standard]
+jinja2
+python-multipart
+
+# ==========================================
+# BANCO DE DADOS E MIGRAÇÕES
+# ==========================================
+sqlalchemy
+pymysql
+python-dotenv
+alembic
+
+# ==========================================
+# SEGURANÇA E AUTENTICAÇÃO
+# ==========================================
+python-jose[cryptography]
+passlib[bcrypt]
+
+# ==========================================
+# MANIPULAÇÃO DE IMAGENS (UPLOADS)
+# ==========================================
+Pillow
+
+# ==========================================
+# GRÁFICOS, RELATÓRIOS E TABELAS (EXCEL/PDF)
+# ==========================================
+matplotlib
+pandas
+openpyxl
+reportlab
+
+# ==========================================
+# VALIDAÇÃO E ESTRUTURAÇÃO DE DADOS
+# ==========================================
+pydantic
