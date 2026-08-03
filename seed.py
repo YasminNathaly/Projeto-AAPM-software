@@ -6,11 +6,14 @@ from app.database import engine, Base, SessionLocal
 from app.models.usuario import Usuario
 from app.models.categoria import Categoria
 from app.models.produto import Produto
-
+import bcrypt
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # ... resto do código permanece o mesmo
 def gerar_hash_senha(senha: str) -> str:
-    return pwd_context.hash(senha)
+    # Garante que a senha não passe de 72 bytes
+    senha_bytes = senha.encode('utf-8')[:72]
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(senha_bytes, salt).decode('utf-8')
 
 async def popular_banco_dados():
     print("🔄 Limpando e recriando tabelas no banco de dados...")
