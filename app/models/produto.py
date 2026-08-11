@@ -16,3 +16,5 @@ class Produto(Base):
     
     categoria_id = Column(Integer, ForeignKey("categorias.id"), nullable=True)
     categoria = relationship("Categoria", back_populates="produtos")
+
+variacoes = relationship("VariacaoProduto", back_populates="produto", cascade="all, delete-orphan")
