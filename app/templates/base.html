@@ -3,243 +3,1057 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AAPM – SENAI Brás | Sistema de Gestão</title>
+  
+  <!-- Tipografia do layout antigo (Poppins + Bebas Neue) + Inter para dados -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <title>AAPM – SENAI Brás</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
+    /* ─── DESIGN SYSTEM (IDENTIDADE DO MODELO ANTIGO) ─── */
+    :root {
+      --bg-main: #09090f;
+      --bg-surface: rgba(18, 18, 24, 0.85);
+      --bg-surface-hover: rgba(255, 255, 255, 0.05);
+      --bg-card: #0d0d14;
+      --border-color: rgba(255, 255, 255, 0.08);
+      
+      --primary: #d63250; /* Vermelho AAPM/SENAI */
+      --primary-hover: #b82842;
+      --accent: #d63250;
+      
+      --text-main: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.65);
+      --text-dark: rgba(255, 255, 255, 0.4);
+      
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+
+      --header-height: 70px;
+      --radius: 6px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
     * { 
       margin: 0; 
       padding: 0; 
       box-sizing: border-box; 
-      font-family: 'Poppins', sans-serif; 
+      font-family: 'Poppins', 'Inter', sans-serif; 
     }
     
-    html, body { 
-      background-color: #070913; 
-      color: #fff; 
-      width: 100%;
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
       min-height: 100vh;
-      overflow-x: hidden; 
-      overflow-y: auto;
-      scroll-behavior: smooth;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      position: relative;
     }
 
-    /* ─── HEADER FIXO NO TOPO ─── */
-    header {
-      width: 100%;
-      display: flex; 
-      justify-content: space-between; 
+    /* ─── CANVAS PARA ANIMAÇÃO DE FUNDO ─── */
+    #bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ─── HEADER / MENU FIXO (ESTILO ANTIGO) ─── */
+    header.main-header {
+      height: var(--header-height);
+      background-color: rgba(9, 9, 15, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 7vw;
+      display: flex;
       align-items: center;
-      padding: 1.2rem 5%; 
-      background: #06070d; 
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      position: relative;
+      justify-content: space-between;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
       z-index: 100;
     }
-    
-    .logo { display: flex; align-items: center; gap: 12px; }
-    .logo-box {
-      width: 32px; height: 32px; background: #e63956; border-radius: 6px;
-      display: grid; grid-template-columns: 1fr 1fr; gap: 3px; padding: 5px;
-    }
-    .logo-box div { background: #fff; border-radius: 2px; }
-    .logo-text h1 { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 1px; line-height: 1; }
-    .logo-text span { font-size: 0.55rem; color: rgba(255,255,255,0.5); letter-spacing: 1px; font-weight: 600; display: block; }
 
-    nav { display: flex; gap: 2rem; align-items: center; }
-    nav a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.9rem; transition: 0.3s; }
-    nav a:hover { color: #fff; }
-
-    .btn-admin {
-      border: 1px solid rgba(255,255,255,0.3); padding: 8px 18px; border-radius: 4px;
-      color: #fff; text-decoration: none; font-size: 0.75rem; font-weight: 600; letter-spacing: 1px;
-      transition: 0.3s;
-    }
-    .btn-admin:hover {
-      background: rgba(255,255,255,0.1);
-      border-color: #fff;
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: 0.1em;
+      color: #fff;
+      text-decoration: none;
     }
 
-    /* ─── HERO E FUNDO ANIMADO ─── */
-    .hero-container {
-      position: relative;
-      width: 100%;
-      min-height: 88vh;
+    .logo-icon {
+      width: 30px;
+      height: 30px;
+      background: var(--primary);
+      border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 3rem 5%;
-      overflow: hidden;
     }
 
-    .animated-bg {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      z-index: 1;
-      background: 
-        radial-gradient(ellipse at 70% 50%, rgba(30, 50, 110, 0.45) 0%, transparent 65%),
-        radial-gradient(ellipse at 20% 30%, rgba(180, 30, 60, 0.25) 0%, transparent 50%),
-        linear-gradient(180deg, #06070d 0%, #0a0d1a 100%);
+    .header-location {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      color: var(--text-dark);
+      text-transform: uppercase;
     }
 
-    .animated-bg::after {
-      content: "";
-      position: absolute;
-      width: 200%; height: 200%; top: -50%; left: -50%;
-      background-image: 
-        linear-gradient(rgba(60, 100, 200, 0.15) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(60, 100, 200, 0.15) 1px, transparent 1px);
-      background-size: 60px 60px;
-      transform: perspective(600px) rotateX(55deg);
-      animation: gridMove 25s linear infinite;
+    /* BARRA DE NAVEGAÇÃO SUPERIOR FIXA */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 4px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
     }
 
-    @keyframes gridMove {
-      0% { transform: perspective(600px) rotateX(55deg) translateY(0); }
-      100% { transform: perspective(600px) rotateX(55deg) translateY(60px); }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      text-transform: uppercase;
     }
 
-    .hero-content {
-      position: relative;
-      z-index: 10;
+    .nav-item svg { width: 16px; height: 16px; fill: currentColor; }
+
+    .nav-item:hover {
+      color: var(--text-main);
+      background: var(--bg-surface-hover);
+    }
+
+    .nav-item.active {
+      background-color: var(--primary);
+      color: #fff;
+    }
+
+    .header-user-area {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-card {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .avatar {
+      width: 32px; 
+      height: 32px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: 1px solid var(--border-color);
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      font-weight: 700; 
+      font-size: 0.75rem; 
+      color: var(--text-main);
+    }
+
+    .user-info { display: flex; flex-direction: column; }
+    .user-name { font-size: 0.75rem; font-weight: 600; color: var(--text-main); }
+
+    .btn-auth {
+      padding: 6px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-auth:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: rgba(214, 50, 80, 0.1);
+    }
+
+    /* ─── ÁREA PRINCIPAL DO CONTEÚDO ─── */
+    main.wrapper {
+      margin-top: var(--header-height);
       width: 100%;
-      max-width: 1200px;
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 3rem;
+      min-height: calc(100vh - var(--header-height));
+      padding: 3rem 7vw;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* BARRA DE AÇÕES / BUSCA */
+    .utility-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 0.6rem 1rem;
+      border-radius: var(--radius);
+      width: 360px;
+    }
+
+    .search-bar input {
+      background: transparent; 
+      border: none; 
+      outline: none;
+      color: var(--text-main); 
+      font-size: 0.85rem; 
+      width: 100%;
+    }
+
+    /* VIEWS / PÁGINAS */
+    .view-content {
+      display: none;
+      flex-direction: column;
+      gap: 1.5rem;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    .view-content.active { display: flex; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-title-header {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
     }
 
-    .hero-tag { color: #e63956; font-size: 0.8rem; font-weight: 700; letter-spacing: 2px; margin-bottom: 0.5rem; }
-    .hero-title { font-family: 'Bebas Neue', sans-serif; font-size: 7.5rem; line-height: 0.85; letter-spacing: 2px; color: #fff; }
-    .hero-sub { color: #e63956; font-size: 1.1rem; font-weight: 700; margin: 1.2rem 0 2rem; max-width: 480px; text-transform: uppercase; line-height: 1.3; }
+    .page-title-box h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.5rem;
+      letter-spacing: 0.04em;
+      line-height: 1;
+      color: #fff;
+    }
+
+    .page-title-box p { 
+      font-size: 0.85rem; 
+      color: var(--text-muted); 
+      margin-top: 4px; 
+    }
+
+    /* GRID & CARDS */
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .grid-3-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    /* CARDS KPIS */
+    .kpi-card { display: flex; flex-direction: column; gap: 0.4rem; }
+    .kpi-header { color: var(--primary); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; }
+    .kpi-value { font-size: 2rem; font-weight: 700; color: var(--text-main); font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.05em; }
+    .kpi-trend { font-size: 0.75rem; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+    .kpi-trend.up { color: var(--success); }
+    .kpi-trend.neutral { color: var(--text-muted); }
+
+    /* FORMULÁRIOS */
+    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group.full { grid-column: span 2; }
+    .form-group label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+
+    .form-control {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 0.65rem 0.85rem;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-control:focus { border-color: var(--primary); }
+    .form-control[readonly] { background: rgba(255, 255, 255, 0.01); color: var(--text-dark); }
+
+    .btn {
+      padding: 0.65rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+
+    /* TABELAS MODERNAS */
+    .table-responsive { width: 100%; overflow-x: auto; }
     
-    .stat-number { color: #e63956; font-size: 4rem; font-weight: 700; line-height: 1; margin-bottom: 0.3rem; }
-    .stat-desc { color: rgba(255,255,255,0.65); font-size: 0.85rem; max-width: 320px; line-height: 1.4; }
-
-    .btn-saiba {
-      display: inline-block; background: #e63956; color: #fff; text-decoration: none;
-      padding: 12px 32px; border-radius: 6px; font-weight: 600; margin-top: 1.8rem;
-      box-shadow: 0 4px 20px rgba(230, 57, 86, 0.4); transition: 0.3s;
-    }
-    .btn-saiba:hover { transform: translateY(-2px); background: #f04360; }
-
-    /* MOCKUP FLUTUANTE */
-    .hero-right { display: flex; justify-content: center; align-items: center; }
-    .mockup-img {
+    table {
       width: 100%;
-      max-width: 520px;
+      border-collapse: separate;
+      border-spacing: 0 8px;
+      text-align: left;
+    }
+
+    th {
+      padding: 0.75rem 1rem;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    tbody tr {
+      background: var(--bg-card);
+      transition: background-color 0.2s;
+    }
+
+    tbody tr:hover {
+      background: var(--bg-surface-hover);
+    }
+
+    td {
+      padding: 1rem;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: var(--text-main);
+    }
+
+    td:first-child { border-left: 1px solid var(--border-color); border-top-left-radius: var(--radius); border-bottom-left-radius: var(--radius); }
+    td:last-child { border-right: 1px solid var(--border-color); border-top-right-radius: var(--radius); border-bottom-right-radius: var(--radius); }
+
+    .badge-rm {
+      background: rgba(214, 50, 80, 0.15);
+      color: var(--primary);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: 1px solid rgba(214, 50, 80, 0.3);
+    }
+
+    .status-tag {
+      padding: 0.2rem 0.6rem;
       border-radius: 12px;
-      box-shadow: -15px 20px 40px rgba(0,0,0,0.8), 0 0 30px rgba(50, 90, 200, 0.3);
-      transform: perspective(800px) rotateY(-12deg) rotateX(6deg);
-      transition: transform 0.5s ease;
-      border: 1px solid rgba(255,255,255,0.12);
+      font-size: 0.7rem;
+      font-weight: 600;
+      display: inline-block;
     }
-    .mockup-img:hover { transform: perspective(800px) rotateY(0deg) rotateX(0deg) scale(1.02); }
+    .status-tag.active { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .status-tag.pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
 
-    /* ─── RODAPÉ / INFOS ─── */
-    .info-footer {
-      position: relative; z-index: 10;
-      display: grid; grid-template-columns: 1fr 1.2fr 1.2fr;
-      border-top: 1px solid rgba(255,255,255,0.08); background: #040509;
+    .action-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      width: 32px; height: 32px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
     }
-    .info-col { padding: 2.5rem 5%; border-right: 1px solid rgba(255,255,255,0.08); }
-    .info-col:last-child { border-right: none; }
-    .col-title { color: #e63956; font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; margin-bottom: 1.5rem; text-transform: uppercase; }
 
-    .info-label { color: rgba(255,255,255,0.4); font-size: 0.7rem; letter-spacing: 1px; margin-top: 1rem; }
-    .info-val { color: #fff; font-size: 0.95rem; font-weight: 500; margin-top: 2px; }
+    .action-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-    .horario-row { display: flex; justify-content: space-between; margin-bottom: 0.8rem; font-size: 0.9rem; color: rgba(255,255,255,0.8); }
-
-    .map-container {
-      width: 100%; height: 130px; border-radius: 8px; overflow: hidden; margin-top: 10px;
-      border: 1px solid rgba(255,255,255,0.1);
+    /* GALERIA DE PRODUTOS */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.25rem;
     }
+
+    .product-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s;
+    }
+
+    .product-item:hover { transform: translateY(-4px); }
+
+    .product-thumb {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      background: var(--bg-main);
+    }
+
+    .product-body { padding: 1rem; display: flex; flex-direction: column; gap: 6px; }
+    .product-category { font-size: 0.65rem; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+    .product-title { font-size: 0.9rem; font-weight: 600; color: var(--text-main); }
+    .product-price { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
+    .product-sku { font-size: 0.7rem; color: var(--text-dark); }
+    .badge-no-stock {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 4px;
+      width: fit-content;
+    }
+
+    /* MODAL */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      display: none;
+      align-items: center; justify-content: center;
+    }
+
+    .modal-backdrop.active { display: flex; }
+
+    .modal-box {
+      background: #0d0d14;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      width: 100%; max-width: 400px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+    }
+
+    .modal-header { margin-bottom: 1.5rem; }
+    .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.05em; }
   </style>
 </head>
 <body>
 
-  <!-- 1. HEADER -->
-  <header>
-    <div class="logo">
-      <div class="logo-box">
-        <div></div><div></div><div></div><div></div>
+  <!-- CANVAS PARA ANIMAÇÃO NO FUNDO -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- MENU / HEADER FIXO NO TOPO -->
+  <header class="main-header">
+    <a href="#" class="brand-logo">
+      <div class="logo-icon">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+          <rect x="1" y="1" width="6" height="6" rx="1.5" fill="white"/>
+          <rect x="11" y="1" width="6" height="6" rx="1.5" fill="white" opacity=".55"/>
+          <rect x="1" y="11" width="6" height="6" rx="1.5" fill="white" opacity=".55"/>
+          <rect x="11" y="11" width="6" height="6" rx="1.5" fill="white"/>
+        </svg>
       </div>
-      <div class="logo-text">
-        <h1>AAPM</h1>
-        <span>SENAI BRÁS &mdash; SP | UNIDADE FRANCISCO MATARAZZO</span>
+      <span>AAPM</span>
+    </a>
+
+    <nav class="top-nav">
+      <a class="nav-item active" onclick="navigate('dashboard', this)">
+        <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+        Início
+      </a>
+      <a class="nav-item" onclick="navigate('associados', this)">
+        <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+        Associados
+      </a>
+      <a class="nav-item" onclick="navigate('estoque', this)">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4V8h16v10zm-2-1h-6v-2h6v2z"/></svg>
+        Produtos
+      </a>
+      <a class="nav-item" onclick="navigate('relatorios', this)">
+        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+        Fale conosco
+      </a>
+    </nav>
+
+    <div class="header-user-area">
+      <span class="header-location"></span>
+      <div class="user-card" id="userBox" style="display: none;">
+        <div class="avatar" id="avatarText">AD</div>
+        <div class="user-info">
+          <span class="user-name" id="userNameLabel">Admin</span>
+        </div>
+      </div>
+      <button class="btn-auth" id="authBtn" onclick="toggleAuth()">PAINEL ADMIN</button>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL DO SISTEMA -->
+  <main class="wrapper">
       </div>
     </div>
 
-    <nav>
-      <a href="#">Home</a>
-      <a href="#sobre">Sobre Nós</a>
-      <a href="#produtos">Produtos</a>
-      <a href="#contato">Contatos</a>
-      <a href="#eventos">Eventos</a>
-    </nav>
-
-    <a href="/login" class="btn-admin">PAINEL ADMIN</a>
-  </header>
-
-  <!-- 2. HERO -->
-  <div class="hero-container">
-    <div class="animated-bg"></div>
-
-    <div class="hero-content">
-      <div class="hero-left">
-        <p class="hero-tag">SENAI BRÁS &mdash; SP</p>
-        <h1 class="hero-title">AAPM</h1>
-        <p class="hero-sub">ASSOCIAÇÃO DE ALUNOS, EX-ALUNOS, PAIS E MESTRES DO SENAI BRÁS</p>
-
-        <div class="stat-number">+200</div>
-        <p class="stat-desc">alunos formados anualmente em cursos técnicos de alta demanda.</p>
-
-        <a href="#sobre" class="btn-saiba">Saiba Mais</a>
+    <!-- ABA 1: DASHBOARD -->
+    <section id="dashboard" class="view-content active">
+      <div class="page-title-box">
+        <h2>Unidade SENAI - Brás</h2>
+        <p>Rua Correia de Andrade, 232 - São Paulo/SP</p>
       </div>
 
-      <div class="hero-right">
-        <img class="mockup-img" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop" alt="AAPM Dashboard">
+      <div class="grid-4">
+        <div class="card kpi-card">
+          <div class="kpi-header">TOTAL DE ASSOCIADOS</div>
+          <div class="kpi-value">1.248</div>
+          <div class="kpi-trend up">↑ 12% em relação ao mês anterior</div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-header"></div>
+          <div class="kpi-value">R$ 38.450</div>
+          <div class="kpi-trend up">↑ 8.5% meta batida</div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-header">VENDAS DA LOJA</div>
+          <div class="kpi-value">R$ 9.800</div>
+          <div class="kpi-trend neutral">• Dentro da média</div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-header">ITENS CADASTRADOS</div>
+          <div class="kpi-value" id="kpiTotalItems">4</div>
+          <div class="kpi-trend neutral">Catalogados por código</div>
+        </div>
       </div>
+
+      <div class="grid-3-1">
+        <div class="card">
+          <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary);">Crescimento Mensal de Associados</h3>
+          <div style="height: 260px;"><canvas id="dashChart1"></canvas></div>
+        </div>
+        <div class="card">
+          <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary);">Distribuição de Vendas</h3>
+          <div style="height: 260px;"><canvas id="dashChart2"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABA 2: ASSOCIADOS -->
+    <section id="associados" class="view-content">
+      <div class="page-title-header">
+        <div class="page-title-box">
+          <h2>Gestão de Associados</h2>
+          <p>Membros cadastrados, ex-alunos e comunidade escolar.</p>
+        </div>
+        <button class="btn btn-primary">+ Novo Associado</button>
+      </div>
+
+      <div class="card" style="padding: 0.5rem 1.25rem;">
+        <div class="table-responsive">
+          <table id="associatesTable">
+            <thead>
+              <tr>
+                <th>Nome Completo</th>
+                <th>RM / Matrícula</th>
+                <th>Curso / Departamento</th>
+                <th>Status</th>
+                <th>Admissão</th>
+                <th style="text-align: right;">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight: 600;">Carlos Eduardo Silva</td>
+                <td><span class="badge-rm">RM-90124</span></td>
+                <td>Técnico em Desenvolvimento de Sistemas</td>
+                <td><span class="status-tag active">Ativo</span></td>
+                <td>12/02/2025</td>
+                <td style="text-align: right;">
+                  <button class="action-btn" title="Visualizar">👁</button>
+                  <button class="action-btn" title="Editar">✏️</button>
+                </td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600;">Mariana Souza Lima</td>
+                <td><span class="badge-rm">RM-88412</span></td>
+                <td>Técnico em Mecatrônica</td>
+                <td><span class="status-tag active">Ativo</span></td>
+                <td>05/01/2025</td>
+                <td style="text-align: right;">
+                  <button class="action-btn" title="Visualizar">👁</button>
+                  <button class="action-btn" title="Editar">✏️</button>
+                </td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600;">Lucas Oliveira</td>
+                <td><span class="badge-rm">RM-77192</span></td>
+                <td>Aprendizagem Industrial</td>
+                <td><span class="status-tag pending">Pendente</span></td>
+                <td>28/02/2025</td>
+                <td style="text-align: right;">
+                  <button class="action-btn" title="Visualizar">👁</button>
+                  <button class="action-btn" title="Editar">✏️</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABA 3: PRODUTOS & ESTOQUE -->
+    <section id="estoque" class="view-content">
+      <div class="page-title-box">
+        <h2>Controle de Estoque & Produtos</h2>
+        <p>Cadastro com identificação automática de categoria pelo código.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem; text-transform: uppercase; color: var(--primary);">Novo Produto</h3>
+          
+          <form id="productForm" onsubmit="saveProduct(event)">
+            <div class="form-grid">
+              <div class="form-group full">
+                <label>SKU / CÓDIGO DO PRODUTO</label>
+                <input type="text" class="form-control" id="skuInput" placeholder="Ex: PROD-01" oninput="autoDetectCategory()" required>
+              </div>
+
+              <div class="form-group">
+                <label>NOME DO ITEM</label>
+                <input type="text" class="form-control" id="nameInput" placeholder="Ex: Camiseta Regimental M" required>
+              </div>
+
+              <div class="form-group">
+                <label>CATEGORIA IDENTIFICADA</label>
+                <input type="text" class="form-control" id="categoryInput" placeholder="Sufixo 01, 02 ou 03" readonly>
+              </div>
+
+              <div class="form-group">
+                <label>PREÇO UNITÁRIO (R$)</label>
+                <input type="number" step="0.01" class="form-control" id="priceInput" placeholder="0,00" required>
+              </div>
+
+              <div class="form-group">
+                <label>GERENCIAR ESTOQUE?</label>
+                <select class="form-control" id="stockControlInput">
+                  <option value="sim">Sim (Físico)</option>
+                  <option value="nao">Não (Sem estoque / Serviço)</option>
+                </select>
+              </div>
+
+              <div class="form-group full">
+                <label>URL DA IMAGEM</label>
+                <input type="url" class="form-control" id="imgInput" placeholder="https://..." required>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.25rem;">Cadastrar Produto</button>
+          </form>
+        </div>
+
+        <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
+          <h4 style="font-size: 0.8rem; color: var(--primary); text-transform: uppercase; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: 0.1em;">REGRA DE CATEGORIZAÇÃO SKU</h4>
+          <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1rem;">
+            O sistema classifica automaticamente o item analisando os **últimos dois dígitos** do código:
+          </p>
+          <ul style="font-size: 0.85rem; color: var(--text-main); display: flex; flex-direction: column; gap: 8px; padding-left: 1rem;">
+            <li><strong>Final 01:</strong> Uniformes & Vestuário</li>
+            <li><strong>Final 02:</strong> Material Didático & Livros</li>
+            <li><strong>Final 03:</strong> Ferramentas & Equipamentos</li>
+            <li><strong>Demais Finais:</strong> Acessórios & Artigos Gerais</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.04em; margin-top: 1rem;">Catálogo Cadastrado</h3>
+      <div class="product-grid" id="productGallery"></div>
+    </section>
+
+    <!-- ABA 4: RELATÓRIOS -->
+    <section id="relatorios" class="view-content">
+      <div class="page-title-box">
+        <h2>Relatórios Gerenciais</h2>
+        <p>Dados consolidados para prestação de contas AAPM.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem; text-transform: uppercase; color: var(--primary);">Adesão de Membros por Período</h3>
+          <div style="height: 280px;"><canvas id="reportChart1"></canvas></div>
+        </div>
+        <div class="card">
+          <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem; text-transform: uppercase; color: var(--primary);">Volume Financeiro por Categoria (R$)</h3>
+          <div style="height: 280px;"><canvas id="reportChart2"></canvas></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL DE AUTENTICAÇÃO -->
+  <div class="modal-backdrop" id="loginModal" onclick="if(event.target === this) cancelLogin()">
+    <div class="modal-box" style="position: relative;">
+      <button type="button" onclick="cancelLogin()" style="position: absolute; top: 12px; right: 16px; background: none; border: none; color: rgba(255,255,255,0.5); font-size: 1.5rem; cursor: pointer; line-height: 1;">&times;</button>
+
+      <div class="modal-header">
+        <h3 class="modal-title">Painel Administrativo</h3>
+        <p style="font-size: 0.8rem; color: var(--text-muted);">Acesso restrito a gestores da AAPM SENAI Brás.</p>
+      </div>
+
+      <form onsubmit="confirmLogin(event)">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label>E-mail Corporativo</label>
+          <input type="email" class="form-control" id="loginEmail" placeholder="usuario@sp.senai.br" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label>Senha</label>
+          <input type="password" class="form-control" placeholder="••••••••" required>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Entrar</button>
+          <button type="button" onclick="cancelLogin()" class="btn" style="width: 100%; background: transparent; border: 1px solid var(--border-color); color: var(--text-muted);">Cancelar</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <!-- 3. RODAPÉ DE CONTATO E MAPA -->
-  <section id="contato" class="info-footer">
-    <div class="info-col">
-      <p class="col-title">CONTATO</p>
-      <p class="info-label">TELEFONE</p>
-      <p class="info-val">(11) 2293-8200</p>
-      <p class="info-label">E-MAIL</p>
-      <p class="info-val">aapm@sp.senai.br</p>
-    </div>
+  <script>
+    /* ─── ANIMAÇÃO DO CANVAS (ESTILO REDE CONECTADA EM PONTOS BRANCOS) ─── */
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
 
-    <div class="info-col">
-      <p class="col-title">HORÁRIO DE FUNCIONAMENTO</p>
-      <div class="horario-row">
-        <span>Segunda a Sexta</span>
-        <strong>07h – 22h</strong>
-      </div>
-      <div class="horario-row">
-        <span>Sábado</span>
-        <strong>07h – 13h</strong>
-      </div>
-    </div>
+    let particles = [];
+    const maxParticles = 90;
+    const mouse = { x: null, y: null, radius: 140 };
 
-    <div class="info-col">
-      <p class="col-title">ONDE ESTAMOS</p>
-      <p class="info-val" style="font-size: 0.85rem; line-height: 1.4;">Rua Correia de Andrade, 232 — Brás, São Paulo - SP</p>
-      <div class="map-container">
-        <iframe 
-          title="Localização SENAI Brás"
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3657.6841280312684!2d-46.61868592376173!3d-23.54385196161421!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94ce5932598c92a9%3A0xc34a179fa4d17c9d!2sRua%20Correia%20de%20Andrade%2C%20232%20-%20Br%C3%A1s%2C%20S%C3%A3o%20Paulo%20-%20SP!5e0!3m2!1spt-BR!2sbr!4v1700000000000!5m2!1spt-BR!2sbr" 
-          width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy">
-        </iframe>
-      </div>
-    </div>
-  </section>
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
+    window.addEventListener('mousemove', (e) => {
+      mouse.x = e.x;
+      mouse.y = e.y;
+    });
+
+    window.addEventListener('mouseleave', () => {
+      mouse.x = null;
+      mouse.y = null;
+    });
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 1;
+        this.speedX = (Math.random() - 0.5) * 0.7;
+        this.speedY = (Math.random() - 0.5) * 0.7;
+      }
+
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+      }
+
+      draw() {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function initParticles() {
+      particles = [];
+      for (let i = 0; i < maxParticles; i++) {
+        particles.push(new Particle());
+      }
+    }
+    initParticles();
+
+    function animateBackground() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update();
+        particles[i].draw();
+
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 110) {
+            ctx.strokeStyle = `rgba(255, 255, 255, ${0.15 - dist / 800})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+
+        if (mouse.x && mouse.y) {
+          const mdx = particles[i].x - mouse.x;
+          const mdy = particles[i].y - mouse.y;
+          const mDist = Math.sqrt(mdx * mdx + mdy * mdy);
+
+          if (mDist < mouse.radius) {
+            ctx.strokeStyle = `rgba(214, 50, 80, ${0.4 - mDist / (mouse.radius * 2)})`;
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(mouse.x, mouse.y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      requestAnimationFrame(animateBackground);
+    }
+    animateBackground();
+
+    /* ─── ESTADO E LÓGICA DO SISTEMA ─── */
+    let products = [
+      { sku: "UNI-2001", name: "Camiseta SENAI M", category: "Uniformes", price: 45.00, hasStock: true, img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=400&auto=format&fit=crop" },
+      { sku: "LIV-3002", name: "Apostila Mecatrônica", category: "Material Didático", price: 65.00, hasStock: true, img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=400&auto=format&fit=crop" },
+      { sku: "FER-4003", name: "Paquímetro Digital 150mm", category: "Ferramentas", price: 120.00, hasStock: true, img: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=400&auto=format&fit=crop" },
+      { sku: "ACE-1099", name: "Chaveiro AAPM", category: "Acessórios", price: 12.00, hasStock: false, img: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=400&auto=format&fit=crop" }
+    ];
+
+    let userLogged = false;
+    let chartsInitialized = false;
+
+    /* NAVEGAÇÃO SPA */
+    function navigate(viewId, element) {
+      document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+
+      document.getElementById(viewId).classList.add('active');
+      element.classList.add('active');
+
+      if ((viewId === 'dashboard' || viewId === 'relatorios') && !chartsInitialized) {
+        setTimeout(initCharts, 50);
+      }
+    }
+
+    /* FILTRO DE PESQUISA */
+    function filterAssociates() {
+      const term = document.getElementById('globalSearch').value.toLowerCase();
+      const rows = document.querySelectorAll('#associatesTable tbody tr');
+
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(term) ? '' : 'none';
+      });
+    }
+
+    /* DETECÇÃO AUTOMÁTICA DE CATEGORIA POR SKU */
+    function autoDetectCategory() {
+      const sku = document.getElementById('skuInput').value.trim();
+      const catField = document.getElementById('categoryInput');
+
+      if (sku.length >= 2) {
+        const lastDigits = sku.slice(-2);
+        if (lastDigits === "01") catField.value = "Uniformes";
+        else if (lastDigits === "02") catField.value = "Material Didático";
+        else if (lastDigits === "03") catField.value = "Ferramentas";
+        else catField.value = "Acessórios";
+      } else {
+        catField.value = "";
+      }
+    }
+
+    /* SALVAR NOVO PRODUTO */
+    function saveProduct(e) {
+      e.preventDefault();
+      const sku = document.getElementById('skuInput').value;
+      const name = document.getElementById('nameInput').value;
+      const category = document.getElementById('categoryInput').value;
+      const price = parseFloat(document.getElementById('priceInput').value);
+      const hasStock = document.getElementById('stockControlInput').value === "sim";
+      const img = document.getElementById('imgInput').value;
+
+      products.push({ sku, name, category, price, hasStock, img });
+      renderProducts();
+
+      document.getElementById('productForm').reset();
+      document.getElementById('categoryInput').value = "";
+      document.getElementById('kpiTotalItems').innerText = products.length;
+    }
+
+    /* RENDERIZAR CATALOGO DE PRODUTOS */
+    function renderProducts() {
+      const container = document.getElementById('productGallery');
+      container.innerHTML = "";
+
+      products.forEach(p => {
+        const stockBadge = !p.hasStock ? '<span class="badge-no-stock">Sem Estoque (Ilimitado)</span>' : '';
+        
+        container.innerHTML += `
+          <div class="product-item">
+            <img src="${p.img}" class="product-thumb" alt="${p.name}">
+            <div class="product-body">
+              <span class="product-category">${p.category}</span>
+              <div class="product-title">${p.name}</div>
+              <div class="product-price">R$ ${p.price.toFixed(2)}</div>
+              <div class="product-sku">SKU: ${p.sku}</div>
+              ${stockBadge}
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    /* GRÁFICOS CHART.JS COM CORES AJUSTADAS */
+    let c1, c2, c3, c4;
+
+    function initCharts() {
+      if (c1) c1.destroy(); if (c2) c2.destroy();
+      if (c3) c3.destroy(); if (c4) c4.destroy();
+
+      const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: 'rgba(255,255,255,0.65)', font: { family: 'Poppins' } } } },
+        scales: {
+          x: { ticks: { color: 'rgba(255,255,255,0.4)' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+          y: { ticks: { color: 'rgba(255,255,255,0.4)' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+        }
+      };
+
+      const ctx1 = document.getElementById('dashChart1');
+      if (ctx1) {
+        c1 = new Chart(ctx1, {
+          type: 'line',
+          data: {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+            datasets: [{ label: 'Associados', data: [850, 920, 1010, 1100, 1180, 1248], borderColor: '#d63250', backgroundColor: 'rgba(214, 50, 80, 0.15)', fill: true, tension: 0.4 }]
+          },
+          options: chartOptions
+        });
+      }
+
+      const ctx2 = document.getElementById('dashChart2');
+      if (ctx2) {
+        c2 = new Chart(ctx2, {
+          type: 'doughnut',
+          data: {
+            labels: ['Uniformes', 'Didático', 'Ferramentas', 'Outros'],
+            datasets: [{ data: [45, 25, 20, 10], backgroundColor: ['#d63250', '#10b981', '#f59e0b', 'rgba(255,255,255,0.3)'] }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: 'rgba(255,255,255,0.65)' } } } }
+        });
+      }
+
+      const ctx3 = document.getElementById('reportChart1');
+      if (ctx3) {
+        c3 = new Chart(ctx3, {
+          type: 'bar',
+          data: {
+            labels: ['1º Trim', '2º Trim', '3º Trim', '4º Trim'],
+            datasets: [{ label: 'Novas Adesões', data: [320, 450, 210, 380], backgroundColor: '#d63250' }]
+          },
+          options: chartOptions
+        });
+      }
+
+      const ctx4 = document.getElementById('reportChart2');
+      if (ctx4) {
+        c4 = new Chart(ctx4, {
+          type: 'bar',
+          data: {
+            labels: ['Uniformes', 'Didático', 'Ferramentas', 'Geral'],
+            datasets: [{ label: 'Receita (R$)', data: [18200, 12400, 8900, 3100], backgroundColor: '#10b981' }]
+          },
+          options: chartOptions
+        });
+      }
+
+      chartsInitialized = true;
+    }
+
+    /* AUTENTICAÇÃO SIMULADA */
+    function toggleAuth() {
+      if (userLogged) {
+        userLogged = false;
+        document.getElementById('userBox').style.display = 'none';
+        document.getElementById('authBtn').innerText = 'PAINEL ADMIN';
+      } else {
+        document.getElementById('loginModal').classList.add('active');
+      }
+    }
+
+    function cancelLogin() {
+      document.getElementById('loginModal').classList.remove('active');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') cancelLogin();
+    });
+
+    function confirmLogin(e) {
+      e.preventDefault();
+      userLogged = true;
+      document.getElementById('loginModal').classList.remove('active');
+
+      const email = document.getElementById('loginEmail').value;
+      const name = email.split('@')[0];
+
+      document.getElementById('userNameLabel').innerText = name.charAt(0).toUpperCase() + name.slice(1);
+      document.getElementById('avatarText').innerText = name.substring(0, 2).toUpperCase();
+      document.getElementById('userBox').style.display = 'flex';
+      document.getElementById('authBtn').innerText = 'SAIR';
+    }
+
+    window.onload = function() {
+      renderProducts();
+      initCharts();
+    };
+  </script>
 </body>
 </html>
