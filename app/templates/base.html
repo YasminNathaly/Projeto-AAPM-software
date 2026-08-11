@@ -5,16 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AAPM – SENAI Brás | Sistema de Gestão</title>
   
-  <!-- Tipografia do layout antigo (Poppins + Bebas Neue) + Inter para dados -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    /* ─── DESIGN SYSTEM (IDENTIDADE DO MODELO ANTIGO) ─── */
     :root {
       --bg-main: #09090f;
       --bg-surface: rgba(18, 18, 24, 0.85);
@@ -22,7 +19,7 @@
       --bg-card: #0d0d14;
       --border-color: rgba(255, 255, 255, 0.08);
       
-      --primary: #d63250; /* Vermelho AAPM/SENAI */
+      --primary: #d63250;
       --primary-hover: #b82842;
       --accent: #d63250;
       
@@ -39,12 +36,7 @@
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
     }
 
-    * { 
-      margin: 0; 
-      padding: 0; 
-      box-sizing: border-box; 
-      font-family: 'Poppins', 'Inter', sans-serif; 
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', 'Inter', sans-serif; }
     
     body {
       background-color: var(--bg-main);
@@ -56,18 +48,14 @@
       position: relative;
     }
 
-    /* ─── CANVAS PARA ANIMAÇÃO DE FUNDO ─── */
     #bg-canvas {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
       z-index: 0;
       pointer-events: none;
     }
 
-    /* ─── HEADER / MENU FIXO (ESTILO ANTIGO) ─── */
     header.main-header {
       height: var(--header-height);
       background-color: rgba(9, 9, 15, 0.9);
@@ -78,31 +66,30 @@
       align-items: center;
       justify-content: space-between;
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
+      top: 0; left: 0; right: 0;
       z-index: 100;
     }
 
     .brand-logo {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+    }
+
+    .logo-senai-svg {
+      height: 32px;
+      width: auto;
+      display: block;
+    }
+
+    .brand-title {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 1.5rem;
       letter-spacing: 0.1em;
-      color: #fff;
-      text-decoration: none;
-    }
-
-    .logo-icon {
-      width: 30px;
-      height: 30px;
-      background: var(--primary);
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      border-left: 1px solid var(--border-color);
+      padding-left: 12px;
     }
 
     .header-location {
@@ -113,7 +100,6 @@
       text-transform: uppercase;
     }
 
-    /* BARRA DE NAVEGAÇÃO SUPERIOR FIXA */
     .top-nav {
       display: flex;
       align-items: center;
@@ -140,42 +126,19 @@
       text-transform: uppercase;
     }
 
-    .nav-item svg { width: 16px; height: 16px; fill: currentColor; }
+    .nav-item:hover { color: var(--text-main); background: var(--bg-surface-hover); }
+    .nav-item.active { background-color: var(--primary); color: #fff; }
 
-    .nav-item:hover {
-      color: var(--text-main);
-      background: var(--bg-surface-hover);
-    }
-
-    .nav-item.active {
-      background-color: var(--primary);
-      color: #fff;
-    }
-
-    .header-user-area {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .user-card {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .header-user-area { display: flex; align-items: center; gap: 1rem; }
+    .user-card { display: flex; align-items: center; gap: 8px; }
 
     .avatar {
-      width: 32px; 
-      height: 32px;
+      width: 32px; height: 32px;
       border-radius: 50%;
       background: var(--primary);
       border: 1px solid var(--border-color);
-      display: flex; 
-      align-items: center; 
-      justify-content: center;
-      font-weight: 700; 
-      font-size: 0.75rem; 
-      color: var(--text-main);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.75rem; color: var(--text-main);
     }
 
     .user-info { display: flex; flex-direction: column; }
@@ -194,13 +157,8 @@
       transition: all 0.2s;
     }
 
-    .btn-auth:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-      background: rgba(214, 50, 80, 0.1);
-    }
+    .btn-auth:hover { border-color: var(--primary); color: var(--primary); background: rgba(214, 50, 80, 0.1); }
 
-    /* ─── ÁREA PRINCIPAL DO CONTEÚDO ─── */
     main.wrapper {
       margin-top: var(--header-height);
       width: 100%;
@@ -210,37 +168,6 @@
       z-index: 1;
     }
 
-    /* BARRA DE AÇÕES / BUSCA */
-    .utility-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .search-bar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      padding: 0.6rem 1rem;
-      border-radius: var(--radius);
-      width: 360px;
-    }
-
-    .search-bar input {
-      background: transparent; 
-      border: none; 
-      outline: none;
-      color: var(--text-main); 
-      font-size: 0.85rem; 
-      width: 100%;
-    }
-
-    /* VIEWS / PÁGINAS */
     .view-content {
       display: none;
       flex-direction: column;
@@ -255,12 +182,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .page-title-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
     .page-title-box h2 {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 2.5rem;
@@ -269,17 +190,10 @@
       color: #fff;
     }
 
-    .page-title-box p { 
-      font-size: 0.85rem; 
-      color: var(--text-muted); 
-      margin-top: 4px; 
-    }
+    .page-title-box p { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
 
-    /* GRID & CARDS */
-    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
-    .grid-3-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; }
-
+    
     .card {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
@@ -288,15 +202,6 @@
       box-shadow: var(--shadow);
     }
 
-    /* CARDS KPIS */
-    .kpi-card { display: flex; flex-direction: column; gap: 0.4rem; }
-    .kpi-header { color: var(--primary); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; }
-    .kpi-value { font-size: 2rem; font-weight: 700; color: var(--text-main); font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.05em; }
-    .kpi-trend { font-size: 0.75rem; font-weight: 500; display: flex; align-items: center; gap: 4px; }
-    .kpi-trend.up { color: var(--success); }
-    .kpi-trend.neutral { color: var(--text-muted); }
-
-    /* FORMULÁRIOS */
     .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
     .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
     .form-group.full { grid-column: span 2; }
@@ -314,7 +219,6 @@
     }
 
     .form-control:focus { border-color: var(--primary); }
-    .form-control[readonly] { background: rgba(255, 255, 255, 0.01); color: var(--text-dark); }
 
     .btn {
       padding: 0.65rem 1.25rem;
@@ -330,12 +234,14 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+      text-decoration: none;
     }
 
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-primary:hover { background: var(--primary-hover); }
+    .btn-whatsapp { background: #25D366; color: #fff; }
+    .btn-whatsapp:hover { background: #1ebc57; }
 
-    /* TABELAS MODERNAS */
     .table-responsive { width: 100%; overflow-x: auto; }
     
     table {
@@ -354,14 +260,8 @@
       font-weight: 700;
     }
 
-    tbody tr {
-      background: var(--bg-card);
-      transition: background-color 0.2s;
-    }
-
-    tbody tr:hover {
-      background: var(--bg-surface-hover);
-    }
+    tbody tr { background: var(--bg-card); transition: background-color 0.2s; }
+    tbody tr:hover { background: var(--bg-surface-hover); }
 
     td {
       padding: 1rem;
@@ -392,7 +292,6 @@
       display: inline-block;
     }
     .status-tag.active { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
-    .status-tag.pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
 
     .action-btn {
       background: transparent;
@@ -409,7 +308,6 @@
 
     .action-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-    /* GALERIA DE PRODUTOS */
     .product-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -423,37 +321,17 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      transition: transform 0.2s;
     }
 
-    .product-item:hover { transform: translateY(-4px); }
-
-    .product-thumb {
-      width: 100%;
-      height: 140px;
-      object-fit: cover;
-      background: var(--bg-main);
-    }
-
+    .product-thumb { width: 100%; height: 140px; object-fit: cover; background: var(--bg-main); }
     .product-body { padding: 1rem; display: flex; flex-direction: column; gap: 6px; }
     .product-category { font-size: 0.65rem; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
     .product-title { font-size: 0.9rem; font-weight: 600; color: var(--text-main); }
     .product-price { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
     .product-sku { font-size: 0.7rem; color: var(--text-dark); }
-    .badge-no-stock {
-      display: inline-block;
-      font-size: 0.65rem;
-      font-weight: 600;
-      color: #38bdf8;
-      background: rgba(56, 189, 248, 0.1);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      padding: 2px 6px;
-      border-radius: 4px;
-      margin-top: 4px;
-      width: fit-content;
-    }
 
-    /* MODAL */
+    .admin-only { display: none; }
+
     .modal-backdrop {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -470,9 +348,10 @@
       background: #0d0d14;
       border: 1px solid var(--border-color);
       border-radius: var(--radius);
-      width: 100%; max-width: 400px;
+      width: 100%; max-width: 450px;
       padding: 2rem;
       box-shadow: var(--shadow);
+      position: relative;
     }
 
     .modal-header { margin-bottom: 1.5rem; }
@@ -481,44 +360,38 @@
 </head>
 <body>
 
-  <!-- CANVAS PARA ANIMAÇÃO NO FUNDO -->
   <canvas id="bg-canvas"></canvas>
 
-  <!-- MENU / HEADER FIXO NO TOPO -->
   <header class="main-header">
-    <a href="#" class="brand-logo">
-      <div class="logo-icon">
-        <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
-          <rect x="1" y="1" width="6" height="6" rx="1.5" fill="white"/>
-          <rect x="11" y="1" width="6" height="6" rx="1.5" fill="white" opacity=".55"/>
-          <rect x="1" y="11" width="6" height="6" rx="1.5" fill="white" opacity=".55"/>
-          <rect x="11" y="11" width="6" height="6" rx="1.5" fill="white"/>
-        </svg>
-      </div>
-      <span>AAPM</span>
+    <a href="#" class="brand-logo" onclick="navigate('inicio', document.querySelectorAll('.nav-item')[0])">
+      <!-- LOGO VETORIAL INLINE DO SENAI -->
+      <svg class="logo-senai-svg" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+        <rect width="300" height="100" fill="#FF0000"/>
+        <line x1="0" y1="20" x2="25" y2="20" stroke="#FFFFFF" stroke-width="5"/>
+        <line x1="0" y1="35" x2="25" y2="35" stroke="#FFFFFF" stroke-width="5"/>
+        <line x1="0" y1="50" x2="25" y2="50" stroke="#FFFFFF" stroke-width="5"/>
+        <line x1="0" y1="65" x2="25" y2="65" stroke="#FFFFFF" stroke-width="5"/>
+        <line x1="0" y1="80" x2="25" y2="80" stroke="#FFFFFF" stroke-width="5"/>
+        <line x1="275" y1="20" x2="300" y2="20" stroke="#FFFFFF" stroke-width="5"/>
+        <line x1="275" y1="35" x2="300" y2="35" stroke="#FFFFFF" stroke-width="5"/>
+        <line x1="275" y1="50" x2="300" y2="50" stroke="#FFFFFF" stroke-width="5"/>
+        <line x1="275" y1="65" x2="300" y2="65" stroke="#FFFFFF" stroke-width="5"/>
+        <line x1="275" y1="80" x2="300" y2="80" stroke="#FFFFFF" stroke-width="5"/>
+        <text x="150" y="73" font-family="'Arial Black', 'Impact', sans-serif" font-size="62" font-weight="900" font-style="italic" fill="#FFFFFF" text-anchor="middle">SENAI</text>
+      </svg>
+      > 
     </a>
 
     <nav class="top-nav">
-      <a class="nav-item active" onclick="navigate('dashboard', this)">
-        <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-        Início
-      </a>
-      <a class="nav-item" onclick="navigate('associados', this)">
-        <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-        Associados
-      </a>
-      <a class="nav-item" onclick="navigate('estoque', this)">
-        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4V8h16v10zm-2-1h-6v-2h6v2z"/></svg>
-        Produtos
-      </a>
-      <a class="nav-item" onclick="navigate('relatorios', this)">
-        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-        Fale conosco
-      </a>
+      <a class="nav-item active" onclick="navigate('inicio', this)">Início</a>
+      <a class="nav-item" onclick="navigate('associados', this)">Associados</a>
+      <a class="nav-item" onclick="navigate('produtos', this)">Produtos</a>
+      <a class="nav-item" onclick="navigate('fale-conosco', this)">Fale Conosco</a>
+      <a class="nav-item admin-only" onclick="navigate('admin-panel', this)" style="color: var(--primary);">Painel Admin</a>
     </nav>
 
     <div class="header-user-area">
-      <span class="header-location"></span>
+      <span class="header-location">SENAI BRÁS &mdash; SP</span>
       <div class="user-card" id="userBox" style="display: none;">
         <div class="avatar" id="avatarText">AD</div>
         <div class="user-info">
@@ -529,86 +402,696 @@
     </div>
   </header>
 
-  <!-- CONTEÚDO PRINCIPAL DO SISTEMA -->
   <main class="wrapper">
+
+    <!-- 1. INÍCIO / APRESENTAÇÃO INSTITUCIONAL SENAI ROBERTO SIMONSEN -->
+<section id="inicio" class="view-content active">
+  
+  <!-- HERO INSTITUCIONAL DE ALTO IMPACTO -->
+  <div class="hero-container">
+    <div class="hero-bg-wrapper">
+      <div class="hero-bg active" style="background-image: url('https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=1600&auto=format&fit=crop');"></div>
+      <div class="hero-bg" style="background-image: url('https://images.unsplash.com/photo-1581092335397-9583fe92d232?q=80&w=1600&auto=format&fit=crop');"></div>
+      <div class="hero-bg" style="background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1600&auto=format&fit=crop');"></div>
+    </div>
+
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+      <div class="hero-tag">
+        <span class="badge-accent">INDUSTRIA 4.0</span>
+        ESCOLA SENAI "ROBERTO SIMONSEN" &mdash; BRÁS
+      </div>
+      <h1 class="hero-title">Liderança em Formação Técnica e Inovação Industrial</h1>
+      <p class="hero-description">
+        Referência nacional no desenvolvimento de talentos e soluções para a indústria. Tecnologia de ponta, infraestrutura laboratorial avançada e ecossistema integrado de aprendizagem.
+      </p>
+      
+      <div class="hero-indicators">
+        <button class="hero-tab active" onclick="setHeroSlide(0)">
+          <span class="tab-num">01</span>
+          <span class="tab-text">Excelência Técnica</span>
+          <div class="tab-progress"></div>
+        </button>
+        <button class="hero-tab" onclick="setHeroSlide(1)">
+          <span class="tab-num">02</span>
+          <span class="tab-text">Tecnologia Avançada</span>
+          <div class="tab-progress"></div>
+        </button>
+        <button class="hero-tab" onclick="setHeroSlide(2)">
+          <span class="tab-num">03</span>
+          <span class="tab-text">Comunidade & AAPM</span>
+          <div class="tab-progress"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- METRICAS E PAINEL INSTITUCIONAL -->
+  <div class="metrics-bar">
+    <div class="metric-item">
+      <span class="metric-number">+80</span>
+      <span class="metric-label">Anos Formando a Indústria Paulista</span>
+    </div>
+    <div class="metric-divider"></div>
+    <div class="metric-item">
+      <span class="metric-number">35+</span>
+      <span class="metric-label">Laboratórios Tecnológicos Avançados</span>
+    </div>
+    <div class="metric-divider"></div>
+    <div class="metric-item">
+      <span class="metric-number">90%⁺</span>
+      <span class="metric-label">Índice de Empregabilidade Técnica</span>
+    </div>
+    <div class="metric-divider"></div>
+    <div class="metric-item">
+      <span class="metric-number">100%</span>
+      <span class="metric-label">Infraestrutura em Nível Industrial</span>
+    </div>
+  </div>
+
+  <!-- CONTEÚDO PRINCIPAL: SOBRE A UNIDADE E PILARES TECNOLÓGICOS -->
+  <div class="grid-2" style="margin-top: 1.25rem;">
+    
+    <!-- CARD SOBRE O SENAI BRÁS & LOCALIZAÇÃO -->
+    <div class="card senai-info-card">
+      <div class="info-header">
+        <span class="info-badge">UNIDADE BRÁS / MOOCA</span>
+        <h3>Escola SENAI Roberto Simonsen</h3>
+      </div>
+
+      <p class="info-text">
+        Projetada para atender aos mais altos padrões exigidos pelo setor produtivo, a unidade Roberto Simonsen une a tradição do ensino técnico SENAI com os avanços da Indústria 4.0, Robótica e Automação Industrial.
+      </p>
+
+      <div class="location-box">
+        <div class="location-header">
+          <span class="location-icon">📍</span>
+          <div>
+            <strong>Localização e Acesso Estratégico</strong>
+            <p>Rua Correia de Andrade, 232 - Brás, São Paulo - SP, 03008-020</p>
+          </div>
+        </div>
+
+        <div class="location-info-grid">
+          <div class="info-chip">
+            <span>🚇 Transporte Público:</span>
+            <strong>Metrô Brás (Linha 3 - Vermelha) | CPTM Brás (Linhas 10 e 11)</strong>
+
+          </div>
+          <div class="info-chip">
+            <span>🕒 Horário de Funcionamento:</span>
+            <strong>Seg. a Sex.: 07h às 22h | Sáb.: 08h às 17h</strong>
+          </div>
+          <div class="info-chip">
+            <span>📞 Central de Atendimento:</span>
+            <strong>(11) 2227-8000</strong>
+          </div>
+        </div>
+      </div>
+
+      <a href="https://maps.google.com/?q=Rua+Bresser+2315+Bras+Sao+Paulo" target="_blank" class="btn btn-primary" style="width: 100%; text-align: center; justify-content: center;">
+        🗺️ Traçar Rota no Google Maps
+      </a>
+    </div>
+
+    <!-- CARD ÁREAS DE ATUAÇÃO E MODALIDADES -->
+    <div class="card">
+      <div class="info-header" style="margin-bottom: 1rem;">
+        <span class="info-badge">POLOS TECNOLÓGICOS</span>
+        <h3>Áreas de Atuação e Especialização</h3>
+      </div>
+
+      <div class="tech-areas-grid">
+        <div class="tech-area-item">
+          <span class="tech-icon">🤖</span>
+          <div>
+            <h4>Mecatrônica & Automação</h4>
+            <p>Sistemas integrados, robótica industrial, CLPs e manufatura conectada.</p>
+          </div>
+        </div>
+
+        <div class="tech-area-item">
+          <span class="tech-icon">⚡</span>
+          <div>
+            <h4>Eletroeletrônica & Eletrônica</h4>
+            <p>Instalações industriais, microcontroladores e acionamentos elétricos.</p>
+          </div>
+        </div>
+
+        <div class="tech-area-item">
+          <span class="tech-icon">⚙️</span>
+          <div>
+            <h4>Metalmecânica & Usinagem</h4>
+            <p>Comando Numérico Computadorizado (CNC), metrologia e fabricação mecânica.</p>
+          </div>
+        </div>
+
+        <div class="tech-area-item">
+          <span class="tech-icon">💻</span>
+          <div>
+            <h4>Tecnologia da Informação</h4>
+            <p>Desenvolvimento de sistemas, redes industriais e segurança cibernética.</p>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- ABA 1: DASHBOARD -->
-    <section id="dashboard" class="view-content active">
-      <div class="page-title-box">
-        <h2>Unidade SENAI - Brás</h2>
-        <p>Rua Correia de Andrade, 232 - São Paulo/SP</p>
-      </div>
+  </div>
 
-      <div class="grid-4">
-        <div class="card kpi-card">
-          <div class="kpi-header">TOTAL DE ASSOCIADOS</div>
-          <div class="kpi-value">1.248</div>
-          <div class="kpi-trend up">↑ 12% em relação ao mês anterior</div>
-        </div>
-        <div class="card kpi-card">
-          <div class="kpi-header"></div>
-          <div class="kpi-value">R$ 38.450</div>
-          <div class="kpi-trend up">↑ 8.5% meta batida</div>
-        </div>
-        <div class="card kpi-card">
-          <div class="kpi-header">VENDAS DA LOJA</div>
-          <div class="kpi-value">R$ 9.800</div>
-          <div class="kpi-trend neutral">• Dentro da média</div>
-        </div>
-        <div class="card kpi-card">
-          <div class="kpi-header">ITENS CADASTRADOS</div>
-          <div class="kpi-value" id="kpiTotalItems">4</div>
-          <div class="kpi-trend neutral">Catalogados por código</div>
-        </div>
-      </div>
+  <!-- PILARES DA AAPM E INTEGRAÇÃO INSTITUCIONAL -->
+  <div class="card" style="margin-top: 1.25rem;">
+    <div class="info-header" style="margin-bottom: 1rem;">
+      <span class="info-badge">SUPORTE E COMUNIDADE</span>
+      <h3>O Papel da AAPM na Unidade Roberto Simonsen</h3>
+    </div>
 
-      <div class="grid-3-1">
-        <div class="card">
-          <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary);">Crescimento Mensal de Associados</h3>
-          <div style="height: 260px;"><canvas id="dashChart1"></canvas></div>
-        </div>
-        <div class="card">
-          <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary);">Distribuição de Vendas</h3>
-          <div style="height: 260px;"><canvas id="dashChart2"></canvas></div>
-        </div>
+    <div class="benefits-grid">
+      <div class="benefit-item">
+        <span class="benefit-icon">🎓</span>
+        <h4>Incentivo a Projetos Científicos</h4>
+        <p>Apoio na aquisição de insumos para protótipos, bancadas de testes, TCCs e Feiras de Tecnologia.</p>
       </div>
-    </section>
+      <div class="benefit-item">
+        <span class="benefit-icon">🛡️</span>
+        <h4>Equipamentos e Materiais</h4>
+        <p>Apoio na logística e disponibilização de Equipamentos de Proteção Individual (EPIs) e uniformes oficiais.</p>
+      </div>
+      <div class="benefit-item">
+        <span class="benefit-icon">🏛️</span>
+        <h4>Representatividade e Diálogo</h4>
+        <p>Intermediação transparente promovendo o contínuo alinhamento entre pais, alunos e a diretoria do SENAI.</p>
+      </div>
+    </div>
+  </div>
 
-    <!-- ABA 2: ASSOCIADOS -->
+</section>
+
+<!-- ESTILOS EXCLUSIVOS DA SEÇÃO 1 (PADRÃO SENAI / BLUE TECH) -->
+<style>
+  .hero-container {
+    position: relative;
+    width: 100%;
+    height: 420px;
+    border-radius: var(--radius, 8px);
+    overflow: hidden;
+    border: 1px solid rgba(0, 140, 255, 0.2);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: flex-end;
+    padding: 2.5rem;
+  }
+
+  .hero-bg-wrapper {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 1;
+  }
+
+  .hero-bg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transform: scale(1.05);
+    transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), transform 6s ease-out;
+  }
+
+  .hero-bg.active {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .hero-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(180deg, rgba(8, 12, 20, 0.25) 0%, rgba(8, 12, 20, 0.95) 90%);
+    z-index: 2;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 3;
+    max-width: 780px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .hero-tag {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: #008cff;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .badge-accent {
+    background: rgba(0, 140, 255, 0.15);
+    border: 1px solid rgba(0, 140, 255, 0.4);
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: #008cff;
+    font-size: 0.65rem;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.8rem;
+    line-height: 1.05;
+    letter-spacing: 0.03em;
+    color: #ffffff;
+    animation: heroFadeUp 0.8s ease-out forwards;
+  }
+
+  .hero-description {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .hero-indicators {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.8rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1rem;
+  }
+
+  .hero-tab {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    position: relative;
+    padding-bottom: 6px;
+  }
+
+  .hero-tab .tab-num {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+
+  .hero-tab .tab-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .hero-tab.active { color: #ffffff; }
+
+  .hero-tab .tab-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 2px;
+    background: #008cff;
+    transition: width 0.3s ease;
+  }
+
+  .hero-tab.active .tab-progress { width: 100%; }
+
+  /* BARRA DE MÉTRICAS INSTITUCIONAIS */
+  .metrics-bar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+    align-items: center;
+    background: rgba(12, 18, 30, 0.85);
+    border: 1px solid rgba(0, 140, 255, 0.2);
+    border-radius: var(--radius, 8px);
+    padding: 1rem 1.5rem;
+    margin-top: 1.25rem;
+    backdrop-filter: blur(8px);
+  }
+
+  .metric-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .metric-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: #008cff;
+    line-height: 1;
+  }
+
+  .metric-label {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.65);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .metric-divider {
+    width: 1px;
+    height: 35px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  /* DETALHES DE LOCALIZAÇÃO E CARDS */
+  .senai-info-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .info-header .info-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #008cff;
+    letter-spacing: 0.15em;
+  }
+
+  .info-header h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    color: #fff;
+  }
+
+  .info-text {
+    font-size: 0.88rem;
+    color: var(--text-muted, rgba(255, 255, 255, 0.7));
+    line-height: 1.6;
+  }
+
+  .location-box {
+    background: rgba(0, 140, 255, 0.04);
+    border: 1px solid rgba(0, 140, 255, 0.2);
+    border-radius: var(--radius, 6px);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .location-header {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .location-icon {
+    font-size: 1.4rem;
+  }
+
+  .location-header strong {
+    font-size: 0.85rem;
+    color: #fff;
+  }
+
+  .location-header p {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 2px;
+  }
+
+  .location-info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-top: 1px dashed rgba(0, 140, 255, 0.15);
+    padding-top: 0.75rem;
+  }
+
+  .info-chip {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .info-chip span {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .info-chip strong {
+    color: #008cff;
+  }
+
+  /* GRID DE ÁREAS TECNOLÓGICAS */
+  .tech-areas-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.85rem;
+  }
+
+  .tech-area-item {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 0.85rem;
+    border-radius: var(--radius, 6px);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    transition: border-color 0.3s ease;
+  }
+
+  .tech-area-item:hover {
+    border-color: rgba(0, 140, 255, 0.3);
+  }
+
+  .tech-icon {
+    font-size: 1.3rem;
+  }
+
+  .tech-area-item h4 {
+    font-size: 0.85rem;
+    color: #fff;
+    margin-bottom: 2px;
+  }
+
+  .tech-area-item p {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.4;
+  }
+
+  /* BENEFÍCIOS GRID */
+  .benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  .benefit-item {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 1.1rem;
+    border-radius: var(--radius, 6px);
+  }
+
+  .benefit-icon {
+    font-size: 1.5rem;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .benefit-item h4 {
+    font-size: 0.9rem;
+    color: #fff;
+    margin-bottom: 0.3rem;
+  }
+
+  .benefit-item p {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.65);
+    line-height: 1.5;
+  }
+
+  @keyframes heroFadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 900px) {
+    .metrics-bar {
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .metric-divider { display: none; }
+    .tech-areas-grid { grid-template-columns: 1fr; }
+    .benefits-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<!-- SCRIPT SLIDER + CANVAS COM AS CORES E DISTÂNCIAS EXATAS SOLICITADAS -->
+<script>
+  // SLIDER INSTITUCIONAL
+  const heroData = [
+    {
+      title: "Liderança em Formação Técnica e Inovação Industrial",
+      desc: "Referência nacional no desenvolvimento de talentos e soluções para a indústria. Tecnologia de ponta, infraestrutura laboratorial avançada e ecossistema integrado de aprendizagem."
+    },
+    {
+      title: "Infraestrutura Industrial 4.0 e Manufatura Avançada",
+      desc: "Laboratórios equipados com tecnologia real de mercado: Robótica, Células Flexíveis de Manufatura, Redes Industriais e Automação de Processos."
+    },
+    {
+      title: "Parceria Estratégica Entre Escola, Família e Indústria",
+      desc: "Atuação constante da AAPM e do SENAI para assegurar a melhor jornada acadêmica, desenvolvimento humano e inserção no mercado de trabalho."
+    }
+  ];
+
+  let heroIndex = 0;
+  let heroTimer = setInterval(nextHeroSlide, 6000);
+
+  function setHeroSlide(index) {
+    clearInterval(heroTimer);
+    heroIndex = index;
+    updateHero();
+    heroTimer = setInterval(nextHeroSlide, 6000);
+  }
+
+  function nextHeroSlide() {
+    heroIndex = (heroIndex + 1) % heroData.length;
+    updateHero();
+  }
+
+  function updateHero() {
+    const backgrounds = document.querySelectorAll('.hero-bg');
+    const tabs = document.querySelectorAll('.hero-tab');
+    const titleEl = document.querySelector('.hero-title');
+    const descEl = document.querySelector('.hero-description');
+
+    backgrounds.forEach((bg, idx) => { bg.classList.toggle('active', idx === heroIndex); });
+    tabs.forEach((tab, idx) => { tab.classList.toggle('active', idx === heroIndex); });
+
+    if(titleEl) {
+      titleEl.style.animation = 'none';
+      void titleEl.offsetWidth;
+      titleEl.innerText = heroData[heroIndex].title;
+      titleEl.style.animation = 'heroFadeUp 0.8s ease-out forwards';
+    }
+    if(descEl) descEl.innerText = heroData[heroIndex].desc;
+  }
+
+  // CANVAS DE FUNDO COM ANIMAÇÃO AZUL EXATA
+  (function initInteractiveCanvas() {
+    const canvas = document.getElementById('bg-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    let particles = [];
+    const particleCount = 80;
+    const maxDistance = 140;
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 1;
+        this.speedX = (Math.random() - 0.5) * 0.7;
+        this.speedY = (Math.random() - 0.5) * 0.7;
+      }
+
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+      }
+
+      draw() {
+        // Estilo de preenchimento das partículas
+        ctx.fillStyle = 'rgba(0, 140, 255, 0.75)';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    particles = [];
+    for (let i = 0; i < particleCount; i++) {
+      particles.push(new Particle());
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update();
+        particles[i].draw();
+
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < maxDistance) {
+            // Estilo e opacidade exatos
+            ctx.strokeStyle = `rgba(0, 140, 255, ${0.35 - dist / 1000})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  })();
+</script>
+
+    <!-- 2. ASSOCIADOS -->
     <section id="associados" class="view-content">
-      <div class="page-title-header">
-        <div class="page-title-box">
-          <h2>Gestão de Associados</h2>
-          <p>Membros cadastrados, ex-alunos e comunidade escolar.</p>
-        </div>
-        <button class="btn btn-primary">+ Novo Associado</button>
+      <div class="page-title-box">
+        <h2>Consulta de Associados</h2>
+        <p>Lista oficial de associados cadastrados na AAPM SENAI Brás.</p>
       </div>
 
       <div class="card" style="padding: 0.5rem 1.25rem;">
         <div class="table-responsive">
-          <table id="associatesTable">
+          <table>
             <thead>
               <tr>
                 <th>Nome Completo</th>
                 <th>RM / Matrícula</th>
                 <th>Curso / Departamento</th>
                 <th>Status</th>
-                <th>Admissão</th>
-                <th style="text-align: right;">Ações</th>
+                <th style="text-align: right;">Visualizar</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td style="font-weight: 600;">Carlos Eduardo Silva</td>
-                <td><span class="badge-rm">RM-90124</span></td>
+                <td><span class="badge-rm"></span></td>
                 <td>Técnico em Desenvolvimento de Sistemas</td>
                 <td><span class="status-tag active">Ativo</span></td>
-                <td>12/02/2025</td>
                 <td style="text-align: right;">
-                  <button class="action-btn" title="Visualizar">👁</button>
-                  <button class="action-btn" title="Editar">✏️</button>
+                  <button class="action-btn" title="Visualizar" onclick="openViewModal('Carlos Eduardo Silva', 'RM-90124', 'Técnico em Desenvolvimento de Sistemas', 'Ativo')">👁</button>
                 </td>
               </tr>
               <tr>
@@ -616,21 +1099,17 @@
                 <td><span class="badge-rm">RM-88412</span></td>
                 <td>Técnico em Mecatrônica</td>
                 <td><span class="status-tag active">Ativo</span></td>
-                <td>05/01/2025</td>
                 <td style="text-align: right;">
-                  <button class="action-btn" title="Visualizar">👁</button>
-                  <button class="action-btn" title="Editar">✏️</button>
+                  <button class="action-btn" title="Visualizar" onclick="openViewModal('Mariana Souza Lima', 'RM-88412', 'Técnico em Mecatrônica', 'Ativo')">👁</button>
                 </td>
               </tr>
               <tr>
                 <td style="font-weight: 600;">Lucas Oliveira</td>
                 <td><span class="badge-rm">RM-77192</span></td>
                 <td>Aprendizagem Industrial</td>
-                <td><span class="status-tag pending">Pendente</span></td>
-                <td>28/02/2025</td>
+                <td><span class="status-tag active">Ativo</span></td>
                 <td style="text-align: right;">
-                  <button class="action-btn" title="Visualizar">👁</button>
-                  <button class="action-btn" title="Editar">✏️</button>
+                  <button class="action-btn" title="Visualizar" onclick="openViewModal('Lucas Oliveira', 'RM-77192', 'Aprendizagem Industrial', 'Ativo')">👁</button>
                 </td>
               </tr>
             </tbody>
@@ -639,99 +1118,149 @@
       </div>
     </section>
 
-    <!-- ABA 3: PRODUTOS & ESTOQUE -->
-    <section id="estoque" class="view-content">
+    <!-- 3. PRODUTOS -->
+    <section id="produtos" class="view-content">
       <div class="page-title-box">
-        <h2>Controle de Estoque & Produtos</h2>
-        <p>Cadastro com identificação automática de categoria pelo código.</p>
+        <h2>Catálogo de Produtos</h2>
+        <p>Uniformes, materiais e itens oficiais da AAPM.</p>
+      </div>
+
+      <div class="product-grid" id="productGallery"></div>
+    </section>
+
+    <!-- 4. FALE CONOSCO / INSCRIÇÃO ASSOCIADO -->
+<section id="fale-conosco" class="view-content">
+  <div class="page-title-box">
+    <h2>Seja um Associado / Fale Conosco</h2>
+    <p>Preencha os dados abaixo. Ao clicar em enviar, você será redirecionado para finalizar seu cadastro no Google Forms.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3 style="font-size: 1.1rem; color: var(--primary); font-weight: 600; margin-bottom: 1rem;">Formulário de Inscrição</h3>
+      
+      <form onsubmit="redirectToGoogleForms(event)">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label>Nome Completo</label>
+          <input type="text" id="gf-nome" class="form-control" placeholder="Seu nome" required>
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label>E-mail</label>
+          <input type="email" id="gf-email" class="form-control" placeholder="seu@email.com" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label>Mensagem / Observação</label>
+          <textarea id="gf-mensagem" class="form-control" rows="4" placeholder="Alguma dúvida ou observação?" style="resize: none;"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Continuar no Google Forms ↗</button>
+      </form>
+    </div>
+
+    <div class="card" style="display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 1.25rem;">
+      <h3 style="font-size: 1.1rem; color: var(--primary); font-weight: 600;">Atendimento Rápido via WhatsApp</h3>
+      <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
+        Precisa de um suporte imediato? Fale diretamente com nossa equipe de atendimento via WhatsApp.
+      </p>
+      <a href="https://wa.me/5511951611320" target="_blank" class="btn btn-whatsapp">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.762.459 3.48 1.333 5rem.005l-1.417 5.18 5.301-1.39a9.92 9.92 0 0 0 4.77 1.218h.004c5.505 0 9.988-4.478 9.989-9.985 0-2.667-1.037-5.176-2.923-7.062A9.925 9.925 0 0 0 12.012 2z"/></svg>
+        Iniciar Conversa no WhatsApp
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+  function redirectToGoogleForms(event) {
+    event.preventDefault();
+
+    // 1. Capta os dados digitados pelo usuário
+    const nome = encodeURIComponent(document.getElementById('gf-nome').value);
+    const email = encodeURIComponent(document.getElementById('gf-email').value);
+    const mensagem = encodeURIComponent(document.getElementById('gf-mensagem').value);
+
+    // 2. Insira aqui a ID do seu formulário e os IDs dos campos (entry.XXXXX)
+    const formId = "SUA_FORM_ID_AQUI"; 
+    const entryNome = "entry.123456789"; 
+    const entryEmail = "entry.987654321";
+    const entryMensagem = "entry.112233445";
+
+    // 3. Monta a URL final com as respostas pré-preenchidas
+    const googleFormsUrl = `https://docs.google.com/forms/d/e/1FAIpQLSfm7ghOYRckrt8EajO9Hx7Y5KMZEvqQXwj8tJ3V_dX1xfCBzw/viewform?usp=header`;
+
+    // 4. Redireciona para o Google Forms em uma nova aba
+    window.open(googleFormsUrl, '_blank');
+  }
+</script>
+
+    <!-- 5. PAINEL ADMIN -->
+    <section id="admin-panel" class="view-content admin-only">
+      <div class="page-title-box">
+        <h2>Painel Administrativo</h2>
+        <p>Área de gestão interna da AAPM.</p>
       </div>
 
       <div class="grid-2">
         <div class="card">
-          <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem; text-transform: uppercase; color: var(--primary);">Novo Produto</h3>
+          <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem; text-transform: uppercase; color: var(--primary);">Cadastrar Novo Produto</h3>
           
           <form id="productForm" onsubmit="saveProduct(event)">
             <div class="form-grid">
               <div class="form-group full">
                 <label>SKU / CÓDIGO DO PRODUTO</label>
-                <input type="text" class="form-control" id="skuInput" placeholder="Ex: PROD-01" oninput="autoDetectCategory()" required>
+                <input type="text" class="form-control" id="skuInput" placeholder="Ex: PROD-01" required>
               </div>
-
               <div class="form-group">
                 <label>NOME DO ITEM</label>
-                <input type="text" class="form-control" id="nameInput" placeholder="Ex: Camiseta Regimental M" required>
+                <input type="text" class="form-control" id="nameInput" placeholder="Ex: Camiseta M" required>
               </div>
-
               <div class="form-group">
-                <label>CATEGORIA IDENTIFICADA</label>
-                <input type="text" class="form-control" id="categoryInput" placeholder="Sufixo 01, 02 ou 03" readonly>
+                <label>CATEGORIA</label>
+                <input type="text" class="form-control" id="categoryInput" placeholder="Ex: Uniformes" required>
               </div>
-
-              <div class="form-group">
+              <div class="form-group full">
                 <label>PREÇO UNITÁRIO (R$)</label>
                 <input type="number" step="0.01" class="form-control" id="priceInput" placeholder="0,00" required>
               </div>
-
-              <div class="form-group">
-                <label>GERENCIAR ESTOQUE?</label>
-                <select class="form-control" id="stockControlInput">
-                  <option value="sim">Sim (Físico)</option>
-                  <option value="nao">Não (Sem estoque / Serviço)</option>
-                </select>
-              </div>
-
               <div class="form-group full">
                 <label>URL DA IMAGEM</label>
                 <input type="url" class="form-control" id="imgInput" placeholder="https://..." required>
               </div>
             </div>
-
-            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.25rem;">Cadastrar Produto</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.25rem;">Salvar Produto</button>
           </form>
         </div>
 
-        <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
-          <h4 style="font-size: 0.8rem; color: var(--primary); text-transform: uppercase; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: 0.1em;">REGRA DE CATEGORIZAÇÃO SKU</h4>
-          <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1rem;">
-            O sistema classifica automaticamente o item analisando os **últimos dois dígitos** do código:
-          </p>
-          <ul style="font-size: 0.85rem; color: var(--text-main); display: flex; flex-direction: column; gap: 8px; padding-left: 1rem;">
-            <li><strong>Final 01:</strong> Uniformes & Vestuário</li>
-            <li><strong>Final 02:</strong> Material Didático & Livros</li>
-            <li><strong>Final 03:</strong> Ferramentas & Equipamentos</li>
-            <li><strong>Demais Finais:</strong> Acessórios & Artigos Gerais</li>
-          </ul>
-        </div>
-      </div>
-
-      <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.04em; margin-top: 1rem;">Catálogo Cadastrado</h3>
-      <div class="product-grid" id="productGallery"></div>
-    </section>
-
-    <!-- ABA 4: RELATÓRIOS -->
-    <section id="relatorios" class="view-content">
-      <div class="page-title-box">
-        <h2>Relatórios Gerenciais</h2>
-        <p>Dados consolidados para prestação de contas AAPM.</p>
-      </div>
-
-      <div class="grid-2">
         <div class="card">
-          <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem; text-transform: uppercase; color: var(--primary);">Adesão de Membros por Período</h3>
-          <div style="height: 280px;"><canvas id="reportChart1"></canvas></div>
-        </div>
-        <div class="card">
-          <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem; text-transform: uppercase; color: var(--primary);">Volume Financeiro por Categoria (R$)</h3>
-          <div style="height: 280px;"><canvas id="reportChart2"></canvas></div>
+          <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem; text-transform: uppercase; color: var(--primary);">Relatório de Adesões</h3>
+          <div style="height: 250px;"><canvas id="adminChart"></canvas></div>
         </div>
       </div>
     </section>
+
   </main>
 
-  <!-- MODAL DE AUTENTICAÇÃO -->
+  <div class="modal-backdrop" id="viewModal" onclick="if(event.target === this) closeViewModal()">
+    <div class="modal-box">
+      <button type="button" onclick="closeViewModal()" style="position: absolute; top: 12px; right: 16px; background: none; border: none; color: rgba(255,255,255,0.5); font-size: 1.5rem; cursor: pointer;">&times;</button>
+      <div class="modal-header">
+        <h3 class="modal-title">Detalhes do Associado</h3>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.9rem;">
+        <div><strong>Nome:</strong> <span id="v-name" style="color: var(--text-muted);"></span></div>
+        <div><strong>RM:</strong> <span id="v-rm" style="color: var(--text-muted);"></span></div>
+        <div><strong>Curso:</strong> <span id="v-curso" style="color: var(--text-muted);"></span></div>
+        <div><strong>Status:</strong> <span id="v-status" style="color: var(--success);"></span></div>
+      </div>
+      <button class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;" onclick="closeViewModal()">Fechar</button>
+    </div>
+  </div>
+
   <div class="modal-backdrop" id="loginModal" onclick="if(event.target === this) cancelLogin()">
-    <div class="modal-box" style="position: relative;">
-      <button type="button" onclick="cancelLogin()" style="position: absolute; top: 12px; right: 16px; background: none; border: none; color: rgba(255,255,255,0.5); font-size: 1.5rem; cursor: pointer; line-height: 1;">&times;</button>
+    <div class="modal-box">
+      <button type="button" onclick="cancelLogin()" style="position: absolute; top: 12px; right: 16px; background: none; border: none; color: rgba(255,255,255,0.5); font-size: 1.5rem; cursor: pointer;">&times;</button>
 
       <div class="modal-header">
         <h3 class="modal-title">Painel Administrativo</h3>
@@ -757,30 +1286,13 @@
   </div>
 
   <script>
-    /* ─── ANIMAÇÃO DO CANVAS (ESTILO REDE CONECTADA EM PONTOS BRANCOS) ─── */
     const canvas = document.getElementById('bg-canvas');
     const ctx = canvas.getContext('2d');
-
     let particles = [];
-    const maxParticles = 90;
-    const mouse = { x: null, y: null, radius: 140 };
 
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
+    function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
-
-    window.addEventListener('mousemove', (e) => {
-      mouse.x = e.x;
-      mouse.y = e.y;
-    });
-
-    window.addEventListener('mouseleave', () => {
-      mouse.x = null;
-      mouse.y = null;
-    });
 
     class Particle {
       constructor() {
@@ -790,15 +1302,11 @@
         this.speedX = (Math.random() - 0.5) * 0.7;
         this.speedY = (Math.random() - 0.5) * 0.7;
       }
-
       update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-
+        this.x += this.speedX; this.y += this.speedY;
         if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
         if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
       }
-
       draw() {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
         ctx.beginPath();
@@ -807,133 +1315,40 @@
       }
     }
 
-    function initParticles() {
-      particles = [];
-      for (let i = 0; i < maxParticles; i++) {
-        particles.push(new Particle());
-      }
-    }
-    initParticles();
+    for (let i = 0; i < 70; i++) particles.push(new Particle());
 
     function animateBackground() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      for (let i = 0; i < particles.length; i++) {
-        particles[i].update();
-        particles[i].draw();
-
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          if (dist < 110) {
-            ctx.strokeStyle = `rgba(255, 255, 255, ${0.15 - dist / 800})`;
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.stroke();
-          }
-        }
-
-        if (mouse.x && mouse.y) {
-          const mdx = particles[i].x - mouse.x;
-          const mdy = particles[i].y - mouse.y;
-          const mDist = Math.sqrt(mdx * mdx + mdy * mdy);
-
-          if (mDist < mouse.radius) {
-            ctx.strokeStyle = `rgba(214, 50, 80, ${0.4 - mDist / (mouse.radius * 2)})`;
-            ctx.lineWidth = 1.2;
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(mouse.x, mouse.y);
-            ctx.stroke();
-          }
-        }
-      }
-
+      particles.forEach(p => { p.update(); p.draw(); });
       requestAnimationFrame(animateBackground);
     }
     animateBackground();
 
-    /* ─── ESTADO E LÓGICA DO SISTEMA ─── */
     let products = [
-      { sku: "UNI-2001", name: "Camiseta SENAI M", category: "Uniformes", price: 45.00, hasStock: true, img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=400&auto=format&fit=crop" },
-      { sku: "LIV-3002", name: "Apostila Mecatrônica", category: "Material Didático", price: 65.00, hasStock: true, img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=400&auto=format&fit=crop" },
-      { sku: "FER-4003", name: "Paquímetro Digital 150mm", category: "Ferramentas", price: 120.00, hasStock: true, img: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=400&auto=format&fit=crop" },
-      { sku: "ACE-1099", name: "Chaveiro AAPM", category: "Acessórios", price: 12.00, hasStock: false, img: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=400&auto=format&fit=crop" }
+      { sku: "UNI-2001", name: "Camiseta SENAI M", category: "Uniformes", price: 45.00, img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=400&auto=format&fit=crop" },
+      { sku: "LIV-3002", name: "Apostila Mecatrônica", category: "Material Didático", price: 65.00, img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=400&auto=format&fit=crop" },
+      { sku: "FER-4003", name: "Paquímetro Digital", category: "Ferramentas", price: 120.00, img: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=400&auto=format&fit=crop" }
     ];
 
     let userLogged = false;
-    let chartsInitialized = false;
+    let adminChart = null;
 
-    /* NAVEGAÇÃO SPA */
     function navigate(viewId, element) {
       document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
 
       document.getElementById(viewId).classList.add('active');
-      element.classList.add('active');
+      if (element) element.classList.add('active');
 
-      if ((viewId === 'dashboard' || viewId === 'relatorios') && !chartsInitialized) {
-        setTimeout(initCharts, 50);
+      if (viewId === 'admin-panel' && !adminChart) {
+        setTimeout(initAdminChart, 100);
       }
     }
 
-    /* FILTRO DE PESQUISA */
-    function filterAssociates() {
-      const term = document.getElementById('globalSearch').value.toLowerCase();
-      const rows = document.querySelectorAll('#associatesTable tbody tr');
-
-      rows.forEach(row => {
-        const text = row.innerText.toLowerCase();
-        row.style.display = text.includes(term) ? '' : 'none';
-      });
-    }
-
-    /* DETECÇÃO AUTOMÁTICA DE CATEGORIA POR SKU */
-    function autoDetectCategory() {
-      const sku = document.getElementById('skuInput').value.trim();
-      const catField = document.getElementById('categoryInput');
-
-      if (sku.length >= 2) {
-        const lastDigits = sku.slice(-2);
-        if (lastDigits === "01") catField.value = "Uniformes";
-        else if (lastDigits === "02") catField.value = "Material Didático";
-        else if (lastDigits === "03") catField.value = "Ferramentas";
-        else catField.value = "Acessórios";
-      } else {
-        catField.value = "";
-      }
-    }
-
-    /* SALVAR NOVO PRODUTO */
-    function saveProduct(e) {
-      e.preventDefault();
-      const sku = document.getElementById('skuInput').value;
-      const name = document.getElementById('nameInput').value;
-      const category = document.getElementById('categoryInput').value;
-      const price = parseFloat(document.getElementById('priceInput').value);
-      const hasStock = document.getElementById('stockControlInput').value === "sim";
-      const img = document.getElementById('imgInput').value;
-
-      products.push({ sku, name, category, price, hasStock, img });
-      renderProducts();
-
-      document.getElementById('productForm').reset();
-      document.getElementById('categoryInput').value = "";
-      document.getElementById('kpiTotalItems').innerText = products.length;
-    }
-
-    /* RENDERIZAR CATALOGO DE PRODUTOS */
     function renderProducts() {
       const container = document.getElementById('productGallery');
       container.innerHTML = "";
-
       products.forEach(p => {
-        const stockBadge = !p.hasStock ? '<span class="badge-no-stock">Sem Estoque (Ilimitado)</span>' : '';
-        
         container.innerHTML += `
           <div class="product-item">
             <img src="${p.img}" class="product-thumb" alt="${p.name}">
@@ -942,87 +1357,70 @@
               <div class="product-title">${p.name}</div>
               <div class="product-price">R$ ${p.price.toFixed(2)}</div>
               <div class="product-sku">SKU: ${p.sku}</div>
-              ${stockBadge}
             </div>
           </div>
         `;
       });
     }
 
-    /* GRÁFICOS CHART.JS COM CORES AJUSTADAS */
-    let c1, c2, c3, c4;
-
-    function initCharts() {
-      if (c1) c1.destroy(); if (c2) c2.destroy();
-      if (c3) c3.destroy(); if (c4) c4.destroy();
-
-      const chartOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { labels: { color: 'rgba(255,255,255,0.65)', font: { family: 'Poppins' } } } },
-        scales: {
-          x: { ticks: { color: 'rgba(255,255,255,0.4)' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-          y: { ticks: { color: 'rgba(255,255,255,0.4)' }, grid: { color: 'rgba(255,255,255,0.05)' } }
-        }
-      };
-
-      const ctx1 = document.getElementById('dashChart1');
-      if (ctx1) {
-        c1 = new Chart(ctx1, {
-          type: 'line',
-          data: {
-            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
-            datasets: [{ label: 'Associados', data: [850, 920, 1010, 1100, 1180, 1248], borderColor: '#d63250', backgroundColor: 'rgba(214, 50, 80, 0.15)', fill: true, tension: 0.4 }]
-          },
-          options: chartOptions
-        });
-      }
-
-      const ctx2 = document.getElementById('dashChart2');
-      if (ctx2) {
-        c2 = new Chart(ctx2, {
-          type: 'doughnut',
-          data: {
-            labels: ['Uniformes', 'Didático', 'Ferramentas', 'Outros'],
-            datasets: [{ data: [45, 25, 20, 10], backgroundColor: ['#d63250', '#10b981', '#f59e0b', 'rgba(255,255,255,0.3)'] }]
-          },
-          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: 'rgba(255,255,255,0.65)' } } } }
-        });
-      }
-
-      const ctx3 = document.getElementById('reportChart1');
-      if (ctx3) {
-        c3 = new Chart(ctx3, {
-          type: 'bar',
-          data: {
-            labels: ['1º Trim', '2º Trim', '3º Trim', '4º Trim'],
-            datasets: [{ label: 'Novas Adesões', data: [320, 450, 210, 380], backgroundColor: '#d63250' }]
-          },
-          options: chartOptions
-        });
-      }
-
-      const ctx4 = document.getElementById('reportChart2');
-      if (ctx4) {
-        c4 = new Chart(ctx4, {
-          type: 'bar',
-          data: {
-            labels: ['Uniformes', 'Didático', 'Ferramentas', 'Geral'],
-            datasets: [{ label: 'Receita (R$)', data: [18200, 12400, 8900, 3100], backgroundColor: '#10b981' }]
-          },
-          options: chartOptions
-        });
-      }
-
-      chartsInitialized = true;
+    function openViewModal(name, rm, curso, status) {
+      document.getElementById('v-name').innerText = name;
+      document.getElementById('v-rm').innerText = rm;
+      document.getElementById('v-curso').innerText = curso;
+      document.getElementById('v-status').innerText = status;
+      document.getElementById('viewModal').classList.add('active');
     }
 
-    /* AUTENTICAÇÃO SIMULADA */
+    function closeViewModal() {
+      document.getElementById('viewModal').classList.remove('active');
+    }
+
+    function handleInscricao(e) {
+      e.preventDefault();
+      alert("Solicitação de inscrição enviada com sucesso! Analisaremos seus dados.");
+      e.target.reset();
+    }
+
+    function handleContact(e) {
+      e.preventDefault();
+      alert("Sua mensagem foi enviada à equipe da AAPM!");
+      e.target.reset();
+    }
+
+    function saveProduct(e) {
+      e.preventDefault();
+      const sku = document.getElementById('skuInput').value;
+      const name = document.getElementById('nameInput').value;
+      const category = document.getElementById('categoryInput').value;
+      const price = parseFloat(document.getElementById('priceInput').value);
+      const img = document.getElementById('imgInput').value;
+
+      products.push({ sku, name, category, price, img });
+      renderProducts();
+      e.target.reset();
+      alert("Produto adicionado com sucesso!");
+    }
+
+    function initAdminChart() {
+      const ctx = document.getElementById('adminChart');
+      if (!ctx) return;
+      adminChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
+          datasets: [{ label: 'Novos Associados', data: [12, 19, 15, 25, 30], borderColor: '#d63250', backgroundColor: 'rgba(214, 50, 80, 0.2)', fill: true }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }
+
     function toggleAuth() {
       if (userLogged) {
         userLogged = false;
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
         document.getElementById('userBox').style.display = 'none';
         document.getElementById('authBtn').innerText = 'PAINEL ADMIN';
+        navigate('inicio', document.querySelectorAll('.nav-item')[0]);
       } else {
         document.getElementById('loginModal').classList.add('active');
       }
@@ -1032,13 +1430,10 @@
       document.getElementById('loginModal').classList.remove('active');
     }
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') cancelLogin();
-    });
-
     function confirmLogin(e) {
       e.preventDefault();
       userLogged = true;
+      document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
       document.getElementById('loginModal').classList.remove('active');
 
       const email = document.getElementById('loginEmail').value;
@@ -1047,12 +1442,11 @@
       document.getElementById('userNameLabel').innerText = name.charAt(0).toUpperCase() + name.slice(1);
       document.getElementById('avatarText').innerText = name.substring(0, 2).toUpperCase();
       document.getElementById('userBox').style.display = 'flex';
-      document.getElementById('authBtn').innerText = 'SAIR';
+      document.getElementById('authBtn').innerText = 'SAIR DO ADMIN';
     }
 
     window.onload = function() {
       renderProducts();
-      initCharts();
     };
   </script>
 </body>
