@@ -66,14 +66,27 @@ class TokenPayload(BaseModel):
 
 def verificar_senha(senha_plana: str, hash_senha: str) -> bool:
     """
-    Verifica se a senha coincide com o hash armazenado.
-    Possui fallback para texto puro caso existam senhas antigas sem hash.
+    Verifica a senha comparando Bcrypt, texto puro ou exceções de biblioteca.
     """
+    if not hash_senha:
+        return False
+        
+    # 1. Checagem direta de texto puro (útil se o seed salvou em texto limpo)
+    if senha_plana == hash_senha:
+        return True
+
+    # 2. Tentativa via Passlib / Bcrypt
     try:
         return pwd_context.verify(senha_plana, hash_senha)
-    except Exception:
-        # Permite comparar se a senha no banco estiver salva em texto puro
-        return senha_plana == hash_senha
+    except Exception as e:
+        print(f"[DEBUG AUTH] Erro ao verificar hash com Passlib: {e}")
+        # Fallback de emergência para lidar com hashes iniciados em $2a$, $2b$ ou $2y$
+        import bcrypt
+        try:
+            return bcrypt.checkpw(senha_plana.encode('utf-8'), hash_senha.encode('utf-8'))
+        except Exception as err:
+            print(f"[DEBUG AUTH] Erro no fallback do Bcrypt: {err}")
+            return False
 
 def gerar_hash_senha(senha: str) -> str:
     """Gera um hash bcrypt para a senha"""
@@ -154,38 +167,52 @@ def get_usuario_atual(
 # ─────────────────────────────────────────────────────────────────────────────
 # ROTAS DE AUTENTICAÇÃO
 # ─────────────────────────────────────────────────────────────────────────────
-
 @router.post("/api/auth/login", response_model=TokenSchema)
 async def fazer_login(
     credenciais: UsuarioLoginSchema,
     db: Session = Depends(get_db)
 ):
-    """
-    Autentica um usuário e retorna um JWT token
-    """
+    print(f"\n[LOGIN TRY] E-mail informado: '{credenciais.email}'")
+    
     # 1. Buscar usuário por e-mail
     usuario = db.query(Usuario).filter(Usuario.email == credenciais.email).first()
     
-    # 2. Se o usuário não existir -> BARRA AQUI
     if not usuario:
+        print(f"[LOGIN FAIL] Usuário com e-mail '{credenciais.email}' NÃO foi encontrado no banco.")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="E-mail ou senha incorretos",
+            detail="E-mail não encontrado no sistema",
         )
     
-    # 3. Se a senha for incorreta -> BARRA AQUI
-    if not verificar_senha(credenciais.senha, usuario.senha):
+    print(f"[LOGIN INFO] Usuário encontrado: ID={usuario.id}, Nome={usuario.nome}")
+    
+    # 2. Verificar a senha
+    senha_valida = verificar_senha(credenciais.senha, usuario.senha)
+    if not senha_valida:
+        print(f"[LOGIN FAIL] Senha incorreta para o e-mail '{credenciais.email}'.")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="E-mail ou senha incorretos",
+            detail="Senha incorreta",
         )
     
-    # 4. Se usuário inativo -> BARRA AQUI
+    # 3. Validar se ativo
     if not usuario.ativo:
+        print(f"[LOGIN FAIL] Usuário ID={usuario.id} está inativo.")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Usuário inativo. Contacte a administração.",
         )
+    
+    # 4. Sucesso
+    print(f"[LOGIN SUCCESS] Login realizado com sucesso para ID={usuario.id}")
+    access_token = criar_access_token(usuario_id=usuario.id)
+    
+    return TokenSchema(
+        access_token=access_token,
+        token_type="bearer",
+        usuario_id=usuario.id,
+        usuario_nome=usuario.nome
+    )
     
     # 5. Só gera o token se passar por TODAS as verificações acima
     access_token = criar_access_token(usuario_id=usuario.id)
