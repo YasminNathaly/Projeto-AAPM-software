@@ -1,43 +1,79 @@
+
+
+Index · HTML
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AAPM – SENAI Brás | Sistema de Gestão</title>
-  
+ 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
+ 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+ 
   <style>
     :root {
       --bg-main: #09090f;
       --bg-surface: rgba(18, 18, 24, 0.85);
       --bg-surface-hover: rgba(255, 255, 255, 0.05);
-      --bg-card: #0d0d14;
-      --border-color: rgba(255, 255, 255, 0.08);
-      
+      --bg-card: #101018;
+      --bg-card-2: #0c0c14;
+      --border-color: rgba(255, 255, 255, 0.09);
+      --border-color-soft: rgba(255, 255, 255, 0.05);
+ 
       --primary: #d63250;
       --primary-hover: #b82842;
+      --primary-soft: rgba(214, 50, 80, 0.12);
+      --primary-soft-border: rgba(214, 50, 80, 0.3);
       --accent: #d63250;
-      
+      --whatsapp-color: #25D366;
+      --whatsapp-hover: #1ebd5b;
+ 
       --text-main: #ffffff;
-      --text-muted: rgba(255, 255, 255, 0.65);
-      --text-dark: rgba(255, 255, 255, 0.4);
-      
-      --success: #10b981;
+      --text-muted: rgba(255, 255, 255, 0.64);
+      --text-dark: rgba(255, 255, 255, 0.38);
+ 
+      --success: #1fbf82;
       --warning: #f59e0b;
       --danger: #ef4444;
-
-      --header-height: 70px;
-      --radius: 6px;
-      --shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+ 
+      --header-height: 76px;
+      --radius-sm: 10px;
+      --radius: 16px;
+      --radius-lg: 22px;
+      --radius-pill: 999px;
+      --shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+      --shadow-soft: 0 10px 24px rgba(0, 0, 0, 0.28);
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
     }
-
+ 
+    html[data-theme="light"] {
+      --bg-main: #f6f4f1;
+      --bg-surface: rgba(255, 255, 255, 0.82);
+      --bg-surface-hover: rgba(9, 9, 15, 0.04);
+      --bg-card: #ffffff;
+      --bg-card-2: #fbfaf8;
+      --border-color: rgba(9, 9, 15, 0.09);
+      --border-color-soft: rgba(9, 9, 15, 0.05);
+ 
+      --primary-soft: rgba(214, 50, 80, 0.08);
+      --primary-soft-border: rgba(214, 50, 80, 0.22);
+ 
+      --text-main: #14141a;
+      --text-muted: rgba(20, 20, 26, 0.62);
+      --text-dark: rgba(20, 20, 26, 0.4);
+ 
+      --shadow: 0 20px 50px rgba(20, 20, 26, 0.1);
+      --shadow-soft: 0 10px 24px rgba(20, 20, 26, 0.07);
+    }
+ 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', 'Inter', sans-serif; }
-    
+ 
+    html { scroll-behavior: smooth; }
+ 
     body {
       background-color: var(--bg-main);
       color: var(--text-main);
@@ -46,20 +82,28 @@
       flex-direction: column;
       overflow-x: hidden;
       position: relative;
+      transition: background-color 0.4s var(--ease), color 0.4s var(--ease);
     }
-
+ 
+    ::selection { background: var(--primary); color: #fff; }
+ 
     #bg-canvas {
       position: fixed;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
       z-index: 0;
       pointer-events: none;
+      opacity: 1;
+      transition: opacity 0.4s var(--ease);
     }
-
+    html[data-theme="light"] #bg-canvas { opacity: 0.35; }
+ 
+    /* ================= HEADER ================= */
     header.main-header {
       height: var(--header-height);
-      background-color: rgba(9, 9, 15, 0.9);
-      backdrop-filter: blur(12px);
+      background-color: var(--bg-surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border-color);
       padding: 0 7vw;
       display: flex;
@@ -68,303 +112,456 @@
       position: fixed;
       top: 0; left: 0; right: 0;
       z-index: 100;
+      transition: background-color 0.4s var(--ease), border-color 0.4s var(--ease);
     }
-
+ 
     .brand-logo {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       text-decoration: none;
-      color: #fff;
+      color: var(--text-main);
     }
-
-    .logo-senai-svg {
-      height: 32px;
-      width: auto;
-      display: block;
-    }
-
+ 
+    .logo-senai-svg { height: 30px; width: auto; display: block; border-radius: 4px; }
+ 
     .brand-title {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.5rem;
-      letter-spacing: 0.1em;
+      font-size: 1.4rem;
+      letter-spacing: 0.12em;
       border-left: 1px solid var(--border-color);
-      padding-left: 12px;
+      padding-left: 14px;
+      color: var(--text-main);
     }
-
+ 
     .header-location {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: 600;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.16em;
       color: var(--text-dark);
       text-transform: uppercase;
+      display: none;
     }
-
+    @media (min-width: 1180px) { .header-location { display: inline; } }
+ 
     .top-nav {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      background: rgba(255, 255, 255, 0.03);
-      padding: 4px;
-      border-radius: 6px;
+      gap: 0.25rem;
+      background: var(--bg-surface-hover);
+      padding: 5px;
+      border-radius: var(--radius-pill);
       border: 1px solid var(--border-color);
     }
-
+ 
     .nav-item {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 14px;
+      padding: 8px 18px;
       color: var(--text-muted);
       text-decoration: none;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 600;
-      letter-spacing: 0.05em;
-      border-radius: 4px;
-      transition: all 0.2s ease;
+      letter-spacing: 0.04em;
+      border-radius: var(--radius-pill);
+      transition: color 0.25s var(--ease), background 0.25s var(--ease);
       cursor: pointer;
-      text-transform: uppercase;
     }
-
+ 
     .nav-item:hover { color: var(--text-main); background: var(--bg-surface-hover); }
     .nav-item.active { background-color: var(--primary); color: #fff; }
-
-    .header-user-area { display: flex; align-items: center; gap: 1rem; }
-    .user-card { display: flex; align-items: center; gap: 8px; }
-
-    .avatar {
-      width: 32px; height: 32px;
-      border-radius: 50%;
-      background: var(--primary);
-      border: 1px solid var(--border-color);
+ 
+    .header-user-area { display: flex; align-items: center; gap: 0.85rem; }
+ 
+    .user-box { display: flex; align-items: center; gap: 8px; }
+    .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 700; }
+    .user-name { font-size: 0.75rem; font-weight: 600; }
+ 
+    .icon-btn {
+      width: 38px; height: 38px;
       display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 0.75rem; color: var(--text-main);
-    }
-
-    .user-info { display: flex; flex-direction: column; }
-    .user-name { font-size: 0.75rem; font-weight: 600; color: var(--text-main); }
-
-    .btn-auth {
-      padding: 6px 14px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 4px;
+      border-radius: 50%;
+      border: 1px solid var(--border-color);
       background: transparent;
-      color: rgba(255, 255, 255, 0.85);
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.1em;
+      color: var(--text-muted);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.25s var(--ease);
+      flex-shrink: 0;
     }
-
-    .btn-auth:hover { border-color: var(--primary); color: var(--primary); background: rgba(214, 50, 80, 0.1); }
-
+    .icon-btn:hover { color: var(--text-main); border-color: var(--primary); background: var(--primary-soft); }
+    .icon-btn svg { width: 17px; height: 17px; }
+    .icon-btn .icon-moon { display: none; }
+    html[data-theme="light"] .icon-btn .icon-sun { display: none; }
+    html[data-theme="light"] .icon-btn .icon-moon { display: block; }
+ 
+    .btn-auth {
+      padding: 9px 20px;
+      border: 1px solid var(--text-main);
+      border-radius: var(--radius-pill);
+      background: var(--text-main);
+      color: var(--bg-main);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.25s var(--ease);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+ 
+    .btn-auth:hover { background: var(--primary); border-color: var(--primary); color: #fff; transform: translateY(-1px); }
+ 
+    /* ================= LAYOUT ================= */
     main.wrapper {
       margin-top: var(--header-height);
       width: 100%;
       min-height: calc(100vh - var(--header-height));
-      padding: 3rem 7vw;
       position: relative;
       z-index: 1;
     }
-
+ 
+    .section-pad { padding: 0 7vw; }
+ 
     .view-content {
       display: none;
       flex-direction: column;
-      gap: 1.5rem;
-      animation: fadeIn 0.2s ease-in-out;
+      gap: 2rem;
     }
-
+ 
     .view-content.active { display: flex; }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
+    .view-content .section-pad:first-of-type { padding-top: 3rem; }
+    .view-content > .section-pad { padding-top: 0; }
+    
+ 
+    .admin-only { display: none; }
+ 
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
     }
-
+    .reveal.in-view { opacity: 1; transform: translateY(0); }
+    .reveal-stagger.in-view > * { opacity: 1; transform: translateY(0); }
+    .reveal-stagger > * {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+    }
+    .reveal-stagger.in-view > *:nth-child(1) { transition-delay: 0.04s; }
+    .reveal-stagger.in-view > *:nth-child(2) { transition-delay: 0.1s; }
+    .reveal-stagger.in-view > *:nth-child(3) { transition-delay: 0.16s; }
+    .reveal-stagger.in-view > *:nth-child(4) { transition-delay: 0.22s; }
+    .reveal-stagger.in-view > *:nth-child(5) { transition-delay: 0.28s; }
+    .reveal-stagger.in-view > *:nth-child(6) { transition-delay: 0.34s; }
+ 
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .reveal, .reveal-stagger > *, .hero-bg { transition: none !important; opacity: 1 !important; transform: none !important; }
+    }
+ 
+    .page-title-box { padding: 0 7vw; }
     .page-title-box h2 {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: 2.5rem;
-      letter-spacing: 0.04em;
+      font-size: clamp(2.2rem, 4vw, 2.9rem);
+      letter-spacing: 0.03em;
       line-height: 1;
-      color: #fff;
+      color: var(--text-main);
     }
-
-    .page-title-box p { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
-
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
-    
+ 
+    .page-title-box p { font-size: 0.9rem; color: var(--text-muted); margin-top: 8px; max-width: 560px; }
+ 
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; padding: 0 7vw; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; padding: 0 7vw; }
+ 
     .card {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      box-shadow: var(--shadow);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-soft);
+      transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease), background-color 0.4s var(--ease), border-color 0.4s var(--ease);
     }
-
-    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
-    .form-group.full { grid-column: span 2; }
-    .form-group label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
-
-    .form-control {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      padding: 0.65rem 0.85rem;
-      color: var(--text-main);
-      font-size: 0.85rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .form-control:focus { border-color: var(--primary); }
-
+    .card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+ 
     .btn {
-      padding: 0.65rem 1.25rem;
-      border-radius: var(--radius);
-      font-size: 0.8rem;
+      padding: 0.8rem 1.5rem;
+      border-radius: var(--radius-pill);
+      font-size: 0.78rem;
       font-weight: 600;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
+      letter-spacing: 0.04em;
       border: none;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.25s var(--ease);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 9px;
       text-decoration: none;
     }
-
+ 
     .btn-primary { background: var(--primary); color: #fff; }
-    .btn-primary:hover { background: var(--primary-hover); }
-    .btn-whatsapp { background: #25D366; color: #fff; }
-    .btn-whatsapp:hover { background: #1ebc57; }
-
-    .table-responsive { width: 100%; overflow-x: auto; }
-    
-    table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0 8px;
-      text-align: left;
-    }
-
-    th {
-      padding: 0.75rem 1rem;
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: var(--primary);
-      font-weight: 700;
-    }
-
-    tbody tr { background: var(--bg-card); transition: background-color 0.2s; }
-    tbody tr:hover { background: var(--bg-surface-hover); }
-
-    td {
-      padding: 1rem;
-      border-top: 1px solid var(--border-color);
-      border-bottom: 1px solid var(--border-color);
-      font-size: 0.85rem;
-      color: var(--text-main);
-    }
-
-    td:first-child { border-left: 1px solid var(--border-color); border-top-left-radius: var(--radius); border-bottom-left-radius: var(--radius); }
-    td:last-child { border-right: 1px solid var(--border-color); border-top-right-radius: var(--radius); border-bottom-right-radius: var(--radius); }
-
-    .badge-rm {
-      background: rgba(214, 50, 80, 0.15);
-      color: var(--primary);
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      border: 1px solid rgba(214, 50, 80, 0.3);
-    }
-
-    .status-tag {
-      padding: 0.2rem 0.6rem;
-      border-radius: 12px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      display: inline-block;
-    }
-    .status-tag.active { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
-
-    .action-btn {
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 10px 24px rgba(214, 50, 80, 0.35); }
+ 
+    .btn-ghost {
       background: transparent;
       border: 1px solid var(--border-color);
       color: var(--text-muted);
-      width: 32px; height: 32px;
-      border-radius: 4px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s;
     }
-
-    .action-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
-
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 1.25rem;
+    .btn-ghost:hover { color: var(--text-main); border-color: var(--text-muted); }
+ 
+    .btn-whatsapp { background-color: var(--whatsapp-color); color: #06210f; font-weight: 700; }
+    .btn-whatsapp:hover { background-color: var(--whatsapp-hover); transform: translateY(-2px); }
+ 
+    .icon-circle {
+      width: 20px; height: 20px;
+      display: inline-flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
     }
-
-    .product-item {
-      background: var(--bg-card);
+    .icon-circle svg { width: 100%; height: 100%; }
+ 
+    /* FORMS */
+    .form-group { display: flex; flex-direction: column; gap: 7px; }
+    .form-group label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; color: var(--text-muted); text-transform: uppercase; }
+    .form-control {
+      background: var(--bg-surface-hover);
       border: 1px solid var(--border-color);
-      border-radius: var(--radius);
+      border-radius: var(--radius-sm);
+      padding: 0.8rem 1rem;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+    }
+    .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+    .form-control::placeholder { color: var(--text-dark); }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-grid .full { grid-column: span 2; }
+ 
+    /* TABLES */
+    .table-responsive { width: 100%; overflow-x: auto; }
+ 
+    table { width: 100%; border-collapse: separate; border-spacing: 0 10px; text-align: left; }
+ 
+    th {
+      padding: 0.75rem 1.1rem;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--primary);
+      font-weight: 700;
+    }
+ 
+    tbody tr { background: var(--bg-card-2); transition: background-color 0.2s var(--ease), transform 0.2s var(--ease); }
+    tbody tr:hover { background: var(--bg-surface-hover); transform: translateX(2px); }
+ 
+    td { padding: 1.05rem 1.1rem; border-top: 1px solid var(--border-color-soft); border-bottom: 1px solid var(--border-color-soft); font-size: 0.85rem; color: var(--text-main); }
+ 
+    td:first-child { border-left: 1px solid var(--border-color-soft); border-top-left-radius: var(--radius-sm); border-bottom-left-radius: var(--radius-sm); }
+    td:last-child { border-right: 1px solid var(--border-color-soft); border-top-right-radius: var(--radius-sm); border-bottom-right-radius: var(--radius-sm); }
+ 
+    .badge-rm {
+      background: var(--primary-soft);
+      color: var(--primary);
+      padding: 5px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 0.74rem;
+      font-weight: 600;
+      border: 1px solid var(--primary-soft-border);
+    }
+ 
+    .status-tag { padding: 0.24rem 0.7rem; border-radius: var(--radius-pill); font-size: 0.7rem; font-weight: 600; display: inline-block; }
+    .status-tag.active { background: rgba(31, 191, 130, 0.14); color: var(--success); border: 1px solid rgba(31, 191, 130, 0.3); }
+ 
+    /* ================= HERO (estrutura inspirada na referência) ================= */
+    .hero-container {
+      position: relative;
+      width: 100%;
+      height: min(88vh, 760px);
+      min-height: 560px;
       overflow: hidden;
       display: flex;
+      align-items: center;
+    }
+ 
+    .hero-bg-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+ 
+    .hero-bg {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background-size: cover; background-position: center;
+      opacity: 0; transform: scale(1.08);
+      transition: opacity 1.4s var(--ease), transform 8s ease-out;
+    }
+ 
+    .hero-bg.active { opacity: 1; transform: scale(1); }
+    .hero-overlay {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(180deg, rgba(6, 6, 10, 0.55) 0%, rgba(6, 6, 10, 0.72) 45%, rgba(6, 6, 10, 0.96) 100%),
+                  linear-gradient(90deg, rgba(6, 6, 10, 0.65) 0%, rgba(6, 6, 10, 0.15) 55%);
+      z-index: 2;
+    }
+ 
+    .hero-inner {
+      position: relative; z-index: 3;
+      width: 100%;
+      padding: 0 7vw;
+      display: flex;
       flex-direction: column;
+      justify-content: flex-end;
+      height: 100%;
+      padding-bottom: 2.5rem;
     }
-
-    .product-thumb { width: 100%; height: 140px; object-fit: cover; background: var(--bg-main); }
-    .product-body { padding: 1rem; display: flex; flex-direction: column; gap: 6px; }
-    .product-category { font-size: 0.65rem; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
-    .product-title { font-size: 0.9rem; font-weight: 600; color: var(--text-main); }
-    .product-price { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
+ 
+    .hero-content { max-width: 760px; display: flex; flex-direction: column; gap: 1.1rem; }
+ 
+    .hero-tag {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; color: rgba(255,255,255,0.85);
+      text-transform: uppercase; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .badge-accent { background: rgba(214, 50, 80, 0.22); border: 1px solid rgba(214, 50, 80, 0.5); padding: 4px 10px; border-radius: var(--radius-pill); color: #ff90a3; font-size: 0.66rem; }
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.6rem, 6vw, 4.6rem);
+      line-height: 1.02;
+      letter-spacing: 0.01em;
+      color: #ffffff;
+      max-width: 14ch;
+    }
+    .hero-description { font-size: 0.98rem; color: rgba(255, 255, 255, 0.78); line-height: 1.65; font-weight: 300; max-width: 52ch; }
+ 
+    .hero-cta-row { display: flex; align-items: center; gap: 1.4rem; margin-top: 0.4rem; flex-wrap: wrap; }
+    .btn-hero-primary {
+      background: #ffffff; color: #0b0b12; font-weight: 700; padding: 0.95rem 1.6rem;
+      border-radius: var(--radius-pill); display: inline-flex; align-items: center; gap: 12px;
+      text-decoration: none; font-size: 0.85rem; transition: all 0.3s var(--ease);
+    }
+    .btn-hero-primary .circle-arrow {
+      width: 26px; height: 26px; border-radius: 50%; background: var(--primary); color: #fff;
+      display: flex; align-items: center; justify-content: center; transition: transform 0.3s var(--ease);
+    }
+    .btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,0.35); }
+    .btn-hero-primary:hover .circle-arrow { transform: translateX(3px); }
+ 
+    .link-learn-more { color: rgba(255,255,255,0.85); font-size: 0.85rem; font-weight: 500; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.35); padding-bottom: 2px; transition: border-color 0.25s var(--ease), color 0.25s var(--ease); cursor: pointer; }
+    .link-learn-more:hover { color: #fff; border-color: #fff; }
+ 
+    .hero-indicators { display: flex; gap: 1.75rem; margin-top: 1rem; }
+    .hero-tab { background: none; border: none; color: rgba(255, 255, 255, 0.42); display: flex; flex-direction: column; align-items: flex-start; cursor: pointer; position: relative; padding-bottom: 8px; font-family: inherit; }
+    .hero-tab .tab-text { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.03em; }
+    .hero-tab.active { color: #ffffff; }
+    .hero-tab .tab-progress { position: absolute; bottom: 0; left: 0; width: 0%; height: 2px; background: var(--primary); transition: width 0.3s var(--ease); }
+    .hero-tab.active .tab-progress { width: 100%; }
+ 
+    /* barra de estatísticas sobreposta na imagem, como na referência */
+    .hero-stats {
+      position: relative; z-index: 3;
+      display: grid;
+      grid-template-columns: repeat(4, auto);
+      justify-content: start;
+      gap: clamp(2rem, 5vw, 4.5rem);
+      padding: 0 7vw 2.6rem;
+    }
+    .hero-stat-number { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.1rem, 4vw, 3.1rem); color: #fff; line-height: 1; }
+    .hero-stat-label { font-size: 0.74rem; color: rgba(255,255,255,0.68); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+ 
+    @media (max-width: 900px) {
+      .hero-stats { grid-template-columns: repeat(2, auto); row-gap: 1.4rem; }
+    }
+ 
+    .content-stack { padding-top: 0.5rem; display: flex; flex-direction: column; gap: 2rem; padding-bottom: 3rem; }
+ 
+    .senai-info-card { display: flex; flex-direction: column; gap: 1.1rem; }
+    .info-header .info-badge { font-size: 0.64rem; font-weight: 700; color: var(--primary); letter-spacing: 0.16em; text-transform: uppercase; }
+    .info-header h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.7rem; color: var(--text-main); letter-spacing: 0.02em; margin-top: 4px; }
+    .info-text { font-size: 0.88rem; color: var(--text-muted); line-height: 1.65; }
+ 
+    .location-box { background: var(--primary-soft); border: 1px solid var(--primary-soft-border); border-radius: var(--radius); padding: 1.1rem; display: flex; flex-direction: column; gap: 0.9rem; }
+    .location-header { display: flex; gap: 12px; align-items: flex-start; }
+    .location-header .icon-circle { color: var(--primary); margin-top: 2px; }
+    .location-header strong { font-size: 0.88rem; }
+    .location-header p { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
+    .location-info-grid { display: flex; flex-direction: column; gap: 10px; border-top: 1px dashed var(--primary-soft-border); padding-top: 0.85rem; }
+    .info-chip { display: flex; align-items: center; gap: 10px; font-size: 0.78rem; flex-wrap: wrap; }
+    .info-chip .icon-circle { width: 16px; height: 16px; color: var(--text-dark); }
+    .info-chip span { color: var(--text-muted); }
+    .info-chip strong { color: var(--primary); font-weight: 600; }
+ 
+    .tech-areas-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.9rem; }
+    .tech-area-item { background: var(--bg-surface-hover); border: 1px solid var(--border-color-soft); padding: 1rem; border-radius: var(--radius); display: flex; gap: 12px; transition: border-color 0.25s var(--ease), transform 0.25s var(--ease); }
+    .tech-area-item:hover { border-color: var(--primary-soft-border); transform: translateY(-2px); }
+    .tech-area-item .icon-circle { color: var(--primary); margin-top: 2px; }
+    .tech-area-item h4 { font-size: 0.86rem; color: var(--text-main); font-weight: 600; }
+    .tech-area-item p { font-size: 0.76rem; color: var(--text-muted); margin-top: 3px; line-height: 1.5; }
+ 
+    .benefits-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; padding: 0 7vw; }
+    .benefit-item { background: var(--bg-card); border: 1px solid var(--border-color); padding: 1.3rem; border-radius: var(--radius); display: flex; flex-direction: column; gap: 0.7rem; transition: transform 0.3s var(--ease), border-color 0.3s var(--ease); }
+    .benefit-item:hover { transform: translateY(-3px); border-color: var(--primary-soft-border); }
+    .benefit-item .icon-circle { width: 26px; height: 26px; color: var(--primary); background: var(--primary-soft); border-radius: 8px; padding: 6px; box-sizing: content-box; }
+    .benefit-item h4 { font-size: 0.92rem; color: var(--text-main); font-weight: 600; }
+    .benefit-item p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.55; }
+ 
+    /* PRODUTOS */
+    .product-grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.4rem; padding: 0 7vw 3rem; }
+    .product-item { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease); }
+    .product-item:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+    .product-thumb { width: 100%; height: 180px; object-fit: cover; }
+    .product-body { padding: 1.25rem; display: flex; flex-direction: column; gap: 6px; }
+    .product-category { font-size: 0.64rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.06em; }
+    .product-title { font-size: 1.05rem; font-weight: 600; color: var(--text-main); }
+    .product-price { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: var(--text-main); margin-top: 4px; letter-spacing: 0.02em; }
     .product-sku { font-size: 0.7rem; color: var(--text-dark); }
-
-    .admin-only { display: none; }
-
+ 
+    .associados-wrap, .contact-wrap { padding: 0 7vw 3rem; }
+ 
+    /* MODAIS */
     .modal-backdrop {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(6px);
-      z-index: 1000;
-      display: none;
-      align-items: center; justify-content: center;
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(5, 5, 10, 0.7); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      z-index: 200; display: none; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.3s var(--ease);
     }
-
-    .modal-backdrop.active { display: flex; }
-
+    .modal-backdrop.active { display: flex; opacity: 1; }
+ 
     .modal-box {
-      background: #0d0d14;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      width: 100%; max-width: 450px;
-      padding: 2rem;
-      box-shadow: var(--shadow);
-      position: relative;
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg); width: 100%; max-width: 420px; padding: 2.3rem;
+      position: relative; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+      transform: translateY(14px) scale(0.98); transition: transform 0.35s var(--ease);
     }
-
-    .modal-header { margin-bottom: 1.5rem; }
-    .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.05em; }
+    .modal-backdrop.active .modal-box { transform: translateY(0) scale(1); }
+    .modal-header { margin-bottom: 1.5rem; text-align: left; }
+    .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.9rem; color: var(--text-main); letter-spacing: 0.03em; }
+    .modal-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; background: var(--bg-surface-hover); border: 1px solid var(--border-color); color: var(--text-muted); font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s var(--ease); }
+    .modal-close:hover { color: var(--text-main); border-color: var(--primary); }
+ 
+    .login-badge {
+      display: inline-block; background: var(--primary-soft);
+      border: 1px solid var(--primary-soft-border); color: var(--primary);
+      font-size: 0.64rem; font-weight: 700; padding: 4px 10px; border-radius: var(--radius-pill);
+      margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.1em;
+    }
+ 
+    footer.site-footer {
+      padding: 1.8rem 7vw; border-top: 1px solid var(--border-color);
+      font-size: 0.72rem; color: var(--text-dark); text-align: center;
+      position: relative; z-index: 1;
+    }
+ 
+    @media (max-width: 900px) {
+      .tech-areas-grid, .benefits-grid, .grid-2, .grid-3, .form-grid { grid-template-columns: 1fr; }
+      .form-grid .full { grid-column: span 1; }
+      .top-nav { display: none; }
+      .header-user-area { gap: 0.5rem; }
+    }
   </style>
 </head>
 <body>
-
+ 
   <canvas id="bg-canvas"></canvas>
-
+ 
   <header class="main-header">
     <a href="#" class="brand-logo" onclick="navigate('inicio', document.querySelectorAll('.nav-item')[0])">
-      <!-- LOGO VETORIAL INLINE DO SENAI -->
       <svg class="logo-senai-svg" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
         <rect width="300" height="100" fill="#FF0000"/>
         <line x1="0" y1="20" x2="25" y2="20" stroke="#FFFFFF" stroke-width="5"/>
@@ -379,872 +576,364 @@
         <line x1="275" y1="80" x2="300" y2="80" stroke="#FFFFFF" stroke-width="5"/>
         <text x="150" y="73" font-family="'Arial Black', 'Impact', sans-serif" font-size="62" font-weight="900" font-style="italic" fill="#FFFFFF" text-anchor="middle">SENAI</text>
       </svg>
-      > 
+      <span class="brand-title">AAPM</span>
     </a>
-
+ 
     <nav class="top-nav">
       <a class="nav-item active" onclick="navigate('inicio', this)">Início</a>
-      <a class="nav-item" onclick="navigate('associados', this)">Associados</a>
       <a class="nav-item" onclick="navigate('produtos', this)">Produtos</a>
+      <a class="nav-item" onclick="navigate('associados', this)">Associados</a>
       <a class="nav-item" onclick="navigate('fale-conosco', this)">Fale Conosco</a>
-      <a class="nav-item admin-only" onclick="navigate('admin-panel', this)" style="color: var(--primary);">Painel Admin</a>
     </nav>
-
+ 
     <div class="header-user-area">
-      <span class="header-location">SENAI BRÁS &mdash; SP</span>
-      <div class="user-card" id="userBox" style="display: none;">
+      <div class="user-box" id="userBox" style="display: none;">
         <div class="avatar" id="avatarText">AD</div>
-        <div class="user-info">
-          <span class="user-name" id="userNameLabel">Admin</span>
-        </div>
+        <span class="user-name" id="userNameLabel">Admin</span>
       </div>
-      <button class="btn-auth" id="authBtn" onclick="toggleAuth()">PAINEL ADMIN</button>
+      <span class="header-location">SENAI BRÁS &mdash; SP</span>
+      <button class="icon-btn" id="themeToggleBtn" onclick="toggleTheme()" aria-label="Alternar tema claro/escuro" title="Alternar tema">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"/></svg>
+      </button>
+      <button class="btn-auth" id="authBtn" onclick="handleAdminBtnClick()">PAINEL ADMIN</button>
     </div>
   </header>
-
+ 
   <main class="wrapper">
-
-    <!-- 1. INÍCIO / APRESENTAÇÃO INSTITUCIONAL SENAI ROBERTO SIMONSEN -->
-<section id="inicio" class="view-content active">
-  
-  <!-- HERO INSTITUCIONAL DE ALTO IMPACTO -->
-  <div class="hero-container">
-    <div class="hero-bg-wrapper">
-      <div class="hero-bg active" style="background-image: url('https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=1600&auto=format&fit=crop');"></div>
-      <div class="hero-bg" style="background-image: url('https://images.unsplash.com/photo-1581092335397-9583fe92d232?q=80&w=1600&auto=format&fit=crop');"></div>
-      <div class="hero-bg" style="background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1600&auto=format&fit=crop');"></div>
-    </div>
-
-    <div class="hero-overlay"></div>
-
-    <div class="hero-content">
-      <div class="hero-tag">
-        <span class="badge-accent">INDUSTRIA 4.0</span>
-        ESCOLA SENAI "ROBERTO SIMONSEN" &mdash; BRÁS
-      </div>
-      <h1 class="hero-title">Liderança em Formação Técnica e Inovação Industrial</h1>
-      <p class="hero-description">
-        Referência nacional no desenvolvimento de talentos e soluções para a indústria. Tecnologia de ponta, infraestrutura laboratorial avançada e ecossistema integrado de aprendizagem.
-      </p>
-      
-      <div class="hero-indicators">
-        <button class="hero-tab active" onclick="setHeroSlide(0)">
-          <span class="tab-num">01</span>
-          <span class="tab-text">Excelência Técnica</span>
-          <div class="tab-progress"></div>
-        </button>
-        <button class="hero-tab" onclick="setHeroSlide(1)">
-          <span class="tab-num">02</span>
-          <span class="tab-text">Tecnologia Avançada</span>
-          <div class="tab-progress"></div>
-        </button>
-        <button class="hero-tab" onclick="setHeroSlide(2)">
-          <span class="tab-num">03</span>
-          <span class="tab-text">Comunidade & AAPM</span>
-          <div class="tab-progress"></div>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- METRICAS E PAINEL INSTITUCIONAL -->
-  <div class="metrics-bar">
-    <div class="metric-item">
-      <span class="metric-number">+80</span>
-      <span class="metric-label">Anos Formando a Indústria Paulista</span>
-    </div>
-    <div class="metric-divider"></div>
-    <div class="metric-item">
-      <span class="metric-number">35+</span>
-      <span class="metric-label">Laboratórios Tecnológicos Avançados</span>
-    </div>
-    <div class="metric-divider"></div>
-    <div class="metric-item">
-      <span class="metric-number">90%⁺</span>
-      <span class="metric-label">Índice de Empregabilidade Técnica</span>
-    </div>
-    <div class="metric-divider"></div>
-    <div class="metric-item">
-      <span class="metric-number">100%</span>
-      <span class="metric-label">Infraestrutura em Nível Industrial</span>
-    </div>
-  </div>
-
-  <!-- CONTEÚDO PRINCIPAL: SOBRE A UNIDADE E PILARES TECNOLÓGICOS -->
-  <div class="grid-2" style="margin-top: 1.25rem;">
-    
-    <!-- CARD SOBRE O SENAI BRÁS & LOCALIZAÇÃO -->
-    <div class="card senai-info-card">
-      <div class="info-header">
-        <span class="info-badge">UNIDADE BRÁS / MOOCA</span>
-        <h3>Escola SENAI Roberto Simonsen</h3>
-      </div>
-
-      <p class="info-text">
-        Projetada para atender aos mais altos padrões exigidos pelo setor produtivo, a unidade Roberto Simonsen une a tradição do ensino técnico SENAI com os avanços da Indústria 4.0, Robótica e Automação Industrial.
-      </p>
-
-      <div class="location-box">
-        <div class="location-header">
-          <span class="location-icon">📍</span>
-          <div>
-            <strong>Localização e Acesso Estratégico</strong>
-            <p>Rua Correia de Andrade, 232 - Brás, São Paulo - SP, 03008-020</p>
+ 
+    <!-- 1. INÍCIO -->
+    <section id="inicio" class="view-content active">
+      <div class="hero-container">
+        <div class="hero-bg-wrapper">
+          <div class="hero-bg active" style="background-image: url('https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=1600&auto=format&fit=crop');"></div>
+          <div class="hero-bg" style="background-image: url('https://images.unsplash.com/photo-1581092335397-9583fe92d232?q=80&w=1600&auto=format&fit=crop');"></div>
+          <div class="hero-bg" style="background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1600&auto=format&fit=crop');"></div>
+        </div>
+ 
+        <div class="hero-overlay"></div>
+ 
+        <div class="hero-inner">
+          <div class="hero-content">
+            <div class="hero-tag">
+              <span class="badge-accent">INDÚSTRIA 4.0</span>
+              ESCOLA SENAI "ROBERTO SIMONSEN" &mdash; BRÁS
+            </div>
+            <h1 class="hero-title">Liderança em Formação Técnica e Inovação Industrial</h1>
+            <p class="hero-description">
+              Referência nacional no desenvolvimento de talentos e soluções para a indústria. Tecnologia de ponta, infraestrutura laboratorial avançada e ecossistema integrado de aprendizagem.
+            </p>
+ 
+            <div class="hero-cta-row">
+              <a class="btn-hero-primary" onclick="navigate('fale-conosco', document.querySelectorAll('.nav-item')[3])">
+                Fale Conosco
+                <span class="circle-arrow">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </span>
+              </a>
+              <span class="link-learn-more" onclick="navigate('produtos', document.querySelectorAll('.nav-item')[1])">Conheça a Loja</span>
+            </div>
+ 
+            <div class="hero-indicators">
+              <button class="hero-tab active" onclick="setHeroSlide(0)">
+                <span class="tab-text">Excelência Técnica</span>
+                <div class="tab-progress"></div>
+              </button>
+              <button class="hero-tab" onclick="setHeroSlide(1)">
+                <span class="tab-text">Tecnologia Avançada</span>
+                <div class="tab-progress"></div>
+              </button>
+              <button class="hero-tab" onclick="setHeroSlide(2)">
+                <span class="tab-text">Comunidade &amp; AAPM</span>
+                <div class="tab-progress"></div>
+              </button>
+            </div>
           </div>
         </div>
-
-        <div class="location-info-grid">
-          <div class="info-chip">
-            <span>🚇 Transporte Público:</span>
-            <strong>Metrô Brás (Linha 3 - Vermelha) | CPTM Brás (Linhas 10 e 11)</strong>
-
+ 
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-number">+80</div>
+            <div class="hero-stat-label">Anos Formando a Indústria</div>
           </div>
-          <div class="info-chip">
-            <span>🕒 Horário de Funcionamento:</span>
-            <strong>Seg. a Sex.: 07h às 22h | Sáb.: 08h às 17h</strong>
+          <div class="hero-stat">
+            <div class="hero-stat-number">35+</div>
+            <div class="hero-stat-label">Laboratórios Avançados</div>
           </div>
-          <div class="info-chip">
-            <span>📞 Central de Atendimento:</span>
-            <strong>(11) 2227-8000</strong>
+          <div class="hero-stat">
+            <div class="hero-stat-number">90%+</div>
+            <div class="hero-stat-label">Empregabilidade</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-number">100%</div>
+            <div class="hero-stat-label">Infraestrutura Industrial</div>
           </div>
         </div>
       </div>
-
-      <a href="https://maps.google.com/?q=Rua+Bresser+2315+Bras+Sao+Paulo" target="_blank" class="btn btn-primary" style="width: 100%; text-align: center; justify-content: center;">
-        🗺️ Traçar Rota no Google Maps
-      </a>
-    </div>
-
-    <!-- CARD ÁREAS DE ATUAÇÃO E MODALIDADES -->
-    <div class="card">
-      <div class="info-header" style="margin-bottom: 1rem;">
-        <span class="info-badge">POLOS TECNOLÓGICOS</span>
-        <h3>Áreas de Atuação e Especialização</h3>
-      </div>
-
-      <div class="tech-areas-grid">
-        <div class="tech-area-item">
-          <span class="tech-icon">🤖</span>
-          <div>
-            <h4>Mecatrônica & Automação</h4>
-            <p>Sistemas integrados, robótica industrial, CLPs e manufatura conectada.</p>
+ 
+      <div class="content-stack">
+        <div class="grid-2 reveal">
+          <div class="card senai-info-card">
+            <div class="info-header">
+              <span class="info-badge">Unidade Brás</span>
+              <h3>Escola SENAI Roberto Simonsen</h3>
+            </div>
+            <p class="info-text">
+              Projetada para atender aos mais altos padrões exigidos pelo setor produtivo, a unidade Roberto Simonsen une a tradição do ensino técnico SENAI com os avanços da Indústria 4.0.
+            </p>
+            <div class="location-box">
+              <div class="location-header">
+                <span class="icon-circle">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </span>
+                <div>
+                  <strong>Localização Estratégica</strong>
+                  <p>Rua Correia de Andrade, 232 — Brás, São Paulo - SP</p>
+                </div>
+              </div>
+              <div class="location-info-grid">
+                <div class="info-chip">
+                  <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="16" height="14" rx="2"/><path d="M8 3v6M16 3v6M4 11h16"/></svg></span>
+                  <span>Metrô/CPTM:</span> <strong>Estação Brás</strong>
+                </div>
+                <div class="info-chip">
+                  <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg></span>
+                  <span>Horário:</span> <strong>Seg a Sex: 07h às 22h · Sáb: 08h às 17h</strong>
+                </div>
+                <div class="info-chip">
+                  <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-7.53 7.53-2.02.7a1.9 1.9 0 0 1-2.02-.42l-2.9-2.9a1.9 1.9 0 0 1-.42-2.02l.7-2.02a1.9 1.9 0 0 0-.44-1.98L4.1 3.46A1.9 1.9 0 0 0 1.4 3.4l-.7.7a2 2 0 0 0-.5 2c1.4 4.4 4.7 9.7 9.6 12.4a2 2 0 0 0 2.2-.4l.7-.7a1.9 1.9 0 0 0-.06-2.7z"/></svg></span>
+                  <span>Telefone:</span> <strong>(11) 2227-8000</strong>
+                </div>
+              </div>
+            </div>
+            <a href="https://maps.google.com/?q=Rua+Correia+de+Andrade+232+Bras+Sao+Paulo" target="_blank" class="btn btn-primary">
+              <span class="icon-circle" style="width:16px;height:16px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span>
+              Ver no Google Maps
+            </a>
+          </div>
+ 
+          <div class="card">
+            <div class="info-header" style="margin-bottom: 1.1rem;">
+              <span class="info-badge">Polos Tecnológicos</span>
+              <h3>Áreas de Atuação</h3>
+            </div>
+            <div class="tech-areas-grid">
+              <div class="tech-area-item">
+                <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2"/><circle cx="9" cy="14" r="1.4"/><circle cx="15" cy="14" r="1.4"/><path d="M12 8V4M9 4h6"/></svg></span>
+                <div>
+                  <h4>Mecatrônica &amp; Automação</h4>
+                  <p>Robótica industrial e manufatura conectada.</p>
+                </div>
+              </div>
+              <div class="tech-area-item">
+                <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 11 14 11 22 21 10 13 10 13 2"/></svg></span>
+                <div>
+                  <h4>Eletroeletrônica</h4>
+                  <p>Instalações industriais e acionamentos elétricos.</p>
+                </div>
+              </div>
+              <div class="tech-area-item">
+                <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+                <div>
+                  <h4>Metalmecânica</h4>
+                  <p>Usinagem CNC, metrologia e fabricação mecânica.</p>
+                </div>
+              </div>
+              <div class="tech-area-item">
+                <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+                <div>
+                  <h4>Tecnologia da Informação</h4>
+                  <p>Desenvolvimento de sistemas e redes industriais.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-
-        <div class="tech-area-item">
-          <span class="tech-icon">⚡</span>
-          <div>
-            <h4>Eletroeletrônica & Eletrônica</h4>
-            <p>Instalações industriais, microcontroladores e acionamentos elétricos.</p>
+ 
+        <div class="section-pad reveal">
+          <div class="card">
+            <div class="info-header" style="margin-bottom: 1.1rem;">
+              <span class="info-badge">Suporte e Comunidade</span>
+              <h3>O Papel da AAPM</h3>
+            </div>
+            <div class="benefits-grid" style="padding: 0;">
+              <div class="benefit-item">
+                <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg></span>
+                <h4>Projetos Científicos</h4>
+                <p>Apoio na aquisição de insumos para protótipos e TCCs.</p>
+              </div>
+              <div class="benefit-item">
+                <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.7 8 11 4.6-2.3 8-6 8-11V5l-8-3z"/></svg></span>
+                <h4>Equipamentos e Materiais</h4>
+                <p>Apoio na logística de uniformes e EPIs para estudantes.</p>
+              </div>
+              <div class="benefit-item">
+                <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6"/></svg></span>
+                <h4>Representatividade</h4>
+                <p>Intermediação transparente entre pais, alunos e diretoria.</p>
+              </div>
+            </div>
           </div>
         </div>
-
-        <div class="tech-area-item">
-          <span class="tech-icon">⚙️</span>
-          <div>
-            <h4>Metalmecânica & Usinagem</h4>
-            <p>Comando Numérico Computadorizado (CNC), metrologia e fabricação mecânica.</p>
-          </div>
-        </div>
-
-        <div class="tech-area-item">
-          <span class="tech-icon">💻</span>
-          <div>
-            <h4>Tecnologia da Informação</h4>
-            <p>Desenvolvimento de sistemas, redes industriais e segurança cibernética.</p>
-          </div>
-        </div>
       </div>
-    </div>
-
-  </div>
-
-  <!-- PILARES DA AAPM E INTEGRAÇÃO INSTITUCIONAL -->
-  <div class="card" style="margin-top: 1.25rem;">
-    <div class="info-header" style="margin-bottom: 1rem;">
-      <span class="info-badge">SUPORTE E COMUNIDADE</span>
-      <h3>O Papel da AAPM na Unidade Roberto Simonsen</h3>
-    </div>
-
-    <div class="benefits-grid">
-      <div class="benefit-item">
-        <span class="benefit-icon">🎓</span>
-        <h4>Incentivo a Projetos Científicos</h4>
-        <p>Apoio na aquisição de insumos para protótipos, bancadas de testes, TCCs e Feiras de Tecnologia.</p>
+    </section>
+ 
+    <!-- 2. PRODUTOS -->
+    <section id="produtos" class="view-content">
+      <div class="page-title-box reveal">
+        <h2>Loja &amp; Uniformes AAPM</h2>
+        <p>Produtos oficiais, materiais didáticos e vestuário da Escola SENAI Brás.</p>
       </div>
-      <div class="benefit-item">
-        <span class="benefit-icon">🛡️</span>
-        <h4>Equipamentos e Materiais</h4>
-        <p>Apoio na logística e disponibilização de Equipamentos de Proteção Individual (EPIs) e uniformes oficiais.</p>
-      </div>
-      <div class="benefit-item">
-        <span class="benefit-icon">🏛️</span>
-        <h4>Representatividade e Diálogo</h4>
-        <p>Intermediação transparente promovendo o contínuo alinhamento entre pais, alunos e a diretoria do SENAI.</p>
-      </div>
-    </div>
-  </div>
-
-</section>
-
-<!-- ESTILOS EXCLUSIVOS DA SEÇÃO 1 (PADRÃO SENAI / BLUE TECH) -->
-<style>
-  .hero-container {
-    position: relative;
-    width: 100%;
-    height: 420px;
-    border-radius: var(--radius, 8px);
-    overflow: hidden;
-    border: 1px solid rgba(0, 140, 255, 0.2);
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: flex-end;
-    padding: 2.5rem;
-  }
-
-  .hero-bg-wrapper {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 1;
-  }
-
-  .hero-bg {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background-size: cover;
-    background-position: center;
-    opacity: 0;
-    transform: scale(1.05);
-    transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), transform 6s ease-out;
-  }
-
-  .hero-bg.active {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  .hero-overlay {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: linear-gradient(180deg, rgba(8, 12, 20, 0.25) 0%, rgba(8, 12, 20, 0.95) 90%);
-    z-index: 2;
-  }
-
-  .hero-content {
-    position: relative;
-    z-index: 3;
-    max-width: 780px;
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-  }
-
-  .hero-tag {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.2em;
-    color: #008cff;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .badge-accent {
-    background: rgba(0, 140, 255, 0.15);
-    border: 1px solid rgba(0, 140, 255, 0.4);
-    padding: 2px 8px;
-    border-radius: 4px;
-    color: #008cff;
-    font-size: 0.65rem;
-  }
-
-  .hero-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2.8rem;
-    line-height: 1.05;
-    letter-spacing: 0.03em;
-    color: #ffffff;
-    animation: heroFadeUp 0.8s ease-out forwards;
-  }
-
-  .hero-description {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.75);
-    line-height: 1.6;
-    font-weight: 300;
-  }
-
-  .hero-indicators {
-    display: flex;
-    gap: 1.5rem;
-    margin-top: 0.8rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding-top: 1rem;
-  }
-
-  .hero-tab {
-    background: none;
-    border: none;
-    color: rgba(255, 255, 255, 0.4);
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
-    cursor: pointer;
-    transition: color 0.3s ease;
-    position: relative;
-    padding-bottom: 6px;
-  }
-
-  .hero-tab .tab-num {
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-  }
-
-  .hero-tab .tab-text {
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-
-  .hero-tab.active { color: #ffffff; }
-
-  .hero-tab .tab-progress {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0%;
-    height: 2px;
-    background: #008cff;
-    transition: width 0.3s ease;
-  }
-
-  .hero-tab.active .tab-progress { width: 100%; }
-
-  /* BARRA DE MÉTRICAS INSTITUCIONAIS */
-  .metrics-bar {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
-    align-items: center;
-    background: rgba(12, 18, 30, 0.85);
-    border: 1px solid rgba(0, 140, 255, 0.2);
-    border-radius: var(--radius, 8px);
-    padding: 1rem 1.5rem;
-    margin-top: 1.25rem;
-    backdrop-filter: blur(8px);
-  }
-
-  .metric-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  .metric-number {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2rem;
-    color: #008cff;
-    line-height: 1;
-  }
-
-  .metric-label {
-    font-size: 0.72rem;
-    color: rgba(255, 255, 255, 0.65);
-    margin-top: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .metric-divider {
-    width: 1px;
-    height: 35px;
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  /* DETALHES DE LOCALIZAÇÃO E CARDS */
-  .senai-info-card {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .info-header .info-badge {
-    font-size: 0.65rem;
-    font-weight: 700;
-    color: #008cff;
-    letter-spacing: 0.15em;
-  }
-
-  .info-header h3 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.8rem;
-    color: #fff;
-  }
-
-  .info-text {
-    font-size: 0.88rem;
-    color: var(--text-muted, rgba(255, 255, 255, 0.7));
-    line-height: 1.6;
-  }
-
-  .location-box {
-    background: rgba(0, 140, 255, 0.04);
-    border: 1px solid rgba(0, 140, 255, 0.2);
-    border-radius: var(--radius, 6px);
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-
-  .location-header {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-  }
-
-  .location-icon {
-    font-size: 1.4rem;
-  }
-
-  .location-header strong {
-    font-size: 0.85rem;
-    color: #fff;
-  }
-
-  .location-header p {
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.7);
-    margin-top: 2px;
-  }
-
-  .location-info-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    border-top: 1px dashed rgba(0, 140, 255, 0.15);
-    padding-top: 0.75rem;
-  }
-
-  .info-chip {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.75rem;
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-
-  .info-chip span {
-    color: rgba(255, 255, 255, 0.5);
-  }
-
-  .info-chip strong {
-    color: #008cff;
-  }
-
-  /* GRID DE ÁREAS TECNOLÓGICAS */
-  .tech-areas-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.85rem;
-  }
-
-  .tech-area-item {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    padding: 0.85rem;
-    border-radius: var(--radius, 6px);
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    transition: border-color 0.3s ease;
-  }
-
-  .tech-area-item:hover {
-    border-color: rgba(0, 140, 255, 0.3);
-  }
-
-  .tech-icon {
-    font-size: 1.3rem;
-  }
-
-  .tech-area-item h4 {
-    font-size: 0.85rem;
-    color: #fff;
-    margin-bottom: 2px;
-  }
-
-  .tech-area-item p {
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.6);
-    line-height: 1.4;
-  }
-
-  /* BENEFÍCIOS GRID */
-  .benefits-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.25rem;
-  }
-
-  .benefit-item {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 1.1rem;
-    border-radius: var(--radius, 6px);
-  }
-
-  .benefit-icon {
-    font-size: 1.5rem;
-    display: block;
-    margin-bottom: 0.5rem;
-  }
-
-  .benefit-item h4 {
-    font-size: 0.9rem;
-    color: #fff;
-    margin-bottom: 0.3rem;
-  }
-
-  .benefit-item p {
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.65);
-    line-height: 1.5;
-  }
-
-  @keyframes heroFadeUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @media (max-width: 900px) {
-    .metrics-bar {
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-    .metric-divider { display: none; }
-    .tech-areas-grid { grid-template-columns: 1fr; }
-    .benefits-grid { grid-template-columns: 1fr; }
-  }
-</style>
-
-<!-- SCRIPT SLIDER + CANVAS COM AS CORES E DISTÂNCIAS EXATAS SOLICITADAS -->
-<script>
-  // SLIDER INSTITUCIONAL
-  const heroData = [
-    {
-      title: "Liderança em Formação Técnica e Inovação Industrial",
-      desc: "Referência nacional no desenvolvimento de talentos e soluções para a indústria. Tecnologia de ponta, infraestrutura laboratorial avançada e ecossistema integrado de aprendizagem."
-    },
-    {
-      title: "Infraestrutura Industrial 4.0 e Manufatura Avançada",
-      desc: "Laboratórios equipados com tecnologia real de mercado: Robótica, Células Flexíveis de Manufatura, Redes Industriais e Automação de Processos."
-    },
-    {
-      title: "Parceria Estratégica Entre Escola, Família e Indústria",
-      desc: "Atuação constante da AAPM e do SENAI para assegurar a melhor jornada acadêmica, desenvolvimento humano e inserção no mercado de trabalho."
-    }
-  ];
-
-  let heroIndex = 0;
-  let heroTimer = setInterval(nextHeroSlide, 6000);
-
-  function setHeroSlide(index) {
-    clearInterval(heroTimer);
-    heroIndex = index;
-    updateHero();
-    heroTimer = setInterval(nextHeroSlide, 6000);
-  }
-
-  function nextHeroSlide() {
-    heroIndex = (heroIndex + 1) % heroData.length;
-    updateHero();
-  }
-
-  function updateHero() {
-    const backgrounds = document.querySelectorAll('.hero-bg');
-    const tabs = document.querySelectorAll('.hero-tab');
-    const titleEl = document.querySelector('.hero-title');
-    const descEl = document.querySelector('.hero-description');
-
-    backgrounds.forEach((bg, idx) => { bg.classList.toggle('active', idx === heroIndex); });
-    tabs.forEach((tab, idx) => { tab.classList.toggle('active', idx === heroIndex); });
-
-    if(titleEl) {
-      titleEl.style.animation = 'none';
-      void titleEl.offsetWidth;
-      titleEl.innerText = heroData[heroIndex].title;
-      titleEl.style.animation = 'heroFadeUp 0.8s ease-out forwards';
-    }
-    if(descEl) descEl.innerText = heroData[heroIndex].desc;
-  }
-
-  // CANVAS DE FUNDO COM ANIMAÇÃO AZUL EXATA
-  (function initInteractiveCanvas() {
-    const canvas = document.getElementById('bg-canvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-
-    let particles = [];
-    const particleCount = 80;
-    const maxDistance = 140;
-
-    function resize() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    resize();
-    window.addEventListener('resize', resize);
-
-    class Particle {
-      constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2 + 1;
-        this.speedX = (Math.random() - 0.5) * 0.7;
-        this.speedY = (Math.random() - 0.5) * 0.7;
-      }
-
-      update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-
-        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-      }
-
-      draw() {
-        // Estilo de preenchimento das partículas
-        ctx.fillStyle = 'rgba(0, 140, 255, 0.75)';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-
-    particles = [];
-    for (let i = 0; i < particleCount; i++) {
-      particles.push(new Particle());
-    }
-
-    function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      for (let i = 0; i < particles.length; i++) {
-        particles[i].update();
-        particles[i].draw();
-
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          if (dist < maxDistance) {
-            // Estilo e opacidade exatos
-            ctx.strokeStyle = `rgba(0, 140, 255, ${0.35 - dist / 1000})`;
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.stroke();
-          }
-        }
-      }
-
-      requestAnimationFrame(animate);
-    }
-
-    animate();
-  })();
-</script>
-
-    <!-- 2. ASSOCIADOS -->
+ 
+      <div class="product-grid-container reveal-stagger" id="productGallery"></div>
+    </section>
+ 
+    <!-- 3. ASSOCIADOS -->
     <section id="associados" class="view-content">
-      <div class="page-title-box">
+      <div class="page-title-box reveal">
         <h2>Consulta de Associados</h2>
         <p>Lista oficial de associados cadastrados na AAPM SENAI Brás.</p>
       </div>
-
-      <div class="card" style="padding: 0.5rem 1.25rem;">
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Nome Completo</th>
-                <th>RM / Matrícula</th>
-                <th>Curso / Departamento</th>
-                <th>Status</th>
-                <th style="text-align: right;">Visualizar</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="font-weight: 600;">Carlos Eduardo Silva</td>
-                <td><span class="badge-rm"></span></td>
-                <td>Técnico em Desenvolvimento de Sistemas</td>
-                <td><span class="status-tag active">Ativo</span></td>
-                <td style="text-align: right;">
-                  <button class="action-btn" title="Visualizar" onclick="openViewModal('Carlos Eduardo Silva', 'RM-90124', 'Técnico em Desenvolvimento de Sistemas', 'Ativo')">👁</button>
-                </td>
-              </tr>
-              <tr>
-                <td style="font-weight: 600;">Mariana Souza Lima</td>
-                <td><span class="badge-rm">RM-88412</span></td>
-                <td>Técnico em Mecatrônica</td>
-                <td><span class="status-tag active">Ativo</span></td>
-                <td style="text-align: right;">
-                  <button class="action-btn" title="Visualizar" onclick="openViewModal('Mariana Souza Lima', 'RM-88412', 'Técnico em Mecatrônica', 'Ativo')">👁</button>
-                </td>
-              </tr>
-              <tr>
-                <td style="font-weight: 600;">Lucas Oliveira</td>
-                <td><span class="badge-rm">RM-77192</span></td>
-                <td>Aprendizagem Industrial</td>
-                <td><span class="status-tag active">Ativo</span></td>
-                <td style="text-align: right;">
-                  <button class="action-btn" title="Visualizar" onclick="openViewModal('Lucas Oliveira', 'RM-77192', 'Aprendizagem Industrial', 'Ativo')">👁</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+ 
+      <div class="associados-wrap reveal">
+        <div class="card" style="padding: 0.6rem 1.4rem;">
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome Completo</th>
+                  <th>RM / Matrícula</th>
+                  <th>Curso / Departamento</th>
+                  <th>Status</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight: 600;">Carlos Eduardo Silva</td>
+                  <td><span class="badge-rm">RM 94821</span></td>
+                  <td>Técnico em Mecatrônica</td>
+                  <td><span class="status-tag active">Ativo</span></td>
+                  <td><button class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.7rem;" onclick="openViewModal('Carlos Eduardo Silva', 'RM 94821', 'Técnico em Mecatrônica', 'Ativo')">Ver</button></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 600;">Mariana Oliveira Souza</td>
+                  <td><span class="badge-rm">RM 88310</span></td>
+                  <td>Técnico em Desenvolvimento de Sistemas</td>
+                  <td><span class="status-tag active">Ativo</span></td>
+                  <td><button class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.7rem;" onclick="openViewModal('Mariana Oliveira Souza', 'RM 88310', 'Técnico em Desenvolvimento de Sistemas', 'Ativo')">Ver</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>
-
-    <!-- 3. PRODUTOS -->
-    <section id="produtos" class="view-content">
-      <div class="page-title-box">
-        <h2>Catálogo de Produtos</h2>
-        <p>Uniformes, materiais e itens oficiais da AAPM.</p>
-      </div>
-
-      <div class="product-grid" id="productGallery"></div>
-    </section>
-
+ 
     <!-- 4. FALE CONOSCO / INSCRIÇÃO ASSOCIADO -->
-<section id="fale-conosco" class="view-content">
-  <div class="page-title-box">
-    <h2>Seja um Associado / Fale Conosco</h2>
-    <p>Preencha os dados abaixo. Ao clicar em enviar, você será redirecionado para finalizar seu cadastro no Google Forms.</p>
-  </div>
-
-  <div class="grid-2">
-    <div class="card">
-      <h3 style="font-size: 1.1rem; color: var(--primary); font-weight: 600; margin-bottom: 1rem;">Formulário de Inscrição</h3>
-      
-      <form onsubmit="redirectToGoogleForms(event)">
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label>Nome Completo</label>
-          <input type="text" id="gf-nome" class="form-control" placeholder="Seu nome" required>
+    <section id="fale-conosco" class="view-content">
+      <div class="page-title-box reveal">
+        <h2>Seja um Associado / Fale Conosco</h2>
+        <p>Preencha os dados abaixo. Ao clicar em enviar, você será redirecionado para finalizar seu cadastro no Google Forms.</p>
+      </div>
+ 
+      <div class="contact-wrap">
+        <div class="grid-2 reveal" style="padding: 0;">
+          <div class="card">
+            <h3 style="font-size: 1.05rem; color: var(--primary); font-weight: 600; margin-bottom: 1.1rem;">Formulário de Inscrição</h3>
+ 
+            <form onsubmit="redirectToGoogleForms(event)">
+              <div class="form-group" style="margin-bottom: 1rem;">
+                <label>Nome Completo</label>
+                <input type="text" id="gf-nome" class="form-control" placeholder="Seu nome" required>
+              </div>
+ 
+              <div class="form-group" style="margin-bottom: 1rem;">
+                <label>E-mail</label>
+                <input type="email" id="gf-email" class="form-control" placeholder="seu@email.com" required>
+              </div>
+ 
+              <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label>Mensagem / Observação</label>
+                <textarea id="gf-mensagem" class="form-control" rows="4" placeholder="Alguma dúvida ou observação?" style="resize: none;"></textarea>
+              </div>
+ 
+              <button type="submit" class="btn btn-primary" style="width: 100%;">
+                Continuar no Google Forms
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
+              </button>
+            </form>
+          </div>
+ 
+          <div class="card" style="display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 1.25rem;">
+            <h3 style="font-size: 1.05rem; color: var(--primary); font-weight: 600;">Atendimento Rápido via WhatsApp</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
+              Precisa de um suporte imediato? Fale diretamente com nossa equipe de atendimento via WhatsApp.
+            </p>
+            <a href="https://wa.me/5511951611320" target="_blank" class="btn btn-whatsapp">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.762.459 3.48 1.333 5.005l-1.417 5.18 5.301-1.39a9.92 9.92 0 0 0 4.77 1.218h.004c5.505 0 9.988-4.478 9.989-9.985 0-2.667-1.037-5.176-2.923-7.062A9.925 9.925 0 0 0 12.012 2z"/></svg>
+              Iniciar Conversa no WhatsApp
+            </a>
+          </div>
         </div>
-        
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label>E-mail</label>
-          <input type="email" id="gf-email" class="form-control" placeholder="seu@email.com" required>
-        </div>
-
-        <div class="form-group" style="margin-bottom: 1.25rem;">
-          <label>Mensagem / Observação</label>
-          <textarea id="gf-mensagem" class="form-control" rows="4" placeholder="Alguma dúvida ou observação?" style="resize: none;"></textarea>
-        </div>
-
-        <button type="submit" class="btn btn-primary" style="width: 100%;">Continuar no Google Forms ↗</button>
-      </form>
-    </div>
-
-    <div class="card" style="display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 1.25rem;">
-      <h3 style="font-size: 1.1rem; color: var(--primary); font-weight: 600;">Atendimento Rápido via WhatsApp</h3>
-      <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
-        Precisa de um suporte imediato? Fale diretamente com nossa equipe de atendimento via WhatsApp.
-      </p>
-      <a href="https://wa.me/5511951611320" target="_blank" class="btn btn-whatsapp">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.762.459 3.48 1.333 5rem.005l-1.417 5.18 5.301-1.39a9.92 9.92 0 0 0 4.77 1.218h.004c5.505 0 9.988-4.478 9.989-9.985 0-2.667-1.037-5.176-2.923-7.062A9.925 9.925 0 0 0 12.012 2z"/></svg>
-        Iniciar Conversa no WhatsApp
-      </a>
-    </div>
-  </div>
-</section>
-
-<script>
-  function redirectToGoogleForms(event) {
-    event.preventDefault();
-
-    // 1. Capta os dados digitados pelo usuário
-    const nome = encodeURIComponent(document.getElementById('gf-nome').value);
-    const email = encodeURIComponent(document.getElementById('gf-email').value);
-    const mensagem = encodeURIComponent(document.getElementById('gf-mensagem').value);
-
-    // 2. Insira aqui a ID do seu formulário e os IDs dos campos (entry.XXXXX)
-    const formId = "SUA_FORM_ID_AQUI"; 
-    const entryNome = "entry.123456789"; 
-    const entryEmail = "entry.987654321";
-    const entryMensagem = "entry.112233445";
-
-    // 3. Monta a URL final com as respostas pré-preenchidas
-    const googleFormsUrl = `https://docs.google.com/forms/d/e/1FAIpQLSfm7ghOYRckrt8EajO9Hx7Y5KMZEvqQXwj8tJ3V_dX1xfCBzw/viewform?usp=header`;
-
-    // 4. Redireciona para o Google Forms em uma nova aba
-    window.open(googleFormsUrl, '_blank');
-  }
-</script>
-
+      </div>
+    </section>
+ 
     <!-- 5. PAINEL ADMIN -->
     <section id="admin-panel" class="view-content admin-only">
       <div class="page-title-box">
         <h2>Painel Administrativo</h2>
         <p>Área de gestão interna da AAPM.</p>
       </div>
-
+ 
       <div class="grid-2">
         <div class="card">
-          <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem; text-transform: uppercase; color: var(--primary);">Cadastrar Novo Produto</h3>
-          
+          <h3 style="font-size: 0.86rem; font-weight: 700; margin-bottom: 1.1rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--primary);">Cadastrar Novo Produto</h3>
+ 
           <form id="productForm" onsubmit="saveProduct(event)">
             <div class="form-grid">
               <div class="form-group full">
-                <label>SKU / CÓDIGO DO PRODUTO</label>
+                <label>SKU / Código do Produto</label>
                 <input type="text" class="form-control" id="skuInput" placeholder="Ex: PROD-01" required>
               </div>
               <div class="form-group">
-                <label>NOME DO ITEM</label>
+                <label>Nome do Item</label>
                 <input type="text" class="form-control" id="nameInput" placeholder="Ex: Camiseta M" required>
               </div>
               <div class="form-group">
-                <label>CATEGORIA</label>
+                <label>Categoria</label>
                 <input type="text" class="form-control" id="categoryInput" placeholder="Ex: Uniformes" required>
               </div>
               <div class="form-group full">
-                <label>PREÇO UNITÁRIO (R$)</label>
+                <label>Preço Unitário (R$)</label>
                 <input type="number" step="0.01" class="form-control" id="priceInput" placeholder="0,00" required>
               </div>
               <div class="form-group full">
-                <label>URL DA IMAGEM</label>
+                <label>URL da Imagem</label>
                 <input type="url" class="form-control" id="imgInput" placeholder="https://..." required>
               </div>
             </div>
             <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.25rem;">Salvar Produto</button>
           </form>
         </div>
-
+ 
         <div class="card">
-          <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem; text-transform: uppercase; color: var(--primary);">Relatório de Adesões</h3>
+          <h3 style="font-size: 0.86rem; font-weight: 700; margin-bottom: 1.1rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--primary);">Relatório de Adesões</h3>
           <div style="height: 250px;"><canvas id="adminChart"></canvas></div>
         </div>
       </div>
     </section>
-
+ 
   </main>
-
+ 
+  <footer class="site-footer">
+    © 2026 AAPM &mdash; Associação de Apoio aos Pais e Mestres · Escola SENAI Roberto Simonsen, Brás — São Paulo/SP
+  </footer>
+ 
+  <!-- MODAL DE VISUALIZAÇÃO DE ASSOCIADO -->
   <div class="modal-backdrop" id="viewModal" onclick="if(event.target === this) closeViewModal()">
     <div class="modal-box">
-      <button type="button" onclick="closeViewModal()" style="position: absolute; top: 12px; right: 16px; background: none; border: none; color: rgba(255,255,255,0.5); font-size: 1.5rem; cursor: pointer;">&times;</button>
+      <button type="button" class="modal-close" onclick="closeViewModal()">&times;</button>
       <div class="modal-header">
         <h3 class="modal-title">Detalhes do Associado</h3>
       </div>
@@ -1257,96 +946,124 @@
       <button class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;" onclick="closeViewModal()">Fechar</button>
     </div>
   </div>
-
-  <div class="modal-backdrop" id="loginModal" onclick="if(event.target === this) cancelLogin()">
+ 
+  <!-- TELA / MODAL DE LOGIN ADMIN -->
+  <div class="modal-backdrop" id="loginModal">
     <div class="modal-box">
-      <button type="button" onclick="cancelLogin()" style="position: absolute; top: 12px; right: 16px; background: none; border: none; color: rgba(255,255,255,0.5); font-size: 1.5rem; cursor: pointer;">&times;</button>
-
+      <button type="button" class="modal-close" onclick="cancelLogin()">&times;</button>
+ 
       <div class="modal-header">
+        <span class="login-badge">Acesso Restrito</span>
         <h3 class="modal-title">Painel Administrativo</h3>
-        <p style="font-size: 0.8rem; color: var(--text-muted);">Acesso restrito a gestores da AAPM SENAI Brás.</p>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Insira suas credenciais corporativas da AAPM SENAI Brás para prosseguir.</p>
       </div>
-
+ 
       <form onsubmit="confirmLogin(event)">
         <div class="form-group" style="margin-bottom: 1rem;">
           <label>E-mail Corporativo</label>
-          <input type="email" class="form-control" id="loginEmail" placeholder="usuario@sp.senai.br" required>
+          <input type="email" class="form-control" id="loginEmail" placeholder="admin@sp.senai.br" required>
         </div>
         <div class="form-group" style="margin-bottom: 1.5rem;">
           <label>Senha</label>
-          <input type="password" class="form-control" placeholder="••••••••" required>
+          <input type="password" class="form-control" id="loginPass" placeholder="••••••••" required>
         </div>
-
-        <div style="display: flex; gap: 10px;">
-          <button type="submit" class="btn btn-primary" style="width: 100%;">Entrar</button>
-          <button type="button" onclick="cancelLogin()" class="btn" style="width: 100%; background: transparent; border: 1px solid var(--border-color); color: var(--text-muted);">Cancelar</button>
+ 
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Acessar Painel</button>
+          <button type="button" onclick="cancelLogin()" class="btn btn-ghost" style="width: 100%;">Voltar para o Início</button>
         </div>
       </form>
     </div>
   </div>
-
+ 
   <script>
-    const canvas = document.getElementById('bg-canvas');
-    const ctx = canvas.getContext('2d');
-    let particles = [];
-
-    function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    class Particle {
-      constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2 + 1;
-        this.speedX = (Math.random() - 0.5) * 0.7;
-        this.speedY = (Math.random() - 0.5) * 0.7;
-      }
-      update() {
-        this.x += this.speedX; this.y += this.speedY;
-        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-      }
-      draw() {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-      }
+    // ===== TEMA CLARO / ESCURO =====
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isLight = html.getAttribute('data-theme') === 'light';
+      html.setAttribute('data-theme', isLight ? 'dark' : 'light');
     }
-
-    for (let i = 0; i < 70; i++) particles.push(new Particle());
-
-    function animateBackground() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach(p => { p.update(); p.draw(); });
-      requestAnimationFrame(animateBackground);
+    (function initTheme() {
+      const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      document.documentElement.setAttribute('data-theme', prefersLight ? 'light' : 'dark');
+    })();
+ 
+    // REDIRECIONAMENTO GOOGLE FORMS
+    function redirectToGoogleForms(event) {
+      event.preventDefault();
+      const googleFormsUrl = `https://docs.google.com/forms/d/e/1FAIpQLSfm7ghOYRckrt8EajO9Hx7Y5KMZEvqQXwj8tJ3V_dX1xfCBzw/viewform?usp=header`;
+      window.open(googleFormsUrl, '_blank');
     }
-    animateBackground();
-
+ 
+    // LISTA DE PRODUTOS E ESTADO DE AUTENTICAÇÃO
     let products = [
       { sku: "UNI-2001", name: "Camiseta SENAI M", category: "Uniformes", price: 45.00, img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=400&auto=format&fit=crop" },
-      { sku: "LIV-3002", name: "Apostila Mecatrônica", category: "Material Didático", price: 65.00, img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=400&auto=format&fit=crop" },
-      { sku: "FER-4003", name: "Paquímetro Digital", category: "Ferramentas", price: 120.00, img: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=400&auto=format&fit=crop" }
+      { sku: "LIV-3002", name: "Jaleco de Proteção", category: "EPI / Segurança", price: 89.90, img: "https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=400&auto=format&fit=crop" },
+      { sku: "FER-4003", name: "Kit de Ferramentas", category: "Insumos Técnicos", price: 120.00, img: "https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=400&auto=format&fit=crop" }
     ];
-
+ 
     let userLogged = false;
     let adminChart = null;
-
+ 
+    // CONTROLE DE CLIQUE NO BOTÃO "PAINEL ADMIN"
+    function handleAdminBtnClick() {
+      if (userLogged) {
+        // Se já está logado, desloga
+        userLogged = false;
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+        document.getElementById('userBox').style.display = 'none';
+        document.getElementById('authBtn').innerText = 'PAINEL ADMIN';
+        navigate('inicio', document.querySelectorAll('.nav-item')[0]);
+      } else {
+        // Se não está logado, ABRE A TELA DE LOGIN
+        document.getElementById('loginModal').classList.add('active');
+      }
+    }
+ 
+    function cancelLogin() {
+      document.getElementById('loginModal').classList.remove('active');
+    }
+ 
+    function confirmLogin(e) {
+      e.preventDefault();
+      userLogged = true;
+ 
+      // Exibe os elementos restritos do admin
+      document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
+      document.getElementById('loginModal').classList.remove('active');
+ 
+      const email = document.getElementById('loginEmail').value;
+      const name = email.split('@')[0];
+ 
+      document.getElementById('userNameLabel').innerText = name.charAt(0).toUpperCase() + name.slice(1);
+      document.getElementById('avatarText').innerText = name.substring(0, 2).toUpperCase();
+      document.getElementById('userBox').style.display = 'flex';
+      document.getElementById('authBtn').innerText = 'SAIR DO ADMIN';
+ 
+      // Navega diretamente para o painel admin após o login
+      navigate('admin-panel');
+    }
+ 
+    // NAVEGAÇÃO DE SEÇÕES
     function navigate(viewId, element) {
       document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-
-      document.getElementById(viewId).classList.add('active');
+ 
+      const targetView = document.getElementById(viewId);
+      if (targetView) targetView.classList.add('active');
       if (element) element.classList.add('active');
-
+ 
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      refreshRevealObserver();
+ 
       if (viewId === 'admin-panel' && !adminChart) {
         setTimeout(initAdminChart, 100);
       }
     }
-
+ 
     function renderProducts() {
       const container = document.getElementById('productGallery');
+      if (!container) return;
       container.innerHTML = "";
       products.forEach(p => {
         container.innerHTML += `
@@ -1361,8 +1078,9 @@
           </div>
         `;
       });
+      refreshRevealObserver();
     }
-
+ 
     function openViewModal(name, rm, curso, status) {
       document.getElementById('v-name').innerText = name;
       document.getElementById('v-rm').innerText = rm;
@@ -1370,23 +1088,11 @@
       document.getElementById('v-status').innerText = status;
       document.getElementById('viewModal').classList.add('active');
     }
-
+ 
     function closeViewModal() {
       document.getElementById('viewModal').classList.remove('active');
     }
-
-    function handleInscricao(e) {
-      e.preventDefault();
-      alert("Solicitação de inscrição enviada com sucesso! Analisaremos seus dados.");
-      e.target.reset();
-    }
-
-    function handleContact(e) {
-      e.preventDefault();
-      alert("Sua mensagem foi enviada à equipe da AAPM!");
-      e.target.reset();
-    }
-
+ 
     function saveProduct(e) {
       e.preventDefault();
       const sku = document.getElementById('skuInput').value;
@@ -1394,13 +1100,13 @@
       const category = document.getElementById('categoryInput').value;
       const price = parseFloat(document.getElementById('priceInput').value);
       const img = document.getElementById('imgInput').value;
-
+ 
       products.push({ sku, name, category, price, img });
       renderProducts();
       e.target.reset();
       alert("Produto adicionado com sucesso!");
     }
-
+ 
     function initAdminChart() {
       const ctx = document.getElementById('adminChart');
       if (!ctx) return;
@@ -1408,46 +1114,133 @@
         type: 'line',
         data: {
           labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
-          datasets: [{ label: 'Novos Associados', data: [12, 19, 15, 25, 30], borderColor: '#d63250', backgroundColor: 'rgba(214, 50, 80, 0.2)', fill: true }]
+          datasets: [{ label: 'Novos Associados', data: [12, 19, 15, 25, 30], borderColor: '#d63250', backgroundColor: 'rgba(214, 50, 80, 0.2)', fill: true, tension: 0.35 }]
         },
         options: { responsive: true, maintainAspectRatio: false }
       });
     }
-
-    function toggleAuth() {
-      if (userLogged) {
-        userLogged = false;
-        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
-        document.getElementById('userBox').style.display = 'none';
-        document.getElementById('authBtn').innerText = 'PAINEL ADMIN';
-        navigate('inicio', document.querySelectorAll('.nav-item')[0]);
-      } else {
-        document.getElementById('loginModal').classList.add('active');
+ 
+    // SLIDER HERO
+    const heroData = [
+      { title: "Liderança em Formação Técnica e Inovação Industrial", desc: "Referência nacional no desenvolvimento de talentos e soluções para a indústria. Tecnologia de ponta, infraestrutura laboratorial avançada e ecossistema integrado de aprendizagem." },
+      { title: "Infraestrutura Industrial 4.0 e Manufatura Avançada", desc: "Laboratórios equipados com tecnologia real de mercado: Robótica, Células Flexíveis de Manufatura, Redes Industriais e Automação de Processos." },
+      { title: "Parceria Estratégica Entre Escola, Família e Indústria", desc: "Atuação constante da AAPM e do SENAI para assegurar a melhor jornada acadêmica, desenvolvimento humano e inserção no mercado de trabalho." }
+    ];
+ 
+    let heroIndex = 0;
+    let heroTimer = setInterval(nextHeroSlide, 6000);
+ 
+    function setHeroSlide(index) {
+      clearInterval(heroTimer);
+      heroIndex = index;
+      updateHero();
+      heroTimer = setInterval(nextHeroSlide, 6000);
+    }
+ 
+    function nextHeroSlide() {
+      heroIndex = (heroIndex + 1) % heroData.length;
+      updateHero();
+    }
+ 
+    function updateHero() {
+      const backgrounds = document.querySelectorAll('.hero-bg');
+      const tabs = document.querySelectorAll('.hero-tab');
+      const titleEl = document.querySelector('.hero-title');
+      const descEl = document.querySelector('.hero-description');
+ 
+      backgrounds.forEach((bg, idx) => bg.classList.toggle('active', idx === heroIndex));
+      tabs.forEach((tab, idx) => tab.classList.toggle('active', idx === heroIndex));
+ 
+      if(titleEl) titleEl.innerText = heroData[heroIndex].title;
+      if(descEl) descEl.innerText = heroData[heroIndex].desc;
+    }
+ 
+    // SCROLL-TRIGGERED REVEAL
+    let revealObserver;
+    function refreshRevealObserver() {
+      if (!('IntersectionObserver' in window)) {
+        document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => el.classList.add('in-view'));
+        return;
       }
+      if (!revealObserver) {
+        revealObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('in-view');
+              revealObserver.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+      }
+      document.querySelectorAll('.reveal:not(.in-view), .reveal-stagger:not(.in-view)').forEach(el => revealObserver.observe(el));
     }
-
-    function cancelLogin() {
-      document.getElementById('loginModal').classList.remove('active');
-    }
-
-    function confirmLogin(e) {
-      e.preventDefault();
-      userLogged = true;
-      document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
-      document.getElementById('loginModal').classList.remove('active');
-
-      const email = document.getElementById('loginEmail').value;
-      const name = email.split('@')[0];
-
-      document.getElementById('userNameLabel').innerText = name.charAt(0).toUpperCase() + name.slice(1);
-      document.getElementById('avatarText').innerText = name.substring(0, 2).toUpperCase();
-      document.getElementById('userBox').style.display = 'flex';
-      document.getElementById('authBtn').innerText = 'SAIR DO ADMIN';
-    }
-
+ 
+    // BACKGROUND CANVAS
+    (function initCanvas() {
+      const canvas = document.getElementById('bg-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let particles = [];
+ 
+      function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+      resize();
+      window.addEventListener('resize', resize);
+ 
+      class Particle {
+        constructor() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.size = Math.random() * 2 + 1;
+          this.speedX = (Math.random() - 0.5) * 0.6;
+          this.speedY = (Math.random() - 0.5) * 0.6;
+        }
+        update() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+          if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+          if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+        }
+        draw() {
+          ctx.fillStyle = 'rgba(214, 50, 80, 0.6)';
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+ 
+      for (let i = 0; i < 70; i++) particles.push(new Particle());
+ 
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < particles.length; i++) {
+          particles[i].update();
+          particles[i].draw();
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 120) {
+              ctx.strokeStyle = `rgba(214, 50, 80, ${0.2 - dist / 600})`;
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+ 
     window.onload = function() {
       renderProducts();
+      refreshRevealObserver();
     };
   </script>
 </body>
 </html>
+ 
+
+

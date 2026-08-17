@@ -11,6 +11,9 @@ from pydantic import BaseModel
 # 1. Importações do banco e dos modelos com Fallback de Segurança
 from app.database import engine, Base, get_db
 
+# 2. Importar o router de autenticação
+from app.routers.auth_router import router as auth_router
+
 # Tentativa segura de carregar cada modelo individualmente
 try:
     from app.models.produto import Produto
@@ -62,6 +65,13 @@ templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "app", "templates")
 # Aponta para a pasta app/static
 caminho_static_correto = os.path.join(BASE_DIR, "app", "static")
 app.mount("/static", StaticFiles(directory=caminho_static_correto), name="static")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# INCLUIR ROUTERS
+# ─────────────────────────────────────────────────────────────────────────────
+
+app.include_router(auth_router)
+
 # ─────────────────────────────────────────────────────────────────────────────
 # HANDLERS DE EXCEÇÃO PERSONALIZADOS
 # ─────────────────────────────────────────────────────────────────────────────
@@ -135,11 +145,6 @@ async def pagina_inicial(request: Request, db: Session = Depends(get_db)):
     )
 
 
-@app.get("/login", response_class=HTMLResponse)
-async def pagina_login(request: Request):
-    return templates.TemplateResponse(request=request, name="auth/login.html")
-
-
 @app.get("/visualizacao", response_class=HTMLResponse)
 async def pagina_visualizacao(request: Request, db: Session = Depends(get_db)):
     produtos_do_banco = []
@@ -155,29 +160,10 @@ async def pagina_visualizacao(request: Request, db: Session = Depends(get_db)):
     )
 
 
-@app.post("/auth/login")
-async def processar_login(
-    email: str = Form(...), 
-    senha: str = Form(...), 
-    db: Session = Depends(get_db)
-):
-    if Usuario:
-        try:
-            usuario = db.query(Usuario).filter(Usuario.email == email).first()
-            if usuario and pwd_context.verify(senha, usuario.senha):
-                return JSONResponse(content={"status": "sucesso", "redirecionar": "/dashboard"})
-        except Exception as e:
-            print(f"❌ Erro na autenticação: {e}")
-        
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED, 
-        detail="E-mail ou senha incorretos."
-    )
-
-
-@app.get("/auth/logout")
-async def processar_logout():
-    return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+# ─────────────────────────────────────────────────────────────────────────────
+# NOTA: As rotas de autenticação (POST /api/auth/login, GET /login, GET /admin)
+# estão centralizadas no arquivo app/routers/auth_router.py
+# ─────────────────────────────────────────────────────────────────────────────
 
 
 # ─────────────────────────────────────────────────────────────────────────────
