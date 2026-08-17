@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Administrativo Executivo | AAPM SENAI Brás</title>
+ 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+ 
+  <style>
+    :root {
+      --bg-main: #07070b;
+      --bg-surface: rgba(15, 15, 22, 0.85);
+      --bg-surface-hover: rgba(255, 255, 255, 0.04);
+      --bg-card: #0c0c12;
+      --border-color: rgba(255, 255, 255, 0.08);
+ 
+      --primary: #d63250;
+      --primary-hover: #b82842;
+      --primary-soft: rgba(214, 50, 80, 0.15);
+      --accent: #008cff;
+ 
+      --text-main: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.65);
+      --text-dark: rgba(255, 255, 255, 0.35);
+ 
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+ 
+      --sidebar-width: 280px;
+      --radius: 22px;
+      --radius-card: 34px;
+      --radius-blob: 48px 32px 48px 32px;
+      --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+ 
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+ 
+    /* ===== TEMA CLARO ===== */
+    html[data-theme="light"] {
+      --bg-main: #f3f4f8;
+      --bg-surface: rgba(255, 255, 255, 0.85);
+      --bg-surface-hover: rgba(20, 20, 30, 0.04);
+      --bg-card: #ffffff;
+      --border-color: rgba(20, 20, 30, 0.08);
+ 
+      --text-main: #12121a;
+      --text-muted: rgba(18, 18, 26, 0.62);
+      --text-dark: rgba(18, 18, 26, 0.35);
+ 
+      --shadow-glass: 0 8px 28px 0 rgba(20, 20, 30, 0.08);
+    }
+ 
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+ 
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+      position: relative;
+      transition: background-color .4s var(--ease), color .4s var(--ease);
+    }
+ 
+    aside, main, .card, header.top-header, .form-control, table, .btn, .action-btn, .stat-block, .menu-item {
+      transition: background-color .35s var(--ease), color .35s var(--ease), border-color .35s var(--ease), box-shadow .35s var(--ease);
+    }
+ 
+    #bg-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.9;
+    }
+    html[data-theme="light"] #bg-canvas { opacity: 0.35; }
+ 
+    /* SIDEBAR PROFISSIONAL */
+    aside.sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border-color);
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 1rem;
+    }
+ 
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+ 
+    .logo-senai-svg { height: 26px; width: auto; border-radius: 6px; }
+ 
+    .brand-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      border-left: 1px solid var(--border-color);
+      padding-left: 10px;
+      color: var(--primary);
+    }
+ 
+    .sidebar-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-top: 1.25rem;
+      flex-grow: 1;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+ 
+    .sidebar-menu::-webkit-scrollbar { width: 4px; }
+    .sidebar-menu::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+ 
+    .menu-category {
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-dark);
+      margin: 1rem 0 0.4rem 0.5rem;
+    }
+ 
+    .menu-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border-radius: 14px;
+      cursor: pointer;
+      position: relative;
+      transition: color .3s var(--ease), background-color .3s var(--ease), transform .3s var(--ease);
+    }
+ 
+    .menu-item-content { display: flex; align-items: center; gap: 12px; }
+    .menu-item-content svg { width: 17px; height: 17px; flex-shrink: 0; stroke: currentColor; }
+ 
+    .menu-item:hover { color: var(--text-main); background: var(--bg-surface-hover); transform: translateX(2px); }
+    .menu-item.active { background: var(--primary); color: #fff; box-shadow: 0 4px 14px var(--primary-soft); }
+ 
+    .sidebar-footer {
+      border-top: 1px solid var(--border-color);
+      padding-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+ 
+    /* MAIN CONTENT */
+    main.admin-wrapper {
+      margin-left: var(--sidebar-width);
+      width: calc(100% - var(--sidebar-width));
+      min-height: 100vh;
+      padding: 2rem 2.5rem 4rem;
+      position: relative;
+      z-index: 1;
+    }
+ 
+    header.top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      background: var(--bg-surface);
+      padding: 1.1rem 1.5rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(12px);
+    }
+ 
+    .page-header-info h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.15rem;
+      letter-spacing: 0.03em;
+      line-height: 1;
+    }
+ 
+    .page-header-info p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+ 
+    .top-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+ 
+    .quick-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      color: #0c0c12;
+      border: none;
+      padding: 0.55rem 0.55rem 0.55rem 1.2rem;
+      border-radius: 50px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+    }
+    html[data-theme="light"] .quick-action { background: #12121a; color: #fff; }
+    .quick-action:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.25); }
+    .quick-action .qa-circle {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .quick-action .qa-circle svg { width: 13px; height: 13px; stroke: #fff; }
+ 
+    .icon-btn {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface-hover);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all .3s var(--ease);
+      flex-shrink: 0;
+    }
+    .icon-btn:hover { color: var(--text-main); border-color: var(--primary); }
+    .icon-btn svg { width: 17px; height: 17px; stroke: currentColor; }
+ 
+    .theme-toggle .icon-moon { display: none; }
+    html[data-theme="light"] .theme-toggle .icon-sun { display: none; }
+    html[data-theme="light"] .theme-toggle .icon-moon { display: block; }
+ 
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-left: 1rem;
+      border-left: 1px solid var(--border-color);
+    }
+ 
+    .avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.85rem; color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+ 
+    .user-details .role-badge {
+      font-size: 0.65rem;
+      background: rgba(0, 140, 255, 0.15);
+      color: var(--accent);
+      padding: 1px 8px;
+      border-radius: 20px;
+      font-weight: 700;
+      display: inline-block;
+    }
+ 
+    /* ===== BARRA DE ESTATÍSTICAS (inspirada na estrutura enviada) ===== */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+ 
+    .stat-block {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      padding: 1.4rem 1.6rem;
+      box-shadow: var(--shadow-glass);
+    }
+ 
+    .stat-block .stat-value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.6rem;
+      line-height: 1;
+      letter-spacing: 0.02em;
+      color: var(--text-main);
+    }
+ 
+    .stat-block .stat-value span { color: var(--primary); }
+ 
+    .stat-block .stat-label {
+      margin-top: 6px;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+ 
+    /* VIEWS ENGINE */
+    .view-content { display: none; flex-direction: column; gap: 1.25rem; }
+    .view-content.active { display: flex; animation: viewIn .5s var(--ease); }
+ 
+    @keyframes viewIn {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+ 
+    /* SCROLL REVEAL */
+    .reveal {
+      opacity: 0;
+      transform: translateY(26px);
+      transition: opacity .8s var(--ease), transform .8s var(--ease);
+    }
+    .reveal.in-view { opacity: 1; transform: translateY(0); }
+ 
+    /* CARDS */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      padding: 1.8rem;
+      box-shadow: var(--shadow-glass);
+      backdrop-filter: blur(16px);
+    }
+ 
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+ 
+    /* TABELAS */
+    .table-responsive { width: 100%; overflow-x: auto; }
+ 
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 6px;
+      text-align: left;
+    }
+ 
+    th {
+      padding: 0.75rem 1rem;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--primary);
+      font-weight: 800;
+    }
+ 
+    tbody tr {
+      background: rgba(128, 128, 128, 0.06);
+      opacity: 0;
+      transform: translateY(10px);
+      animation: rowIn .5s var(--ease) forwards;
+      animation-delay: calc(var(--i, 0) * 60ms);
+      transition: background-color .3s var(--ease), transform .3s var(--ease), box-shadow .3s var(--ease);
+    }
+ 
+    @keyframes rowIn { to { opacity: 1; transform: translateY(0); } }
+ 
+    tbody tr:hover {
+      background: var(--bg-surface-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    }
+ 
+    td {
+      padding: 1.2rem 1.4rem;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: var(--text-main);
+    }
+ 
+    td:first-child {
+      border-left: 1px solid var(--border-color);
+      border-top-left-radius: 20px;
+      border-bottom-left-radius: 20px;
+    }
+ 
+    td:last-child {
+      border-right: 1px solid var(--border-color);
+      border-top-right-radius: 20px;
+      border-bottom-right-radius: 20px;
+    }
+ 
+    .empty-row td {
+      text-align: center;
+      color: var(--text-dark);
+      font-style: italic;
+      padding: 1.6rem;
+    }
+ 
+    .pill-badge {
+      background: rgba(0, 114, 255, 0.15);
+      color: #3892ff;
+      font-weight: 800;
+      padding: 6px 16px;
+      border-radius: 50px;
+      font-size: 0.78rem;
+      display: inline-block;
+      border: 1px solid rgba(0, 114, 255, 0.25);
+    }
+ 
+    .status-tag {
+      padding: 6px 16px;
+      border-radius: 50px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-tag.active { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .status-tag.inactive { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+ 
+    .action-btn-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+ 
+    .action-btn {
+      background: var(--bg-surface-hover);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s var(--ease);
+    }
+ 
+    .action-btn:hover {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      transform: scale(1.1);
+    }
+ 
+    .action-btn.danger:hover {
+      background: var(--danger);
+      border-color: var(--danger);
+    }
+ 
+    /* FORMULÁRIOS */
+    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group.full { grid-column: span 2; }
+    .form-group label { font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+ 
+    .form-control {
+      background: var(--bg-surface-hover);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 0.75rem 1rem;
+      color: var(--text-main);
+      font-size: 0.82rem;
+      outline: none;
+    }
+    .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+    select.form-control { background-color: var(--bg-card); appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.4rem; }
+ 
+    .btn {
+      padding: 0.75rem 1.4rem;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.3s var(--ease);
+    }
+ 
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 8px 18px var(--primary-soft); }
+    .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); }
+    .btn-outline:hover { background: var(--bg-surface-hover); color: var(--text-main); border-color: var(--danger); }
+    .btn-outline svg { width: 15px; height: 15px; stroke: currentColor; }
+ 
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .reveal { opacity: 1; transform: none; }
+      tbody tr { opacity: 1; transform: none; }
+    }
+ 
+    @media (max-width: 1024px) {
+      aside.sidebar { width: 75px; padding: 1rem 0.5rem; }
+      .brand-title, .menu-item span, .menu-category, .user-details { display: none; }
+      .menu-item-content { justify-content: center; width: 100%; }
+      main.admin-wrapper { margin-left: 75px; width: calc(100% - 75px); padding: 1.5rem; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-group.full { grid-column: span 1; }
+      .stats-bar { grid-template-columns: 1fr; }
+      header.top-header { flex-wrap: wrap; }
+      .quick-action span { display: none; }
+    }
+  </style>
+</head>
+<body>
+ 
+  <canvas id="bg-canvas"></canvas>
+ 
+  <!-- SIDEBAR DE NAVEGAÇÃO -->
+  <aside class="sidebar">
+    <a href="#" class="brand-logo">
+      <svg class="logo-senai-svg" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+        <rect width="300" height="100" fill="#FF0000"/>
+        <text x="150" y="73" font-family="'Arial Black', 'Impact', sans-serif" font-size="62" font-weight="900" font-style="italic" fill="#FFFFFF" text-anchor="middle">SENAI</text>
+      </svg>
+      <span class="brand-title">ADMIN</span>
+    </a>
+ 
+    <nav class="sidebar-menu">
+      <div class="menu-category">Módulos do Sistema</div>
+ 
+      <a class="menu-item active" onclick="navigate('categoria', this)">
+        <div class="menu-item-content">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10V6a2 2 0 0 0-2-2h-4L3 15l6 6 11-11Z"/><circle cx="8.5" cy="8.5" r="1.2"/></svg>
+          <span>Categoria</span>
+        </div>
+      </a>
+ 
+      <a class="menu-item" onclick="navigate('fornecedor', this)">
+        <div class="menu-item-content">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-8h6v8"/></svg>
+          <span>Fornecedor</span>
+        </div>
+      </a>
+ 
+      <a class="menu-item" onclick="navigate('produto', this)">
+        <div class="menu-item-content">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5V8Z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg>
+          <span>Produto</span>
+        </div>
+      </a>
+ 
+      <a class="menu-item" onclick="navigate('usuario', this)">
+        <div class="menu-item-content">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+          <span>Usuário</span>
+        </div>
+      </a>
+ 
+      <a class="menu-item" onclick="navigate('variacao', this)">
+        <div class="menu-item-content">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 9l10 6 10-6-10-6Z"/><path d="M2 15l10 6 10-6"/></svg>
+          <span>Variação</span>
+        </div>
+      </a>
+ 
+      <a class="menu-item" onclick="navigate('venda', this)">
+        <div class="menu-item-content">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.8h7.2a2 2 0 0 0 2-1.6L21 8H6"/></svg>
+          <span>Venda</span>
+        </div>
+      </a>
+    </nav>
+ 
+    <div class="sidebar-footer">
+      <button class="btn btn-outline" style="width: 100%;" onclick="logout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        <span>Encerrar Sessão</span>
+      </button>
+    </div>
+  </aside>
+ 
+  <!-- MAIN CONTAINER -->
+  <main class="admin-wrapper">
+ 
+    <!-- HEADER TOPBAR -->
+    <header class="top-header">
+      <div class="page-header-info">
+        <h2 id="page-title">Gestão de Categorias</h2>
+        <p id="page-subtitle">Organização e classificação de produtos.</p>
+      </div>
+      <div class="top-header-actions">
+        <button class="quick-action" id="quickAction" onclick="focusForm()">
+          <span id="quickActionLabel">Nova Categoria</span>
+          <span class="qa-circle">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          </span>
+        </button>
+        <button class="icon-btn theme-toggle" onclick="toggleTheme()" title="Alternar tema claro/escuro" aria-label="Alternar tema">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg>
+        </button>
+        <div class="user-profile">
+          <div class="avatar">A</div>
+          <div class="user-details">
+            <div class="user-name">Admin Geral</div>
+            <div class="role-badge">Administrador</div>
+          </div>
+        </div>
+      </div>
+    </header>
+ 
+    <!-- BARRA DE ESTATÍSTICAS -->
+    <div class="stats-bar" id="statsBar"></div>
+ 
+    <!-- 1. CATEGORIA -->
+    <section id="categoria" class="view-content active">
+      <div class="card reveal">
+        <div class="card-title">Cadastrar Categoria</div>
+        <form onsubmit="addCategoria(event)" class="form-grid">
+          <div class="form-group">
+            <label>Nome da Categoria</label>
+            <input type="text" id="catNome" class="form-control" placeholder="Ex: Uniformes, Ferramental..." required>
+          </div>
+          <div class="form-group">
+            <label>Código Interno</label>
+            <input type="text" id="catCodigo" class="form-control" placeholder="Ex: CAT-01" required>
+          </div>
+          <div class="form-group full">
+            <label>Descrição</label>
+            <input type="text" id="catDesc" class="form-control" placeholder="Breve descrição da categoria">
+          </div>
+          <div class="form-group full">
+            <button type="submit" class="btn btn-primary" style="width: fit-content;">+ Cadastrar Categoria</button>
+          </div>
+        </form>
+      </div>
+ 
+      <div class="card reveal">
+        <div class="card-title">Categorias Cadastradas</div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tblCategorias"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+ 
+    <!-- 2. FORNECEDOR -->
+    <section id="fornecedor" class="view-content">
+      <div class="card reveal">
+        <div class="card-title">Cadastrar Fornecedor</div>
+        <form onsubmit="addFornecedor(event)" class="form-grid">
+          <div class="form-group">
+            <label>Razão Social / Nome</label>
+            <input type="text" id="fornNome" class="form-control" placeholder="Ex: Ferramentas Brás Ltda" required>
+          </div>
+          <div class="form-group">
+            <label>CNPJ / CPF</label>
+            <input type="text" id="fornDoc" class="form-control" placeholder="00.000.000/0001-00" required>
+          </div>
+          <div class="form-group">
+            <label>E-mail de Contato</label>
+            <input type="email" id="fornEmail" class="form-control" placeholder="contato@fornecedor.com" required>
+          </div>
+          <div class="form-group">
+            <label>Telefone</label>
+            <input type="text" id="fornTel" class="form-control" placeholder="(11) 99999-9999">
+          </div>
+          <div class="form-group full">
+            <button type="submit" class="btn btn-primary" style="width: fit-content;">+ Cadastrar Fornecedor</button>
+          </div>
+        </form>
+      </div>
+ 
+      <div class="card reveal">
+        <div class="card-title">Lista de Fornecedores</div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Razão Social</th>
+                <th>CNPJ / CPF</th>
+                <th>E-mail</th>
+                <th>Telefone</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tblFornecedores"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+ 
+    <!-- 3. PRODUTO -->
+    <section id="produto" class="view-content">
+      <div class="card reveal">
+        <div class="card-title">Cadastrar Produto</div>
+        <form onsubmit="addProduto(event)" class="form-grid">
+          <div class="form-group">
+            <label>Nome do Produto</label>
+            <input type="text" id="prodNome" class="form-control" placeholder="Ex: Camiseta SENAI M" required>
+          </div>
+          <div class="form-group">
+            <label>SKU / Código</label>
+            <input type="text" id="prodSku" class="form-control" placeholder="EX: PRD-001" required>
+          </div>
+          <div class="form-group">
+            <label>Categoria</label>
+            <select id="prodCategoria" class="form-control" required>
+              <option value="Uniformes">Uniformes</option>
+              <option value="Material Didático">Material Didático</option>
+              <option value="Ferramentas">Ferramentas</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Preço Unitário (R$)</label>
+            <input type="number" step="0.01" id="prodPreco" class="form-control" placeholder="0.00" required>
+          </div>
+          <div class="form-group full">
+            <button type="submit" class="btn btn-primary" style="width: fit-content;">+ Cadastrar Produto</button>
+          </div>
+        </form>
+      </div>
+ 
+      <div class="card reveal">
+        <div class="card-title">Produtos Cadastrados</div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Nome</th>
+                <th>Categoria</th>
+                <th>Preço</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tblProdutos"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+ 
+    <!-- 4. USUARIO -->
+    <section id="usuario" class="view-content">
+      <div class="card reveal">
+        <div class="card-title">Cadastrar Usuário</div>
+        <form onsubmit="addUsuario(event)" class="form-grid">
+          <div class="form-group">
+            <label>Nome Completo</label>
+            <input type="text" id="usrNome" class="form-control" placeholder="Ex: João da Silva" required>
+          </div>
+          <div class="form-group">
+            <label>E-mail</label>
+            <input type="email" id="usrEmail" class="form-control" placeholder="joao@senai.br" required>
+          </div>
+          <div class="form-group">
+            <label>Perfil de Acesso</label>
+            <select id="usrPerfil" class="form-control" required>
+              <option value="Administrador">Administrador</option>
+              <option value="Operador">Operador</option>
+              <option value="Visualizador">Visualizador</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Senha Inicial</label>
+            <input type="password" id="usrSenha" class="form-control" placeholder="••••••••" required>
+          </div>
+          <div class="form-group full">
+            <button type="submit" class="btn btn-primary" style="width: fit-content;">+ Cadastrar Usuário</button>
+          </div>
+        </form>
+      </div>
+ 
+      <div class="card reveal">
+        <div class="card-title">Usuários do Sistema</div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Perfil</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tblUsuarios"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+ 
+    <!-- 5. VARIACAO -->
+    <section id="variacao" class="view-content">
+      <div class="card reveal">
+        <div class="card-title">Cadastrar Variação de Produto</div>
+        <form onsubmit="addVariacao(event)" class="form-grid">
+          <div class="form-group">
+            <label>Produto Referência</label>
+            <select id="varProduto" class="form-control" required>
+              <option value="Camiseta SENAI">Camiseta SENAI</option>
+              <option value="Paquímetro Digital">Paquímetro Digital</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Atributo (ex: Tamanho, Cor)</label>
+            <input type="text" id="varAtributo" class="form-control" placeholder="Ex: Tamanho M, 220V..." required>
+          </div>
+          <div class="form-group">
+            <label>Estoque Atual</label>
+            <input type="number" id="varEstoque" class="form-control" placeholder="0" required>
+          </div>
+          <div class="form-group">
+            <label>Acréscimo Preço (R$)</label>
+            <input type="number" step="0.01" id="varAcrescimo" class="form-control" placeholder="0.00">
+          </div>
+          <div class="form-group full">
+            <button type="submit" class="btn btn-primary" style="width: fit-content;">+ Cadastrar Variação</button>
+          </div>
+        </form>
+      </div>
+ 
+      <div class="card reveal">
+        <div class="card-title">Variações Registradas</div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Produto Base</th>
+                <th>Variação</th>
+                <th>Qtd. Estoque</th>
+                <th>Acréscimo</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tblVariacoes"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+ 
+    <!-- 6. VENDA -->
+    <section id="venda" class="view-content">
+      <div class="card reveal">
+        <div class="card-title">Registrar Nova Venda</div>
+        <form onsubmit="addVenda(event)" class="form-grid">
+          <div class="form-group">
+            <label>Cliente / Aluno</label>
+            <input type="text" id="vendaCliente" class="form-control" placeholder="Nome do comprador" required>
+          </div>
+          <div class="form-group">
+            <label>Produto Selecionado</label>
+            <select id="vendaProduto" class="form-control" required>
+              <option value="Camiseta SENAI M - R$ 45.00">Camiseta SENAI M (R$ 45,00)</option>
+              <option value="Paquímetro Digital - R$ 120.00">Paquímetro Digital (R$ 120,00)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Quantidade</label>
+            <input type="number" id="vendaQtd" class="form-control" value="1" min="1" required>
+          </div>
+          <div class="form-group">
+            <label>Forma de Pagamento</label>
+            <select id="vendaPagamento" class="form-control" required>
+              <option value="PIX">PIX</option>
+              <option value="Cartão de Crédito">Cartão de Crédito</option>
+              <option value="Dinheiro">Dinheiro</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <button type="submit" class="btn btn-primary" style="width: fit-content;">+ Concluir Venda</button>
+          </div>
+        </form>
+      </div>
+ 
+      <div class="card reveal">
+        <div class="card-title">Histórico de Vendas</div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Data/Hora</th>
+                <th>Cliente</th>
+                <th>Item</th>
+                <th>Qtd</th>
+                <th>Pagamento</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tblVendas"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+ 
+  </main>
+ 
+  <script>
+    // BASES DE DADOS
+    let categorias = [
+      { codigo: "CAT-01", nome: "Uniformes", desc: "Camisas, calças e jalecos oficiais", status: "Ativo" },
+      { codigo: "CAT-02", nome: "Material Didático", desc: "Apostilas e livros técnicos", status: "Ativo" }
+    ];
+ 
+    let fornecedores = [
+      { nome: "Textil SENAI Ltda", doc: "12.345.678/0001-90", email: "vendas@textilsenai.com", tel: "(11) 2233-4455" },
+      { nome: "Ferramentas Brás", doc: "98.765.432/0001-10", email: "contato@ferramentasbras.com", tel: "(11) 3344-5566" }
+    ];
+ 
+    let produtos = [
+      { sku: "PRD-001", nome: "Camiseta SENAI M", categoria: "Uniformes", preco: 45.00 },
+      { sku: "PRD-002", nome: "Paquímetro Digital", categoria: "Ferramentas", preco: 120.00 }
+    ];
+ 
+    let usuarios = [
+      { nome: "Admin Geral", email: "admin@senai.br", perfil: "Administrador", status: "Ativo" },
+      { nome: "Carlos Vendas", email: "carlos@senai.br", perfil: "Operador", status: "Ativo" }
+    ];
+ 
+    let variacoes = [
+      { produto: "Camiseta SENAI", atributo: "Tamanho M", estoque: 28, acrescimo: 0.00 },
+      { produto: "Camiseta SENAI", atributo: "Tamanho G", estoque: 15, acrescimo: 0.00 }
+    ];
+ 
+    let vendas = [
+      { data: "17/08/2026 10:15", cliente: "Mariana Souza", produto: "Camiseta SENAI M", qtd: 1, pagamento: "PIX" }
+    ];
+ 
+    // TÍTULOS E RÓTULOS POR MÓDULO
+    const titulos = {
+      'categoria': ['Gestão de Categorias', 'Organização e classificação de produtos.', 'Nova Categoria'],
+      'fornecedor': ['Gestão de Fornecedores', 'Cadastro e histórico de fornecedores.', 'Novo Fornecedor'],
+      'produto': ['Gestão de Produtos', 'Catálogo e controle de itens.', 'Novo Produto'],
+      'usuario': ['Gestão de Usuários', 'Controle de acessos e permissões.', 'Novo Usuário'],
+      'variacao': ['Variações de Produtos', 'Atributos, tamanhos e estoque.', 'Nova Variação'],
+      'venda': ['Gestão de Vendas', 'Registro de pedidos e transações.', 'Nova Venda']
+    };
+ 
+    // MOTOR DE NAVEGAÇÃO
+    function navigate(viewId, element) {
+      document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+ 
+      const target = document.getElementById(viewId);
+      if (target) target.classList.add('active');
+      if (element) element.classList.add('active');
+ 
+      if (titulos[viewId]) {
+        document.getElementById('page-title').innerText = titulos[viewId][0];
+        document.getElementById('page-subtitle').innerText = titulos[viewId][1];
+        document.getElementById('quickActionLabel').innerText = titulos[viewId][2];
+      }
+ 
+      renderStatsBar(viewId);
+      observeReveals();
+    }
+ 
+    function focusForm() {
+      const active = document.querySelector('.view-content.active');
+      if (!active) return;
+      const firstInput = active.querySelector('input, select');
+      active.querySelector('form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (firstInput) setTimeout(() => firstInput.focus(), 350);
+    }
+ 
+    // TEMA CLARO / ESCURO
+    function toggleTheme() {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+    }
+ 
+    // BOTÕES DE AÇÃO GENÉRICOS (EDITAR/EXCLUIR)
+    function renderAcoes(tipo, index) {
+      return `
+        <div class="action-btn-group">
+          <button class="action-btn" title="Editar" onclick="alert('Editar registro ${index}')">
+            <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </button>
+          <button class="action-btn danger" title="Excluir" onclick="removerItem('${tipo}', ${index})">
+            <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
+      `;
+    }
+ 
+    function removerItem(tipo, index) {
+      if (!confirm("Confirma a exclusão deste item?")) return;
+      if (tipo === 'cat') { categorias.splice(index, 1); renderCategorias(); }
+      if (tipo === 'forn') { fornecedores.splice(index, 1); renderFornecedores(); }
+      if (tipo === 'prod') { produtos.splice(index, 1); renderProdutos(); }
+      if (tipo === 'usr') { usuarios.splice(index, 1); renderUsuarios(); }
+      if (tipo === 'var') { variacoes.splice(index, 1); renderVariacoes(); }
+      if (tipo === 'vnd') { vendas.splice(index, 1); renderVendas(); }
+      refreshStats();
+    }
+ 
+    function emptyRow(cols, msg) {
+      return `<tr class="empty-row"><td colspan="${cols}">${msg}</td></tr>`;
+    }
+ 
+    // RENDERS DAS TABELAS
+    function renderCategorias() {
+      const tbody = document.getElementById('tblCategorias');
+      tbody.innerHTML = categorias.length ? categorias.map((item, i) => `
+        <tr style="--i:${i}">
+          <td><span class="pill-badge">${item.codigo}</span></td>
+          <td style="font-weight: 700;">${item.nome}</td>
+          <td>${item.desc}</td>
+          <td><span class="status-tag active">${item.status}</span></td>
+          <td>${renderAcoes('cat', i)}</td>
+        </tr>
+      `).join('') : emptyRow(5, 'Nenhuma categoria cadastrada.');
+    }
+ 
+    function renderFornecedores() {
+      const tbody = document.getElementById('tblFornecedores');
+      tbody.innerHTML = fornecedores.length ? fornecedores.map((item, i) => `
+        <tr style="--i:${i}">
+          <td style="font-weight: 700;">${item.nome}</td>
+          <td><span class="pill-badge">${item.doc}</span></td>
+          <td>${item.email}</td>
+          <td>${item.tel}</td>
+          <td>${renderAcoes('forn', i)}</td>
+        </tr>
+      `).join('') : emptyRow(5, 'Nenhum fornecedor cadastrado.');
+    }
+ 
+    function renderProdutos() {
+      const tbody = document.getElementById('tblProdutos');
+      tbody.innerHTML = produtos.length ? produtos.map((item, i) => `
+        <tr style="--i:${i}">
+          <td><span class="pill-badge">${item.sku}</span></td>
+          <td style="font-weight: 700;">${item.nome}</td>
+          <td>${item.categoria}</td>
+          <td style="font-weight: 700; color: var(--success);">R$ ${Number(item.preco).toFixed(2)}</td>
+          <td>${renderAcoes('prod', i)}</td>
+        </tr>
+      `).join('') : emptyRow(5, 'Nenhum produto cadastrado.');
+    }
+ 
+    function renderUsuarios() {
+      const tbody = document.getElementById('tblUsuarios');
+      tbody.innerHTML = usuarios.length ? usuarios.map((item, i) => `
+        <tr style="--i:${i}">
+          <td style="font-weight: 700;">${item.nome}</td>
+          <td>${item.email}</td>
+          <td><span class="pill-badge">${item.perfil}</span></td>
+          <td><span class="status-tag active">${item.status}</span></td>
+          <td>${renderAcoes('usr', i)}</td>
+        </tr>
+      `).join('') : emptyRow(5, 'Nenhum usuário cadastrado.');
+    }
+ 
+    function renderVariacoes() {
+      const tbody = document.getElementById('tblVariacoes');
+      tbody.innerHTML = variacoes.length ? variacoes.map((item, i) => `
+        <tr style="--i:${i}">
+          <td style="font-weight: 700;">${item.produto}</td>
+          <td><span class="pill-badge">${item.atributo}</span></td>
+          <td style="font-weight: 700;">${item.estoque} un</td>
+          <td>R$ ${Number(item.acrescimo).toFixed(2)}</td>
+          <td>${renderAcoes('var', i)}</td>
+        </tr>
+      `).join('') : emptyRow(5, 'Nenhuma variação cadastrada.');
+    }
+ 
+    function renderVendas() {
+      const tbody = document.getElementById('tblVendas');
+      tbody.innerHTML = vendas.length ? vendas.map((item, i) => `
+        <tr style="--i:${i}">
+          <td>${item.data}</td>
+          <td style="font-weight: 700;">${item.cliente}</td>
+          <td>${item.produto}</td>
+          <td><span class="pill-badge">${item.qtd}x</span></td>
+          <td><span class="status-tag active">${item.pagamento}</span></td>
+          <td>${renderAcoes('vnd', i)}</td>
+        </tr>
+      `).join('') : emptyRow(6, 'Nenhuma venda registrada.');
+    }
+ 
+    // BARRA DE ESTATÍSTICAS DINÂMICA
+    function computeStats(viewId) {
+      switch (viewId) {
+        case 'categoria':
+          return [
+            { value: categorias.length, label: 'Categorias Cadastradas' },
+            { value: categorias.filter(c => c.status === 'Ativo').length, label: 'Categorias Ativas' },
+            { value: produtos.length, label: 'Produtos Vinculados' }
+          ];
+        case 'fornecedor':
+          return [
+            { value: fornecedores.length, label: 'Fornecedores Cadastrados' },
+            { value: new Set(fornecedores.map(f => f.doc)).size, label: 'Documentos Únicos' },
+            { value: fornecedores.filter(f => f.tel && f.tel !== '-').length, label: 'Com Telefone' }
+          ];
+        case 'produto':
+          return [
+            { value: produtos.length, label: 'Produtos Cadastrados' },
+            { value: new Set(produtos.map(p => p.categoria)).size, label: 'Categorias Utilizadas' },
+            { value: 'R$ ' + produtos.reduce((a, p) => a + Number(p.preco || 0), 0).toFixed(2), label: 'Valor em Catálogo' }
+          ];
+        case 'usuario':
+          return [
+            { value: usuarios.length, label: 'Usuários Cadastrados' },
+            { value: usuarios.filter(u => u.status === 'Ativo').length, label: 'Usuários Ativos' },
+            { value: usuarios.filter(u => u.perfil === 'Administrador').length, label: 'Administradores' }
+          ];
+        case 'variacao':
+          return [
+            { value: variacoes.length, label: 'Variações Cadastradas' },
+            { value: variacoes.reduce((a, v) => a + Number(v.estoque || 0), 0), label: 'Estoque Total (un)' },
+            { value: new Set(variacoes.map(v => v.produto)).size, label: 'Produtos Base' }
+          ];
+        case 'venda':
+          return [
+            { value: vendas.length, label: 'Vendas Registradas' },
+            { value: vendas.reduce((a, v) => a + Number(v.qtd || 0), 0), label: 'Itens Vendidos' },
+            { value: new Set(vendas.map(v => v.pagamento)).size, label: 'Formas de Pagamento' }
+          ];
+        default:
+          return [];
+      }
+    }
+ 
+    function renderStatsBar(viewId) {
+      const bar = document.getElementById('statsBar');
+      const stats = computeStats(viewId);
+      bar.innerHTML = stats.map(s => `
+        <div class="stat-block reveal">
+          <div class="stat-value">${s.value}</div>
+          <div class="stat-label">${s.label}</div>
+        </div>
+      `).join('');
+      observeReveals();
+    }
+ 
+    function refreshStats() {
+      const active = document.querySelector('.view-content.active');
+      if (active) renderStatsBar(active.id);
+    }
+ 
+    // CADASTROS (HANDLERS)
+    function addCategoria(e) {
+      e.preventDefault();
+      categorias.push({
+        nome: document.getElementById('catNome').value,
+        codigo: document.getElementById('catCodigo').value,
+        desc: document.getElementById('catDesc').value || '-',
+        status: 'Ativo'
+      });
+      e.target.reset();
+      renderCategorias();
+      refreshStats();
+    }
+ 
+    function addFornecedor(e) {
+      e.preventDefault();
+      fornecedores.push({
+        nome: document.getElementById('fornNome').value,
+        doc: document.getElementById('fornDoc').value,
+        email: document.getElementById('fornEmail').value,
+        tel: document.getElementById('fornTel').value || '-'
+      });
+      e.target.reset();
+      renderFornecedores();
+      refreshStats();
+    }
+ 
+    function addProduto(e) {
+      e.preventDefault();
+      produtos.push({
+        nome: document.getElementById('prodNome').value,
+        sku: document.getElementById('prodSku').value,
+        categoria: document.getElementById('prodCategoria').value,
+        preco: parseFloat(document.getElementById('prodPreco').value)
+      });
+      e.target.reset();
+      renderProdutos();
+      refreshStats();
+    }
+ 
+    function addUsuario(e) {
+      e.preventDefault();
+      usuarios.push({
+        nome: document.getElementById('usrNome').value,
+        email: document.getElementById('usrEmail').value,
+        perfil: document.getElementById('usrPerfil').value,
+        status: 'Ativo'
+      });
+      e.target.reset();
+      renderUsuarios();
+      refreshStats();
+    }
+ 
+    function addVariacao(e) {
+      e.preventDefault();
+      variacoes.push({
+        produto: document.getElementById('varProduto').value,
+        atributo: document.getElementById('varAtributo').value,
+        estoque: parseInt(document.getElementById('varEstoque').value),
+        acrescimo: parseFloat(document.getElementById('varAcrescimo').value || 0)
+      });
+      e.target.reset();
+      renderVariacoes();
+      refreshStats();
+    }
+ 
+    function addVenda(e) {
+      e.preventDefault();
+      const agora = new Date();
+      const dataStr = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      vendas.push({
+        data: dataStr,
+        cliente: document.getElementById('vendaCliente').value,
+        produto: document.getElementById('vendaProduto').value,
+        qtd: document.getElementById('vendaQtd').value,
+        pagamento: document.getElementById('vendaPagamento').value
+      });
+      e.target.reset();
+      renderVendas();
+      refreshStats();
+    }
+ 
+    function logout() {
+      if (confirm("Deseja encerrar sua sessão?")) {
+        window.location.href = "SITE DA LOUCURA.txt";
+      }
+    }
+ 
+    // ANIMAÇÕES AO ROLAR A TELA (SCROLL TRIGGER)
+    let revealObserver;
+    function observeReveals() {
+      if (!revealObserver) {
+        revealObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('in-view');
+              revealObserver.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      }
+      document.querySelectorAll('.reveal:not(.in-view)').forEach(el => revealObserver.observe(el));
+    }
+ 
+    // CANVAS DE BACKGROUND
+    (function initInteractiveCanvas() {
+      const canvas = document.getElementById('bg-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let particles = [];
+ 
+      function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+      resize();
+      window.addEventListener('resize', resize);
+ 
+      class Particle {
+        constructor() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.size = Math.random() * 2 + 1;
+          this.speedX = (Math.random() - 0.5) * 0.4;
+          this.speedY = (Math.random() - 0.5) * 0.4;
+        }
+        update() {
+          this.x += this.speedX; this.y += this.speedY;
+          if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+          if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+        }
+        draw() {
+          ctx.fillStyle = 'rgba(0, 140, 255, 0.4)';
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+ 
+      for (let i = 0; i < 50; i++) particles.push(new Particle());
+ 
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+ 
+    // CARREGAR DADOS INICIAIS
+    window.onload = function () {
+      renderCategorias();
+      renderFornecedores();
+      renderProdutos();
+      renderUsuarios();
+      renderVariacoes();
+      renderVendas();
+      renderStatsBar('categoria');
+      observeReveals();
+    };
+  </script>
+</body>
+</html>

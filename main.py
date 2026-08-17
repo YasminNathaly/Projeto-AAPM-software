@@ -213,7 +213,7 @@ async def pagina_dashboard(request: Request, db: Session = Depends(get_db)):
 
     return templates.TemplateResponse(
         request=request,
-        name="admin/visaogeral.html",
+        name="admin/admin.html",
         context={
             "total_produtos": total_produtos,
             "total_categorias": total_categorias,
