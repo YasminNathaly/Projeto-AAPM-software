@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Painel Administrativo Executivo | AAPM SENAI Brás</title>
- 
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
- 
+
   <style>
     :root {
       --bg-main: #07070b;
@@ -16,46 +16,47 @@
       --bg-surface-hover: rgba(255, 255, 255, 0.04);
       --bg-card: #0c0c12;
       --border-color: rgba(255, 255, 255, 0.08);
- 
+
       --primary: #d63250;
       --primary-hover: #b82842;
       --primary-soft: rgba(214, 50, 80, 0.15);
       --accent: #008cff;
- 
+      --accent-soft: rgba(0, 140, 255, 0.15);
+
       --text-main: #ffffff;
       --text-muted: rgba(255, 255, 255, 0.65);
       --text-dark: rgba(255, 255, 255, 0.35);
- 
+
       --success: #10b981;
       --warning: #f59e0b;
       --danger: #ef4444;
- 
-      --sidebar-width: 280px;
+
+      --sidebar-width: 92px;
+      --right-width: 320px;
       --radius: 22px;
-      --radius-card: 34px;
-      --radius-blob: 48px 32px 48px 32px;
+      --radius-card: 30px;
+      --radius-pill: 999px;
       --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
- 
+
       --ease: cubic-bezier(0.16, 1, 0.3, 1);
     }
- 
-    /* ===== TEMA CLARO ===== */
+
     html[data-theme="light"] {
-      --bg-main: #f3f4f8;
+      --bg-main: #eef0f6;
       --bg-surface: rgba(255, 255, 255, 0.85);
       --bg-surface-hover: rgba(20, 20, 30, 0.04);
       --bg-card: #ffffff;
       --border-color: rgba(20, 20, 30, 0.08);
- 
+
       --text-main: #12121a;
       --text-muted: rgba(18, 18, 26, 0.62);
       --text-dark: rgba(18, 18, 26, 0.35);
- 
+
       --shadow-glass: 0 8px 28px 0 rgba(20, 20, 30, 0.08);
     }
- 
+
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
- 
+
     body {
       background-color: var(--bg-main);
       color: var(--text-main);
@@ -65,11 +66,11 @@
       position: relative;
       transition: background-color .4s var(--ease), color .4s var(--ease);
     }
- 
-    aside, main, .card, header.top-header, .form-control, table, .btn, .action-btn, .stat-block, .menu-item {
+
+    aside, main, .card, .top-header, .form-control, table, .btn, .action-btn, .stat-tile, .menu-item, .side-panel, .notif-panel {
       transition: background-color .35s var(--ease), color .35s var(--ease), border-color .35s var(--ease), box-shadow .35s var(--ease);
     }
- 
+
     #bg-canvas {
       position: fixed;
       top: 0; left: 0;
@@ -78,268 +79,251 @@
       pointer-events: none;
       opacity: 0.9;
     }
-    html[data-theme="light"] #bg-canvas { opacity: 0.35; }
- 
-    /* SIDEBAR PROFISSIONAL */
+    html[data-theme="light"] #bg-canvas { opacity: 0.3; }
+
     aside.sidebar {
       width: var(--sidebar-width);
-      height: 100vh;
+      min-height: calc(100vh - 40px);
       background: var(--bg-card);
-      border-right: 1px solid var(--border-color);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-pill);
       position: fixed;
-      top: 0; left: 0;
+      top: 20px; left: 20px;
       z-index: 100;
       display: flex;
       flex-direction: column;
-      padding: 1.5rem 1rem;
+      align-items: center;
+      padding: 1.4rem 0.6rem;
+      box-shadow: var(--shadow-glass);
     }
- 
+
     .brand-logo {
+      width: 42px; height: 42px;
+      border-radius: 14px;
+      overflow: hidden;
       display: flex;
       align-items: center;
-      gap: 12px;
-      text-decoration: none;
-      color: #fff;
-      padding-bottom: 1.25rem;
-      border-bottom: 1px solid var(--border-color);
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      flex-shrink: 0;
     }
- 
-    .logo-senai-svg { height: 26px; width: auto; border-radius: 6px; }
- 
-    .brand-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.2rem;
-      letter-spacing: 0.1em;
-      border-left: 1px solid var(--border-color);
-      padding-left: 10px;
-      color: var(--primary);
-    }
- 
+    .logo-senai-svg { width: 100%; height: 100%; display: block; }
+
     .sidebar-menu {
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
-      margin-top: 1.25rem;
+      gap: 0.6rem;
       flex-grow: 1;
-      overflow-y: auto;
-      padding-right: 4px;
+      align-items: center;
     }
- 
-    .sidebar-menu::-webkit-scrollbar { width: 4px; }
-    .sidebar-menu::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
- 
-    .menu-category {
-      font-size: 0.65rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: var(--text-dark);
-      margin: 1rem 0 0.4rem 0.5rem;
-    }
- 
+
     .menu-item {
+      width: 46px; height: 46px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 10px 12px;
+      justify-content: center;
       color: var(--text-muted);
       text-decoration: none;
-      font-size: 0.82rem;
-      font-weight: 600;
-      border-radius: 14px;
+      border-radius: 16px;
       cursor: pointer;
       position: relative;
       transition: color .3s var(--ease), background-color .3s var(--ease), transform .3s var(--ease);
     }
- 
-    .menu-item-content { display: flex; align-items: center; gap: 12px; }
-    .menu-item-content svg { width: 17px; height: 17px; flex-shrink: 0; stroke: currentColor; }
- 
-    .menu-item:hover { color: var(--text-main); background: var(--bg-surface-hover); transform: translateX(2px); }
+
+    .menu-item .menu-tooltip {
+      position: absolute;
+      left: calc(100% + 14px);
+      top: 50%;
+      transform: translateY(-50%) translateX(-6px);
+      background: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      box-shadow: var(--shadow-glass);
+      transition: opacity .25s var(--ease), transform .25s var(--ease);
+      z-index: 50;
+    }
+    .menu-item:hover .menu-tooltip { opacity: 1; transform: translateY(-50%) translateX(0); }
+
+    .menu-item-content svg { width: 19px; height: 19px; flex-shrink: 0; stroke: currentColor; }
+
+    .menu-item:hover { color: var(--text-main); background: var(--bg-surface-hover); }
     .menu-item.active { background: var(--primary); color: #fff; box-shadow: 0 4px 14px var(--primary-soft); }
- 
+
     .sidebar-footer {
-      border-top: 1px solid var(--border-color);
-      padding-top: 1rem;
       display: flex;
       flex-direction: column;
+      align-items: center;
       gap: 8px;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+      width: 100%;
     }
- 
-    /* MAIN CONTENT */
+    .sidebar-footer .menu-item { color: var(--text-muted); }
+
     main.admin-wrapper {
-      margin-left: var(--sidebar-width);
-      width: calc(100% - var(--sidebar-width));
+      margin-left: calc(var(--sidebar-width) + 40px);
+      margin-right: var(--right-width);
+      width: calc(100% - var(--sidebar-width) - var(--right-width) - 60px);
       min-height: 100vh;
-      padding: 2rem 2.5rem 4rem;
+      padding: 1.75rem 0 3rem;
       position: relative;
       z-index: 1;
     }
- 
+
     header.top-header {
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: minmax(160px, 1fr) minmax(230px, 380px) auto;
       align-items: center;
-      gap: 1.5rem;
+      gap: 1.25rem;
       margin-bottom: 1.5rem;
-      background: var(--bg-surface);
-      padding: 1.1rem 1.5rem;
-      border-radius: var(--radius);
-      border: 1px solid var(--border-color);
-      backdrop-filter: blur(12px);
     }
- 
+
+    .page-header-info { min-width: 0; }
+
     .page-header-info h2 {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: 2.15rem;
+      font-size: 2.3rem;
       letter-spacing: 0.03em;
       line-height: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
- 
+    .page-header-info h2 span { color: var(--primary); }
+
     .page-header-info p {
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       color: var(--text-muted);
-      margin-top: 5px;
+      margin-top: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
- 
-    .top-header-actions {
+
+    .search-bar {
+      width: 100%;
       display: flex;
       align-items: center;
-      gap: 14px;
-    }
- 
-    .quick-action {
-      display: inline-flex;
-      align-items: center;
       gap: 10px;
-      background: #fff;
-      color: #0c0c12;
-      border: none;
-      padding: 0.55rem 0.55rem 0.55rem 1.2rem;
-      border-radius: 50px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-pill);
+      padding: 0.7rem 1.1rem;
+      box-shadow: var(--shadow-glass);
     }
-    html[data-theme="light"] .quick-action { background: #12121a; color: #fff; }
-    .quick-action:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.25); }
-    .quick-action .qa-circle {
-      width: 26px; height: 26px;
-      border-radius: 50%;
-      background: var(--primary);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
+    .search-bar svg { width: 16px; height: 16px; stroke: var(--text-muted); flex-shrink: 0; }
+    .search-bar input {
+      border: none; outline: none; background: transparent;
+      color: var(--text-main); font-size: 0.82rem; width: 100%; min-width: 0;
     }
-    .quick-action .qa-circle svg { width: 13px; height: 13px; stroke: #fff; }
- 
+    .search-bar input::placeholder { color: var(--text-dark); }
+
+    .top-header-actions { display: flex; align-items: center; gap: 10px; justify-self: end; }
+
     .icon-btn {
-      width: 40px; height: 40px;
+      width: 42px; height: 42px;
       border-radius: 50%;
       border: 1px solid var(--border-color);
-      background: var(--bg-surface-hover);
+      background: var(--bg-card);
       display: flex; align-items: center; justify-content: center;
       cursor: pointer;
       color: var(--text-muted);
       transition: all .3s var(--ease);
       flex-shrink: 0;
+      box-shadow: var(--shadow-glass);
+      position: relative;
     }
     .icon-btn:hover { color: var(--text-main); border-color: var(--primary); }
     .icon-btn svg { width: 17px; height: 17px; stroke: currentColor; }
- 
+
     .theme-toggle .icon-moon { display: none; }
     html[data-theme="light"] .theme-toggle .icon-sun { display: none; }
     html[data-theme="light"] .theme-toggle .icon-moon { display: block; }
- 
-    .user-profile {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding-left: 1rem;
-      border-left: 1px solid var(--border-color);
-    }
- 
-    .avatar {
-      width: 40px; height: 40px;
-      border-radius: 50%;
-      background: var(--primary);
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 0.85rem; color: #fff;
-      border: 1px solid rgba(255,255,255,0.2);
-    }
- 
-    .user-details .role-badge {
-      font-size: 0.65rem;
-      background: rgba(0, 140, 255, 0.15);
-      color: var(--accent);
-      padding: 1px 8px;
-      border-radius: 20px;
-      font-weight: 700;
-      display: inline-block;
-    }
- 
-    /* ===== BARRA DE ESTATÍSTICAS (inspirada na estrutura enviada) ===== */
+
     .stats-bar {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 1rem;
       margin-bottom: 1.5rem;
     }
- 
-    .stat-block {
+
+    .stat-tile {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: var(--radius-card);
-      padding: 1.4rem 1.6rem;
+      border-radius: 22px;
+      padding: 1.1rem 1.3rem;
       box-shadow: var(--shadow-glass);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
     }
- 
-    .stat-block .stat-value {
+
+    .stat-tile .stat-icon {
+      width: 40px; height: 40px;
+      border-radius: 14px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .stat-tile:nth-child(2) .stat-icon { background: var(--accent-soft); color: var(--accent); }
+    .stat-tile:nth-child(3) .stat-icon { background: rgba(16,185,129,0.15); color: var(--success); }
+    .stat-tile .stat-icon svg { width: 19px; height: 19px; }
+
+    .stat-tile .stat-value-wrap { min-width: 0; }
+    .stat-tile .stat-value {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: 2.6rem;
+      font-size: 1.7rem;
       line-height: 1;
       letter-spacing: 0.02em;
-      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
- 
-    .stat-block .stat-value span { color: var(--primary); }
- 
-    .stat-block .stat-label {
-      margin-top: 6px;
-      font-size: 0.72rem;
+    .stat-tile .stat-label {
+      margin-top: 3px;
+      font-size: 0.68rem;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
       color: var(--text-muted);
       font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
- 
-    /* VIEWS ENGINE */
+
     .view-content { display: none; flex-direction: column; gap: 1.25rem; }
     .view-content.active { display: flex; animation: viewIn .5s var(--ease); }
- 
+
     @keyframes viewIn {
       from { opacity: 0; transform: translateY(14px); }
       to { opacity: 1; transform: translateY(0); }
     }
- 
-    /* SCROLL REVEAL */
+
     .reveal {
       opacity: 0;
       transform: translateY(26px);
       transition: opacity .8s var(--ease), transform .8s var(--ease);
     }
     .reveal.in-view { opacity: 1; transform: translateY(0); }
- 
-    /* CARDS */
+
     .card {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-card);
-      padding: 1.8rem;
+      padding: 1.7rem;
       box-shadow: var(--shadow-glass);
       backdrop-filter: blur(16px);
     }
- 
+
     .card-title {
       font-size: 0.9rem;
       font-weight: 700;
@@ -351,26 +335,20 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
- 
-    /* TABELAS */
+
     .table-responsive { width: 100%; overflow-x: auto; }
- 
-    table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0 6px;
-      text-align: left;
-    }
- 
+
+    table { width: 100%; border-collapse: separate; border-spacing: 0 6px; text-align: left; }
+
     th {
-      padding: 0.75rem 1rem;
-      font-size: 0.68rem;
+      padding: 0.7rem 1rem;
+      font-size: 0.65rem;
       text-transform: uppercase;
       letter-spacing: 0.12em;
       color: var(--primary);
       font-weight: 800;
     }
- 
+
     tbody tr {
       background: rgba(128, 128, 128, 0.06);
       opacity: 0;
@@ -379,261 +357,430 @@
       animation-delay: calc(var(--i, 0) * 60ms);
       transition: background-color .3s var(--ease), transform .3s var(--ease), box-shadow .3s var(--ease);
     }
- 
+
     @keyframes rowIn { to { opacity: 1; transform: translateY(0); } }
- 
+
     tbody tr:hover {
       background: var(--bg-surface-hover);
       transform: translateY(-2px);
       box-shadow: 0 6px 16px rgba(0,0,0,0.12);
     }
- 
+
     td {
-      padding: 1.2rem 1.4rem;
+      padding: 1.05rem 1.3rem;
       border-top: 1px solid var(--border-color);
       border-bottom: 1px solid var(--border-color);
-      font-size: 0.85rem;
+      font-size: 0.83rem;
       color: var(--text-main);
     }
- 
-    td:first-child {
-      border-left: 1px solid var(--border-color);
-      border-top-left-radius: 20px;
-      border-bottom-left-radius: 20px;
+    td:first-child { border-left: 1px solid var(--border-color); border-top-left-radius: 18px; border-bottom-left-radius: 18px; }
+    td:last-child { border-right: 1px solid var(--border-color); border-top-right-radius: 18px; border-bottom-right-radius: 18px; }
+
+    .empty-row td { text-align: center; color: var(--text-dark); font-style: italic; padding: 1.6rem; }
+
+    .prod-thumb {
+      width: 40px; height: 40px; border-radius: 12px;
+      object-fit: cover; border: 1px solid var(--border-color);
+      background: var(--bg-surface-hover);
     }
- 
-    td:last-child {
-      border-right: 1px solid var(--border-color);
-      border-top-right-radius: 20px;
-      border-bottom-right-radius: 20px;
-    }
- 
-    .empty-row td {
-      text-align: center;
-      color: var(--text-dark);
-      font-style: italic;
-      padding: 1.6rem;
-    }
- 
+
     .pill-badge {
-      background: rgba(0, 114, 255, 0.15);
+      background: var(--accent-soft);
       color: #3892ff;
       font-weight: 800;
       padding: 6px 16px;
       border-radius: 50px;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       display: inline-block;
       border: 1px solid rgba(0, 114, 255, 0.25);
     }
- 
+
     .status-tag {
-      padding: 6px 16px;
-      border-radius: 50px;
-      font-size: 0.72rem;
-      font-weight: 800;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+      padding: 6px 16px; border-radius: 50px; font-size: 0.7rem; font-weight: 800;
+      display: inline-flex; align-items: center; gap: 6px;
     }
     .status-tag.active { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
     .status-tag.inactive { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
- 
-    .action-btn-group {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
- 
+
+    .action-btn-group { display: flex; gap: 8px; align-items: center; }
+
     .action-btn {
       background: var(--bg-surface-hover);
       border: 1px solid var(--border-color);
       color: var(--text-muted);
-      width: 38px;
-      height: 38px;
+      width: 36px; height: 36px;
       border-radius: 50%;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      display: inline-flex; align-items: center; justify-content: center;
       transition: all 0.3s var(--ease);
     }
- 
-    .action-btn:hover {
-      background: var(--primary);
-      color: #fff;
-      border-color: var(--primary);
-      transform: scale(1.1);
-    }
- 
-    .action-btn.danger:hover {
-      background: var(--danger);
-      border-color: var(--danger);
-    }
- 
-    /* FORMULÁRIOS */
+    .action-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); transform: scale(1.1); }
+    .action-btn.danger:hover { background: var(--danger); border-color: var(--danger); }
+
     .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
     .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
     .form-group.full { grid-column: span 2; }
-    .form-group label { font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
- 
+    .form-group label { font-size: 0.66rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
     .form-control {
       background: var(--bg-surface-hover);
       border: 1px solid var(--border-color);
       border-radius: var(--radius);
-      padding: 0.75rem 1rem;
+      padding: 0.72rem 1rem;
       color: var(--text-main);
       font-size: 0.82rem;
       outline: none;
     }
     .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
     select.form-control { background-color: var(--bg-card); appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.4rem; }
- 
+
+    .img-upload-row { display: flex; align-items: center; gap: 12px; }
+    .img-preview {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: var(--bg-surface-hover);
+      border: 1px dashed var(--border-color);
+      object-fit: cover; flex-shrink: 0;
+    }
+    .img-upload-row .form-control { flex: 1; }
+
     .btn {
-      padding: 0.75rem 1.4rem;
-      border-radius: 50px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border: none;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
+      padding: 0.72rem 1.3rem; border-radius: 50px; font-size: 0.74rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em; border: none; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
       transition: all 0.3s var(--ease);
     }
- 
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 8px 18px var(--primary-soft); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
     .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); }
     .btn-outline:hover { background: var(--bg-surface-hover); color: var(--text-main); border-color: var(--danger); }
     .btn-outline svg { width: 15px; height: 15px; stroke: currentColor; }
- 
+
+    aside.side-panel {
+      width: var(--right-width);
+      min-height: 100vh;
+      position: fixed;
+      top: 0; right: 0;
+      padding: 1.75rem 1.5rem 3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      z-index: 20;
+      overflow: visible !important;
+    }
+
+    .profile-card {
+      position: relative;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 1.1rem 1.3rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-glass);
+      overflow: visible !important;
+    }
+
+    .avatar-wrapper { position: relative; flex-shrink: 0; cursor: pointer; }
+    .avatar-wrapper:hover .avatar-edit-badge { transform: scale(1.1); }
+
+    .avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--primary);
+      background-size: cover;
+      background-position: center;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.9rem; color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      flex-shrink: 0;
+    }
+
+    .avatar-edit-badge {
+      position: absolute;
+      bottom: -2px; right: -2px;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--bg-card);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform .25s var(--ease);
+    }
+    .avatar-edit-badge svg { width: 9px; height: 9px; stroke: #fff; }
+
+    .user-name { font-size: 0.88rem; font-weight: 800; }
+    .role-badge {
+      font-size: 0.65rem;
+      background: var(--accent-soft);
+      color: var(--accent);
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-weight: 700;
+      display: inline-block;
+      margin-top: 4px;
+    }
+
+    .profile-card .notif-wrapper { margin-left: auto; }
+
+    .notif-wrapper { position: relative; }
+    .notif-dot {
+      position: absolute;
+      top: 8px; right: 8px;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: 2px solid var(--bg-card);
+    }
+    .notif-panel {
+      position: absolute;
+      top: calc(100% + 14px);
+      right: 0;
+      width: 320px;
+      max-width: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+      padding: 1.25rem;
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: opacity .25s var(--ease), transform .25s var(--ease), visibility .25s;
+    }
+    .notif-panel.open { opacity: 1; visibility: visible; transform: translateY(0); }
+
+    .notif-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; }
+    .notif-panel-header span:first-child { font-size: 0.82rem; font-weight: 800; }
+    .notif-panel-header .notif-close { font-size: 0.68rem; color: var(--primary); cursor: pointer; font-weight: 700; }
+
+    .notif-list { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; }
+    .notif-item { display: flex; gap: 10px; padding: 0.7rem 0.75rem; border-radius: 16px; background: var(--bg-surface-hover); border: 1px solid var(--border-color); }
+    .notif-item .ni-icon {
+      width: 32px; height: 32px; border-radius: 10px;
+      background: var(--accent-soft); color: var(--accent);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .notif-item .ni-icon svg { width: 15px; height: 15px; }
+    .notif-item .ni-title { font-size: 0.76rem; font-weight: 700; }
+    .notif-item .ni-time { font-size: 0.65rem; color: var(--text-muted); margin-top: 2px; }
+
+    .date-widget {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      padding: 1.4rem 1.5rem;
+      box-shadow: var(--shadow-glass);
+    }
+    .date-widget .dw-eyebrow {
+      font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-muted); font-weight: 800;
+    }
+    .date-widget .dw-day {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.6rem;
+      color: var(--primary);
+      line-height: 1;
+      margin-top: 6px;
+    }
+    .date-widget .dw-full { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    .date-widget .dw-clock {
+      margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);
+      display: flex; align-items: center; gap: 10px; font-size: 0.78rem; color: var(--text-muted);
+    }
+    .date-widget .dw-clock svg { width: 15px; height: 15px; stroke: var(--accent); }
+
+    .side-panel .card-title { margin-bottom: 0.9rem; }
+
+    .recent-list { display: flex; flex-direction: column; gap: 10px; }
+    .recent-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 0.7rem 0.8rem;
+      border-radius: 16px;
+      background: var(--bg-surface-hover);
+      border: 1px solid var(--border-color);
+    }
+    .recent-item .ri-tag {
+      width: 34px; height: 34px; border-radius: 12px;
+      background: var(--primary-soft); color: var(--primary);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .recent-item .ri-tag svg { width: 16px; height: 16px; }
+    .recent-item .ri-title { font-size: 0.78rem; font-weight: 700; }
+    .recent-item .ri-sub { font-size: 0.68rem; color: var(--text-muted); margin-top: 2px; }
+    .recent-empty { font-size: 0.78rem; color: var(--text-dark); font-style: italic; padding: 0.4rem; }
+
+    .logout-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: rgba(4, 4, 8, 0.72);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity .35s var(--ease), visibility .35s;
+    }
+    .logout-overlay.active { opacity: 1; visibility: visible; }
+
+    .logout-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.1rem;
+      transform: translateY(10px);
+      transition: transform .35s var(--ease);
+    }
+    .logout-overlay.active .logout-box { transform: translateY(0); }
+
+    .logout-spinner {
+      width: 54px; height: 54px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.15);
+      border-top-color: var(--primary);
+      border-right-color: var(--primary);
+      animation: spin .9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .logout-box p { font-size: 0.88rem; font-weight: 800; color: #fff; letter-spacing: 0.03em; }
+    .logout-box .logout-sub { font-size: 0.72rem; color: rgba(255,255,255,0.55); font-weight: 500; margin-top: -8px; }
+
+    .logout-progress {
+      width: 160px; height: 4px; border-radius: 4px;
+      background: rgba(255,255,255,0.12); overflow: hidden;
+    }
+    .logout-progress span {
+      display: block; height: 100%; width: 0%;
+      background: var(--primary);
+      border-radius: 4px;
+      transition: width 1.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .logout-overlay.active .logout-progress span { width: 100%; }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; }
       .reveal { opacity: 1; transform: none; }
       tbody tr { opacity: 1; transform: none; }
     }
- 
-    @media (max-width: 1024px) {
-      aside.sidebar { width: 75px; padding: 1rem 0.5rem; }
-      .brand-title, .menu-item span, .menu-category, .user-details { display: none; }
-      .menu-item-content { justify-content: center; width: 100%; }
-      main.admin-wrapper { margin-left: 75px; width: calc(100% - 75px); padding: 1.5rem; }
+
+    @media (max-width: 1280px) {
+      aside.side-panel { display: none; }
+      main.admin-wrapper { margin-right: 40px; width: calc(100% - var(--sidebar-width) - 60px); }
+    }
+
+    @media (max-width: 720px) {
+      aside.sidebar { left: 10px; top: 10px; width: 66px; padding: 1rem 0.4rem; }
+      .menu-item { width: 38px; height: 38px; }
+      main.admin-wrapper { margin-left: calc(66px + 20px); width: calc(100% - 66px - 40px); padding: 1.25rem 0 2rem; }
       .form-grid { grid-template-columns: 1fr; }
       .form-group.full { grid-column: span 1; }
       .stats-bar { grid-template-columns: 1fr; }
-      header.top-header { flex-wrap: wrap; }
-      .quick-action span { display: none; }
+
+      header.top-header {
+        grid-template-columns: 1fr;
+        row-gap: 0.85rem;
+      }
+      .page-header-info h2, .page-header-info p { white-space: normal; }
+      .top-header-actions { justify-self: stretch; justify-content: flex-end; }
     }
   </style>
 </head>
 <body>
- 
+
   <canvas id="bg-canvas"></canvas>
- 
-  <!-- SIDEBAR DE NAVEGAÇÃO -->
+
+  <!-- SIDEBAR DE NAVEGAÇÃO (ícones) -->
   <aside class="sidebar">
     <a href="#" class="brand-logo">
       <svg class="logo-senai-svg" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
         <rect width="300" height="100" fill="#FF0000"/>
         <text x="150" y="73" font-family="'Arial Black', 'Impact', sans-serif" font-size="62" font-weight="900" font-style="italic" fill="#FFFFFF" text-anchor="middle">SENAI</text>
       </svg>
-      <span class="brand-title">ADMIN</span>
     </a>
- 
+
     <nav class="sidebar-menu">
-      <div class="menu-category">Módulos do Sistema</div>
- 
       <a class="menu-item active" onclick="navigate('categoria', this)">
         <div class="menu-item-content">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10V6a2 2 0 0 0-2-2h-4L3 15l6 6 11-11Z"/><circle cx="8.5" cy="8.5" r="1.2"/></svg>
-          <span>Categoria</span>
         </div>
+        <span class="menu-tooltip">Categoria</span>
       </a>
- 
+
       <a class="menu-item" onclick="navigate('fornecedor', this)">
         <div class="menu-item-content">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-8h6v8"/></svg>
-          <span>Fornecedor</span>
         </div>
+        <span class="menu-tooltip">Fornecedor</span>
       </a>
- 
+
       <a class="menu-item" onclick="navigate('produto', this)">
         <div class="menu-item-content">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5V8Z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg>
-          <span>Produto</span>
         </div>
+        <span class="menu-tooltip">Produto</span>
       </a>
- 
+
       <a class="menu-item" onclick="navigate('usuario', this)">
         <div class="menu-item-content">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
-          <span>Usuário</span>
         </div>
+        <span class="menu-tooltip">Usuário</span>
       </a>
- 
-      <a class="menu-item" onclick="navigate('variacao', this)">
-        <div class="menu-item-content">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 9l10 6 10-6-10-6Z"/><path d="M2 15l10 6 10-6"/></svg>
-          <span>Variação</span>
-        </div>
-      </a>
- 
+
       <a class="menu-item" onclick="navigate('venda', this)">
         <div class="menu-item-content">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.8h7.2a2 2 0 0 0 2-1.6L21 8H6"/></svg>
-          <span>Venda</span>
         </div>
+        <span class="menu-tooltip">Venda</span>
       </a>
     </nav>
- 
+
     <div class="sidebar-footer">
-      <button class="btn btn-outline" style="width: 100%;" onclick="logout()">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
-        <span>Encerrar Sessão</span>
-      </button>
+      <a class="menu-item" onclick="logout()">
+        <div class="menu-item-content">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        </div>
+        <span class="menu-tooltip">Encerrar Sessão</span>
+      </a>
     </div>
   </aside>
- 
+
   <!-- MAIN CONTAINER -->
   <main class="admin-wrapper">
- 
-    <!-- HEADER TOPBAR -->
+
     <header class="top-header">
       <div class="page-header-info">
-        <h2 id="page-title">Gestão de Categorias</h2>
+        <h2 id="page-title">Gestão de <span>Categorias</span></h2>
         <p id="page-subtitle">Organização e classificação de produtos.</p>
       </div>
+
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="tableSearch" placeholder="Buscar nesta lista..." oninput="filtrarTabelaAtiva()">
+      </div>
+
       <div class="top-header-actions">
-        <button class="quick-action" id="quickAction" onclick="focusForm()">
-          <span id="quickActionLabel">Nova Categoria</span>
-          <span class="qa-circle">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-          </span>
+        <button class="icon-btn" id="quickAction" onclick="focusForm()" title="Adicionar novo registro">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
         </button>
         <button class="icon-btn theme-toggle" onclick="toggleTheme()" title="Alternar tema claro/escuro" aria-label="Alternar tema">
           <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
           <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg>
         </button>
-        <div class="user-profile">
-          <div class="avatar">A</div>
-          <div class="user-details">
-            <div class="user-name">Admin Geral</div>
-            <div class="role-badge">Administrador</div>
-          </div>
-        </div>
       </div>
     </header>
- 
-    <!-- BARRA DE ESTATÍSTICAS -->
+
     <div class="stats-bar" id="statsBar"></div>
- 
+
     <!-- 1. CATEGORIA -->
     <section id="categoria" class="view-content active">
       <div class="card reveal">
-        <div class="card-title">Cadastrar Categoria</div>
+        <div class="card-title">Cadastrar Categoria <span id="quickActionLabel" style="font-size:0.68rem;color:var(--text-muted);text-transform:none;letter-spacing:0;">Nova Categoria</span></div>
         <form onsubmit="addCategoria(event)" class="form-grid">
           <div class="form-group">
             <label>Nome da Categoria</label>
@@ -641,37 +788,32 @@
           </div>
           <div class="form-group">
             <label>Código Interno</label>
-            <input type="text" id="catCodigo" class="form-control" placeholder="Ex: CAT-01" required>
+            <input type="text" id="catCodigo" class="form-control" placeholder="Ex: CAT-01">
           </div>
           <div class="form-group full">
             <label>Descrição</label>
             <input type="text" id="catDesc" class="form-control" placeholder="Breve descrição da categoria">
           </div>
+          <input type="hidden" id="catId">
           <div class="form-group full">
             <button type="submit" class="btn btn-primary" style="width: fit-content;">+ Cadastrar Categoria</button>
           </div>
         </form>
       </div>
- 
+
       <div class="card reveal">
         <div class="card-title">Categorias Cadastradas</div>
         <div class="table-responsive">
           <table>
             <thead>
-              <tr>
-                <th>Código</th>
-                <th>Nome</th>
-                <th>Descrição</th>
-                <th>Status</th>
-                <th>Ações</th>
-              </tr>
+              <tr><th>Código</th><th>Nome</th><th>Descrição</th><th>Status</th><th>Ações</th></tr>
             </thead>
             <tbody id="tblCategorias"></tbody>
           </table>
         </div>
       </div>
     </section>
- 
+
     <!-- 2. FORNECEDOR -->
     <section id="fornecedor" class="view-content">
       <div class="card reveal">
@@ -687,7 +829,7 @@
           </div>
           <div class="form-group">
             <label>E-mail de Contato</label>
-            <input type="email" id="fornEmail" class="form-control" placeholder="contato@fornecedor.com" required>
+            <input type="email" id="fornEmail" class="form-control" placeholder="contato@fornecedor.com">
           </div>
           <div class="form-group">
             <label>Telefone</label>
@@ -698,26 +840,18 @@
           </div>
         </form>
       </div>
- 
+
       <div class="card reveal">
         <div class="card-title">Lista de Fornecedores</div>
         <div class="table-responsive">
           <table>
-            <thead>
-              <tr>
-                <th>Razão Social</th>
-                <th>CNPJ / CPF</th>
-                <th>E-mail</th>
-                <th>Telefone</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
+            <thead><tr><th>Razão Social</th><th>CNPJ / CPF</th><th>E-mail</th><th>Telefone</th><th>Ações</th></tr></thead>
             <tbody id="tblFornecedores"></tbody>
           </table>
         </div>
       </div>
     </section>
- 
+
     <!-- 3. PRODUTO -->
     <section id="produto" class="view-content">
       <div class="card reveal">
@@ -728,46 +862,45 @@
             <input type="text" id="prodNome" class="form-control" placeholder="Ex: Camiseta SENAI M" required>
           </div>
           <div class="form-group">
-            <label>SKU / Código</label>
-            <input type="text" id="prodSku" class="form-control" placeholder="EX: PRD-001" required>
-          </div>
-          <div class="form-group">
             <label>Categoria</label>
             <select id="prodCategoria" class="form-control" required>
-              <option value="Uniformes">Uniformes</option>
-              <option value="Material Didático">Material Didático</option>
-              <option value="Ferramentas">Ferramentas</option>
+              <option value="">Selecione...</option>
             </select>
           </div>
           <div class="form-group">
             <label>Preço Unitário (R$)</label>
             <input type="number" step="0.01" id="prodPreco" class="form-control" placeholder="0.00" required>
           </div>
+          <div class="form-group">
+            <label>Tamanho <span style="text-transform:none;font-weight:500;">(opcional)</span></label>
+            <input type="text" id="prodTamanho" class="form-control" placeholder="Ex: P, M, G, 220V...">
+          </div>
           <div class="form-group full">
-            <button type="submit" class="btn btn-primary" style="width: fit-content;">+ Cadastrar Produto</button>
+            <label>Foto do Produto <span style="text-transform:none;font-weight:500;">(opcional)</span></label>
+            <div class="img-upload-row">
+              <img id="prodImgPreview" class="img-preview" src="" alt="" style="display:none;">
+              <input type="file" id="prodImagem" class="form-control" accept="image/*" onchange="handleProdutoImagem(event)">
+            </div>
+            <input type="hidden" id="prodImagemUrl">
+          </div>
+          <input type="hidden" id="prodId">
+          <div class="form-group full">
+            <button type="submit" class="btn btn-primary" id="prodSubmitBtn" style="width: fit-content;">+ Cadastrar Produto</button>
           </div>
         </form>
       </div>
- 
+
       <div class="card reveal">
         <div class="card-title">Produtos Cadastrados</div>
         <div class="table-responsive">
           <table>
-            <thead>
-              <tr>
-                <th>SKU</th>
-                <th>Nome</th>
-                <th>Categoria</th>
-                <th>Preço</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
+            <thead><tr><th>Foto</th><th>Nome</th><th>Categoria</th><th>Tamanho</th><th>Preço</th><th>Ações</th></tr></thead>
             <tbody id="tblProdutos"></tbody>
           </table>
         </div>
       </div>
     </section>
- 
+
     <!-- 4. USUARIO -->
     <section id="usuario" class="view-content">
       <div class="card reveal">
@@ -791,83 +924,27 @@
           </div>
           <div class="form-group">
             <label>Senha Inicial</label>
-            <input type="password" id="usrSenha" class="form-control" placeholder="••••••••" required>
+            <input type="password" id="usrSenha" class="form-control" placeholder="••••••••">
           </div>
+          <input type="hidden" id="usrId">
           <div class="form-group full">
             <button type="submit" class="btn btn-primary" style="width: fit-content;">+ Cadastrar Usuário</button>
           </div>
         </form>
       </div>
- 
+
       <div class="card reveal">
         <div class="card-title">Usuários do Sistema</div>
         <div class="table-responsive">
           <table>
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>E-mail</th>
-                <th>Perfil</th>
-                <th>Status</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
+            <thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Ações</th></tr></thead>
             <tbody id="tblUsuarios"></tbody>
           </table>
         </div>
       </div>
     </section>
- 
-    <!-- 5. VARIACAO -->
-    <section id="variacao" class="view-content">
-      <div class="card reveal">
-        <div class="card-title">Cadastrar Variação de Produto</div>
-        <form onsubmit="addVariacao(event)" class="form-grid">
-          <div class="form-group">
-            <label>Produto Referência</label>
-            <select id="varProduto" class="form-control" required>
-              <option value="Camiseta SENAI">Camiseta SENAI</option>
-              <option value="Paquímetro Digital">Paquímetro Digital</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Atributo (ex: Tamanho, Cor)</label>
-            <input type="text" id="varAtributo" class="form-control" placeholder="Ex: Tamanho M, 220V..." required>
-          </div>
-          <div class="form-group">
-            <label>Estoque Atual</label>
-            <input type="number" id="varEstoque" class="form-control" placeholder="0" required>
-          </div>
-          <div class="form-group">
-            <label>Acréscimo Preço (R$)</label>
-            <input type="number" step="0.01" id="varAcrescimo" class="form-control" placeholder="0.00">
-          </div>
-          <div class="form-group full">
-            <button type="submit" class="btn btn-primary" style="width: fit-content;">+ Cadastrar Variação</button>
-          </div>
-        </form>
-      </div>
- 
-      <div class="card reveal">
-        <div class="card-title">Variações Registradas</div>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Produto Base</th>
-                <th>Variação</th>
-                <th>Qtd. Estoque</th>
-                <th>Acréscimo</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody id="tblVariacoes"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
- 
-    <!-- 6. VENDA -->
+
+    <!-- 5. VENDA -->
     <section id="venda" class="view-content">
       <div class="card reveal">
         <div class="card-title">Registrar Nova Venda</div>
@@ -879,8 +956,7 @@
           <div class="form-group">
             <label>Produto Selecionado</label>
             <select id="vendaProduto" class="form-control" required>
-              <option value="Camiseta SENAI M - R$ 45.00">Camiseta SENAI M (R$ 45,00)</option>
-              <option value="Paquímetro Digital - R$ 120.00">Paquímetro Digital (R$ 120,00)</option>
+              <option value="">Selecione...</option>
             </select>
           </div>
           <div class="form-group">
@@ -900,89 +976,271 @@
           </div>
         </form>
       </div>
- 
+
       <div class="card reveal">
         <div class="card-title">Histórico de Vendas</div>
         <div class="table-responsive">
           <table>
-            <thead>
-              <tr>
-                <th>Data/Hora</th>
-                <th>Cliente</th>
-                <th>Item</th>
-                <th>Qtd</th>
-                <th>Pagamento</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
+            <thead><tr><th>Data/Hora</th><th>Cliente</th><th>Item</th><th>Qtd</th><th>Total</th><th>Pagamento</th><th>Ações</th></tr></thead>
             <tbody id="tblVendas"></tbody>
           </table>
         </div>
       </div>
     </section>
- 
+
   </main>
- 
+
+  <!-- COLUNA LATERAL DIREITA -->
+  <aside class="side-panel">
+    <div class="profile-card reveal">
+      <div class="avatar-wrapper" onclick="document.getElementById('avatarInput').click()" title="Alterar foto do admin">
+        <div class="avatar" id="avatarDisplay">A</div>
+        <div class="avatar-edit-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </div>
+      </div>
+      <input type="file" id="avatarInput" accept="image/*" hidden onchange="handleAvatarUpload(event)">
+
+      <div class="user-details">
+        <div class="user-name">Admin Geral</div>
+        <div class="role-badge">Administrador</div>
+      </div>
+
+      <div class="notif-wrapper" id="notifWrapper">
+        <button class="icon-btn" title="Notificações" onclick="toggleNotifications(event)">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-dot" style="display:none;"></span>
+        </button>
+
+        <div class="notif-panel" id="notifPanel">
+          <div class="notif-panel-header">
+            <span>Notificações</span>
+            <span class="notif-close" onclick="toggleNotifications(event, true)">Fechar</span>
+          </div>
+          <div class="notif-list" id="notifList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="date-widget reveal">
+      <div class="dw-eyebrow" id="dwEyebrow">Hoje</div>
+      <div class="dw-day" id="dwDay">--</div>
+      <div class="dw-full" id="dwFull">--</div>
+      <div class="dw-clock">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        <span id="dwClock">--:--</span>
+      </div>
+    </div>
+
+    <div class="card reveal" style="flex-shrink:0;">
+      <div class="card-title">Últimos Registros</div>
+      <div class="recent-list" id="recentList"></div>
+    </div>
+  </aside>
+
+  <!-- OVERLAY DE ENCERRAMENTO DE SESSÃO -->
+  <div class="logout-overlay" id="logoutOverlay">
+    <div class="logout-box">
+      <div class="logout-spinner"></div>
+      <p>Encerrando sessão...</p>
+      <span class="logout-sub">Aguarde um instante</span>
+      <div class="logout-progress"><span></span></div>
+    </div>
+  </div>
+
   <script>
-    // BASES DE DADOS
-    let categorias = [
-      { codigo: "CAT-01", nome: "Uniformes", desc: "Camisas, calças e jalecos oficiais", status: "Ativo" },
-      { codigo: "CAT-02", nome: "Material Didático", desc: "Apostilas e livros técnicos", status: "Ativo" }
-    ];
- 
-    let fornecedores = [
-      { nome: "Textil SENAI Ltda", doc: "12.345.678/0001-90", email: "vendas@textilsenai.com", tel: "(11) 2233-4455" },
-      { nome: "Ferramentas Brás", doc: "98.765.432/0001-10", email: "contato@ferramentasbras.com", tel: "(11) 3344-5566" }
-    ];
- 
-    let produtos = [
-      { sku: "PRD-001", nome: "Camiseta SENAI M", categoria: "Uniformes", preco: 45.00 },
-      { sku: "PRD-002", nome: "Paquímetro Digital", categoria: "Ferramentas", preco: 120.00 }
-    ];
- 
-    let usuarios = [
-      { nome: "Admin Geral", email: "admin@senai.br", perfil: "Administrador", status: "Ativo" },
-      { nome: "Carlos Vendas", email: "carlos@senai.br", perfil: "Operador", status: "Ativo" }
-    ];
- 
-    let variacoes = [
-      { produto: "Camiseta SENAI", atributo: "Tamanho M", estoque: 28, acrescimo: 0.00 },
-      { produto: "Camiseta SENAI", atributo: "Tamanho G", estoque: 15, acrescimo: 0.00 }
-    ];
- 
-    let vendas = [
-      { data: "17/08/2026 10:15", cliente: "Mariana Souza", produto: "Camiseta SENAI M", qtd: 1, pagamento: "PIX" }
-    ];
- 
+    // ROTAS DO BACKEND / API
+    const API_URLS = {
+      categoria: '/api/categorias',
+      fornecedor: '/api/fornecedores',
+      produto: '/api/produtos',
+      usuario: '/api/usuarios',
+      venda: '/api/vendas',
+      upload: '/api/upload-imagem'
+    };
+
+    // BASES DE DADOS (carregadas via API do Banco)
+    let categorias = [];
+    let fornecedores = [];
+    let produtos = [];
+    let usuarios = [];
+    let vendas = [];
+
+    // ===== CONTROLADOR DE CARREGAMENTO (GET DE TODAS AS ENTIDADES) =====
+    async function carregarDadosDoBanco() {
+      try {
+        const [resCat, resForn, resProd, resUsr, resVnd] = await Promise.all([
+          fetch(API_URLS.categoria),
+          fetch(API_URLS.fornecedor),
+          fetch(API_URLS.produto),
+          fetch(API_URLS.usuario),
+          fetch(API_URLS.venda)
+        ]);
+
+        categorias = resCat.ok ? await resCat.json() : [];
+        fornecedores = resForn.ok ? await resForn.json() : [];
+        produtos = resProd.ok ? await resProd.json() : [];
+        usuarios = resUsr.ok ? await resUsr.json() : [];
+        vendas = resVnd.ok ? await resVnd.json() : [];
+
+        renderCategorias();
+        renderFornecedores();
+        renderProdutos();
+        renderUsuarios();
+        renderVendas();
+        popularSelectsDinamicos();
+        renderNotificacoes();
+
+        const active = document.querySelector('.view-content.active');
+        const activeId = active ? active.id : 'categoria';
+        renderStatsBar(activeId);
+        renderRecentList(activeId);
+      } catch (erro) {
+        console.error('Erro ao conectar e buscar dados do Banco de Dados:', erro);
+      }
+    }
+
+    // Preenche os selects de Categoria (no form de produto) e Produto (no form de venda)
+    // sempre com os dados reais vindos do banco.
+    function popularSelectsDinamicos() {
+      const selCategoria = document.getElementById('prodCategoria');
+      const valorAtualCat = selCategoria.value;
+      selCategoria.innerHTML = '<option value="">Selecione...</option>' +
+        categorias.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+      if (valorAtualCat) selCategoria.value = valorAtualCat;
+
+      const selProduto = document.getElementById('vendaProduto');
+      const valorAtualProd = selProduto.value;
+      selProduto.innerHTML = '<option value="">Selecione...</option>' +
+        produtos.map(p => `<option value="${p.id}">${p.nome} (R$ ${Number(p.preco).toFixed(2)})</option>`).join('');
+      if (valorAtualProd) selProduto.value = valorAtualProd;
+    }
+
+    // ===== NOTIFICAÇÕES DINÂMICAS (sempre a partir dos dados reais) =====
+    const notificacoesIcones = {
+      venda: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.8h7.2a2 2 0 0 0 2-1.6L21 8H6"/></svg>',
+      produto: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5V8Z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg>',
+      usuario: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>',
+      categoria: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10V6a2 2 0 0 0-2-2h-4L3 15l6 6 11-11Z"/><circle cx="8.5" cy="8.5" r="1.2"/></svg>',
+      fornecedor: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-8h6v8"/></svg>'
+    };
+
+    function montarNotificacoes() {
+      const itens = [];
+      vendas.slice(0, 3).forEach(v => itens.push({ tipo: 'venda', titulo: 'Nova venda registrada', sub: `${v.produto_nome} · ${v.data_venda || ''}`, ordem: v.id }));
+      produtos.slice(-2).reverse().forEach(p => itens.push({ tipo: 'produto', titulo: 'Produto cadastrado', sub: p.nome, ordem: p.id }));
+      usuarios.slice(-2).reverse().forEach(u => itens.push({ tipo: 'usuario', titulo: 'Novo usuário cadastrado', sub: u.nome, ordem: u.id }));
+      categorias.slice(-1).reverse().forEach(c => itens.push({ tipo: 'categoria', titulo: 'Categoria cadastrada', sub: c.nome, ordem: c.id }));
+      fornecedores.slice(-1).reverse().forEach(f => itens.push({ tipo: 'fornecedor', titulo: 'Fornecedor cadastrado', sub: f.nome, ordem: f.id }));
+      return itens.sort((a, b) => (b.ordem || 0) - (a.ordem || 0)).slice(0, 6);
+    }
+
+    function renderNotificacoes() {
+      const list = document.getElementById('notifList');
+      const dot = document.querySelector('.notif-dot');
+      const notificacoes = montarNotificacoes();
+      list.innerHTML = notificacoes.length ? notificacoes.map(n => `
+        <div class="notif-item">
+          <div class="ni-icon">${notificacoesIcones[n.tipo] || notificacoesIcones.venda}</div>
+          <div>
+            <div class="ni-title">${n.titulo}</div>
+            <div class="ni-time">${n.sub}</div>
+          </div>
+        </div>
+      `).join('') : '<div class="recent-empty">Nenhuma notificação nova.</div>';
+      if (dot) dot.style.display = notificacoes.length ? 'block' : 'none';
+    }
+
+    function toggleNotifications(e, forceClose) {
+      if (e) e.stopPropagation();
+      const panel = document.getElementById('notifPanel');
+      if (forceClose) { panel.classList.remove('open'); return; }
+      panel.classList.toggle('open');
+    }
+
+    document.addEventListener('click', (e) => {
+      const panel = document.getElementById('notifPanel');
+      const wrapper = document.getElementById('notifWrapper');
+      if (panel && wrapper && panel.classList.contains('open') && !wrapper.contains(e.target)) {
+        panel.classList.remove('open');
+      }
+    });
+
+    // FOTO DO ADMINISTRADOR (apenas visual local, não é produto)
+    function handleAvatarUpload(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      const avatarEl = document.getElementById('avatarDisplay');
+      avatarEl.style.backgroundImage = `url(${url})`;
+      avatarEl.textContent = '';
+    }
+
+    // FOTO DO PRODUTO — envia para o backend e guarda a URL retornada
+    async function handleProdutoImagem(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const preview = document.getElementById('prodImgPreview');
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = 'block';
+
+      const submitBtn = document.getElementById('prodSubmitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Enviando imagem...';
+
+      const formData = new FormData();
+      formData.append('arquivo', file);
+
+      try {
+        const resposta = await fetch(API_URLS.upload, { method: 'POST', body: formData });
+        if (resposta.ok) {
+          const dados = await resposta.json();
+          document.getElementById('prodImagemUrl').value = dados.url;
+        } else {
+          alert('Erro ao enviar a imagem do produto.');
+        }
+      } catch (erro) {
+        console.error('Erro no upload da imagem:', erro);
+        alert('Erro na comunicação com o servidor ao enviar a imagem.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = document.getElementById('prodId').value ? 'Salvar Alterações' : '+ Cadastrar Produto';
+      }
+    }
+
     // TÍTULOS E RÓTULOS POR MÓDULO
     const titulos = {
-      'categoria': ['Gestão de Categorias', 'Organização e classificação de produtos.', 'Nova Categoria'],
-      'fornecedor': ['Gestão de Fornecedores', 'Cadastro e histórico de fornecedores.', 'Novo Fornecedor'],
-      'produto': ['Gestão de Produtos', 'Catálogo e controle de itens.', 'Novo Produto'],
-      'usuario': ['Gestão de Usuários', 'Controle de acessos e permissões.', 'Novo Usuário'],
-      'variacao': ['Variações de Produtos', 'Atributos, tamanhos e estoque.', 'Nova Variação'],
-      'venda': ['Gestão de Vendas', 'Registro de pedidos e transações.', 'Nova Venda']
+      'categoria': ['Categorias', 'Organização e classificação de produtos.', 'Nova Categoria'],
+      'fornecedor': ['Fornecedores', 'Cadastro e histórico de fornecedores.', 'Novo Fornecedor'],
+      'produto': ['Produtos', 'Catálogo e controle de itens.', 'Novo Produto'],
+      'usuario': ['Usuários', 'Controle de acessos e permissões.', 'Novo Usuário'],
+      'venda': ['Vendas', 'Registro de pedidos e transações.', 'Nova Venda']
     };
- 
+
     // MOTOR DE NAVEGAÇÃO
     function navigate(viewId, element) {
       document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
       document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
- 
+
       const target = document.getElementById(viewId);
       if (target) target.classList.add('active');
       if (element) element.classList.add('active');
- 
+
       if (titulos[viewId]) {
-        document.getElementById('page-title').innerText = titulos[viewId][0];
+        document.getElementById('page-title').innerHTML = 'Gestão de <span>' + titulos[viewId][0] + '</span>';
         document.getElementById('page-subtitle').innerText = titulos[viewId][1];
         document.getElementById('quickActionLabel').innerText = titulos[viewId][2];
       }
- 
+
+      const searchInput = document.getElementById('tableSearch');
+      if (searchInput) searchInput.value = '';
+
       renderStatsBar(viewId);
+      renderRecentList(viewId);
       observeReveals();
     }
- 
+
     function focusForm() {
       const active = document.querySelector('.view-content.active');
       if (!active) return;
@@ -990,83 +1248,147 @@
       active.querySelector('form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       if (firstInput) setTimeout(() => firstInput.focus(), 350);
     }
- 
+
     // TEMA CLARO / ESCURO
     function toggleTheme() {
       const html = document.documentElement;
       const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       html.setAttribute('data-theme', next);
     }
- 
+
     // BOTÕES DE AÇÃO GENÉRICOS (EDITAR/EXCLUIR)
-    function renderAcoes(tipo, index) {
+    function renderAcoes(tipo, id) {
       return `
         <div class="action-btn-group">
-          <button class="action-btn" title="Editar" onclick="alert('Editar registro ${index}')">
+          <button class="action-btn" title="Editar" onclick="editarItem('${tipo}', '${id}')">
             <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           </button>
-          <button class="action-btn danger" title="Excluir" onclick="removerItem('${tipo}', ${index})">
+          <button class="action-btn danger" title="Excluir" onclick="removerItem('${tipo}', '${id}')">
             <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
           </button>
         </div>
       `;
     }
- 
-    function removerItem(tipo, index) {
-      if (!confirm("Confirma a exclusão deste item?")) return;
-      if (tipo === 'cat') { categorias.splice(index, 1); renderCategorias(); }
-      if (tipo === 'forn') { fornecedores.splice(index, 1); renderFornecedores(); }
-      if (tipo === 'prod') { produtos.splice(index, 1); renderProdutos(); }
-      if (tipo === 'usr') { usuarios.splice(index, 1); renderUsuarios(); }
-      if (tipo === 'var') { variacoes.splice(index, 1); renderVariacoes(); }
-      if (tipo === 'vnd') { vendas.splice(index, 1); renderVendas(); }
-      refreshStats();
+
+    const mapaModulos = { cat: 'categoria', forn: 'fornecedor', prod: 'produto', usr: 'usuario', vnd: 'venda' };
+
+    // Preenche o formulário do módulo com os dados do item para edição
+    function editarItem(tipo, id) {
+      const endpointKey = mapaModulos[tipo];
+      if (!endpointKey) return;
+      navigate(endpointKey, document.querySelector(`.menu-item[onclick*="'${endpointKey}'"]`));
+
+      if (tipo === 'cat') {
+        const item = categorias.find(c => String(c.id) === String(id));
+        if (!item) return;
+        document.getElementById('catId').value = item.id;
+        document.getElementById('catNome').value = item.nome;
+        document.getElementById('catCodigo').value = item.codigo || '';
+        document.getElementById('catDesc').value = item.descricao || '';
+      } else if (tipo === 'forn') {
+        const item = fornecedores.find(f => String(f.id) === String(id));
+        if (!item) return;
+        document.getElementById('fornNome').value = item.nome;
+        document.getElementById('fornDoc').value = item.documento;
+        document.getElementById('fornEmail').value = item.email || '';
+        document.getElementById('fornTel').value = item.telefone || '';
+        document.querySelector('#fornecedor form').dataset.editId = item.id;
+      } else if (tipo === 'prod') {
+        const item = produtos.find(p => String(p.id) === String(id));
+        if (!item) return;
+        document.getElementById('prodId').value = item.id;
+        document.getElementById('prodNome').value = item.nome;
+        document.getElementById('prodCategoria').value = item.categoria_id || '';
+        document.getElementById('prodPreco').value = item.preco;
+        document.getElementById('prodTamanho').value = item.tamanho || '';
+        document.getElementById('prodImagemUrl').value = item.imagem_url || '';
+        if (item.imagem_url) {
+          const preview = document.getElementById('prodImgPreview');
+          preview.src = item.imagem_url;
+          preview.style.display = 'block';
+        }
+        document.getElementById('prodSubmitBtn').innerText = 'Salvar Alterações';
+      } else if (tipo === 'usr') {
+        const item = usuarios.find(u => String(u.id) === String(id));
+        if (!item) return;
+        document.getElementById('usrId').value = item.id;
+        document.getElementById('usrNome').value = item.nome;
+        document.getElementById('usrEmail').value = item.email;
+        document.getElementById('usrPerfil').value = item.perfil;
+      }
+
+      focusForm();
     }
- 
+
+    // ===== EXCLUSÃO DE ITEM NO BANCO (DELETE) =====
+    async function removerItem(tipo, id) {
+      if (!confirm("Confirma a exclusão deste item no banco de dados?")) return;
+
+      const endpointKey = mapaModulos[tipo];
+      if (!endpointKey) return;
+
+      try {
+        const resposta = await fetch(`${API_URLS[endpointKey]}/${id}`, { method: 'DELETE' });
+        if (resposta.ok) {
+          await carregarDadosDoBanco();
+        } else {
+          alert("Erro ao excluir o registro no banco de dados.");
+        }
+      } catch (erro) {
+        console.error("Erro na comunicação com a API ao excluir:", erro);
+      }
+    }
+
     function emptyRow(cols, msg) {
       return `<tr class="empty-row"><td colspan="${cols}">${msg}</td></tr>`;
     }
- 
+
     // RENDERS DAS TABELAS
     function renderCategorias() {
       const tbody = document.getElementById('tblCategorias');
       tbody.innerHTML = categorias.length ? categorias.map((item, i) => `
         <tr style="--i:${i}">
-          <td><span class="pill-badge">${item.codigo}</span></td>
+          <td><span class="pill-badge">${item.codigo || item.id}</span></td>
           <td style="font-weight: 700;">${item.nome}</td>
-          <td>${item.desc}</td>
-          <td><span class="status-tag active">${item.status}</span></td>
-          <td>${renderAcoes('cat', i)}</td>
+          <td>${item.descricao || '-'}</td>
+          <td><span class="status-tag active">Ativo</span></td>
+          <td>${renderAcoes('cat', item.id)}</td>
         </tr>
       `).join('') : emptyRow(5, 'Nenhuma categoria cadastrada.');
     }
- 
+
     function renderFornecedores() {
       const tbody = document.getElementById('tblFornecedores');
       tbody.innerHTML = fornecedores.length ? fornecedores.map((item, i) => `
         <tr style="--i:${i}">
           <td style="font-weight: 700;">${item.nome}</td>
-          <td><span class="pill-badge">${item.doc}</span></td>
-          <td>${item.email}</td>
-          <td>${item.tel}</td>
-          <td>${renderAcoes('forn', i)}</td>
+          <td><span class="pill-badge">${item.documento}</span></td>
+          <td>${item.email || '-'}</td>
+          <td>${item.telefone || '-'}</td>
+          <td>${renderAcoes('forn', item.id)}</td>
         </tr>
       `).join('') : emptyRow(5, 'Nenhum fornecedor cadastrado.');
     }
- 
+
+    function nomeCategoriaPorId(categoriaId) {
+      const cat = categorias.find(c => c.id === categoriaId);
+      return cat ? cat.nome : '-';
+    }
+
     function renderProdutos() {
       const tbody = document.getElementById('tblProdutos');
       tbody.innerHTML = produtos.length ? produtos.map((item, i) => `
         <tr style="--i:${i}">
-          <td><span class="pill-badge">${item.sku}</span></td>
+          <td>${item.imagem_url ? `<img class="prod-thumb" src="${item.imagem_url}" alt="${item.nome}">` : `<div class="prod-thumb"></div>`}</td>
           <td style="font-weight: 700;">${item.nome}</td>
-          <td>${item.categoria}</td>
+          <td>${nomeCategoriaPorId(item.categoria_id)}</td>
+          <td>${item.tamanho || '-'}</td>
           <td style="font-weight: 700; color: var(--success);">R$ ${Number(item.preco).toFixed(2)}</td>
-          <td>${renderAcoes('prod', i)}</td>
+          <td>${renderAcoes('prod', item.id)}</td>
         </tr>
-      `).join('') : emptyRow(5, 'Nenhum produto cadastrado.');
+      `).join('') : emptyRow(6, 'Nenhum produto cadastrado.');
     }
- 
+
     function renderUsuarios() {
       const tbody = document.getElementById('tblUsuarios');
       tbody.innerHTML = usuarios.length ? usuarios.map((item, i) => `
@@ -1074,215 +1396,276 @@
           <td style="font-weight: 700;">${item.nome}</td>
           <td>${item.email}</td>
           <td><span class="pill-badge">${item.perfil}</span></td>
-          <td><span class="status-tag active">${item.status}</span></td>
-          <td>${renderAcoes('usr', i)}</td>
+          <td><span class="status-tag active">${item.status || 'Ativo'}</span></td>
+          <td>${renderAcoes('usr', item.id)}</td>
         </tr>
       `).join('') : emptyRow(5, 'Nenhum usuário cadastrado.');
     }
- 
-    function renderVariacoes() {
-      const tbody = document.getElementById('tblVariacoes');
-      tbody.innerHTML = variacoes.length ? variacoes.map((item, i) => `
-        <tr style="--i:${i}">
-          <td style="font-weight: 700;">${item.produto}</td>
-          <td><span class="pill-badge">${item.atributo}</span></td>
-          <td style="font-weight: 700;">${item.estoque} un</td>
-          <td>R$ ${Number(item.acrescimo).toFixed(2)}</td>
-          <td>${renderAcoes('var', i)}</td>
-        </tr>
-      `).join('') : emptyRow(5, 'Nenhuma variação cadastrada.');
-    }
- 
+
     function renderVendas() {
       const tbody = document.getElementById('tblVendas');
       tbody.innerHTML = vendas.length ? vendas.map((item, i) => `
         <tr style="--i:${i}">
-          <td>${item.data}</td>
-          <td style="font-weight: 700;">${item.cliente}</td>
-          <td>${item.produto}</td>
-          <td><span class="pill-badge">${item.qtd}x</span></td>
-          <td><span class="status-tag active">${item.pagamento}</span></td>
-          <td>${renderAcoes('vnd', i)}</td>
+          <td>${item.data_venda || '-'}</td>
+          <td style="font-weight: 700;">${item.comprador}</td>
+          <td>${item.produto_nome}</td>
+          <td><span class="pill-badge">${item.quantidade}x</span></td>
+          <td style="font-weight:700;color:var(--success);">R$ ${Number(item.preco_total || 0).toFixed(2)}</td>
+          <td><span class="status-tag active">${item.forma_pagamento}</span></td>
+          <td>${renderAcoes('vnd', item.id)}</td>
         </tr>
-      `).join('') : emptyRow(6, 'Nenhuma venda registrada.');
+      `).join('') : emptyRow(7, 'Nenhuma venda registrada.');
     }
- 
+
     // BARRA DE ESTATÍSTICAS DINÂMICA
     function computeStats(viewId) {
       switch (viewId) {
         case 'categoria':
           return [
             { value: categorias.length, label: 'Categorias Cadastradas' },
-            { value: categorias.filter(c => c.status === 'Ativo').length, label: 'Categorias Ativas' },
+            { value: categorias.length, label: 'Categorias Ativas' },
             { value: produtos.length, label: 'Produtos Vinculados' }
           ];
         case 'fornecedor':
           return [
             { value: fornecedores.length, label: 'Fornecedores Cadastrados' },
-            { value: new Set(fornecedores.map(f => f.doc)).size, label: 'Documentos Únicos' },
-            { value: fornecedores.filter(f => f.tel && f.tel !== '-').length, label: 'Com Telefone' }
+            { value: new Set(fornecedores.map(f => f.documento)).size, label: 'Documentos Únicos' },
+            { value: fornecedores.filter(f => f.telefone).length, label: 'Com Telefone' }
           ];
         case 'produto':
           return [
             { value: produtos.length, label: 'Produtos Cadastrados' },
-            { value: new Set(produtos.map(p => p.categoria)).size, label: 'Categorias Utilizadas' },
+            { value: new Set(produtos.map(p => p.categoria_id)).size, label: 'Categorias Utilizadas' },
             { value: 'R$ ' + produtos.reduce((a, p) => a + Number(p.preco || 0), 0).toFixed(2), label: 'Valor em Catálogo' }
           ];
         case 'usuario':
           return [
             { value: usuarios.length, label: 'Usuários Cadastrados' },
-            { value: usuarios.filter(u => u.status === 'Ativo').length, label: 'Usuários Ativos' },
+            { value: usuarios.filter(u => (u.status || 'Ativo') === 'Ativo').length, label: 'Usuários Ativos' },
             { value: usuarios.filter(u => u.perfil === 'Administrador').length, label: 'Administradores' }
-          ];
-        case 'variacao':
-          return [
-            { value: variacoes.length, label: 'Variações Cadastradas' },
-            { value: variacoes.reduce((a, v) => a + Number(v.estoque || 0), 0), label: 'Estoque Total (un)' },
-            { value: new Set(variacoes.map(v => v.produto)).size, label: 'Produtos Base' }
           ];
         case 'venda':
           return [
             { value: vendas.length, label: 'Vendas Registradas' },
-            { value: vendas.reduce((a, v) => a + Number(v.qtd || 0), 0), label: 'Itens Vendidos' },
-            { value: new Set(vendas.map(v => v.pagamento)).size, label: 'Formas de Pagamento' }
+            { value: vendas.reduce((a, v) => a + Number(v.quantidade || 0), 0), label: 'Itens Vendidos' },
+            { value: 'R$ ' + vendas.reduce((a, v) => a + Number(v.preco_total || 0), 0).toFixed(2), label: 'Faturamento Total' }
           ];
         default:
           return [];
       }
     }
- 
+
+    const statIcons = [
+      '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+      '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>',
+      '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>'
+    ];
+
     function renderStatsBar(viewId) {
       const bar = document.getElementById('statsBar');
+      if (!bar) return;
       const stats = computeStats(viewId);
-      bar.innerHTML = stats.map(s => `
-        <div class="stat-block reveal">
-          <div class="stat-value">${s.value}</div>
-          <div class="stat-label">${s.label}</div>
+      bar.innerHTML = stats.map((s, i) => `
+        <div class="stat-tile reveal">
+          <div class="stat-icon">${statIcons[i] || statIcons[0]}</div>
+          <div class="stat-value-wrap">
+            <div class="stat-value">${s.value}</div>
+            <div class="stat-label">${s.label}</div>
+          </div>
         </div>
       `).join('');
       observeReveals();
     }
- 
+
     function refreshStats() {
       const active = document.querySelector('.view-content.active');
-      if (active) renderStatsBar(active.id);
+      if (active) {
+        renderStatsBar(active.id);
+        renderRecentList(active.id);
+      }
     }
- 
-    // CADASTROS (HANDLERS)
+
+    const recentIcon = '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>';
+
+    function getRecentEntries(viewId) {
+      switch (viewId) {
+        case 'categoria':
+          return categorias.slice(-3).reverse().map(c => ({ title: c.nome, sub: c.codigo || ('#' + c.id) }));
+        case 'fornecedor':
+          return fornecedores.slice(-3).reverse().map(f => ({ title: f.nome, sub: f.documento }));
+        case 'produto':
+          return produtos.slice(-3).reverse().map(p => ({ title: p.nome, sub: 'R$ ' + Number(p.preco).toFixed(2) }));
+        case 'usuario':
+          return usuarios.slice(-3).reverse().map(u => ({ title: u.nome, sub: u.perfil }));
+        case 'venda':
+          return vendas.slice(0, 3).map(v => ({ title: v.comprador, sub: v.produto_nome }));
+        default:
+          return [];
+      }
+    }
+
+    function renderRecentList(viewId) {
+      const list = document.getElementById('recentList');
+      if (!list) return;
+      const entries = getRecentEntries(viewId);
+      list.innerHTML = entries.length ? entries.map(e => `
+        <div class="recent-item">
+          <div class="ri-tag">${recentIcon}</div>
+          <div>
+            <div class="ri-title">${e.title}</div>
+            <div class="ri-sub">${e.sub}</div>
+          </div>
+        </div>
+      `).join('') : '<div class="recent-empty">Nenhum registro recente.</div>';
+    }
+
+    function filtrarTabelaAtiva() {
+      const termo = document.getElementById('tableSearch').value.trim().toLowerCase();
+      const active = document.querySelector('.view-content.active');
+      if (!active) return;
+      const rows = active.querySelectorAll('tbody tr:not(.empty-row)');
+      rows.forEach(row => {
+        const texto = row.innerText.toLowerCase();
+        row.style.display = texto.includes(termo) ? '' : 'none';
+      });
+    }
+
+    function atualizarDataHora() {
+      const agora = new Date();
+      const dias = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+      const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      document.getElementById('dwEyebrow').innerText = dias[agora.getDay()];
+      document.getElementById('dwDay').innerText = String(agora.getDate()).padStart(2, '0') + ' ' + meses[agora.getMonth()];
+      document.getElementById('dwFull').innerText = agora.toLocaleDateString('pt-BR', { year: 'numeric' });
+      document.getElementById('dwClock').innerText = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // ===== CADASTROS/EDIÇÕES VIA API =====
+    async function salvarNoBanco(endpoint, payload, formEvent, method = 'POST') {
+      try {
+        const resposta = await fetch(endpoint, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (resposta.ok) {
+          formEvent.target.reset();
+          document.getElementById('prodImgPreview')?.style && (document.getElementById('prodImgPreview').style.display = 'none');
+          const submitBtn = document.getElementById('prodSubmitBtn');
+          if (submitBtn) submitBtn.innerText = '+ Cadastrar Produto';
+          await carregarDadosDoBanco();
+        } else {
+          const erroDetalhe = await resposta.json().catch(() => ({}));
+          alert('Erro ao gravar os dados no banco de dados: ' + (erroDetalhe.detail || resposta.status));
+        }
+      } catch (erro) {
+        console.error('Erro na requisição ao servidor:', erro);
+        alert('Não foi possível conectar ao servidor. Verifique se o backend está no ar.');
+      }
+    }
+
     function addCategoria(e) {
       e.preventDefault();
-      categorias.push({
+      const id = document.getElementById('catId').value;
+      const payload = {
         nome: document.getElementById('catNome').value,
-        codigo: document.getElementById('catCodigo').value,
-        desc: document.getElementById('catDesc').value || '-',
-        status: 'Ativo'
-      });
-      e.target.reset();
-      renderCategorias();
-      refreshStats();
+        codigo: document.getElementById('catCodigo').value || '',
+        descricao: document.getElementById('catDesc').value || ''
+      };
+      const endpoint = id ? `${API_URLS.categoria}/${id}` : API_URLS.categoria;
+      salvarNoBanco(endpoint, payload, e, id ? 'PUT' : 'POST');
+      document.getElementById('catId').value = '';
     }
- 
+
     function addFornecedor(e) {
       e.preventDefault();
-      fornecedores.push({
+      const editId = e.target.dataset.editId;
+      const payload = {
         nome: document.getElementById('fornNome').value,
-        doc: document.getElementById('fornDoc').value,
-        email: document.getElementById('fornEmail').value,
-        tel: document.getElementById('fornTel').value || '-'
-      });
-      e.target.reset();
-      renderFornecedores();
-      refreshStats();
+        documento: document.getElementById('fornDoc').value,
+        email: document.getElementById('fornEmail').value || '',
+        telefone: document.getElementById('fornTel').value || ''
+      };
+      const endpoint = editId ? `${API_URLS.fornecedor}/${editId}` : API_URLS.fornecedor;
+      salvarNoBanco(endpoint, payload, e, editId ? 'PUT' : 'POST');
+      delete e.target.dataset.editId;
     }
- 
+
     function addProduto(e) {
       e.preventDefault();
-      produtos.push({
+      const id = document.getElementById('prodId').value;
+      const payload = {
         nome: document.getElementById('prodNome').value,
-        sku: document.getElementById('prodSku').value,
-        categoria: document.getElementById('prodCategoria').value,
-        preco: parseFloat(document.getElementById('prodPreco').value)
-      });
-      e.target.reset();
-      renderProdutos();
-      refreshStats();
+        categoria_id: document.getElementById('prodCategoria').value || null,
+        preco: parseFloat(document.getElementById('prodPreco').value),
+        tamanho: document.getElementById('prodTamanho').value || '',
+        imagem_url: document.getElementById('prodImagemUrl').value || '',
+        disponivel: 1
+      };
+      const endpoint = id ? `${API_URLS.produto}/${id}` : API_URLS.produto;
+      salvarNoBanco(endpoint, payload, e, id ? 'PUT' : 'POST');
+      document.getElementById('prodId').value = '';
+      document.getElementById('prodImagemUrl').value = '';
     }
- 
+
     function addUsuario(e) {
       e.preventDefault();
-      usuarios.push({
+      const id = document.getElementById('usrId').value;
+      const payload = {
         nome: document.getElementById('usrNome').value,
         email: document.getElementById('usrEmail').value,
         perfil: document.getElementById('usrPerfil').value,
+        senha: document.getElementById('usrSenha').value || null,
         status: 'Ativo'
-      });
-      e.target.reset();
-      renderUsuarios();
-      refreshStats();
+      };
+      const endpoint = id ? `${API_URLS.usuario}/${id}` : API_URLS.usuario;
+      salvarNoBanco(endpoint, payload, e, id ? 'PUT' : 'POST');
+      document.getElementById('usrId').value = '';
     }
- 
-    function addVariacao(e) {
-      e.preventDefault();
-      variacoes.push({
-        produto: document.getElementById('varProduto').value,
-        atributo: document.getElementById('varAtributo').value,
-        estoque: parseInt(document.getElementById('varEstoque').value),
-        acrescimo: parseFloat(document.getElementById('varAcrescimo').value || 0)
-      });
-      e.target.reset();
-      renderVariacoes();
-      refreshStats();
-    }
- 
+
     function addVenda(e) {
       e.preventDefault();
-      const agora = new Date();
-      const dataStr = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-      vendas.push({
-        data: dataStr,
+      const payload = {
         cliente: document.getElementById('vendaCliente').value,
-        produto: document.getElementById('vendaProduto').value,
-        qtd: document.getElementById('vendaQtd').value,
-        pagamento: document.getElementById('vendaPagamento').value
-      });
-      e.target.reset();
-      renderVendas();
-      refreshStats();
+        produto_id: parseInt(document.getElementById('vendaProduto').value),
+        quantidade: parseInt(document.getElementById('vendaQtd').value),
+        forma_pagamento: document.getElementById('vendaPagamento').value
+      };
+      salvarNoBanco(API_URLS.venda, payload, e, 'POST');
     }
- 
-    function logout() {
-      if (confirm("Deseja encerrar sua sessão?")) {
-        window.location.href = "SITE DA LOUCURA.txt";
-      }
-    }
- 
-    // ANIMAÇÕES AO ROLAR A TELA (SCROLL TRIGGER)
-    let revealObserver;
-    function observeReveals() {
-      if (!revealObserver) {
-        revealObserver = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('in-view');
-              revealObserver.unobserve(entry.target);
-            }
-          });
-        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-      }
-      document.querySelectorAll('.reveal:not(.in-view)').forEach(el => revealObserver.observe(el));
-    }
- 
-    // CANVAS DE BACKGROUND
+
+  function logout() {
+  const overlay = document.getElementById('logoutOverlay');
+  if (overlay) overlay.classList.add('active');
+
+  setTimeout(() => {
+    // 1. Limpa os dados armazenados na sessão/armazenamento local
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // 2. Limpa os cookies
+    document.cookie.split(";").forEach((c) => {
+      document.cookie = c
+        .replace(/^ +/, "")
+        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
+
+    // 3. Redireciona para a rota base '/' (ou substitua por 'base.html' / '/base' se essa for a URL exata da sua rota)
+    window.location.href = '/'; 
+  }, 1200);
+}
+
     (function initInteractiveCanvas() {
       const canvas = document.getElementById('bg-canvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       let particles = [];
- 
+
       function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
       resize();
       window.addEventListener('resize', resize);
- 
+
       class Particle {
         constructor() {
           this.x = Math.random() * canvas.width;
@@ -1303,9 +1686,9 @@
           ctx.fill();
         }
       }
- 
+
       for (let i = 0; i < 50; i++) particles.push(new Particle());
- 
+
       function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         particles.forEach(p => { p.update(); p.draw(); });
@@ -1313,18 +1696,13 @@
       }
       animate();
     })();
- 
-    // CARREGAR DADOS INICIAIS
+
+    // INICIALIZAÇÃO ASSÍNCRONA
     window.onload = function () {
-      renderCategorias();
-      renderFornecedores();
-      renderProdutos();
-      renderUsuarios();
-      renderVariacoes();
-      renderVendas();
-      renderStatsBar('categoria');
+      carregarDadosDoBanco();
+      atualizarDataHora();
+      setInterval(atualizarDataHora, 30000);
       observeReveals();
     };
-  </script>
-</body>
+</script></body>
 </html>
