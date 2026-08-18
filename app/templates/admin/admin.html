@@ -434,13 +434,66 @@
     .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
     select.form-control { background-color: var(--bg-card); appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.4rem; }
 
-    .img-upload-row { display: flex; align-items: center; gap: 12px; }
+    .img-upload-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
     .img-preview {
       width: 52px; height: 52px; border-radius: 14px;
       background: var(--bg-surface-hover);
       border: 1px dashed var(--border-color);
       object-fit: cover; flex-shrink: 0;
     }
+
+    .file-upload-btn {
+      flex: 1;
+      min-width: 220px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-surface-hover);
+      border: 1.5px dashed var(--border-color);
+      border-radius: var(--radius);
+      padding: 0.72rem 1rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: all .3s var(--ease);
+    }
+    .file-upload-btn:hover { border-color: var(--primary); color: var(--text-main); background: var(--primary-soft); }
+    .file-upload-btn .fub-icon {
+      width: 32px; height: 32px;
+      border-radius: 10px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all .3s var(--ease);
+    }
+    .file-upload-btn:hover .fub-icon { background: var(--primary); color: #fff; }
+    .file-upload-btn .fub-icon svg { width: 16px; height: 16px; stroke: currentColor; }
+    .file-upload-btn .fub-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+    .file-upload-btn .fub-text span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-upload-btn .fub-hint { font-size: 0.66rem; color: var(--text-dark); font-weight: 500; text-transform: none; letter-spacing: 0; }
+
+    .variacoes-list { display: flex; flex-direction: column; gap: 8px; }
+    .variacao-row {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg-surface-hover);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 0.5rem;
+    }
+    .variacao-row .form-control { padding: 0.55rem 0.85rem; font-size: 0.78rem; }
+    .variacao-row .var-nome { flex: 2; min-width: 0; }
+    .variacao-row .var-estoque { flex: 1; min-width: 0; max-width: 130px; }
+    .variacao-row .action-btn { flex-shrink: 0; }
+    .variacoes-empty-hint { font-size: 0.72rem; color: var(--text-dark); font-style: italic; padding: 0.2rem 0.1rem; }
+    .btn-add-variacao {
+      margin-top: 0.6rem;
+      width: fit-content;
+      padding: 0.6rem 1.1rem;
+      font-size: 0.7rem;
+    }
+
     .img-upload-row .form-control { flex: 1; }
 
     .btn {
@@ -483,7 +536,7 @@
       overflow: visible !important;
     }
 
-    .avatar-wrapper { position: relative; flex-shrink: 0; cursor: pointer; }
+    .avatar-wrapper { position: relative; flex-shrink: 0; }
     .avatar-wrapper:hover .avatar-edit-badge { transform: scale(1.1); }
 
     .avatar {
@@ -496,6 +549,7 @@
       font-weight: 800; font-size: 0.9rem; color: #fff;
       border: 1px solid rgba(255,255,255,0.2);
       flex-shrink: 0;
+      cursor: pointer;
     }
 
     .avatar-edit-badge {
@@ -507,6 +561,7 @@
       border: 2px solid var(--bg-card);
       display: flex; align-items: center; justify-content: center;
       transition: transform .25s var(--ease);
+      cursor: pointer;
     }
     .avatar-edit-badge svg { width: 9px; height: 9px; stroke: #fff; }
 
@@ -661,6 +716,118 @@
       transition: width 1.7s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .logout-overlay.active .logout-progress span { width: 100%; }
+
+    /* ===== MODAIS DE DETALHE (PRODUTO E FOTO DO ADMIN) ===== */
+    .detail-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(4, 4, 8, 0.75);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      padding: 20px;
+      transition: opacity .3s var(--ease), visibility .3s;
+    }
+    .detail-overlay.open { opacity: 1; visibility: visible; }
+
+    .detail-modal, .avatar-modal {
+      transform: translateY(16px) scale(.97);
+      transition: transform .3s var(--ease);
+    }
+    .detail-overlay.open .detail-modal,
+    .detail-overlay.open .avatar-modal { transform: translateY(0) scale(1); }
+
+    .detail-modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      max-width: 460px;
+      width: 100%;
+      max-height: 88vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .detail-modal-img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      display: block;
+      background: var(--bg-surface-hover);
+      border-radius: var(--radius-card) var(--radius-card) 0 0;
+    }
+    .detail-modal-img-empty {
+      width: 100%;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-surface-hover);
+      color: var(--text-dark);
+      border-radius: var(--radius-card) var(--radius-card) 0 0;
+    }
+    .detail-modal-img-empty svg { width: 46px; height: 46px; stroke: currentColor; }
+
+    .detail-modal-body { padding: 1.6rem; }
+    .detail-modal-body h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.9rem;
+      letter-spacing: 0.02em;
+      margin-bottom: 1.1rem;
+      padding-right: 1.5rem;
+    }
+    .detail-modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+    .detail-modal-grid > div { display: flex; flex-direction: column; gap: 4px; }
+    .dm-label { font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 800; }
+    .dm-value { font-size: 0.94rem; font-weight: 700; color: var(--text-main); }
+    .dm-value.price { color: var(--success); }
+
+    .detail-close {
+      position: absolute;
+      top: 14px; right: 14px;
+      z-index: 5;
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-size: 1.15rem;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .3s var(--ease), transform .3s var(--ease);
+    }
+    .detail-close:hover { background: var(--primary); transform: scale(1.08); }
+
+    .avatar-modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      width: min(70vw, 320px);
+      height: min(70vw, 320px);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .avatar-modal-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .avatar-modal-letter {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--primary);
+      color: #fff;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 5rem;
+    }
 
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -875,13 +1042,31 @@
             <label>Tamanho <span style="text-transform:none;font-weight:500;">(opcional)</span></label>
             <input type="text" id="prodTamanho" class="form-control" placeholder="Ex: P, M, G, 220V...">
           </div>
+          <div class="form-group">
+            <label>Quantidade em Estoque</label>
+            <input type="number" step="1" min="0" id="prodQuantidade" class="form-control" placeholder="0" value="0" required>
+          </div>
           <div class="form-group full">
             <label>Foto do Produto <span style="text-transform:none;font-weight:500;">(opcional)</span></label>
             <div class="img-upload-row">
               <img id="prodImgPreview" class="img-preview" src="" alt="" style="display:none;">
-              <input type="file" id="prodImagem" class="form-control" accept="image/*" onchange="handleProdutoImagem(event)">
+              <label for="prodImagem" class="file-upload-btn">
+                <span class="fub-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </span>
+                <span class="fub-text">
+                  <span id="prodImagemFileName">Escolher imagem do produto</span>
+                  <span class="fub-hint">PNG, JPG ou WEBP</span>
+                </span>
+              </label>
+              <input type="file" id="prodImagem" accept="image/*" onchange="handleProdutoImagem(event)" hidden>
             </div>
             <input type="hidden" id="prodImagemUrl">
+          </div>
+          <div class="form-group full">
+            <label>Variações <span style="text-transform:none;font-weight:500;">(opcional — cores, tamanhos, voltagens etc., cada uma com seu próprio estoque)</span></label>
+            <div class="variacoes-list" id="variacoesList"></div>
+            <button type="button" class="btn btn-outline btn-add-variacao" onclick="adicionarVariacaoRow()">+ Adicionar Variação</button>
           </div>
           <input type="hidden" id="prodId">
           <div class="form-group full">
@@ -891,10 +1076,15 @@
       </div>
 
       <div class="card reveal">
-        <div class="card-title">Produtos Cadastrados</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap: 12px; flex-wrap: wrap; margin-bottom: 1rem;">
+          <div class="card-title" style="margin: 0;">Produtos Cadastrados</div>
+          <button type="button" class="btn btn-outline" onclick="deletarProdutosSelecionados()" style="padding: 0.65rem 0.9rem; font-size: 0.72rem;">
+            Excluir selecionados
+          </button>
+        </div>
         <div class="table-responsive">
           <table>
-            <thead><tr><th>Foto</th><th>Nome</th><th>Categoria</th><th>Tamanho</th><th>Preço</th><th>Ações</th></tr></thead>
+            <thead><tr><th>Sel.</th><th>Foto</th><th>Nome</th><th>Categoria</th><th>Tamanho</th><th>Quantidade</th><th>Preço</th><th>Ações</th></tr></thead>
             <tbody id="tblProdutos"></tbody>
           </table>
         </div>
@@ -971,8 +1161,9 @@
               <option value="Dinheiro">Dinheiro</option>
             </select>
           </div>
+          <input type="hidden" id="vendaId">
           <div class="form-group full">
-            <button type="submit" class="btn btn-primary" style="width: fit-content;">+ Concluir Venda</button>
+            <button type="submit" class="btn btn-primary" id="vendaSubmitBtn" style="width: fit-content;">+ Concluir Venda</button>
           </div>
         </form>
       </div>
@@ -993,9 +1184,9 @@
   <!-- COLUNA LATERAL DIREITA -->
   <aside class="side-panel">
     <div class="profile-card reveal">
-      <div class="avatar-wrapper" onclick="document.getElementById('avatarInput').click()" title="Alterar foto do admin">
-        <div class="avatar" id="avatarDisplay">A</div>
-        <div class="avatar-edit-badge">
+      <div class="avatar-wrapper" title="Clique na foto para ampliar">
+        <div class="avatar" id="avatarDisplay" onclick="abrirAvatarModal()">A</div>
+        <div class="avatar-edit-badge" title="Alterar foto do admin" onclick="event.stopPropagation(); document.getElementById('avatarInput').click();">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
         </div>
       </div>
@@ -1045,6 +1236,48 @@
       <p>Encerrando sessão...</p>
       <span class="logout-sub">Aguarde um instante</span>
       <div class="logout-progress"><span></span></div>
+    </div>
+  </div>
+
+  <!-- MODAL DE DETALHES DO PRODUTO -->
+  <div class="detail-overlay" id="produtoModalOverlay" onclick="fecharProdutoModal(event)">
+    <div class="detail-modal" onclick="event.stopPropagation()">
+      <button class="detail-close" onclick="fecharProdutoModal()" title="Fechar">&times;</button>
+      <img id="produtoModalImg" class="detail-modal-img" src="" alt="" style="display:none;">
+      <div id="produtoModalImgEmpty" class="detail-modal-img-empty" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+      </div>
+      <div class="detail-modal-body">
+        <h3 id="produtoModalNome">-</h3>
+        <div class="detail-modal-grid">
+          <div>
+            <span class="dm-label">Categoria</span>
+            <span class="dm-value" id="produtoModalCategoria">-</span>
+          </div>
+          <div>
+            <span class="dm-label">Tamanho</span>
+            <span class="dm-value" id="produtoModalTamanho">-</span>
+          </div>
+          <div>
+            <span class="dm-label">Quantidade em Estoque</span>
+            <span class="dm-value" id="produtoModalQtd">-</span>
+          </div>
+          <div>
+            <span class="dm-label">Preço Unitário</span>
+            <span class="dm-value price" id="produtoModalPreco">-</span>
+          </div>
+        </div>
+        <div id="produtoModalVariacoes" style="margin-top: 1rem;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE FOTO DO ADMINISTRADOR AMPLIADA -->
+  <div class="detail-overlay" id="avatarModalOverlay" onclick="fecharAvatarModal(event)">
+    <div class="avatar-modal" onclick="event.stopPropagation()">
+      <button class="detail-close" onclick="fecharAvatarModal()" title="Fechar">&times;</button>
+      <img id="avatarModalImg" class="avatar-modal-img" src="" alt="Foto do administrador" style="display:none;">
+      <div id="avatarModalLetter" class="avatar-modal-letter" style="display:none;">A</div>
     </div>
   </div>
 
@@ -1176,6 +1409,78 @@
       avatarEl.textContent = '';
     }
 
+    // ===== MODAL: FOTO DO ADMINISTRADOR AMPLIADA =====
+    function abrirAvatarModal() {
+      const avatarEl = document.getElementById('avatarDisplay');
+      const bgImage = avatarEl.style.backgroundImage;
+      const modalImg = document.getElementById('avatarModalImg');
+      const modalLetter = document.getElementById('avatarModalLetter');
+
+      if (bgImage && bgImage !== 'none' && bgImage !== '') {
+        const url = bgImage.slice(5, -2); // remove url(" e ")
+        modalImg.src = url;
+        modalImg.style.display = 'block';
+        modalLetter.style.display = 'none';
+      } else {
+        modalImg.style.display = 'none';
+        modalLetter.textContent = avatarEl.textContent || 'A';
+        modalLetter.style.display = 'flex';
+      }
+
+      document.getElementById('avatarModalOverlay').classList.add('open');
+    }
+
+    function fecharAvatarModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('avatarModalOverlay').classList.remove('open');
+    }
+
+    // ===== MODAL: DETALHES DO PRODUTO =====
+    function abrirProdutoModal(id) {
+      const item = produtos.find(p => String(p.id) === String(id));
+      if (!item) return;
+
+      const img = document.getElementById('produtoModalImg');
+      const imgEmpty = document.getElementById('produtoModalImgEmpty');
+      if (item.imagem_url) {
+        img.src = item.imagem_url;
+        img.alt = item.nome;
+        img.style.display = 'block';
+        imgEmpty.style.display = 'none';
+      } else {
+        img.style.display = 'none';
+        imgEmpty.style.display = 'flex';
+      }
+
+      document.getElementById('produtoModalNome').innerText = item.nome;
+      document.getElementById('produtoModalCategoria').innerText = nomeCategoriaPorId(item.categoria_id);
+      document.getElementById('produtoModalTamanho').innerText = item.tamanho || (item.variacoes && item.variacoes.length ? item.variacoes.map(v => v.nome_variacao).join(', ') : '-');
+      document.getElementById('produtoModalQtd').innerText = item.quantidade ?? item.estoque ?? 0;
+      document.getElementById('produtoModalPreco').innerText = 'R$ ' + Number(item.preco).toFixed(2);
+      const variacaoWrap = document.getElementById('produtoModalVariacoes');
+      if (variacaoWrap) {
+        const variacoes = Array.isArray(item.variacoes) && item.variacoes.length ? item.variacoes : [];
+        variacaoWrap.innerHTML = variacoes.length ? variacoes.map(v => `
+          <div style="display:flex; justify-content:space-between; gap:12px; padding: 0.55rem 0.75rem; border:1px solid var(--border-color); border-radius:12px; background: var(--bg-surface-hover);">
+            <span>${v.nome_variacao}</span>
+            <strong style="color: var(--primary);">${v.estoque ?? 0} und.</strong>
+          </div>
+        `).join('') : '<div style="color: var(--text-muted);">Sem variações cadastradas.</div>';
+      }
+      document.getElementById('produtoModalOverlay').classList.add('open');
+    }
+
+    function fecharProdutoModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('produtoModalOverlay').classList.remove('open');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      document.getElementById('produtoModalOverlay')?.classList.remove('open');
+      document.getElementById('avatarModalOverlay')?.classList.remove('open');
+    });
+
     // FOTO DO PRODUTO — envia para o backend e guarda a URL retornada
     async function handleProdutoImagem(e) {
       const file = e.target.files && e.target.files[0];
@@ -1184,6 +1489,9 @@
       const preview = document.getElementById('prodImgPreview');
       preview.src = URL.createObjectURL(file);
       preview.style.display = 'block';
+
+      const fileNameLabel = document.getElementById('prodImagemFileName');
+      if (fileNameLabel) fileNameLabel.innerText = file.name;
 
       const submitBtn = document.getElementById('prodSubmitBtn');
       submitBtn.disabled = true;
@@ -1207,6 +1515,40 @@
         submitBtn.disabled = false;
         submitBtn.innerText = document.getElementById('prodId').value ? 'Salvar Alterações' : '+ Cadastrar Produto';
       }
+    }
+
+    // ===== VARIAÇÕES DO PRODUTO (tamanho/cor/etc, cada uma com seu próprio estoque) =====
+    let variacaoRowSeq = 0;
+
+    function adicionarVariacaoRow(nome = '', estoque = '') {
+      const wrap = document.getElementById('variacoesList');
+      if (!wrap) return;
+      const rowId = 'variacaoRow' + (variacaoRowSeq++);
+      const row = document.createElement('div');
+      row.className = 'variacao-row';
+      row.id = rowId;
+      row.innerHTML = `
+        <input type="text" class="form-control var-nome" placeholder="Ex: Tamanho M - Azul" value="${(nome || '').replace(/"/g, '&quot;')}">
+        <input type="number" class="form-control var-estoque" placeholder="Estoque" min="0" step="1" value="${estoque === '' || estoque === null || estoque === undefined ? '' : estoque}">
+        <button type="button" class="action-btn danger" title="Remover variação" onclick="document.getElementById('${rowId}').remove()">
+          <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      `;
+      wrap.appendChild(row);
+    }
+
+    function coletarVariacoes() {
+      return [...document.querySelectorAll('#variacoesList .variacao-row')]
+        .map(row => ({
+          nome_variacao: row.querySelector('.var-nome').value.trim(),
+          estoque: parseInt(row.querySelector('.var-estoque').value || '0', 10)
+        }))
+        .filter(v => v.nome_variacao);
+    }
+
+    function limparVariacoes() {
+      const wrap = document.getElementById('variacoesList');
+      if (wrap) wrap.innerHTML = '';
     }
 
     // TÍTULOS E RÓTULOS POR MÓDULO
@@ -1259,7 +1601,7 @@
     // BOTÕES DE AÇÃO GENÉRICOS (EDITAR/EXCLUIR)
     function renderAcoes(tipo, id) {
       return `
-        <div class="action-btn-group">
+        <div class="action-btn-group" onclick="event.stopPropagation()">
           <button class="action-btn" title="Editar" onclick="editarItem('${tipo}', '${id}')">
             <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           </button>
@@ -1301,12 +1643,17 @@
         document.getElementById('prodCategoria').value = item.categoria_id || '';
         document.getElementById('prodPreco').value = item.preco;
         document.getElementById('prodTamanho').value = item.tamanho || '';
+        document.getElementById('prodQuantidade').value = (item.quantidade ?? 0);
         document.getElementById('prodImagemUrl').value = item.imagem_url || '';
         if (item.imagem_url) {
           const preview = document.getElementById('prodImgPreview');
           preview.src = item.imagem_url;
           preview.style.display = 'block';
+          const fileNameLabel = document.getElementById('prodImagemFileName');
+          if (fileNameLabel) fileNameLabel.innerText = 'Imagem atual mantida (opcional trocar)';
         }
+        limparVariacoes();
+        (item.variacoes || []).forEach(v => adicionarVariacaoRow(v.nome_variacao, v.estoque));
         document.getElementById('prodSubmitBtn').innerText = 'Salvar Alterações';
       } else if (tipo === 'usr') {
         const item = usuarios.find(u => String(u.id) === String(id));
@@ -1315,6 +1662,15 @@
         document.getElementById('usrNome').value = item.nome;
         document.getElementById('usrEmail').value = item.email;
         document.getElementById('usrPerfil').value = item.perfil;
+      } else if (tipo === 'vnd') {
+        const item = vendas.find(v => String(v.id) === String(id));
+        if (!item) return;
+        document.getElementById('vendaId').value = item.id;
+        document.getElementById('vendaCliente').value = item.comprador || '';
+        document.getElementById('vendaProduto').value = item.produto_id ?? '';
+        document.getElementById('vendaQtd').value = item.quantidade ?? 1;
+        document.getElementById('vendaPagamento').value = item.forma_pagamento || 'PIX';
+        document.getElementById('vendaSubmitBtn').innerText = 'Salvar Alterações';
       }
 
       focusForm();
@@ -1378,15 +1734,44 @@
     function renderProdutos() {
       const tbody = document.getElementById('tblProdutos');
       tbody.innerHTML = produtos.length ? produtos.map((item, i) => `
-        <tr style="--i:${i}">
+        <tr style="--i:${i}; cursor:pointer;" onclick="abrirProdutoModal('${item.id}')" title="Ver detalhes do produto">
+          <td onclick="event.stopPropagation()"><input type="checkbox" name="produtoDeleteCheck" value="${item.id}" style="width: 15px; height: 15px; accent-color: var(--primary);"></td>
           <td>${item.imagem_url ? `<img class="prod-thumb" src="${item.imagem_url}" alt="${item.nome}">` : `<div class="prod-thumb"></div>`}</td>
           <td style="font-weight: 700;">${item.nome}</td>
           <td>${nomeCategoriaPorId(item.categoria_id)}</td>
-          <td>${item.tamanho || '-'}</td>
+          <td>${item.tamanho || (item.variacoes && item.variacoes.length ? item.variacoes.length + ' variações' : '-')}</td>
+          <td><span class="pill-badge">${item.quantidade ?? 0}</span></td>
           <td style="font-weight: 700; color: var(--success);">R$ ${Number(item.preco).toFixed(2)}</td>
           <td>${renderAcoes('prod', item.id)}</td>
         </tr>
-      `).join('') : emptyRow(6, 'Nenhum produto cadastrado.');
+      `).join('') : emptyRow(8, 'Nenhum produto cadastrado.');
+    }
+
+    async function deletarProdutosSelecionados() {
+      const selecionados = [...document.querySelectorAll('input[name="produtoDeleteCheck"]:checked')].map(el => Number(el.value)).filter(Boolean);
+      if (!selecionados.length) {
+        alert('Selecione pelo menos um produto para apagar.');
+        return;
+      }
+
+      const confirmar = confirm(`Deseja excluir ${selecionados.length} produto(s) selecionado(s)?`);
+      if (!confirmar) return;
+
+      for (const id of selecionados) {
+        try {
+          const resposta = await fetch(`${API_URLS.produto}/${id}`, { method: 'DELETE' });
+          if (!resposta.ok) {
+            throw new Error(`Erro ao apagar produto ${id}`);
+          }
+        } catch (erro) {
+          console.error(erro);
+          alert('Não foi possível excluir todos os produtos selecionados.');
+          return;
+        }
+      }
+
+      await carregarDadosDoBanco();
+      alert(`${selecionados.length} produto(s) removido(s) com sucesso.`);
     }
 
     function renderUsuarios() {
@@ -1396,7 +1781,7 @@
           <td style="font-weight: 700;">${item.nome}</td>
           <td>${item.email}</td>
           <td><span class="pill-badge">${item.perfil}</span></td>
-          <td><span class="status-tag active">${item.status || 'Ativo'}</span></td>
+          <td><span class="status-tag ${(item.status || 'Ativo') === 'Ativo' ? 'active' : 'inactive'}">${item.status || 'Ativo'}</span></td>
           <td>${renderAcoes('usr', item.id)}</td>
         </tr>
       `).join('') : emptyRow(5, 'Nenhum usuário cadastrado.');
@@ -1404,14 +1789,15 @@
 
     function renderVendas() {
       const tbody = document.getElementById('tblVendas');
+      if (!tbody) return;
       tbody.innerHTML = vendas.length ? vendas.map((item, i) => `
         <tr style="--i:${i}">
           <td>${item.data_venda || '-'}</td>
-          <td style="font-weight: 700;">${item.comprador}</td>
-          <td>${item.produto_nome}</td>
-          <td><span class="pill-badge">${item.quantidade}x</span></td>
-          <td style="font-weight:700;color:var(--success);">R$ ${Number(item.preco_total || 0).toFixed(2)}</td>
-          <td><span class="status-tag active">${item.forma_pagamento}</span></td>
+          <td style="font-weight: 700;">${item.comprador || item.cliente || '-'}</td>
+          <td>${item.produto_nome || '-'}</td>
+          <td><span class="pill-badge">${item.quantidade ?? 0}</span></td>
+          <td style="font-weight: 700; color: var(--success);">R$ ${Number(item.preco_total ?? item.total ?? 0).toFixed(2)}</td>
+          <td>${item.forma_pagamento || '-'}</td>
           <td>${renderAcoes('vnd', item.id)}</td>
         </tr>
       `).join('') : emptyRow(7, 'Nenhuma venda registrada.');
@@ -1551,9 +1937,15 @@
 
         if (resposta.ok) {
           formEvent.target.reset();
-          document.getElementById('prodImgPreview')?.style && (document.getElementById('prodImgPreview').style.display = 'none');
+          const prodPreview = document.getElementById('prodImgPreview');
+          if (prodPreview) prodPreview.style.display = 'none';
+          const fileNameLabel = document.getElementById('prodImagemFileName');
+          if (fileNameLabel) fileNameLabel.innerText = 'Escolher imagem do produto';
+          limparVariacoes();
           const submitBtn = document.getElementById('prodSubmitBtn');
           if (submitBtn) submitBtn.innerText = '+ Cadastrar Produto';
+          const vendaBtn = document.getElementById('vendaSubmitBtn');
+          if (vendaBtn) vendaBtn.innerText = '+ Concluir Venda';
           await carregarDadosDoBanco();
         } else {
           const erroDetalhe = await resposta.json().catch(() => ({}));
@@ -1600,7 +1992,9 @@
         categoria_id: document.getElementById('prodCategoria').value || null,
         preco: parseFloat(document.getElementById('prodPreco').value),
         tamanho: document.getElementById('prodTamanho').value || '',
+        quantidade: parseInt(document.getElementById('prodQuantidade').value || '0', 10),
         imagem_url: document.getElementById('prodImagemUrl').value || '',
+        variacoes: coletarVariacoes(),
         disponivel: 1
       };
       const endpoint = id ? `${API_URLS.produto}/${id}` : API_URLS.produto;
@@ -1626,13 +2020,16 @@
 
     function addVenda(e) {
       e.preventDefault();
+      const id = document.getElementById('vendaId').value;
       const payload = {
         cliente: document.getElementById('vendaCliente').value,
         produto_id: parseInt(document.getElementById('vendaProduto').value),
         quantidade: parseInt(document.getElementById('vendaQtd').value),
         forma_pagamento: document.getElementById('vendaPagamento').value
       };
-      salvarNoBanco(API_URLS.venda, payload, e, 'POST');
+      const endpoint = id ? `${API_URLS.venda}/${id}` : API_URLS.venda;
+      salvarNoBanco(endpoint, payload, e, id ? 'PUT' : 'POST');
+      document.getElementById('vendaId').value = '';
     }
 
   function logout() {
@@ -1696,6 +2093,24 @@
       }
       animate();
     })();
+
+    // FUNÇÃO AUXILIAR: OBSERVA ELEMENTOS .reveal PARA ANIMAÇÃO DE ENTRADA
+    function observeReveals() {
+      const els = document.querySelectorAll('.reveal:not(.in-view)');
+      if (!('IntersectionObserver' in window)) {
+        els.forEach(el => el.classList.add('in-view'));
+        return;
+      }
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      els.forEach(el => observer.observe(el));
+    }
 
     // INICIALIZAÇÃO ASSÍNCRONA
     window.onload = function () {

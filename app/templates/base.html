@@ -502,6 +502,43 @@ Index · HTML
     .benefit-item p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.55; }
  
     /* PRODUTOS */
+    .product-filters {
+      padding: 0 7vw;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .product-search-box { position: relative; flex: 1; min-width: 240px; max-width: 420px; }
+    .product-search-box svg {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      width: 15px; height: 15px; color: var(--text-dark); pointer-events: none;
+    }
+    .product-search-box input.form-control { padding-left: 38px; }
+    .category-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+    .category-pill {
+      padding: 0.6rem 1.1rem;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface-hover);
+      color: var(--text-muted);
+      font-size: 0.74rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      transition: all 0.25s var(--ease);
+      white-space: nowrap;
+    }
+    .category-pill:hover { color: var(--text-main); border-color: var(--primary); }
+    .category-pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .product-empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
     .product-grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.4rem; padding: 0 7vw 3rem; }
     .product-item { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease); }
     .product-item:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
@@ -513,6 +550,18 @@ Index · HTML
     .product-sku { font-size: 0.7rem; color: var(--text-dark); }
  
     .associados-wrap, .contact-wrap { padding: 0 7vw 3rem; }
+ 
+    /* ADMIN - CATEGORIAS */
+    .category-manage-list { display: flex; flex-direction: column; gap: 8px; margin-top: 1rem; max-height: 220px; overflow-y: auto; }
+    .category-manage-item {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--bg-surface-hover); border: 1px solid var(--border-color-soft);
+      padding: 0.65rem 0.9rem; border-radius: var(--radius-sm); font-size: 0.8rem;
+    }
+    .category-manage-item button {
+      background: transparent; border: none; color: var(--danger); cursor: pointer;
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+    }
  
     /* MODAIS */
     .modal-backdrop {
@@ -553,6 +602,8 @@ Index · HTML
       .form-grid .full { grid-column: span 1; }
       .top-nav { display: none; }
       .header-user-area { gap: 0.5rem; }
+      .product-filters { flex-direction: column; align-items: stretch; }
+      .product-search-box { max-width: none; }
     }
   </style>
 </head>
@@ -596,7 +647,7 @@ Index · HTML
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"/></svg>
       </button>
-       <a href="/login" class="btn-auth">PAINEL ADMIN</a>
+       <a href="/login" class="btn-auth" id="authBtn" onclick="event.preventDefault(); handleAdminBtnClick();">PAINEL ADMIN</a>
     </div>
   </header>
  
@@ -617,7 +668,7 @@ Index · HTML
           <div class="hero-content">
             <div class="hero-tag">
               <span class="badge-accent">INDÚSTRIA 4.0</span>
-              ESCOLA SENAI "ROBERTO SIMONSEN" &mdash; BRÁS
+              ESCOLA SENAI "FRANCISCO MATARAZZO" &mdash; BRÁS
             </div>
             <h1 class="hero-title">Liderança em Formação Técnica e Inovação Industrial</h1>
             <p class="hero-description">
@@ -785,6 +836,14 @@ Index · HTML
         <p>Produtos oficiais, materiais didáticos e vestuário da Escola SENAI Brás.</p>
       </div>
  
+      <div class="product-filters reveal">
+        <div class="product-search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="text" id="productSearchInput" class="form-control" placeholder="Pesquisar produto..." oninput="filterProducts()">
+        </div>
+        <div class="category-pills" id="categoryPills"></div>
+      </div>
+ 
       <div class="product-grid-container reveal-stagger" id="productGallery"></div>
     </section>
  
@@ -902,7 +961,9 @@ Index · HTML
               </div>
               <div class="form-group">
                 <label>Categoria</label>
-                <input type="text" class="form-control" id="categoryInput" placeholder="Ex: Uniformes" required>
+                <select class="form-control" id="categoryInput" required>
+                  <option value="">Selecione...</option>
+                </select>
               </div>
               <div class="form-group full">
                 <label>Preço Unitário (R$)</label>
@@ -920,6 +981,20 @@ Index · HTML
         <div class="card">
           <h3 style="font-size: 0.86rem; font-weight: 700; margin-bottom: 1.1rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--primary);">Relatório de Adesões</h3>
           <div style="height: 250px;"><canvas id="adminChart"></canvas></div>
+        </div>
+      </div>
+ 
+      <div class="grid-2" style="margin-top: 1.5rem;">
+        <div class="card">
+          <h3 style="font-size: 0.86rem; font-weight: 700; margin-bottom: 1.1rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--primary);">Gerenciar Categorias</h3>
+          <form id="categoryForm" onsubmit="saveCategory(event)" style="display:flex; gap:10px; align-items:flex-end;">
+            <div class="form-group" style="flex:1;">
+              <label>Nova Categoria</label>
+              <input type="text" class="form-control" id="newCategoryInput" placeholder="Ex: Material Didático" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="white-space:nowrap;">Adicionar</button>
+          </form>
+          <div class="category-manage-list" id="categoryManageList"></div>
         </div>
       </div>
     </section>
@@ -995,15 +1070,218 @@ Index · HTML
       window.open(googleFormsUrl, '_blank');
     }
  
-    // LISTA DE PRODUTOS E ESTADO DE AUTENTICAÇÃO
-    let products = [
-      { sku: "UNI-2001", name: "Camiseta SENAI M", category: "Uniformes", price: 45.00, img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=400&auto=format&fit=crop" },
-      { sku: "LIV-3002", name: "Jaleco de Proteção", category: "EPI / Segurança", price: 89.90, img: "https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=400&auto=format&fit=crop" },
-      { sku: "FER-4003", name: "Kit de Ferramentas", category: "Insumos Técnicos", price: 120.00, img: "https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=400&auto=format&fit=crop" }
-    ];
- 
+    // ===== ESTADO GLOBAL =====
     let userLogged = false;
     let adminChart = null;
+ 
+    // Categorias (vêm do admin / backend)
+    let categories = [
+      { id: 1, nome: 'Uniformes' },
+      { id: 2, nome: 'Ferramentas' },
+      { id: 3, nome: 'Material Didático' }
+    ];
+ 
+    // Produtos
+    let products = [
+     
+    ];
+ 
+    let selectedCategoryId = 'all';
+ 
+    // ===== CARREGAMENTO DE DADOS =====
+    async function carregarCategorias() {
+      try {
+        const resposta = await fetch('/api/categorias');
+        if (resposta.ok) {
+          const dados = await resposta.json();
+          if (Array.isArray(dados) && dados.length) {
+            categories = dados.map((c) => ({ id: c.id, nome: c.nome || c.name }));
+          }
+        }
+      } catch (erro) {
+        console.warn('Não foi possível carregar categorias do backend. Mantendo fallback local.', erro);
+      }
+      renderCategoryPills();
+      populateCategorySelect();
+      renderCategoryManageList();
+    }
+ 
+    async function carregarProdutos() {
+      try {
+        const resposta = await fetch('/api/produtos');
+        if (resposta.ok) {
+          const dados = await resposta.json();
+          if (Array.isArray(dados) && dados.length) {
+            products = dados.map((p) => ({
+              id: p.id,
+              nome: p.nome,
+              categoria_id: p.categoria_id ?? null,
+              preco: Number(p.preco || 0),
+              imagem_url: p.imagem_url || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=400&auto=format&fit=crop',
+              sku: p.sku || null
+            }));
+          }
+        }
+      } catch (erro) {
+        console.warn('Não foi possível carregar os produtos do backend. Mantendo fallback local.', erro);
+      }
+      filterProducts();
+    }
+ 
+    // ===== CATEGORIAS: LABEL / PILLS / SELECT / GERENCIAMENTO =====
+    function getCategoryNameById(categoriaId) {
+      const found = categories.find((c) => String(c.id) === String(categoriaId));
+      return found ? found.nome : 'Sem categoria';
+    }
+ 
+    function getProductCategoryLabel(produto) {
+      if (produto && produto.categoria_id != null) return getCategoryNameById(produto.categoria_id);
+      return 'Produto oficial';
+    }
+ 
+    function renderCategoryPills() {
+      const container = document.getElementById('categoryPills');
+      if (!container) return;
+ 
+      let html = `<button type="button" class="category-pill ${selectedCategoryId === 'all' ? 'active' : ''}" onclick="setCategoryFilter('all')">Todos</button>`;
+      categories.forEach((c) => {
+        html += `<button type="button" class="category-pill ${String(selectedCategoryId) === String(c.id) ? 'active' : ''}" onclick="setCategoryFilter('${c.id}')">${c.nome}</button>`;
+      });
+      container.innerHTML = html;
+    }
+ 
+    function setCategoryFilter(categoryId) {
+      selectedCategoryId = categoryId;
+      renderCategoryPills();
+      filterProducts();
+    }
+ 
+    function populateCategorySelect() {
+      const select = document.getElementById('categoryInput');
+      if (!select) return;
+      const currentValue = select.value;
+      select.innerHTML = '<option value="">Selecione...</option>' +
+        categories.map((c) => `<option value="${c.id}">${c.nome}</option>`).join('');
+      if (currentValue) select.value = currentValue;
+    }
+ 
+    function renderCategoryManageList() {
+      const container = document.getElementById('categoryManageList');
+      if (!container) return;
+      if (!categories.length) {
+        container.innerHTML = '<div style="color: var(--text-dark); font-size: 0.78rem;">Nenhuma categoria cadastrada.</div>';
+        return;
+      }
+      container.innerHTML = categories.map((c) => `
+        <div class="category-manage-item">
+          <span>${c.nome}</span>
+          <button type="button" onclick="removeCategory(${c.id})">Remover</button>
+        </div>
+      `).join('');
+    }
+ 
+    function saveCategory(e) {
+      e.preventDefault();
+      const input = document.getElementById('newCategoryInput');
+      const nome = input.value.trim();
+      if (!nome) return;
+ 
+      fetch('/api/categorias', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome })
+      })
+        .then(async (resposta) => {
+          if (!resposta.ok) {
+            const detalhe = await resposta.json().catch(() => ({}));
+            throw new Error(detalhe.detail || 'Erro ao cadastrar categoria.');
+          }
+          return resposta.json();
+        })
+        .then(async () => {
+          input.value = '';
+          await carregarCategorias();
+        })
+        .catch((erro) => {
+          console.warn('Backend indisponível, adicionando categoria localmente.', erro);
+          const novoId = categories.length ? Math.max(...categories.map((c) => c.id)) + 1 : 1;
+          categories.push({ id: novoId, nome });
+          input.value = '';
+          renderCategoryPills();
+          populateCategorySelect();
+          renderCategoryManageList();
+        });
+    }
+ 
+    function removeCategory(categoryId) {
+      if (!confirm('Remover esta categoria?')) return;
+ 
+      fetch(`/api/categorias/${categoryId}`, { method: 'DELETE' })
+        .then(async (resposta) => {
+          if (!resposta.ok) throw new Error('Erro ao remover categoria.');
+          await carregarCategorias();
+        })
+        .catch((erro) => {
+          console.warn('Backend indisponível, removendo categoria localmente.', erro);
+          categories = categories.filter((c) => c.id !== categoryId);
+          if (String(selectedCategoryId) === String(categoryId)) selectedCategoryId = 'all';
+          renderCategoryPills();
+          populateCategorySelect();
+          renderCategoryManageList();
+          filterProducts();
+        });
+    }
+ 
+    // ===== PRODUTOS: FILTRO SIMULTÂNEO (BUSCA + CATEGORIA) =====
+    function filterProducts() {
+      const searchInput = document.getElementById('productSearchInput');
+      const termo = searchInput ? searchInput.value.trim().toLowerCase() : '';
+ 
+      const filtrados = products.filter((p) => {
+        const nome = (p.nome || '').toLowerCase();
+        const categoriaNome = getProductCategoryLabel(p).toLowerCase();
+        const sku = (p.sku || '').toLowerCase();
+ 
+        const combinaTexto = !termo || nome.includes(termo) || categoriaNome.includes(termo) || sku.includes(termo);
+        const combinaCategoria = selectedCategoryId === 'all' || String(p.categoria_id) === String(selectedCategoryId);
+ 
+        return combinaTexto && combinaCategoria;
+      });
+ 
+      renderProducts(filtrados);
+    }
+ 
+    function renderProducts(lista) {
+      const container = document.getElementById('productGallery');
+      if (!container) return;
+ 
+      const produtos = lista || products;
+ 
+      if (!produtos.length) {
+        container.innerHTML = '<div class="product-empty-state">Nenhum produto encontrado para essa busca.</div>';
+        return;
+      }
+ 
+      container.innerHTML = "";
+      produtos.forEach((p) => {
+        const produtoImg = p.imagem_url || p.img || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=400&auto=format&fit=crop';
+        const produtoNome = p.nome || p.name || 'Produto';
+        const produtoPreco = Number(p.preco || p.price || 0);
+ 
+        container.innerHTML += `
+          <div class="product-item">
+            <img src="${produtoImg}" class="product-thumb" alt="${produtoNome}">
+            <div class="product-body">
+              <span class="product-category">${getProductCategoryLabel(p)}</span>
+              <div class="product-title">${produtoNome}</div>
+              <div class="product-price">R$ ${produtoPreco.toFixed(2)}</div>
+              <div class="product-sku">SKU: ${p.sku || ('PROD-' + (p.id || 'N/A'))}</div>
+            </div>
+          </div>
+        `;
+      });
+      refreshRevealObserver();
+    }
  
     // CONTROLE DE CLIQUE NO BOTÃO "PAINEL ADMIN"
     function handleAdminBtnClick() {
@@ -1056,29 +1334,11 @@ Index · HTML
       window.scrollTo({ top: 0, behavior: 'smooth' });
       refreshRevealObserver();
  
-      if (viewId === 'admin-panel' && !adminChart) {
-        setTimeout(initAdminChart, 100);
+      if (viewId === 'admin-panel') {
+        populateCategorySelect();
+        renderCategoryManageList();
+        if (!adminChart) setTimeout(initAdminChart, 100);
       }
-    }
- 
-    function renderProducts() {
-      const container = document.getElementById('productGallery');
-      if (!container) return;
-      container.innerHTML = "";
-      products.forEach(p => {
-        container.innerHTML += `
-          <div class="product-item">
-            <img src="${p.img}" class="product-thumb" alt="${p.name}">
-            <div class="product-body">
-              <span class="product-category">${p.category}</span>
-              <div class="product-title">${p.name}</div>
-              <div class="product-price">R$ ${p.price.toFixed(2)}</div>
-              <div class="product-sku">SKU: ${p.sku}</div>
-            </div>
-          </div>
-        `;
-      });
-      refreshRevealObserver();
     }
  
     function openViewModal(name, rm, curso, status) {
@@ -1095,16 +1355,45 @@ Index · HTML
  
     function saveProduct(e) {
       e.preventDefault();
-      const sku = document.getElementById('skuInput').value;
       const name = document.getElementById('nameInput').value;
-      const category = document.getElementById('categoryInput').value;
       const price = parseFloat(document.getElementById('priceInput').value);
       const img = document.getElementById('imgInput').value;
+      const sku = document.getElementById('skuInput').value;
+      const categoriaId = document.getElementById('categoryInput').value;
  
-      products.push({ sku, name, category, price, img });
-      renderProducts();
-      e.target.reset();
-      alert("Produto adicionado com sucesso!");
+      const payload = {
+        nome: name,
+        preco: Number.isFinite(price) ? price : 0,
+        sku: sku || '',
+        disponivel: 1,
+        categoria_id: categoriaId ? Number(categoriaId) : null,
+        imagem_url: img || ''
+      };
+ 
+      fetch('/api/produtos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+        .then(async (resposta) => {
+          if (!resposta.ok) {
+            const detalhe = await resposta.json().catch(() => ({}));
+            throw new Error(detalhe.detail || 'Erro ao cadastrar produto.');
+          }
+          return resposta.json();
+        })
+        .then(async () => {
+          await carregarProdutos();
+          e.target.reset();
+          alert('Produto adicionado com sucesso!');
+        })
+        .catch((erro) => {
+          console.warn('Backend indisponível, salvando produto localmente.', erro);
+          const novoId = products.length ? Math.max(...products.map((p) => p.id)) + 1 : 0;
+          products.push({ id: novoId, ...payload });
+          filterProducts();
+          e.target.reset();
+        });
     }
  
     function initAdminChart() {
@@ -1235,12 +1524,11 @@ Index · HTML
     })();
  
     window.onload = function() {
-      renderProducts();
+      carregarCategorias();
+      carregarProdutos();
       refreshRevealObserver();
     };
   </script>
 </body>
 </html>
  
-
-

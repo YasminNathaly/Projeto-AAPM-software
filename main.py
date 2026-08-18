@@ -11,10 +11,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from pydantic import BaseModel, field_validator
+from sqlalchemy import inspect, text
 
 # 1. Importações do banco e dos modelos
 from app.database import engine, Base, get_db
+from app.routers import categoria_router, produto_router
 from app.routers.auth_router import router as auth_router
+from app.routers.fornecedor import router as fornecedor_router
+from app.routers.variacao_router import router as variacao_router
+from app.routers.venda_router import router as venda_router
 
 try:
     from app.models.produto import Produto
@@ -45,6 +50,34 @@ except ImportError:
 # Cria as tabelas no Banco de Dados
 Base.metadata.create_all(bind=engine)
 
+def garantir_colunas_vendas():
+    with engine.begin() as conn:
+        inspector = inspect(conn)
+        colunas = {coluna["name"] for coluna in inspector.get_columns("vendas")}
+        colunas_para_adicionar = {
+            "cliente": "TEXT",
+            "comprador": "TEXT",
+            "produto_id": "INTEGER",
+            "quantidade": "INTEGER",
+            "forma_pagamento": "TEXT",
+            "preco_total": "REAL",
+        }
+
+        for nome, tipo in colunas_para_adicionar.items():
+            if nome not in colunas:
+                conn.execute(text(f"ALTER TABLE vendas ADD COLUMN {nome} {tipo}"))
+
+garantir_colunas_vendas()
+
+def garantir_colunas_itens_venda():
+    with engine.begin() as conn:
+        inspector = inspect(conn)
+        colunas = {coluna["name"] for coluna in inspector.get_columns("itens_venda")}
+        if "variacao_id" not in colunas:
+            conn.execute(text("ALTER TABLE itens_venda ADD COLUMN variacao_id INTEGER"))
+
+garantir_colunas_itens_venda()
+
 app = FastAPI(
     title="Sistema AAPM - Gestão de Estoque e Vendas",
     version="1.1.0"
@@ -74,6 +107,11 @@ CAMINHO_UPLOADS = os.path.join(caminho_static_correto, "uploads")
 os.makedirs(CAMINHO_UPLOADS, exist_ok=True)
 
 app.include_router(auth_router)
+app.include_router(produto_router.router)
+app.include_router(categoria_router.router)
+app.include_router(fornecedor_router)
+app.include_router(variacao_router)
+app.include_router(venda_router)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # EXCEÇÕES PERSONALIZADAS
@@ -96,6 +134,8 @@ class ProdutoSchema(BaseModel):
     nome: str
     preco: Union[float, str]
     tamanho: Optional[str] = ""
+    quantidade: Optional[int] = 0
+    estoque: Optional[int] = 0
     disponivel: Optional[Union[int, bool, str]] = 1
     categoria_id: Optional[Union[int, str]] = None
     imagem_url: Optional[str] = ""
@@ -126,6 +166,20 @@ class ProdutoSchema(BaseModel):
         if isinstance(v, str):
             return 1 if v.lower() in ["true", "1", "on", "yes"] else 0
         return int(v) if v is not None else 1
+
+    @field_validator("quantidade", mode="before")
+    def tratar_quantidade(cls, v):
+        try:
+            return int(v or 0)
+        except (TypeError, ValueError):
+            return 0
+
+    @field_validator("estoque", mode="before")
+    def tratar_estoque(cls, v):
+        try:
+            return int(v or 0)
+        except (TypeError, ValueError):
+            return 0
 
 
 class CategoriaSchema(BaseModel):
@@ -353,17 +407,31 @@ async def api_listar_usuarios(db: Session = Depends(get_db)):
 async def api_listar_produtos(db: Session = Depends(get_db)):
     if not Produto:
         return []
-    return [
-        {
+    retorno = []
+    for p in db.query(Produto).all():
+        variacoes = []
+        if hasattr(p, "variacoes"):
+            for v in p.variacoes:
+                variacoes.append({
+                    "id": v.id,
+                    "nome_variacao": v.nome_variacao,
+                    "sku": getattr(v, "sku", None),
+                    "estoque": getattr(v, "estoque", 0),
+                    "preco_adicional": getattr(v, "preco_adicional", 0.0)
+                })
+        retorno.append({
             "id": p.id,
             "nome": p.nome,
             "preco": p.preco,
             "tamanho": getattr(p, "tamanho", ""),
+            "quantidade": getattr(p, "quantidade", getattr(p, "estoque", 0)) or 0,
+            "estoque": getattr(p, "estoque", getattr(p, "quantidade", 0)) or 0,
             "disponivel": getattr(p, "disponivel", True),
             "categoria_id": getattr(p, "categoria_id", None),
-            "imagem_url": getattr(p, "imagem_url", "")
-        } for p in db.query(Produto).all()
-    ]
+            "imagem_url": getattr(p, "imagem_url", ""),
+            "variacoes": variacoes
+        })
+    return retorno
 
 @app.get("/api/vendas")
 async def api_listar_vendas(db: Session = Depends(get_db)):
@@ -480,21 +548,51 @@ async def deletar_fornecedor(fornecedor_id: int, db: Session = Depends(get_db)):
     return {"status": "deletado"}
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CRUD USUÁRIOS
+# CRUD USUÁRIOS (COMPLETO E OTIMIZADO)
 # ─────────────────────────────────────────────────────────────────────────────
 
+@app.get("/api/usuarios")
+@app.get("/api/usuarios/")
+async def api_listar_usuarios(db: Session = Depends(get_db)):
+    if not Usuario:
+        return []
+    
+    usuarios = db.query(Usuario).all()
+    return [
+        {
+            "id": u.id,
+            "nome": u.nome,
+            "email": u.email,
+            "perfil": obter_perfil_usuario(u),
+            "status": getattr(u, "status", "Ativo")
+        } for u in usuarios
+    ]
+
+
 @app.post("/api/usuarios")
+@app.post("/api/usuarios/")
 async def criar_usuario(dados: UsuarioSchema, db: Session = Depends(get_db)):
     if not Usuario:
         raise HTTPException(status_code=501, detail="Modelo Usuario não configurado.")
-    senha_hash = pwd_context.hash(dados.senha or "senai@1234")
     
+    # 1. Trata a senha para o limite do bcrypt
+    senha_bruta = (dados.senha or "senai@1234").encode('utf-8')[:72]
+    senha_criptografada = pwd_context.hash(senha_bruta.decode('utf-8', errors='ignore'))
+
+    # 2. Mapeamento dinâmico do campo de senha no modelo
+    campo_senha = "senha"
+    if hasattr(Usuario, "senha_hash"):
+        campo_senha = "senha_hash"
+    elif hasattr(Usuario, "hashed_password"):
+        campo_senha = "hashed_password"
+
     usuario_kwargs = {
         "nome": dados.nome,
         "email": dados.email,
-        "senha_hash": senha_hash
+        campo_senha: senha_criptografada
     }
-    
+
+    # 3. Mapeamento de perfil/cargo e status
     if hasattr(Usuario, "perfil"):
         usuario_kwargs["perfil"] = dados.perfil
     elif hasattr(Usuario, "cargo"):
@@ -507,44 +605,76 @@ async def criar_usuario(dados: UsuarioSchema, db: Session = Depends(get_db)):
     db.add(novo)
     db.commit()
     db.refresh(novo)
+    
     return {"status": "criado", "id": novo.id}
 
+
 @app.put("/api/usuarios/{usuario_id}")
+@app.put("/api/usuarios/{usuario_id}/")
 async def atualizar_usuario(usuario_id: int, dados: UsuarioSchema, db: Session = Depends(get_db)):
     if not Usuario:
         raise HTTPException(status_code=501, detail="Modelo Usuario não configurado.")
+    
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado.")
     
+    # Atualiza campos básicos
     usuario.nome = dados.nome
     usuario.email = dados.email
 
+    # Atualiza perfil/cargo
     if hasattr(usuario, "perfil"):
         usuario.perfil = dados.perfil
     elif hasattr(usuario, "cargo"):
         usuario.cargo = dados.perfil
 
+    # Atualiza status
     if hasattr(usuario, "status"):
         usuario.status = dados.status
 
-    if dados.senha and hasattr(usuario, "senha_hash"):
-        usuario.senha_hash = pwd_context.hash(dados.senha)
+    # Atualiza senha apenas se for enviada
+    if dados.senha and dados.senha.strip():
+        senha_bruta = dados.senha.encode('utf-8')[:72]
+        hash_nova = pwd_context.hash(senha_bruta.decode('utf-8', errors='ignore'))
         
+        if hasattr(usuario, "senha"):
+            usuario.senha = hash_nova
+        elif hasattr(usuario, "senha_hash"):
+            usuario.senha_hash = hash_nova
+        elif hasattr(usuario, "hashed_password"):
+            usuario.hashed_password = hash_nova
+
+    db.add(usuario)
     db.commit()
-    return {"status": "atualizado"}
+    db.refresh(usuario)
+
+    return {
+        "status": "atualizado",
+        "usuario": {
+            "id": usuario.id,
+            "nome": usuario.nome,
+            "email": usuario.email,
+            "perfil": obter_perfil_usuario(usuario),
+            "status": getattr(usuario, "status", "Ativo")
+        }
+    }
+
 
 @app.delete("/api/usuarios/{usuario_id}")
+@app.delete("/api/usuarios/{usuario_id}/")
 async def deletar_usuario(usuario_id: int, db: Session = Depends(get_db)):
     if not Usuario:
         raise HTTPException(status_code=501, detail="Modelo Usuario não configurado.")
+    
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+    
     db.delete(usuario)
     db.commit()
-    return {"status": "deletado"}
-
+    
+    return {"status": "deletado", "mensagem": f"Usuário {usuario_id} removido com sucesso."}
 # ─────────────────────────────────────────────────────────────────────────────
 # CRUD PRODUTOS
 # ─────────────────────────────────────────────────────────────────────────────
@@ -555,10 +685,15 @@ async def criar_produto(dados: ProdutoSchema, db: Session = Depends(get_db)):
     if not Produto:
         raise HTTPException(status_code=501, detail="Modelo Produto não configurado.")
 
+    quantidade = getattr(dados, "quantidade", 0) or getattr(dados, "estoque", 0) or 0
+    estoque = getattr(dados, "estoque", quantidade) or quantidade or 0
+
     novo = Produto(
         nome=dados.nome,
         preco=dados.preco,
         tamanho=dados.tamanho,
+        quantidade=quantidade,
+        estoque=estoque,
         disponivel=bool(dados.disponivel),
         categoria_id=dados.categoria_id,
         imagem_url=dados.imagem_url
@@ -577,9 +712,14 @@ async def atualizar_produto(produto_id: int, dados: ProdutoSchema, db: Session =
     if not produto:
         raise HTTPException(status_code=404, detail="Produto não encontrado.")
 
+    quantidade = getattr(dados, "quantidade", 0) or getattr(dados, "estoque", 0) or 0
+    estoque = getattr(dados, "estoque", quantidade) or quantidade or 0
+
     produto.nome = dados.nome
     produto.preco = dados.preco
     produto.tamanho = dados.tamanho
+    produto.quantidade = quantidade
+    produto.estoque = estoque
     produto.disponivel = bool(dados.disponivel)
     produto.categoria_id = dados.categoria_id
     produto.imagem_url = dados.imagem_url
@@ -615,71 +755,3 @@ async def limpar_vendas_temp(db: Session = Depends(get_db)):
             db.rollback()
             return {"status": "erro", "mensagem": str(e)}
     return {"status": "erro", "mensagem": "Modelo Venda não encontrado."}
-
-@app.post("/api/vendas")
-@app.post("/admin/vendas")
-async def registrar_venda(dados: VendaSchema, db: Session = Depends(get_db)):
-    if not Venda or not Produto:
-        raise HTTPException(status_code=501, detail="Módulos não configurados.")
-
-    produto = db.query(Produto).filter(Produto.id == dados.produto_id).first()
-    if not produto:
-        raise HTTPException(status_code=404, detail="Produto não encontrado.")
-
-    preco_unitario = float(getattr(produto, "preco", 0.0))
-    qtd = dados.quantidade if dados.quantidade is not None else 1
-    total_calculado = preco_unitario * qtd
-    nome_cliente = dados.cliente or dados.comprador or "Cliente Não Informado"
-
-    venda_kwargs = {}
-
-    # Cliente / Comprador
-    for col in ["cliente", "comprador", "nome_cliente", "cliente_nome"]:
-        if hasattr(Venda, col):
-            venda_kwargs[col] = nome_cliente
-            break
-
-    # Produto
-    for col in ["produto_id", "id_produto"]:
-        if hasattr(Venda, col):
-            venda_kwargs[col] = dados.produto_id
-            break
-
-    # Quantidade
-    for col in ["quantidade", "qtd"]:
-        if hasattr(Venda, col):
-            venda_kwargs[col] = qtd
-            break
-
-    # Valor Total
-    for col in ["valor_total", "preco_total", "total"]:
-        if hasattr(Venda, col):
-            venda_kwargs[col] = total_calculado
-            break
-
-    # Forma de Pagamento
-    for col in ["forma_pagamento", "pagamento", "forma_pgto"]:
-        if hasattr(Venda, col):
-            venda_kwargs[col] = dados.forma_pagamento or "PIX"
-            break
-
-    nova_venda = Venda(**venda_kwargs)
-    db.add(nova_venda)
-    db.commit()
-    db.refresh(nova_venda)
-    return {"status": "criado", "id": nova_venda.id}
-
-@app.delete("/api/vendas/{venda_id}")
-@app.delete("/admin/vendas/{venda_id}")
-async def deletar_venda(venda_id: int, db: Session = Depends(get_db)):
-    if not Venda:
-        raise HTTPException(status_code=501, detail="Módulo de vendas não está ativo.")
-
-    venda = db.query(Venda).filter(Venda.id == venda_id).first()
-    if not venda:
-        raise HTTPException(status_code=404, detail="Venda não encontrada.")
-
-    db.delete(venda)
-    db.commit()
-
-    return {"status": "sucesso", "mensagem": f"Venda {venda_id} removida com sucesso."}

@@ -8,7 +8,13 @@ class Venda(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=True) # Pode ser nulo para venda no balcão sem cadastro
-    valor_total = Column(Float, nullable=False)
+    cliente = Column(String(120), nullable=True, default="Cliente Não Informado")
+    comprador = Column(String(120), nullable=True, default="Cliente Não Informado")
+    produto_id = Column(Integer, ForeignKey("produtos.id"), nullable=True)
+    quantidade = Column(Integer, nullable=True, default=1)
+    forma_pagamento = Column(String(30), nullable=True, default="PIX")
+    valor_total = Column(Float, nullable=False, default=0.0)
+    preco_total = Column(Float, nullable=True, default=0.0)
     status = Column(String(30), default="Concluída") # ex: "Pendente", "Concluída", "Cancelada"
     data_venda = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -22,9 +28,11 @@ class ItemVenda(Base):
     id = Column(Integer, primary_key=True, index=True)
     venda_id = Column(Integer, ForeignKey("vendas.id"), nullable=False)
     produto_id = Column(Integer, ForeignKey("produtos.id"), nullable=False)
+    variacao_id = Column(Integer, ForeignKey("variacoes_produto.id"), nullable=True)
     quantidade = Column(Integer, nullable=False, default=1)
     preco_unitario = Column(Float, nullable=False) # Guarda o preço do produto no momento exato da compra
 
     # Relacionamentos
     venda = relationship("Venda", back_populates="itens")
     produto = relationship("Produto")
+    variacao = relationship("VariacaoProduto")
