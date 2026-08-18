@@ -5,7 +5,7 @@ class Fornecedor(Base):
     __tablename__ = "fornecedores"
 
     id = Column(Integer, primary_key=True, index=True)
-    nome = Column(String(100), nullable=False)
-    cnpj = Column(String(20), nullable=True, unique=True)
-    telefone = Column(String(20), nullable=True)
-    email = Column(String(100), nullable=True)
+    nome = Column(String, nullable=False)
+    documento = Column(String)  # <-- Adicione este campo se estiver faltando
+    email = Column(String)
+    telefone = Column(String)
