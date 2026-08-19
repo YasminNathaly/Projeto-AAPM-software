@@ -1282,6 +1282,15 @@
   </div>
 
   <script>
+  
+  // Verifica se o usuário fez o login (buscando do localStorage)
+  const usuarioLogado = localStorage.getItem('userLogged');
+
+  if (!usuarioLogado || usuarioLogado !== 'true') {
+    alert('Acesso restrito! Faça o login primeiro.');
+    window.location.href = 'login.html'; // Manda para a tela de login
+  }
+
     // ROTAS DO BACKEND / API
     const API_URLS = {
       categoria: '/api/categorias',
