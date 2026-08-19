@@ -423,7 +423,7 @@
       </div>
 
       <div class="login-info">
-        <strong>ℹ️ Informação de Acesso</strong>
+        <strong> Informação de Acesso</strong>
         Use as credenciais fornecidas pela administração da AAPM para acessar o painel administrativo.
       </div>
     </div>
@@ -579,7 +579,7 @@
           localStorage.setItem('access_token', token);
           
           setTimeout(() => {
-            window.location.href = '/dashboard';
+            window.location.href = '/admin';
           }, 1000);
         } else {
           let msg = 'E-mail ou senha incorretos.';

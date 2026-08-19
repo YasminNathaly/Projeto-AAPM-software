@@ -647,8 +647,7 @@ Index · HTML
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"/></svg>
       </button>
-       <a href="/login" class="btn-auth" id="authBtn" onclick="event.preventDefault(); handleAdminBtnClick();">PAINEL ADMIN</a>
-    </div>
+      <a href="/login" class="btn-auth" id="authBtn">PAINEL ADMIN</a>
   </header>
  
   <main class="wrapper">
@@ -938,73 +937,7 @@ Index · HTML
       </div>
     </section>
  
-    <!-- 5. PAINEL ADMIN -->
-    <section id="admin-panel" class="view-content admin-only">
-      <div class="page-title-box">
-        <h2>Painel Administrativo</h2>
-        <p>Área de gestão interna da AAPM.</p>
-      </div>
- 
-      <div class="grid-2">
-        <div class="card">
-          <h3 style="font-size: 0.86rem; font-weight: 700; margin-bottom: 1.1rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--primary);">Cadastrar Novo Produto</h3>
- 
-          <form id="productForm" onsubmit="saveProduct(event)">
-            <div class="form-grid">
-              <div class="form-group full">
-                <label>SKU / Código do Produto</label>
-                <input type="text" class="form-control" id="skuInput" placeholder="Ex: PROD-01" required>
-              </div>
-              <div class="form-group">
-                <label>Nome do Item</label>
-                <input type="text" class="form-control" id="nameInput" placeholder="Ex: Camiseta M" required>
-              </div>
-              <div class="form-group">
-                <label>Categoria</label>
-                <select class="form-control" id="categoryInput" required>
-                  <option value="">Selecione...</option>
-                </select>
-              </div>
-              <div class="form-group full">
-                <label>Preço Unitário (R$)</label>
-                <input type="number" step="0.01" class="form-control" id="priceInput" placeholder="0,00" required>
-              </div>
-              <div class="form-group full">
-                <label>URL da Imagem</label>
-                <input type="url" class="form-control" id="imgInput" placeholder="https://..." required>
-              </div>
-            </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.25rem;">Salvar Produto</button>
-          </form>
-        </div>
- 
-        <div class="card">
-          <h3 style="font-size: 0.86rem; font-weight: 700; margin-bottom: 1.1rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--primary);">Relatório de Adesões</h3>
-          <div style="height: 250px;"><canvas id="adminChart"></canvas></div>
-        </div>
-      </div>
- 
-      <div class="grid-2" style="margin-top: 1.5rem;">
-        <div class="card">
-          <h3 style="font-size: 0.86rem; font-weight: 700; margin-bottom: 1.1rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--primary);">Gerenciar Categorias</h3>
-          <form id="categoryForm" onsubmit="saveCategory(event)" style="display:flex; gap:10px; align-items:flex-end;">
-            <div class="form-group" style="flex:1;">
-              <label>Nova Categoria</label>
-              <input type="text" class="form-control" id="newCategoryInput" placeholder="Ex: Material Didático" required>
-            </div>
-            <button type="submit" class="btn btn-primary" style="white-space:nowrap;">Adicionar</button>
-          </form>
-          <div class="category-manage-list" id="categoryManageList"></div>
-        </div>
-      </div>
-    </section>
- 
-  </main>
- 
-  <footer class="site-footer">
-    © 2026 AAPM &mdash; Associação de Apoio aos Pais e Mestres · Escola SENAI Roberto Simonsen, Brás — São Paulo/SP
-  </footer>
- 
+
   <!-- MODAL DE VISUALIZAÇÃO DE ASSOCIADO -->
   <div class="modal-backdrop" id="viewModal" onclick="if(event.target === this) closeViewModal()">
     <div class="modal-box">
@@ -1021,35 +954,7 @@ Index · HTML
       <button class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;" onclick="closeViewModal()">Fechar</button>
     </div>
   </div>
- 
-  <!-- TELA / MODAL DE LOGIN ADMIN -->
-  <div class="modal-backdrop" id="loginModal">
-    <div class="modal-box">
-      <button type="button" class="modal-close" onclick="cancelLogin()">&times;</button>
- 
-      <div class="modal-header">
-        <span class="login-badge">Acesso Restrito</span>
-        <h3 class="modal-title">Painel Administrativo</h3>
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Insira suas credenciais corporativas da AAPM SENAI Brás para prosseguir.</p>
-      </div>
- 
-      <form onsubmit="confirmLogin(event)">
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label>E-mail Corporativo</label>
-          <input type="email" class="form-control" id="loginEmail" placeholder="admin@sp.senai.br" required>
-        </div>
-        <div class="form-group" style="margin-bottom: 1.5rem;">
-          <label>Senha</label>
-          <input type="password" class="form-control" id="loginPass" placeholder="••••••••" required>
-        </div>
- 
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          <button type="submit" class="btn btn-primary" style="width: 100%;">Acessar Painel</button>
-          <button type="button" onclick="cancelLogin()" class="btn btn-ghost" style="width: 100%;">Voltar para o Início</button>
-        </div>
-      </form>
-    </div>
-  </div>
+
  
   <script>
     // ===== TEMA CLARO / ESCURO =====
@@ -1104,6 +1009,33 @@ Index · HTML
       renderCategoryPills();
       populateCategorySelect();
       renderCategoryManageList();
+    }
+
+    async function  loginadmin(params) {
+      try{
+
+        const resposta = await fetch('/api/loginadmin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(params)
+        });
+        if (resposta.ok) {
+          const dados = await resposta.json();
+          if (dados && dados.success) {
+            userLogged = true;
+            alert('Login realizado com sucesso!');
+            // Aqui você pode redirecionar para a página de administração ou atualizar a interface
+          } else {
+            alert('Falha no login. Verifique suas credenciais.');
+          }
+        } else {
+          alert('Erro ao tentar logar. Tente novamente mais tarde.');
+        }
+      } catch (erro) {
+        console.warn('Erro ao tentar logar no backend.', erro);
+        alert('Erro ao tentar logar. Tente novamente mais tarde.');
+      }
+      
     }
  
     async function carregarProdutos() {
