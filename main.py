@@ -69,6 +69,7 @@ def garantir_colunas_vendas():
 
 garantir_colunas_vendas()
 
+
 def garantir_colunas_itens_venda():
     with engine.begin() as conn:
         inspector = inspect(conn)
@@ -77,6 +78,20 @@ def garantir_colunas_itens_venda():
             conn.execute(text("ALTER TABLE itens_venda ADD COLUMN variacao_id INTEGER"))
 
 garantir_colunas_itens_venda()
+def garantir_colunas_fornecedores():
+    with engine.begin() as conn:
+        inspector = inspect(conn)
+        colunas = {c["name"] for c in inspector.get_columns("fornecedores")}
+        colunas_para_adicionar = {
+            "documento": "TEXT",
+            "email": "TEXT",
+            "telefone": "TEXT",
+        }
+        for nome, tipo in colunas_para_adicionar.items():
+            if nome not in colunas:
+                conn.execute(text(f"ALTER TABLE fornecedores ADD COLUMN {nome} {tipo}"))
+
+garantir_colunas_fornecedores()
 
 app = FastAPI(
     title="Sistema AAPM - Gestão de Estoque e Vendas",
