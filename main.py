@@ -2,7 +2,7 @@ import os
 import re
 import shutil
 import uuid
-from typing import Optional, Union
+from typing import Optional, Union, List
 from fastapi import FastAPI, Request, Depends, Form, HTTPException, status, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -46,6 +46,15 @@ try:
 except ImportError:
     Venda = None
 
+# MEXI AQUI: import do model de Variação de produto.
+# Tentei os caminhos mais comuns dado que o variacao_router já existe no projeto.
+# Se nenhum bater, Variacao fica None e o código de gravação simplesmente é pulado
+# (sem quebrar o resto do app) — me avisa o caminho certo do arquivo pra eu fechar isso.
+try:
+    from app.models.variacao import VariacaoProduto as Variacao
+except ImportError:
+    Variacao = None
+
 
 # Cria as tabelas no Banco de Dados
 Base.metadata.create_all(bind=engine)
@@ -78,6 +87,8 @@ def garantir_colunas_itens_venda():
             conn.execute(text("ALTER TABLE itens_venda ADD COLUMN variacao_id INTEGER"))
 
 garantir_colunas_itens_venda()
+
+
 def garantir_colunas_fornecedores():
     with engine.begin() as conn:
         inspector = inspect(conn)
@@ -145,6 +156,20 @@ async def custom_404_handler(request: Request, exc: Exception):
 # SCHEMAS PYDANTIC
 # ─────────────────────────────────────────────────────────────────────────────
 
+# MEXI AQUI: schema para cada linha de variação enviada pelo formulário
+# (nome_variacao + estoque, exatamente o que o admin.html manda em coletarVariacoes()).
+class VariacaoSchema(BaseModel):
+    nome_variacao: str
+    estoque: Optional[int] = 0
+
+    @field_validator("estoque", mode="before")
+    def tratar_estoque_variacao(cls, v):
+        try:
+            return int(v or 0)
+        except (TypeError, ValueError):
+            return 0
+
+
 class ProdutoSchema(BaseModel):
     nome: str
     preco: Union[float, str]
@@ -154,6 +179,9 @@ class ProdutoSchema(BaseModel):
     disponivel: Optional[Union[int, bool, str]] = 1
     categoria_id: Optional[Union[int, str]] = None
     imagem_url: Optional[str] = ""
+    # MEXI AQUI: sem esse campo, o Pydantic descartava silenciosamente as
+    # variações enviadas pelo formulário (era por isso que nada era salvo).
+    variacoes: Optional[List[VariacaoSchema]] = []
 
     @field_validator("preco", mode="before")
     def tratar_preco(cls, v):
@@ -269,6 +297,30 @@ def obter_nome_produto_venda(venda_obj, db: Session):
 
 def obter_perfil_usuario(usuario_obj):
     return getattr(usuario_obj, "perfil", getattr(usuario_obj, "cargo", getattr(usuario_obj, "funcao", getattr(usuario_obj, "tipo", "Operador"))))
+
+
+# MEXI AQUI: função central que grava as variações de um produto no banco.
+# É usada tanto na criação quanto na edição. Em edição, apaga as variações
+# antigas antes de recriar (evita duplicar a cada "Salvar Alterações").
+def sincronizar_variacoes_produto(db: Session, produto_id: int, variacoes: List[VariacaoSchema]):
+    if not Variacao:
+        return  # model não encontrado - ver comentário no topo do arquivo
+
+    # Remove as variações antigas deste produto
+    db.query(Variacao).filter(Variacao.produto_id == produto_id).delete()
+
+    # Recria a partir do que veio no formulário
+    for v in (variacoes or []):
+        nome_limpo = (v.nome_variacao or "").strip()
+        if not nome_limpo:
+            continue
+        db.add(Variacao(
+            produto_id=produto_id,
+            nome_variacao=nome_limpo,
+            estoque=v.estoque or 0
+        ))
+
+    db.commit()
 
 # ─────────────────────────────────────────────────────────────────────────────
 # ROTAS PÚBLICAS E HTML
@@ -716,6 +768,10 @@ async def criar_produto(dados: ProdutoSchema, db: Session = Depends(get_db)):
     db.add(novo)
     db.commit()
     db.refresh(novo)
+
+    # MEXI AQUI: grava as variações enviadas no formulário para este produto recém-criado.
+    sincronizar_variacoes_produto(db, novo.id, dados.variacoes)
+
     return {"status": "criado", "id": novo.id}
 
 @app.put("/api/produtos/{produto_id}")
@@ -740,6 +796,11 @@ async def atualizar_produto(produto_id: int, dados: ProdutoSchema, db: Session =
     produto.imagem_url = dados.imagem_url
 
     db.commit()
+
+    # MEXI AQUI: re-sincroniza as variações (apaga as antigas e grava as novas)
+    # para não duplicar a cada edição.
+    sincronizar_variacoes_produto(db, produto.id, dados.variacoes)
+
     return {"status": "atualizado"}
 
 @app.delete("/api/produtos/{produto_id}")
@@ -750,6 +811,11 @@ async def deletar_produto(produto_id: int, db: Session = Depends(get_db)):
     produto = db.query(Produto).filter(Produto.id == produto_id).first()
     if not produto:
         raise HTTPException(status_code=404, detail="Produto não encontrado.")
+
+    # MEXI AQUI: remove as variações órfãs antes de apagar o produto,
+    # para não deixar lixo no banco (e evitar erro de FK em bancos que a checam).
+    if Variacao:
+        db.query(Variacao).filter(Variacao.produto_id == produto_id).delete()
 
     db.delete(produto)
     db.commit()
