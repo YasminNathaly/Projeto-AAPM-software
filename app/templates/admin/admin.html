@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- MEXI AQUI: CSS do Cropper.js para o recorte de foto do produto -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">
 
   <style>
     :root {
@@ -1300,15 +1302,44 @@
     </div>
   </div>
 
+  <!-- MEXI AQUI: MODAL DE RECORTE DE IMAGEM DO PRODUTO (Cropper.js) -->
+  <div class="detail-overlay" id="cropModalOverlay">
+    <div class="detail-modal" style="max-width: 520px;" onclick="event.stopPropagation()">
+      <button class="detail-close" onclick="cancelarCrop()" title="Cancelar">&times;</button>
+      <div class="detail-modal-body">
+        <h3 style="font-size: 1.4rem; margin-bottom: 1rem;">Ajustar Foto do Produto</h3>
+
+        <div style="max-height: 360px; overflow: hidden; border-radius: 14px; border: 1px solid var(--border-color); background: #000;">
+          <img id="cropImageSource" style="max-width: 100%; display: block;">
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top: 1rem; flex-wrap: wrap;">
+          <button type="button" class="btn btn-outline" style="padding:0.5rem 0.9rem; font-size:0.7rem;" onclick="setCropAspect(null)">Livre</button>
+          <button type="button" class="btn btn-outline" style="padding:0.5rem 0.9rem; font-size:0.7rem;" onclick="setCropAspect(1)">Quadrado (1:1)</button>
+          <button type="button" class="btn btn-outline" style="padding:0.5rem 0.9rem; font-size:0.7rem;" onclick="setCropAspect(4/3)">4:3</button>
+          <button type="button" class="btn btn-outline" style="padding:0.5rem 0.9rem; font-size:0.7rem;" onclick="setCropAspect(16/9)">16:9</button>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top: 1.3rem;">
+          <button type="button" class="btn btn-outline" style="flex:1;" onclick="cancelarCrop()">Cancelar</button>
+          <button type="button" class="btn btn-primary" style="flex:1;" onclick="confirmarCrop()">Usar esta foto</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEXI AQUI: script do Cropper.js, precisa estar carregado antes do script principal -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+
   <script>
-  // admin.html
+  
+ // admin.html
 const token = localStorage.getItem('access_token');
 if (!token) {
   alert('Acesso restrito! Faça o login primeiro.');
   window.location.href = 'login.html';
 }
-
-    // ROTAS DO BACKEND / API
+  //   // ROTAS DO BACKEND / API
     const API_URLS = {
       categoria: '/api/categorias',
       fornecedor: '/api/fornecedores',
@@ -1520,15 +1551,86 @@ if (!token) {
       document.getElementById('avatarModalOverlay')?.classList.remove('open');
     });
 
-    // FOTO DO PRODUTO — envia para o backend e guarda a URL retornada
-    async function handleProdutoImagem(e) {
+    // MEXI AQUI: ===== RECORTE DE IMAGEM DO PRODUTO (Cropper.js) =====
+    // Antes, handleProdutoImagem enviava a foto direto pro backend assim que
+    // era escolhida. Agora ela abre um modal de recorte primeiro, e só depois
+    // do usuário confirmar o enquadramento é que a imagem (já cortada) é
+    // enviada — resolve o corte automático "errado" do object-fit: cover.
+    let cropperInstance = null;
+    let cropArquivoOriginal = null;
+
+    function handleProdutoImagem(e) {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
 
-      const preview = document.getElementById('prodImgPreview');
-      preview.src = URL.createObjectURL(file);
-      preview.style.display = 'block';
+      cropArquivoOriginal = file;
+      const imgSrc = document.getElementById('cropImageSource');
+      imgSrc.src = URL.createObjectURL(file);
 
+      document.getElementById('cropModalOverlay').classList.add('open');
+
+      // Precisa esperar a imagem carregar antes de instanciar o Cropper
+      imgSrc.onload = () => {
+        if (cropperInstance) cropperInstance.destroy();
+        cropperInstance = new Cropper(imgSrc, {
+          aspectRatio: NaN, // livre por padrão
+          viewMode: 1,
+          dragMode: 'move',
+          autoCropArea: 0.9,
+          background: false,
+          responsive: true
+        });
+      };
+    }
+
+    function setCropAspect(ratio) {
+      if (!cropperInstance) return;
+      cropperInstance.setAspectRatio(ratio === null ? NaN : ratio);
+    }
+
+    function cancelarCrop() {
+      document.getElementById('cropModalOverlay').classList.remove('open');
+      if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
+      // limpa o input de arquivo pra permitir escolher o mesmo arquivo de novo se quiser
+      const inputFile = document.getElementById('prodImagem');
+      if (inputFile) inputFile.value = '';
+    }
+
+    function confirmarCrop() {
+      if (!cropperInstance) return;
+
+      const canvas = cropperInstance.getCroppedCanvas({
+        maxWidth: 1200,
+        maxHeight: 1200,
+        imageSmoothingQuality: 'high'
+      });
+
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          alert('Não foi possível processar o recorte da imagem.');
+          return;
+        }
+        // Usa o mesmo nome/extensão do arquivo original
+        const nomeArquivo = cropArquivoOriginal ? cropArquivoOriginal.name : 'produto.png';
+        const arquivoRecortado = new File([blob], nomeArquivo, { type: blob.type || 'image/png' });
+
+        // Mostra preview já recortado
+        const preview = document.getElementById('prodImgPreview');
+        preview.src = URL.createObjectURL(arquivoRecortado);
+        preview.style.display = 'block';
+
+        document.getElementById('cropModalOverlay').classList.remove('open');
+        cropperInstance.destroy();
+        cropperInstance = null;
+
+        enviarImagemProduto(arquivoRecortado);
+      }, cropArquivoOriginal ? cropArquivoOriginal.type : 'image/png', 0.92);
+    }
+
+    // FOTO DO PRODUTO — envia para o backend e guarda a URL retornada.
+    // MEXI AQUI: agora recebe o arquivo já recortado pelo Cropper.js
+    // (antes recebia direto o evento do input file).
+    async function enviarImagemProduto(file) {
       const fileNameLabel = document.getElementById('prodImagemFileName');
       if (fileNameLabel) fileNameLabel.innerText = file.name;
 
