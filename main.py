@@ -12,6 +12,13 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from pydantic import BaseModel, field_validator
 from sqlalchemy import inspect, text
+import os
+from dotenv import load_dotenv
+
+load_dotenv() # Carrega as variáveis do arquivo .env
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # 1. Importações do banco e dos modelos
 from app.database import engine, Base, get_db
@@ -545,7 +552,8 @@ async def upload_imagem(arquivo: UploadFile = File(...)):
 async def criar_categoria(dados: CategoriaSchema, db: Session = Depends(get_db)):
     if not Categoria:
         raise HTTPException(status_code=501, detail="Modelo Categoria não configurado.")
-    nova = Categoria(nome=dados.nome, codigo=dados.codigo, descricao=dados.descricao)
+    
+    nova = Categoria(nome=dados.nome)
     db.add(nova)
     db.commit()
     db.refresh(nova)
