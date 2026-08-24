@@ -25,6 +25,7 @@ class VariacaoResponse(BaseModel):
 
     class Config:
         from_attributes = True
+    
 
 
 router = APIRouter(prefix="/produtos", tags=["Variações"])

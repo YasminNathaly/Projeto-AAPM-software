@@ -2,8 +2,14 @@ import os
 import re
 import shutil
 import uuid
+<<<<<<< Updated upstream
 from typing import Optional, Union, List
 from fastapi import FastAPI, Request, Depends, Form, HTTPException, status, UploadFile, File
+=======
+from typing import Optional, Union
+
+from fastapi import FastAPI, Request, Depends, Form, HTTPException, status, UploadFile, File, APIRouter, Query
+>>>>>>> Stashed changes
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
@@ -27,6 +33,15 @@ from app.routers.auth_router import router as auth_router
 from app.routers.fornecedor import router as fornecedor_router
 from app.routers.variacao_router import router as variacao_router
 from app.routers.venda_router import router as venda_router
+
+# Importação segura do router de associados para evitar crash do Uvicorn
+try:
+    from app.routers.associado_router import router as associado_router
+except (ImportError, AttributeError):
+    try:
+        from app.routers.associado_router import routers as associado_router
+    except (ImportError, AttributeError):
+        associado_router = None
 
 try:
     from app.models.produto import Produto
@@ -53,6 +68,7 @@ try:
 except ImportError:
     Venda = None
 
+<<<<<<< Updated upstream
 # MEXI AQUI: import do model de Variação de produto.
 # Tentei os caminhos mais comuns dado que o variacao_router já existe no projeto.
 # Se nenhum bater, Variacao fica None e o código de gravação simplesmente é pulado
@@ -62,8 +78,75 @@ try:
 except ImportError:
     Variacao = None
 
+=======
+try: 
+    from app.models.associado import Associado
+except ImportError:
+    Associado = None
+>>>>>>> Stashed changes
 
-# Cria as tabelas no Banco de Dados
+try:
+    from app.controllers import associado_controller
+except ImportError:
+    associado_controller = None
+
+# 2. Schemas do Router Local de Associados
+class AssociadoCreate(BaseModel):
+    nome: str
+    rm: str
+    email: str
+    curso: Optional[str] = None
+    telefone: Optional[str] = None
+    endereco: Optional[str] = None
+    ativo: Optional[bool] = True
+
+class AssociadoResponse(AssociadoCreate):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+# Router embutido para Associados (caso não venha do módulo externo)
+local_associado_router = APIRouter(prefix="/associados", tags=["Associados"])
+
+@local_associado_router.get("/")
+def listar_paginado(
+    request: Request,
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1),
+    db: Session = Depends(get_db)
+):
+    if associado_controller and hasattr(associado_controller, "listar_associados_page"):
+        return associado_controller.listar_associados_page(
+            db=db, request=request, page=page, limit=limit
+        )
+    return {"mensagem": "Controller de associados não disponível."}
+
+@local_associado_router.post("/", status_code=status.HTTP_201_CREATED, response_model=AssociadoResponse)
+def criar_associado_local(dados: AssociadoCreate, db: Session = Depends(get_db)):
+    if associado_controller and hasattr(associado_controller, "criar"):
+        return associado_controller.criar(db=db, dados=dados.model_dump())
+    raise HTTPException(status_code=501, detail="Controller de associados não disponível.")
+
+@local_associado_router.get("/{associado_id}", response_model=AssociadoResponse)
+def buscar_associado_por_id(associado_id: int, db: Session = Depends(get_db)):
+    if associado_controller and hasattr(associado_controller, "obter_por_id"):
+        return associado_controller.obter_por_id(db=db, associado_id=associado_id)
+    raise HTTPException(status_code=501, detail="Controller de associados não disponível.")
+
+@local_associado_router.put("/{associado_id}", response_model=AssociadoResponse)
+def atualizar_associado_local(associado_id: int, dados: AssociadoCreate, db: Session = Depends(get_db)):
+    if associado_controller and hasattr(associado_controller, "atualizar"):
+        return associado_controller.atualizar(db=db, associado_id=associado_id, dados=dados.model_dump())
+    raise HTTPException(status_code=501, detail="Controller de associados não disponível.")
+
+@local_associado_router.delete("/{associado_id}", status_code=status.HTTP_204_NO_CONTENT)
+def deletar_associado_local(associado_id: int, db: Session = Depends(get_db)):
+    if associado_controller and hasattr(associado_controller, "deletar"):
+        associado_controller.deletar(db=db, associado_id=associado_id)
+    return None
+
+# 3. Criação das tabelas no Banco de Dados e Migrações manuais
 Base.metadata.create_all(bind=engine)
 
 def garantir_colunas_vendas():
@@ -95,6 +178,7 @@ def garantir_colunas_itens_venda():
 
 garantir_colunas_itens_venda()
 
+<<<<<<< Updated upstream
 
 def garantir_colunas_fornecedores():
     with engine.begin() as conn:
@@ -111,6 +195,9 @@ def garantir_colunas_fornecedores():
 
 garantir_colunas_fornecedores()
 
+=======
+# 4. Inicialização do App FastAPI
+>>>>>>> Stashed changes
 app = FastAPI(
     title="Sistema AAPM - Gestão de Estoque e Vendas",
     version="1.1.0"
@@ -126,19 +213,16 @@ app.add_middleware(
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# ─────────────────────────────────────────────────────────────────────────────
-# CAMINHOS E STATIC
-# ─────────────────────────────────────────────────────────────────────────────
-
+# 5. Caminhos e Arquivos Estáticos
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "app", "templates"))
 caminho_static_correto = os.path.join(BASE_DIR, "app", "static")
 app.mount("/static", StaticFiles(directory=caminho_static_correto), name="static")
 
-# Pasta de uploads (fotos de produtos) dentro da própria pasta static
 CAMINHO_UPLOADS = os.path.join(caminho_static_correto, "uploads")
 os.makedirs(CAMINHO_UPLOADS, exist_ok=True)
 
+# 6. Inclusão dos Routers
 app.include_router(auth_router)
 app.include_router(produto_router.router)
 app.include_router(categoria_router.router)
@@ -146,10 +230,12 @@ app.include_router(fornecedor_router)
 app.include_router(variacao_router)
 app.include_router(venda_router)
 
-# ─────────────────────────────────────────────────────────────────────────────
-# EXCEÇÕES PERSONALIZADAS
-# ─────────────────────────────────────────────────────────────────────────────
+if associado_router:
+    app.include_router(associado_router)
+else:
+    app.include_router(local_associado_router)
 
+# 7. Exceções Personalizadas
 @app.exception_handler(404)
 async def custom_404_handler(request: Request, exc: Exception):
     if request.url.path.startswith("/admin") or request.url.path.startswith("/api"):
@@ -159,6 +245,7 @@ async def custom_404_handler(request: Request, exc: Exception):
         )
     return templates.TemplateResponse(request=request, name="public/404.html", status_code=404)
 
+<<<<<<< Updated upstream
 # ─────────────────────────────────────────────────────────────────────────────
 # SCHEMAS PYDANTIC
 # ─────────────────────────────────────────────────────────────────────────────
@@ -177,6 +264,9 @@ class VariacaoSchema(BaseModel):
             return 0
 
 
+=======
+# 8. Schemas Pydantic do Main
+>>>>>>> Stashed changes
 class ProdutoSchema(BaseModel):
     nome: str
     preco: Union[float, str]
@@ -260,10 +350,14 @@ class VendaSchema(BaseModel):
     quantidade: Optional[int] = 1
     forma_pagamento: Optional[str] = "PIX"
 
-# ─────────────────────────────────────────────────────────────────────────────
-# AUXILIARES
-# ─────────────────────────────────────────────────────────────────────────────
 
+class AssociadoSchema(BaseModel):
+    nome: str
+    email: str
+    telefone: Optional[str] = None
+    endereco: Optional[str] = None
+
+# 9. Funções Auxiliares
 def obter_comprador_venda(venda_obj):
     for atributo in ["cliente", "comprador", "nome_cliente", "cliente_nome"]:
         val = getattr(venda_obj, atributo, None)
@@ -305,6 +399,7 @@ def obter_nome_produto_venda(venda_obj, db: Session):
 def obter_perfil_usuario(usuario_obj):
     return getattr(usuario_obj, "perfil", getattr(usuario_obj, "cargo", getattr(usuario_obj, "funcao", getattr(usuario_obj, "tipo", "Operador"))))
 
+<<<<<<< Updated upstream
 
 # MEXI AQUI: função central que grava as variações de um produto no banco.
 # É usada tanto na criação quanto na edição. Em edição, apaga as variações
@@ -333,6 +428,9 @@ def sincronizar_variacoes_produto(db: Session, produto_id: int, variacoes: List[
 # ROTAS PÚBLICAS E HTML
 # ─────────────────────────────────────────────────────────────────────────────
 
+=======
+# 10. Rotas Públicas e HTML
+>>>>>>> Stashed changes
 @app.get("/", response_class=HTMLResponse)
 async def pagina_inicial(request: Request, db: Session = Depends(get_db)):
     produtos = db.query(Produto).all() if Produto else []
@@ -432,10 +530,7 @@ async def pagina_dashboard_vendas(request: Request, db: Session = Depends(get_db
         }
     )
 
-# ─────────────────────────────────────────────────────────────────────────────
-# API GET ENDPOINTS (listagem)
-# ─────────────────────────────────────────────────────────────────────────────
-
+# 11. API GET Endpoints (Listagens)
 @app.get("/api/categorias")
 async def api_listar_categorias(db: Session = Depends(get_db)):
     if not Categoria:
@@ -464,6 +559,7 @@ async def api_listar_fornecedores(db: Session = Depends(get_db)):
     ]
 
 @app.get("/api/usuarios")
+@app.get("/api/usuarios/")
 async def api_listar_usuarios(db: Session = Depends(get_db)):
     if not Usuario:
         return []
@@ -525,10 +621,21 @@ async def api_listar_vendas(db: Session = Depends(get_db)):
         } for v in db.query(Venda).order_by(Venda.id.desc()).all()
     ]
 
-# ─────────────────────────────────────────────────────────────────────────────
-# UPLOAD DE IMAGEM
-# ─────────────────────────────────────────────────────────────────────────────
+@app.get("/api/associados")
+async def api_listar_associados(db: Session = Depends(get_db)):
+    if not Associado:
+        return []
+    return [
+        {
+            "id": a.id,
+            "nome": a.nome,
+            "email": a.email,
+            "telefone": getattr(a, "telefone", "") or "",
+            "endereco": getattr(a, "endereco", "") or ""
+        } for a in db.query(Associado).all()
+    ]
 
+# 12. Upload de Imagens
 @app.post("/api/upload-imagem")
 async def upload_imagem(arquivo: UploadFile = File(...)):
     extensoes_validas = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
@@ -544,10 +651,7 @@ async def upload_imagem(arquivo: UploadFile = File(...)):
 
     return {"status": "ok", "url": f"/static/uploads/{nome_arquivo}"}
 
-# ─────────────────────────────────────────────────────────────────────────────
-# CRUD CATEGORIAS
-# ─────────────────────────────────────────────────────────────────────────────
-
+# 13. CRUD Categorias
 @app.post("/api/categorias")
 async def criar_categoria(dados: CategoriaSchema, db: Session = Depends(get_db)):
     if not Categoria:
@@ -583,10 +687,7 @@ async def deletar_categoria(categoria_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"status": "deletado"}
 
-# ─────────────────────────────────────────────────────────────────────────────
-# CRUD FORNECEDORES
-# ─────────────────────────────────────────────────────────────────────────────
-
+# 14. CRUD Fornecedores
 @app.post("/api/fornecedores")
 async def criar_fornecedor(dados: FornecedorSchema, db: Session = Depends(get_db)):
     if not Fornecedor:
@@ -622,39 +723,16 @@ async def deletar_fornecedor(fornecedor_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"status": "deletado"}
 
-# ─────────────────────────────────────────────────────────────────────────────
-# CRUD USUÁRIOS (COMPLETO E OTIMIZADO)
-# ─────────────────────────────────────────────────────────────────────────────
-
-@app.get("/api/usuarios")
-@app.get("/api/usuarios/")
-async def api_listar_usuarios(db: Session = Depends(get_db)):
-    if not Usuario:
-        return []
-    
-    usuarios = db.query(Usuario).all()
-    return [
-        {
-            "id": u.id,
-            "nome": u.nome,
-            "email": u.email,
-            "perfil": obter_perfil_usuario(u),
-            "status": getattr(u, "status", "Ativo")
-        } for u in usuarios
-    ]
-
-
+# 15. CRUD Usuários
 @app.post("/api/usuarios")
 @app.post("/api/usuarios/")
 async def criar_usuario(dados: UsuarioSchema, db: Session = Depends(get_db)):
     if not Usuario:
         raise HTTPException(status_code=501, detail="Modelo Usuario não configurado.")
-    
-    # 1. Trata a senha para o limite do bcrypt
+
     senha_bruta = (dados.senha or "senai@1234").encode('utf-8')[:72]
     senha_criptografada = pwd_context.hash(senha_bruta.decode('utf-8', errors='ignore'))
 
-    # 2. Mapeamento dinâmico do campo de senha no modelo
     campo_senha = "senha"
     if hasattr(Usuario, "senha_hash"):
         campo_senha = "senha_hash"
@@ -667,7 +745,6 @@ async def criar_usuario(dados: UsuarioSchema, db: Session = Depends(get_db)):
         campo_senha: senha_criptografada
     }
 
-    # 3. Mapeamento de perfil/cargo e status
     if hasattr(Usuario, "perfil"):
         usuario_kwargs["perfil"] = dados.perfil
     elif hasattr(Usuario, "cargo"):
@@ -680,39 +757,34 @@ async def criar_usuario(dados: UsuarioSchema, db: Session = Depends(get_db)):
     db.add(novo)
     db.commit()
     db.refresh(novo)
-    
-    return {"status": "criado", "id": novo.id}
 
+    return {"status": "criado", "id": novo.id}
 
 @app.put("/api/usuarios/{usuario_id}")
 @app.put("/api/usuarios/{usuario_id}/")
 async def atualizar_usuario(usuario_id: int, dados: UsuarioSchema, db: Session = Depends(get_db)):
     if not Usuario:
         raise HTTPException(status_code=501, detail="Modelo Usuario não configurado.")
-    
+
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado.")
-    
-    # Atualiza campos básicos
+
     usuario.nome = dados.nome
     usuario.email = dados.email
 
-    # Atualiza perfil/cargo
     if hasattr(usuario, "perfil"):
         usuario.perfil = dados.perfil
     elif hasattr(usuario, "cargo"):
         usuario.cargo = dados.perfil
 
-    # Atualiza status
     if hasattr(usuario, "status"):
         usuario.status = dados.status
 
-    # Atualiza senha apenas se for enviada
     if dados.senha and dados.senha.strip():
         senha_bruta = dados.senha.encode('utf-8')[:72]
         hash_nova = pwd_context.hash(senha_bruta.decode('utf-8', errors='ignore'))
-        
+
         if hasattr(usuario, "senha"):
             usuario.senha = hash_nova
         elif hasattr(usuario, "senha_hash"):
@@ -735,25 +807,22 @@ async def atualizar_usuario(usuario_id: int, dados: UsuarioSchema, db: Session =
         }
     }
 
-
 @app.delete("/api/usuarios/{usuario_id}")
 @app.delete("/api/usuarios/{usuario_id}/")
 async def deletar_usuario(usuario_id: int, db: Session = Depends(get_db)):
     if not Usuario:
         raise HTTPException(status_code=501, detail="Modelo Usuario não configurado.")
-    
+
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado.")
-    
+
     db.delete(usuario)
     db.commit()
-    
-    return {"status": "deletado", "mensagem": f"Usuário {usuario_id} removido com sucesso."}
-# ─────────────────────────────────────────────────────────────────────────────
-# CRUD PRODUTOS
-# ─────────────────────────────────────────────────────────────────────────────
 
+    return {"status": "deletado", "mensagem": f"Usuário {usuario_id} removido com sucesso."}
+
+# 16. CRUD Produtos
 @app.post("/api/produtos")
 @app.post("/admin/produtos")
 async def criar_produto(dados: ProdutoSchema, db: Session = Depends(get_db)):
@@ -829,10 +898,7 @@ async def deletar_produto(produto_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"status": "deletado"}
 
-# ─────────────────────────────────────────────────────────────────────────────
-# CRUD VENDAS E UTILITÁRIO
-# ─────────────────────────────────────────────────────────────────────────────
-
+# 17. Utilitário Vendas
 @app.get("/admin/limpar-vendas-zerar")
 async def limpar_vendas_temp(db: Session = Depends(get_db)):
     if Venda:

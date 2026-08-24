@@ -8,6 +8,7 @@ class Venda(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=True) # Pode ser nulo para venda no balcão sem cadastro
+    associado_id = Column(Integer, ForeignKey("associados.id"), nullable=True) # Chave estrangeira para associados
     cliente = Column(String(120), nullable=True, default="Cliente Não Informado")
     comprador = Column(String(120), nullable=True, default="Cliente Não Informado")
     produto_id = Column(Integer, ForeignKey("produtos.id"), nullable=True)
@@ -18,7 +19,8 @@ class Venda(Base):
     status = Column(String(30), default="Concluída") # ex: "Pendente", "Concluída", "Cancelada"
     data_venda = Column(DateTime(timezone=True), server_default=func.now())
 
-    # Relacionamento com os itens da venda
+    # Relacionamentos
+    associado = relationship("Associado", back_populates="vendas")
     itens = relationship("ItemVenda", back_populates="venda", cascade="all, delete-orphan")
 
 
