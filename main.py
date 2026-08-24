@@ -21,6 +21,8 @@ from app.routers.fornecedor import router as fornecedor_router
 from app.routers.variacao_router import router as variacao_router
 from app.routers.venda_router import router as venda_router
 from app.routers.associado_router import router as associado_router
+from app.routers.armario_router import router as armario_router
+
 try:
     from app.models.produto import Produto
 except ImportError:
@@ -50,6 +52,12 @@ try:
     from app.models.associado import Associado
 except ImportError:
     Associado = None
+
+try:
+    from app.models.armario import Armario
+except ImportError:
+    Armario = None
+
 # Cria as tabelas no Banco de Dados
 Base.metadata.create_all(bind=engine)
 
@@ -81,6 +89,7 @@ def garantir_colunas_itens_venda():
             conn.execute(text("ALTER TABLE itens_venda ADD COLUMN variacao_id INTEGER"))
 
 garantir_colunas_itens_venda()
+
 def garantir_colunas_fornecedores():
     with engine.begin() as conn:
         inspector = inspect(conn)
@@ -131,6 +140,7 @@ app.include_router(fornecedor_router)
 app.include_router(variacao_router)
 app.include_router(venda_router)
 app.include_router(associado_router)
+app.include_router(armario_router)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # EXCEÇÕES PERSONALIZADAS
@@ -694,6 +704,7 @@ async def deletar_usuario(usuario_id: int, db: Session = Depends(get_db)):
     db.commit()
     
     return {"status": "deletado", "mensagem": f"Usuário {usuario_id} removido com sucesso."}
+
 # ─────────────────────────────────────────────────────────────────────────────
 # CRUD PRODUTOS
 # ─────────────────────────────────────────────────────────────────────────────
