@@ -882,61 +882,68 @@
 
   <canvas id="bg-canvas"></canvas>
 
-  <!-- SIDEBAR DE NAVEGAÇÃO (ícones) -->
-  <aside class="sidebar">
-    <a href="#" class="brand-logo">
-      <svg class="logo-senai-svg" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
-        <rect width="300" height="100" fill="#FF0000"/>
-        <text x="150" y="73" font-family="'Arial Black', 'Impact', sans-serif" font-size="62" font-weight="900" font-style="italic" fill="#FFFFFF" text-anchor="middle">SENAI</text>
-      </svg>
+<!-- SIDEBAR DE NAVEGAÇÃO (ícones) -->
+<aside class="sidebar">
+  <a href="#" class="brand-logo">
+    <svg class="logo-senai-svg" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="300" height="100" fill="#FF0000"/>
+      <text x="150" y="73" font-family="'Arial Black', 'Impact', sans-serif" font-size="62" font-weight="900" font-style="italic" fill="#FFFFFF" text-anchor="middle">SENAI</text>
+    </svg>
+  </a>
+
+  <nav class="sidebar-menu">
+    <a class="menu-item active" onclick="navigate('categoria', this)">
+      <div class="menu-item-content">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10V6a2 2 0 0 0-2-2h-4L3 15l6 6 11-11Z"/><circle cx="8.5" cy="8.5" r="1.2"/></svg>
+      </div>
+      <span class="menu-tooltip">Categoria</span>
     </a>
 
-    <nav class="sidebar-menu">
-      <a class="menu-item active" onclick="navigate('categoria', this)">
-        <div class="menu-item-content">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10V6a2 2 0 0 0-2-2h-4L3 15l6 6 11-11Z"/><circle cx="8.5" cy="8.5" r="1.2"/></svg>
-        </div>
-        <span class="menu-tooltip">Categoria</span>
-      </a>
+    <a class="menu-item" onclick="navigate('fornecedor', this)">
+      <div class="menu-item-content">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-8h6v8"/></svg>
+      </div>
+      <span class="menu-tooltip">Fornecedor</span>
+    </a>
 
-      <a class="menu-item" onclick="navigate('fornecedor', this)">
-        <div class="menu-item-content">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-8h6v8"/></svg>
-        </div>
-        <span class="menu-tooltip">Fornecedor</span>
-      </a>
+    <a class="menu-item" onclick="navigate('produto', this)">
+      <div class="menu-item-content">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5V8Z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg>
+      </div>
+      <span class="menu-tooltip">Produto</span>
+    </a>
 
-      <a class="menu-item" onclick="navigate('produto', this)">
-        <div class="menu-item-content">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5V8Z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg>
-        </div>
-        <span class="menu-tooltip">Produto</span>
-      </a>
+    <a class="menu-item" onclick="navigate('associado', this)">
+      <div class="menu-item-content">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <span class="menu-tooltip">Associados</span>
+    </a>
 
-      <a class="menu-item" onclick="navigate('usuario', this)">
-        <div class="menu-item-content">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
-        </div>
-        <span class="menu-tooltip">Usuário</span>
-      </a>
+    <a class="menu-item" onclick="navigate('usuario', this)">
+      <div class="menu-item-content">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+      </div>
+      <span class="menu-tooltip">Usuário</span>
+    </a>
 
-      <a class="menu-item" onclick="navigate('venda', this)">
-        <div class="menu-item-content">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.8h7.2a2 2 0 0 0 2-1.6L21 8H6"/></svg>
-        </div>
-        <span class="menu-tooltip">Venda</span>
-      </a>
-    </nav>
+    <a class="menu-item" onclick="navigate('venda', this)">
+      <div class="menu-item-content">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.8h7.2a2 2 0 0 0 2-1.6L21 8H6"/></svg>
+      </div>
+      <span class="menu-tooltip">Venda</span>
+    </a>
+  </nav>
 
-    <div class="sidebar-footer">
-      <a class="menu-item" onclick="logout()">
-        <div class="menu-item-content">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
-        </div>
-        <span class="menu-tooltip">Encerrar Sessão</span>
-      </a>
-    </div>
-  </aside>
+  <div class="sidebar-footer">
+    <a class="menu-item" onclick="logout()">
+      <div class="menu-item-content">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      </div>
+      <span class="menu-tooltip">Encerrar Sessão</span>
+    </a>
+  </div>
+</aside>
 
   <!-- MAIN CONTAINER -->
   <main class="admin-wrapper">
@@ -1112,7 +1119,46 @@
       </div>
     </section>
 
-    <!-- 4. USUARIO -->
+    <!-- 4. ASSOCIADO -->
+    <section id="associado" class="view-content">
+      <div class="card reveal">
+        <div class="card-title">Cadastrar Associado</div>
+        <form onsubmit="addAssociado(event)" class="form-grid">
+          <div class="form-group">
+            <label>Nome Completo</label>
+            <input type="text" id="assocNome" class="form-control" placeholder="Ex: João da Silva" required>
+          </div>
+          <div class="form-group">
+            <label>E-mail</label>
+            <input type="email" id="assocEmail" class="form-control" placeholder="aapm@sp.senai.br" required>
+          </div>
+          <div class="form-group">
+            <label>Telefone</label>
+            <input type="text" id="assocTelefone" class="form-control" placeholder="(11) 99999-9999">
+          </div>
+          <div class="form-group">
+            <label>Endereço</label>
+            <input type="text" id="assocEndereco" class="form-control" placeholder="Rua / Avenida, nº">
+          </div>
+          <input type="hidden" id="assocId">
+          <div class="form-group full">
+            <button type="submit" class="btn btn-primary" id="assocSubmitBtn" style="width: fit-content;">+ Cadastrar Associado</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card reveal">
+        <div class="card-title">Associados do Sistema</div>
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Endereço</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody id="tblAssociados"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. USUARIO -->
     <section id="usuario" class="view-content">
       <div class="card reveal">
         <div class="card-title">Cadastrar Usuário</div>
@@ -1155,7 +1201,7 @@
       </div>
     </section>
 
-    <!-- 5. VENDA -->
+    <!-- 6. VENDA -->
     <section id="venda" class="view-content">
       <div class="card reveal">
         <div class="card-title">Registrar Nova Venda</div>
@@ -1332,18 +1378,20 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
   <script>
-  
- // admin.html
-const token = localStorage.getItem('access_token');
-if (!token) {
-  alert('Acesso restrito! Faça o login primeiro.');
-  window.location.href = 'login.html';
-}
-  //   // ROTAS DO BACKEND / API
+
+  // admin.html
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+    alert('Acesso restrito! Faça o login primeiro.');
+    window.location.href = 'login.html';
+  }
+
+    // ROTAS DO BACKEND / API
     const API_URLS = {
       categoria: '/api/categorias',
       fornecedor: '/api/fornecedores',
       produto: '/api/produtos',
+      associado: '/api/associados',
       usuario: '/api/usuarios',
       venda: '/api/vendas',
       upload: '/api/upload-imagem'
@@ -1353,6 +1401,7 @@ if (!token) {
     let categorias = [];
     let fornecedores = [];
     let produtos = [];
+    let associados = [];
     let usuarios = [];
     let vendas = [];
 
@@ -1370,10 +1419,11 @@ if (!token) {
     // ===== CONTROLADOR DE CARREGAMENTO (GET DE TODAS AS ENTIDADES) =====
     async function carregarDadosDoBanco() {
       try {
-        const [resCat, resForn, resProd, resUsr, resVnd] = await Promise.all([
+        const [resCat, resForn, resProd, resAssoc, resUsr, resVnd] = await Promise.all([
           fetch(API_URLS.categoria),
           fetch(API_URLS.fornecedor),
           fetch(API_URLS.produto),
+          fetch(API_URLS.associado),
           fetch(API_URLS.usuario),
           fetch(API_URLS.venda)
         ]);
@@ -1383,12 +1433,14 @@ if (!token) {
         // MEXI AQUI: passa cada produto por normalizarProduto() para garantir
         // que "variacoes" chegue certinho até as funções de render.
         produtos = resProd.ok ? (await resProd.json()).map(normalizarProduto) : [];
+        associados = resAssoc.ok ? await resAssoc.json() : [];
         usuarios = resUsr.ok ? await resUsr.json() : [];
         vendas = resVnd.ok ? await resVnd.json() : [];
 
         renderCategorias();
         renderFornecedores();
         renderProdutos();
+        renderAssociados();
         renderUsuarios();
         renderVendas();
         popularSelectsDinamicos();
@@ -1423,6 +1475,7 @@ if (!token) {
     const notificacoesIcones = {
       venda: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.8h7.2a2 2 0 0 0 2-1.6L21 8H6"/></svg>',
       produto: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5V8Z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg>',
+      associado: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
       usuario: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>',
       categoria: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10V6a2 2 0 0 0-2-2h-4L3 15l6 6 11-11Z"/><circle cx="8.5" cy="8.5" r="1.2"/></svg>',
       fornecedor: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-8h6v8"/></svg>'
@@ -1432,6 +1485,7 @@ if (!token) {
       const itens = [];
       vendas.slice(0, 3).forEach(v => itens.push({ tipo: 'venda', titulo: 'Nova venda registrada', sub: `${v.produto_nome} · ${v.data_venda || ''}`, ordem: v.id }));
       produtos.slice(-2).reverse().forEach(p => itens.push({ tipo: 'produto', titulo: 'Produto cadastrado', sub: p.nome, ordem: p.id }));
+      associados.slice(-2).reverse().forEach(a => itens.push({ tipo: 'associado', titulo: 'Associado cadastrado', sub: a.nome, ordem: a.id }));
       usuarios.slice(-2).reverse().forEach(u => itens.push({ tipo: 'usuario', titulo: 'Novo usuário cadastrado', sub: u.nome, ordem: u.id }));
       categorias.slice(-1).reverse().forEach(c => itens.push({ tipo: 'categoria', titulo: 'Categoria cadastrada', sub: c.nome, ordem: c.id }));
       fornecedores.slice(-1).reverse().forEach(f => itens.push({ tipo: 'fornecedor', titulo: 'Fornecedor cadastrado', sub: f.nome, ordem: f.id }));
@@ -1697,6 +1751,7 @@ if (!token) {
       'categoria': ['Categorias', 'Organização e classificação de produtos.', 'Nova Categoria'],
       'fornecedor': ['Fornecedores', 'Cadastro e histórico de fornecedores.', 'Novo Fornecedor'],
       'produto': ['Produtos', 'Catálogo e controle de itens.', 'Novo Produto'],
+      'associado': ['Associados', 'Consulta e cadastro dos associados da AAPM.', 'Novo Associado'],
       'usuario': ['Usuários', 'Controle de acessos e permissões.', 'Novo Usuário'],
       'venda': ['Vendas', 'Registro de pedidos e transações.', 'Nova Venda']
     };
@@ -1753,7 +1808,7 @@ if (!token) {
       `;
     }
 
-    const mapaModulos = { cat: 'categoria', forn: 'fornecedor', prod: 'produto', usr: 'usuario', vnd: 'venda' };
+    const mapaModulos = { cat: 'categoria', forn: 'fornecedor', prod: 'produto', assoc: 'associado', usr: 'usuario', vnd: 'venda' };
 
     // Preenche o formulário do módulo com os dados do item para edição
     function editarItem(tipo, id) {
@@ -1798,6 +1853,15 @@ if (!token) {
         limparVariacoes();
         (item.variacoes || []).forEach(v => adicionarVariacaoRow(v.nome_variacao || v.nome || v.name || '', v.estoque ?? v.quantidade ?? ''));
         document.getElementById('prodSubmitBtn').innerText = 'Salvar Alterações';
+      } else if (tipo === 'assoc') {
+        const item = associados.find(a => String(a.id) === String(id));
+        if (!item) return;
+        document.getElementById('assocId').value = item.id;
+        document.getElementById('assocNome').value = item.nome;
+        document.getElementById('assocEmail').value = item.email || '';
+        document.getElementById('assocTelefone').value = item.telefone || '';
+        document.getElementById('assocEndereco').value = item.endereco || '';
+        document.getElementById('assocSubmitBtn').innerText = 'Salvar Alterações';
       } else if (tipo === 'usr') {
         const item = usuarios.find(u => String(u.id) === String(id));
         if (!item) return;
@@ -1931,6 +1995,24 @@ if (!token) {
       alert(`${selecionados.length} produto(s) removido(s) com sucesso.`);
     }
 
+    // MEXI AQUI: renderAssociados segue exatamente o mesmo padrão de renderUsuarios,
+    // usando as classes globais da tabela (.pill-badge, .status-tag, renderAcoes) em
+    // vez de estilos inline, e o mesmo tipo de card de cadastro/listagem.
+    function renderAssociados() {
+      const tbody = document.getElementById('tblAssociados');
+      if (!tbody) return;
+      tbody.innerHTML = associados.length ? associados.map((item, i) => `
+        <tr style="--i:${i}">
+          <td style="font-weight: 700;">${item.nome}</td>
+          <td>${item.email || '-'}</td>
+          <td>${item.telefone || '-'}</td>
+          <td>${item.endereco || '-'}</td>
+          <td><span class="status-tag ${(item.status || 'Ativo') === 'Ativo' ? 'active' : 'inactive'}">${item.status || 'Ativo'}</span></td>
+          <td>${renderAcoes('assoc', item.id)}</td>
+        </tr>
+      `).join('') : emptyRow(6, 'Nenhum associado cadastrado.');
+    }
+
     function renderUsuarios() {
       const tbody = document.getElementById('tblUsuarios');
       tbody.innerHTML = usuarios.length ? usuarios.map((item, i) => `
@@ -1980,6 +2062,12 @@ if (!token) {
             { value: produtos.length, label: 'Produtos Cadastrados' },
             { value: new Set(produtos.map(p => p.categoria_id)).size, label: 'Categorias Utilizadas' },
             { value: 'R$ ' + produtos.reduce((a, p) => a + Number(p.preco || 0), 0).toFixed(2), label: 'Valor em Catálogo' }
+          ];
+        case 'associado':
+          return [
+            { value: associados.length, label: 'Associados Cadastrados' },
+            { value: associados.filter(a => (a.status || 'Ativo') === 'Ativo').length, label: 'Associados Ativos' },
+            { value: associados.filter(a => a.telefone).length, label: 'Com Telefone' }
           ];
         case 'usuario':
           return [
@@ -2038,6 +2126,8 @@ if (!token) {
           return fornecedores.slice(-3).reverse().map(f => ({ title: f.nome, sub: f.documento }));
         case 'produto':
           return produtos.slice(-3).reverse().map(p => ({ title: p.nome, sub: 'R$ ' + Number(p.preco).toFixed(2) }));
+        case 'associado':
+          return associados.slice(-3).reverse().map(a => ({ title: a.nome, sub: a.email || a.telefone || '-' }));
         case 'usuario':
           return usuarios.slice(-3).reverse().map(u => ({ title: u.nome, sub: u.perfil }));
         case 'venda':
@@ -2101,6 +2191,8 @@ if (!token) {
           limparVariacoes();
           const submitBtn = document.getElementById('prodSubmitBtn');
           if (submitBtn) submitBtn.innerText = '+ Cadastrar Produto';
+          const assocBtn = document.getElementById('assocSubmitBtn');
+          if (assocBtn) assocBtn.innerText = '+ Cadastrar Associado';
           const vendaBtn = document.getElementById('vendaSubmitBtn');
           if (vendaBtn) vendaBtn.innerText = '+ Concluir Venda';
           await carregarDadosDoBanco();
@@ -2160,6 +2252,24 @@ if (!token) {
       salvarNoBanco(endpoint, payload, e, id ? 'PUT' : 'POST');
       document.getElementById('prodId').value = '';
       document.getElementById('prodImagemUrl').value = '';
+    }
+
+    // MEXI AQUI: addAssociado agora segue o mesmo fluxo de addUsuario/addCategoria,
+    // usando salvarNoBanco (POST para novo, PUT para edição) em vez do fetch
+    // direto e hardcoded que existia antes.
+    function addAssociado(e) {
+      e.preventDefault();
+      const id = document.getElementById('assocId').value;
+      const payload = {
+        nome: document.getElementById('assocNome').value,
+        email: document.getElementById('assocEmail').value,
+        telefone: document.getElementById('assocTelefone').value || '',
+        endereco: document.getElementById('assocEndereco').value || '',
+        status: 'Ativo'
+      };
+      const endpoint = id ? `${API_URLS.associado}/${id}` : API_URLS.associado;
+      salvarNoBanco(endpoint, payload, e, id ? 'PUT' : 'POST');
+      document.getElementById('assocId').value = '';
     }
 
     function addUsuario(e) {

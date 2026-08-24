@@ -1,13 +1,14 @@
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, status
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 
 from app.controllers import venda_controller
 from app.database import get_db
 
 
+# --- Schemas (Pydantic) ---
 class ItemVendaInput(BaseModel):
     produto_id: int
     quantidade: int = 1
@@ -39,17 +40,18 @@ class VendaResponse(BaseModel):
     data_venda: Optional[str] = None
     itens: List[dict] = []
 
+    model_config = ConfigDict(from_attributes=True)
 
+
+# --- Router ---
 router = APIRouter(prefix="/api/vendas", tags=["Vendas"])
 
 
 @router.get("/", response_model=List[VendaResponse])
-@router.get("", response_model=List[VendaResponse])
-async def listar_vendas(db: Session = Depends(get_db)):
+def listar_vendas(db: Session = Depends(get_db)):
     return venda_controller.listar_vendas(db)
 
 
-@router.post("/", response_model=dict, status_code=status.HTTP_201_CREATED)
-@router.post("", response_model=dict, status_code=status.HTTP_201_CREATED)
-async def registrar_venda(dados: VendaCreate, db: Session = Depends(get_db)):
+@router.post("/", response_model=VendaResponse, status_code=status.HTTP_201_CREATED)
+def registrar_venda(dados: VendaCreate, db: Session = Depends(get_db)):
     return venda_controller.registrar_venda(db, dados)

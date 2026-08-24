@@ -38,3 +38,4 @@ class ItemVenda(Base):
     venda = relationship("Venda", back_populates="itens")
     produto = relationship("Produto")
     variacao = relationship("VariacaoProduto")
+    # Em Venda
