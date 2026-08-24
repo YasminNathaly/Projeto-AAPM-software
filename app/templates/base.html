@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
  
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-   
+ 
   <style>
     :root {
       --bg-main: #09090f;
@@ -869,34 +869,49 @@
  
       <div class="product-grid-container reveal-stagger" id="productGallery"></div>
     </section>
+ 
     <!-- 3. ASSOCIADOS -->
-<section id="associados" class="view-content">
-  <div class="page-title-box reveal">
-    <h2>Consulta de Associados</h2>
-    <p>Lista oficial de associados cadastrados na AAPM SENAI Brás.</p>
-  </div>
-
-  <div class="associados-wrap reveal">
-    <div class="card" style="padding: 0.6rem 1.4rem;">
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th>Nome Completo</th>
-              <th>RM / Matrícula</th>
-              <th>Curso / Departamento</th>
-              <th>Status</th>
-              <th>Ação</th>
-            </tr>
-          </thead>
-          <tbody id="tabela-associados">
-            <!-- Dados alimentados via JavaScript -->
-          </tbody>
-        </table>
+    <section id="associados" class="view-content">
+      <div class="page-title-box reveal">
+        <h2>Consulta de Associados</h2>
+        <p>Lista oficial de associados cadastrados na AAPM SENAI Brás.</p>
       </div>
-    </div>
-  </div>
-</section>
+ 
+      <div class="associados-wrap reveal">
+        <div class="card" style="padding: 0.6rem 1.4rem;">
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome Completo</th>
+                  <th>RM / Matrícula</th>
+                  <th>Curso / Departamento</th>
+                  <th>Status</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight: 600;">Carlos Eduardo Silva</td>
+                  <td><span class="badge-rm">RM 94821</span></td>
+                  <td>Técnico em Mecatrônica</td>
+                  <td><span class="status-tag active">Ativo</span></td>
+                  <td><button class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.7rem;" onclick="openViewModal('Carlos Eduardo Silva', 'RM 94821', 'Técnico em Mecatrônica', 'Ativo')">Ver</button></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 600;">Mariana Oliveira Souza</td>
+                  <td><span class="badge-rm">RM 88310</span></td>
+                  <td>Técnico em Desenvolvimento de Sistemas</td>
+                  <td><span class="status-tag active">Ativo</span></td>
+                  <td><button class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.7rem;" onclick="openViewModal('Mariana Oliveira Souza', 'RM 88310', 'Técnico em Desenvolvimento de Sistemas', 'Ativo')">Ver</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+ 
     <!-- 4. FALE CONOSCO / INSCRIÇÃO ASSOCIADO -->
     <section id="fale-conosco" class="view-content">
       <div class="page-title-box reveal">
@@ -966,53 +981,7 @@
 
  
   <script>
-   async function carregarAssociados() {
-  const tbody = document.getElementById('tabela-associados');
-  if (!tbody) return;
-
-  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Carregando associados...</td></tr>';
-
-  try {
-    const response = await fetch('http://127.0.0.1:8000/associados/');
-    if (!response.ok) throw new Error('Erro ao buscar associados');
-
-    const associados = await response.json();
-
-    if (associados.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhum associado cadastrado.</td></tr>';
-      return;
-    }
-
-    tbody.innerHTML = associados.map(assoc => {
-      const rm = assoc.matricula || assoc.rm || 'N/A';
-      const curso = assoc.curso || assoc.departamento || 'N/A';
-      const status = assoc.status || 'Ativo';
-      const isActive = status.toLowerCase() === 'ativo';
-
-      return `
-        <tr>
-          <td style="font-weight: 600;">${assoc.nome}</td>
-          <td><span class="badge-rm">${rm}</span></td>
-          <td>${curso}</td>
-          <td><span class="status-tag ${isActive ? 'active' : ''}">${status}</span></td>
-          <td>
-            <button class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.7rem;" 
-              onclick="openViewModal('${assoc.nome}', '${rm}', '${curso}', '${status}')">
-              Ver
-            </button>
-          </td>
-        </tr>
-      `;
-    }).join('');
-
-  } catch (error) {
-    console.error('Erro:', error);
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Erro ao carregar associados.</td></tr>';
-  }
-}
-
-// Carrega a lista automaticamente assim que a página abrir
-document.addEventListener('DOMContentLoaded', carregarAssociados);
+   
 
     // ===== TEMA CLARO / ESCURO =====
     function toggleTheme() {
