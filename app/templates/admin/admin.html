@@ -422,6 +422,7 @@
     }
     .status-tag.active { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
     .status-tag.inactive { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+    .status-tag.warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
 
     .action-btn-group { display: flex; gap: 8px; align-items: center; }
 
@@ -1165,7 +1166,52 @@
       </div>
     </section>
 
-    <!-- 5. USUARIO -->
+    <!-- 5. ARMARIO -->
+    <section id="armario" class="view-content">
+      <div class="card reveal">
+        <div class="card-title">Cadastrar Armário</div>
+        <form onsubmit="addArmario(event)" class="form-grid">
+          <div class="form-group">
+            <label>Número do Armário</label>
+            <input type="text" id="armNumero" class="form-control" placeholder="Ex: 001, A-12..." required>
+          </div>
+          <div class="form-group">
+            <label>Localização <span style="text-transform:none;font-weight:500;">(opcional)</span></label>
+            <input type="text" id="armLocalizacao" class="form-control" placeholder="Ex: Bloco A, Corredor 2...">
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="armStatus" class="form-control" required onchange="toggleArmarioAssociadoField()">
+              <option value="Disponível">Disponível</option>
+              <option value="Ocupado">Ocupado</option>
+              <option value="Manutenção">Manutenção</option>
+            </select>
+          </div>
+          <div class="form-group" id="armAssociadoWrap">
+            <label>Associado <span style="text-transform:none;font-weight:500;">(vincular ao armário)</span></label>
+            <select id="armAssociadoId" class="form-control">
+              <option value="">Nenhum</option>
+            </select>
+          </div>
+          <input type="hidden" id="armId">
+          <div class="form-group full">
+            <button type="submit" class="btn btn-primary" id="armSubmitBtn" style="width: fit-content;">+ Cadastrar Armário</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card reveal">
+        <div class="card-title">Armários Cadastrados</div>
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>Número</th><th>Localização</th><th>Status</th><th>Associado</th><th>Ações</th></tr></thead>
+            <tbody id="tblArmarios"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. USUARIO -->
     <section id="usuario" class="view-content">
       <div class="card reveal">
         <div class="card-title">Cadastrar Usuário</div>
@@ -1208,7 +1254,7 @@
       </div>
     </section>
 
-    <!-- 6. VENDA -->
+    <!-- 7. VENDA -->
     <section id="venda" class="view-content">
       <div class="card reveal">
         <div class="card-title">Registrar Nova Venda</div>
@@ -1399,6 +1445,7 @@
       fornecedor: '/api/fornecedores',
       produto: '/api/produtos',
       associado: '/api/associados',
+      armario: '/api/armarios',
       usuario: '/api/usuarios',
       venda: '/api/vendas',
       upload: '/api/upload-imagem'
@@ -1409,6 +1456,7 @@
     let fornecedores = [];
     let produtos = [];
     let associados = [];
+    let armarios = [];
     let usuarios = [];
     let vendas = [];
 
@@ -1423,14 +1471,26 @@
       };
     }
 
+    // MEXI AQUI: normaliza o armário vindo do backend (model Armario do FastAPI):
+    // id, numero, localizacao, status, associado_id, associado_nome (via @property).
+    function normalizarArmario(a) {
+      return {
+        ...a,
+        status: a.status || 'Disponível',
+        associado_id: a.associado_id ?? null,
+        associado_nome: a.associado_nome || null
+      };
+    }
+
     // ===== CONTROLADOR DE CARREGAMENTO (GET DE TODAS AS ENTIDADES) =====
     async function carregarDadosDoBanco() {
       try {
-        const [resCat, resForn, resProd, resAssoc, resUsr, resVnd] = await Promise.all([
+        const [resCat, resForn, resProd, resAssoc, resArm, resUsr, resVnd] = await Promise.all([
           fetch(API_URLS.categoria),
           fetch(API_URLS.fornecedor),
           fetch(API_URLS.produto),
           fetch(API_URLS.associado),
+          fetch(API_URLS.armario),
           fetch(API_URLS.usuario),
           fetch(API_URLS.venda)
         ]);
@@ -1441,6 +1501,8 @@
         // que "variacoes" chegue certinho até as funções de render.
         produtos = resProd.ok ? (await resProd.json()).map(normalizarProduto) : [];
         associados = resAssoc.ok ? await resAssoc.json() : [];
+        // MEXI AQUI: passa cada armário por normalizarArmario()
+        armarios = resArm.ok ? (await resArm.json()).map(normalizarArmario) : [];
         usuarios = resUsr.ok ? await resUsr.json() : [];
         vendas = resVnd.ok ? await resVnd.json() : [];
 
@@ -1448,6 +1510,7 @@
         renderFornecedores();
         renderProdutos();
         renderAssociados();
+        renderArmarios();
         renderUsuarios();
         renderVendas();
         popularSelectsDinamicos();
@@ -1462,8 +1525,8 @@
       }
     }
 
-    // Preenche os selects de Categoria (no form de produto) e Produto (no form de venda)
-    // sempre com os dados reais vindos do banco.
+    // Preenche os selects de Categoria (no form de produto), Produto (no form de venda)
+    // e Associado (no form de armário) sempre com os dados reais vindos do banco.
     function popularSelectsDinamicos() {
       const selCategoria = document.getElementById('prodCategoria');
       const valorAtualCat = selCategoria.value;
@@ -1476,6 +1539,15 @@
       selProduto.innerHTML = '<option value="">Selecione...</option>' +
         produtos.map(p => `<option value="${p.id}">${p.nome} (R$ ${Number(p.preco).toFixed(2)})</option>`).join('');
       if (valorAtualProd) selProduto.value = valorAtualProd;
+
+      // MEXI AQUI: popula o select de associado dentro do form de armário
+      const selArmAssoc = document.getElementById('armAssociadoId');
+      if (selArmAssoc) {
+        const valorAtualArmAssoc = selArmAssoc.value;
+        selArmAssoc.innerHTML = '<option value="">Nenhum</option>' +
+          associados.map(a => `<option value="${a.id}">${a.nome}</option>`).join('');
+        if (valorAtualArmAssoc) selArmAssoc.value = valorAtualArmAssoc;
+      }
     }
 
     // ===== NOTIFICAÇÕES DINÂMICAS (sempre a partir dos dados reais) =====
@@ -1483,6 +1555,7 @@
       venda: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.8h7.2a2 2 0 0 0 2-1.6L21 8H6"/></svg>',
       produto: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5V8Z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg>',
       associado: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+      armario: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="7" y1="6" x2="9" y2="6"/><line x1="15" y1="6" x2="17" y2="6"/><circle cx="8" cy="12" r="1"/><circle cx="16" cy="12" r="1"/></svg>',
       usuario: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>',
       categoria: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10V6a2 2 0 0 0-2-2h-4L3 15l6 6 11-11Z"/><circle cx="8.5" cy="8.5" r="1.2"/></svg>',
       fornecedor: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-8h6v8"/></svg>'
@@ -1493,6 +1566,7 @@
       vendas.slice(0, 3).forEach(v => itens.push({ tipo: 'venda', titulo: 'Nova venda registrada', sub: `${v.produto_nome} · ${v.data_venda || ''}`, ordem: v.id }));
       produtos.slice(-2).reverse().forEach(p => itens.push({ tipo: 'produto', titulo: 'Produto cadastrado', sub: p.nome, ordem: p.id }));
       associados.slice(-2).reverse().forEach(a => itens.push({ tipo: 'associado', titulo: 'Associado cadastrado', sub: a.nome, ordem: a.id }));
+      armarios.slice(-2).reverse().forEach(a => itens.push({ tipo: 'armario', titulo: 'Armário cadastrado', sub: `Nº ${a.numero} · ${a.status}`, ordem: a.id }));
       usuarios.slice(-2).reverse().forEach(u => itens.push({ tipo: 'usuario', titulo: 'Novo usuário cadastrado', sub: u.nome, ordem: u.id }));
       categorias.slice(-1).reverse().forEach(c => itens.push({ tipo: 'categoria', titulo: 'Categoria cadastrada', sub: c.nome, ordem: c.id }));
       fornecedores.slice(-1).reverse().forEach(f => itens.push({ tipo: 'fornecedor', titulo: 'Fornecedor cadastrado', sub: f.nome, ordem: f.id }));
@@ -1753,12 +1827,28 @@
       if (wrap) wrap.innerHTML = '';
     }
 
+    // MEXI AQUI: mostra/esconde o campo de associado no form de armário —
+    // só faz sentido escolher um associado quando o status é "Ocupado".
+    function toggleArmarioAssociadoField() {
+      const status = document.getElementById('armStatus').value;
+      const wrap = document.getElementById('armAssociadoWrap');
+      const sel = document.getElementById('armAssociadoId');
+      if (!wrap || !sel) return;
+      if (status === 'Ocupado') {
+        wrap.style.display = '';
+      } else {
+        wrap.style.display = '';
+        sel.value = '';
+      }
+    }
+
     // TÍTULOS E RÓTULOS POR MÓDULO
     const titulos = {
       'categoria': ['Categorias', 'Organização e classificação de produtos.', 'Nova Categoria'],
       'fornecedor': ['Fornecedores', 'Cadastro e histórico de fornecedores.', 'Novo Fornecedor'],
       'produto': ['Produtos', 'Catálogo e controle de itens.', 'Novo Produto'],
       'associado': ['Associados', 'Consulta e cadastro dos associados da AAPM.', 'Novo Associado'],
+      'armario': ['Armários', 'Controle de disponibilidade e ocupação dos armários.', 'Novo Armário'],
       'usuario': ['Usuários', 'Controle de acessos e permissões.', 'Novo Usuário'],
       'venda': ['Vendas', 'Registro de pedidos e transações.', 'Nova Venda']
     };
@@ -1815,7 +1905,7 @@
       `;
     }
 
-    const mapaModulos = { cat: 'categoria', forn: 'fornecedor', prod: 'produto', assoc: 'associado', usr: 'usuario', vnd: 'venda' };
+    const mapaModulos = { cat: 'categoria', forn: 'fornecedor', prod: 'produto', assoc: 'associado', arm: 'armario', usr: 'usuario', vnd: 'venda' };
 
     // Preenche o formulário do módulo com os dados do item para edição
     function editarItem(tipo, id) {
@@ -1869,6 +1959,16 @@
         document.getElementById('assocTelefone').value = item.telefone || '';
         document.getElementById('assocEndereco').value = item.endereco || '';
         document.getElementById('assocSubmitBtn').innerText = 'Salvar Alterações';
+      } else if (tipo === 'arm') {
+        const item = armarios.find(a => String(a.id) === String(id));
+        if (!item) return;
+        document.getElementById('armId').value = item.id;
+        document.getElementById('armNumero').value = item.numero;
+        document.getElementById('armLocalizacao').value = item.localizacao || '';
+        document.getElementById('armStatus').value = item.status || 'Disponível';
+        toggleArmarioAssociadoField();
+        document.getElementById('armAssociadoId').value = item.associado_id || '';
+        document.getElementById('armSubmitBtn').innerText = 'Salvar Alterações';
       } else if (tipo === 'usr') {
         const item = usuarios.find(u => String(u.id) === String(id));
         if (!item) return;
@@ -2020,6 +2120,33 @@
       `).join('') : emptyRow(6, 'Nenhum associado cadastrado.');
     }
 
+    // MEXI AQUI: badge de status do armário — verde (Disponível), vermelho (Ocupado),
+    // amarelo (Manutenção ou qualquer outro status não previsto).
+    function statusArmarioClasse(status) {
+      if (status === 'Disponível') return 'active';
+      if (status === 'Ocupado') return 'inactive';
+      return 'warning';
+    }
+
+    function renderArmarios() {
+      const tbody = document.getElementById('tblArmarios');
+      if (!tbody) return;
+      tbody.innerHTML = armarios.length ? armarios.map((item, i) => `
+        <tr style="--i:${i}">
+          <td><span class="pill-badge">${item.numero}</span></td>
+          <td>${item.localizacao || '-'}</td>
+          <td><span class="status-tag ${statusArmarioClasse(item.status)}">${item.status || 'Disponível'}</span></td>
+          <td>${item.associado_nome || (item.associado_id ? nomeAssociadoPorId(item.associado_id) : '-')}</td>
+          <td>${renderAcoes('arm', item.id)}</td>
+        </tr>
+      `).join('') : emptyRow(5, 'Nenhum armário cadastrado.');
+    }
+
+    function nomeAssociadoPorId(associadoId) {
+      const a = associados.find(a => String(a.id) === String(associadoId));
+      return a ? a.nome : '-';
+    }
+
     function renderUsuarios() {
       const tbody = document.getElementById('tblUsuarios');
       tbody.innerHTML = usuarios.length ? usuarios.map((item, i) => `
@@ -2075,6 +2202,12 @@
             { value: associados.length, label: 'Associados Cadastrados' },
             { value: associados.filter(a => (a.status || 'Ativo') === 'Ativo').length, label: 'Associados Ativos' },
             { value: associados.filter(a => a.telefone).length, label: 'Com Telefone' }
+          ];
+        case 'armario':
+          return [
+            { value: armarios.length, label: 'Armários Cadastrados' },
+            { value: armarios.filter(a => a.status === 'Disponível').length, label: 'Disponíveis' },
+            { value: armarios.filter(a => a.status === 'Ocupado').length, label: 'Ocupados' }
           ];
         case 'usuario':
           return [
@@ -2135,6 +2268,8 @@
           return produtos.slice(-3).reverse().map(p => ({ title: p.nome, sub: 'R$ ' + Number(p.preco).toFixed(2) }));
         case 'associado':
           return associados.slice(-3).reverse().map(a => ({ title: a.nome, sub: a.email || a.telefone || '-' }));
+        case 'armario':
+          return armarios.slice(-3).reverse().map(a => ({ title: 'Armário ' + a.numero, sub: a.status || 'Disponível' }));
         case 'usuario':
           return usuarios.slice(-3).reverse().map(u => ({ title: u.nome, sub: u.perfil }));
         case 'venda':
@@ -2200,6 +2335,8 @@
           if (submitBtn) submitBtn.innerText = '+ Cadastrar Produto';
           const assocBtn = document.getElementById('assocSubmitBtn');
           if (assocBtn) assocBtn.innerText = '+ Cadastrar Associado';
+          const armBtn = document.getElementById('armSubmitBtn');
+          if (armBtn) armBtn.innerText = '+ Cadastrar Armário';
           const vendaBtn = document.getElementById('vendaSubmitBtn');
           if (vendaBtn) vendaBtn.innerText = '+ Concluir Venda';
           await carregarDadosDoBanco();
@@ -2277,6 +2414,25 @@
       const endpoint = id ? `${API_URLS.associado}/${id}` : API_URLS.associado;
       salvarNoBanco(endpoint, payload, e, id ? 'PUT' : 'POST');
       document.getElementById('assocId').value = '';
+    }
+
+    // MEXI AQUI: addArmario segue o mesmo padrão de addAssociado/addUsuario —
+    // usa salvarNoBanco (POST para novo, PUT para edição), enviando os campos
+    // que existem no model Armario (numero, localizacao, status, associado_id).
+    function addArmario(e) {
+      e.preventDefault();
+      const id = document.getElementById('armId').value;
+      const status = document.getElementById('armStatus').value;
+      const associadoValor = document.getElementById('armAssociadoId').value;
+      const payload = {
+        numero: document.getElementById('armNumero').value,
+        localizacao: document.getElementById('armLocalizacao').value || '',
+        status: status,
+        associado_id: associadoValor ? parseInt(associadoValor, 10) : null
+      };
+      const endpoint = id ? `${API_URLS.armario}/${id}` : API_URLS.armario;
+      salvarNoBanco(endpoint, payload, e, id ? 'PUT' : 'POST');
+      document.getElementById('armId').value = '';
     }
 
     function addUsuario(e) {
