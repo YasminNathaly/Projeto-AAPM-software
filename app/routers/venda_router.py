@@ -46,12 +46,10 @@ class VendaResponse(BaseModel):
 # --- Router ---
 router = APIRouter(prefix="/api/vendas", tags=["Vendas"])
 
-
-@router.get("/", response_model=List[VendaResponse])
+@router.get("", response_model=List[VendaResponse])   # tirei a "/"
 def listar_vendas(db: Session = Depends(get_db)):
     return venda_controller.listar_vendas(db)
 
-
-@router.post("/", response_model=VendaResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=VendaResponse, status_code=status.HTTP_201_CREATED)  # tirei a "/"
 def registrar_venda(dados: VendaCreate, db: Session = Depends(get_db)):
     return venda_controller.registrar_venda(db, dados)

@@ -18,7 +18,6 @@ alembic
 # SEGURANÇA E AUTENTICAÇÃO
 # ==========================================
 python-jose[cryptography]
-passlib[bcrypt]
 
 # ==========================================
 # MANIPULAÇÃO DE IMAGENS (UPLOADS)
@@ -37,3 +36,5 @@ reportlab
 # VALIDAÇÃO E ESTRUTURAÇÃO DE DADOS
 # ==========================================
 pydantic
+ 
+bcrypt

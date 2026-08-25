@@ -16,7 +16,12 @@ def criar_categoria(db: Session, categoria_data):
             detail="Categoria já cadastrada",
         )
 
-    nova_categoria = Categoria(nome=categoria_data.nome)
+    # Criação garantindo o envio dos campos opcionais
+    nova_categoria = Categoria(
+        nome=categoria_data.nome,
+        codigo=getattr(categoria_data, "codigo", None),
+        descricao=getattr(categoria_data, "descricao", None)
+    )
     db.add(nova_categoria)
     db.commit()
     db.refresh(nova_categoria)
@@ -30,6 +35,31 @@ def buscar_categoria_por_id(db: Session, categoria_id: int):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Categoria não encontrada",
         )
+    return categoria
+
+
+def atualizar_categoria(db: Session, categoria_id: int, categoria_data):
+    categoria = buscar_categoria_por_id(db, categoria_id)
+
+    # Evita duplicar nome com outra categoria existente
+    categoria_existente = db.query(Categoria).filter(
+        Categoria.nome == categoria_data.nome,
+        Categoria.id != categoria_id
+    ).first()
+    if categoria_existente:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Já existe outra categoria cadastrada com este nome",
+        )
+
+    categoria.nome = categoria_data.nome
+    if hasattr(categoria, "codigo"):
+        categoria.codigo = getattr(categoria_data, "codigo", "")
+    if hasattr(categoria, "descricao"):
+        categoria.descricao = getattr(categoria_data, "descricao", "")
+
+    db.commit()
+    db.refresh(categoria)
     return categoria
 
 

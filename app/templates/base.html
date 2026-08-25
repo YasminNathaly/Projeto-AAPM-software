@@ -1403,22 +1403,39 @@ cat > /home/claude/index.html << 'HTMLEOF'
     }
  
     // ===== CARREGAMENTO DE DADOS =====
-    async function carregarCategorias() {
-      try {
-        const resposta = await fetch('/api/categorias');
-        if (resposta.ok) {
-          const dados = await resposta.json();
-          if (Array.isArray(dados) && dados.length) {
-            categories = dados.map((c) => ({ id: c.id, nome: c.nome || c.name }));
-          }
-        }
-      } catch (erro) {
-        console.warn('Não foi possível carregar categorias do backend. Mantendo fallback local.', erro);
-      }
-      renderCategoryPills();
-      populateCategorySelect();
-      renderCategoryManageList();
+    // Exemplo: Cadastrar Categoria
+async function cadastrarCategoria(event) {
+  event.preventDefault();
+
+  const payload = {
+    nome: document.getElementById('catNome').value,
+    descricao: document.getElementById('catDescricao')?.value || null
+  };
+
+  try {
+    const response = await fetch('/api/categorias/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (response.ok) {
+      alert('Categoria cadastrada com sucesso!');
+      event.target.reset();
+      
+      // Atualiza a lista na tela se a função existir
+      if (typeof carregarCategorias === 'function') carregarCategorias();
+      if (typeof fetchCategorias === 'function') fetchCategorias();
+    } else {
+      const err = await response.json();
+      alert('Erro ao cadastrar: ' + (err.detail || JSON.stringify(err)));
     }
+  } catch (error) {
+    console.error('Erro de rede:', error);
+    alert('Erro de conexão com o servidor.');
+  }
+}
+
 
     async function  loginadmin(params) {
       try{

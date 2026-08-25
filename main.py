@@ -9,11 +9,13 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from passlib.context import CryptContext
+
+# Hash de senha (bcrypt puro, sem depender do passlib)
+from app.auth_utils import hash_senha
 from pydantic import BaseModel, field_validator
 from sqlalchemy import inspect, text
 
-# 1. Importações do banco e dos modelos
+# 1. Importações do banco e dos routers
 from app.database import engine, Base, get_db
 from app.routers import categoria_router, produto_router
 from app.routers.auth_router import router as auth_router
@@ -23,20 +25,29 @@ from app.routers.venda_router import router as venda_router
 from app.routers.associado_router import router as associado_router
 from app.routers.armario_router import router as armario_router
 
+# 2. Importação garantida de todos os modelos do SQLAlchemy (antes de create_all)
+try:
+    from app.models.categoria import Categoria
+except ImportError:
+    Categoria = None
+
 try:
     from app.models.produto import Produto
 except ImportError:
     Produto = None
 
 try:
+    from app.models.variacao import VariacaoProduto
+except ImportError:
+    try:
+        from app.models.variacao import Variacao as VariacaoProduto
+    except ImportError:
+        VariacaoProduto = None
+
+try:
     from app.models.usuario import Usuario
 except ImportError:
     Usuario = None
-
-try:
-    from app.models.categoria import Categoria
-except ImportError:
-    Categoria = None
 
 try:
     from app.models.fornecedor import Fornecedor
@@ -48,7 +59,7 @@ try:
 except ImportError:
     Venda = None
 
-try: 
+try:
     from app.models.associado import Associado
 except ImportError:
     Associado = None
@@ -58,8 +69,9 @@ try:
 except ImportError:
     Armario = None
 
-# Cria as tabelas no Banco de Dados
+# Cria as tabelas no Banco de Dados após carregar os modelos
 Base.metadata.create_all(bind=engine)
+
 
 def garantir_colunas_vendas():
     with engine.begin() as conn:
@@ -79,7 +91,6 @@ def garantir_colunas_vendas():
                 conn.execute(text(f"ALTER TABLE vendas ADD COLUMN {nome} {tipo}"))
 
 garantir_colunas_vendas()
-
 
 def garantir_colunas_itens_venda():
     with engine.begin() as conn:
@@ -117,8 +128,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CAMINHOS E STATIC
@@ -418,20 +427,6 @@ async def api_listar_fornecedores(db: Session = Depends(get_db)):
         } for f in db.query(Fornecedor).all()
     ]
 
-@app.get("/api/usuarios")
-async def api_listar_usuarios(db: Session = Depends(get_db)):
-    if not Usuario:
-        return []
-    return [
-        {
-            "id": u.id,
-            "nome": u.nome,
-            "email": u.email,
-            "perfil": obter_perfil_usuario(u),
-            "status": getattr(u, "status", "Ativo")
-        } for u in db.query(Usuario).all()
-    ]
-
 @app.get("/api/produtos")
 async def api_listar_produtos(db: Session = Depends(get_db)):
     if not Produto:
@@ -462,23 +457,10 @@ async def api_listar_produtos(db: Session = Depends(get_db)):
         })
     return retorno
 
-@app.get("/api/vendas")
-async def api_listar_vendas(db: Session = Depends(get_db)):
-    if not Venda:
-        return []
-    return [
-        {
-            "id": v.id,
-            "comprador": obter_comprador_venda(v),
-            "cliente": obter_comprador_venda(v),
-            "produto_id": getattr(v, "produto_id", getattr(v, "id_produto", None)),
-            "produto_nome": obter_nome_produto_venda(v, db),
-            "quantidade": getattr(v, "quantidade", getattr(v, "qtd", 1)),
-            "preco_total": obter_preco_total_venda(v),
-            "forma_pagamento": obter_forma_pagamento_venda(v),
-            "data_venda": str(getattr(v, "data_venda", getattr(v, "created_at", "")))
-        } for v in db.query(Venda).order_by(Venda.id.desc()).all()
-    ]
+# NOTA: a listagem/criação de vendas (GET e POST /api/vendas) já é feita
+# pelo venda_router.py (incluído acima via app.include_router(venda_router)).
+# A rota GET /api/vendas que existia aqui foi removida para não duplicar/
+# conflitar com a rota equivalente do router.
 
 # ─────────────────────────────────────────────────────────────────────────────
 # UPLOAD DE IMAGEM
@@ -504,10 +486,13 @@ async def upload_imagem(arquivo: UploadFile = File(...)):
 # ─────────────────────────────────────────────────────────────────────────────
 
 @app.post("/api/categorias")
-async def criar_categoria(dados: CategoriaSchema, db: Session = Depends(get_db)):
-    if not Categoria:
-        raise HTTPException(status_code=501, detail="Modelo Categoria não configurado.")
-    nova = Categoria(nome=dados.nome, codigo=dados.codigo, descricao=dados.descricao)
+@app.post("/api/categorias/")
+def criar_categoria(dados: CategoriaSchema, db: Session = Depends(get_db)):
+    nova = Categoria(
+        nome=dados.nome,
+        codigo=dados.codigo,
+        descricao=dados.descricao
+    )
     db.add(nova)
     db.commit()
     db.refresh(nova)
@@ -577,7 +562,7 @@ async def deletar_fornecedor(fornecedor_id: int, db: Session = Depends(get_db)):
     return {"status": "deletado"}
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CRUD USUÁRIOS (COMPLETO E OTIMIZADO)
+# CRUD USUÁRIOS
 # ─────────────────────────────────────────────────────────────────────────────
 
 @app.get("/api/usuarios")
@@ -585,7 +570,7 @@ async def deletar_fornecedor(fornecedor_id: int, db: Session = Depends(get_db)):
 async def api_listar_usuarios(db: Session = Depends(get_db)):
     if not Usuario:
         return []
-    
+
     usuarios = db.query(Usuario).all()
     return [
         {
@@ -597,18 +582,14 @@ async def api_listar_usuarios(db: Session = Depends(get_db)):
         } for u in usuarios
     ]
 
-
 @app.post("/api/usuarios")
 @app.post("/api/usuarios/")
 async def criar_usuario(dados: UsuarioSchema, db: Session = Depends(get_db)):
     if not Usuario:
         raise HTTPException(status_code=501, detail="Modelo Usuario não configurado.")
-    
-    # 1. Trata a senha para o limite do bcrypt
-    senha_bruta = (dados.senha or "senai@1234").encode('utf-8')[:72]
-    senha_criptografada = pwd_context.hash(senha_bruta.decode('utf-8', errors='ignore'))
 
-    # 2. Mapeamento dinâmico do campo de senha no modelo
+    senha_criptografada = hash_senha(dados.senha or "senai@1234")
+
     campo_senha = "senha"
     if hasattr(Usuario, "senha_hash"):
         campo_senha = "senha_hash"
@@ -621,7 +602,6 @@ async def criar_usuario(dados: UsuarioSchema, db: Session = Depends(get_db)):
         campo_senha: senha_criptografada
     }
 
-    # 3. Mapeamento de perfil/cargo e status
     if hasattr(Usuario, "perfil"):
         usuario_kwargs["perfil"] = dados.perfil
     elif hasattr(Usuario, "cargo"):
@@ -634,39 +614,33 @@ async def criar_usuario(dados: UsuarioSchema, db: Session = Depends(get_db)):
     db.add(novo)
     db.commit()
     db.refresh(novo)
-    
-    return {"status": "criado", "id": novo.id}
 
+    return {"status": "criado", "id": novo.id}
 
 @app.put("/api/usuarios/{usuario_id}")
 @app.put("/api/usuarios/{usuario_id}/")
 async def atualizar_usuario(usuario_id: int, dados: UsuarioSchema, db: Session = Depends(get_db)):
     if not Usuario:
         raise HTTPException(status_code=501, detail="Modelo Usuario não configurado.")
-    
+
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado.")
-    
-    # Atualiza campos básicos
+
     usuario.nome = dados.nome
     usuario.email = dados.email
 
-    # Atualiza perfil/cargo
     if hasattr(usuario, "perfil"):
         usuario.perfil = dados.perfil
     elif hasattr(usuario, "cargo"):
         usuario.cargo = dados.perfil
 
-    # Atualiza status
     if hasattr(usuario, "status"):
         usuario.status = dados.status
 
-    # Atualiza senha apenas se for enviada
     if dados.senha and dados.senha.strip():
-        senha_bruta = dados.senha.encode('utf-8')[:72]
-        hash_nova = pwd_context.hash(senha_bruta.decode('utf-8', errors='ignore'))
-        
+        hash_nova = hash_senha(dados.senha)
+
         if hasattr(usuario, "senha"):
             usuario.senha = hash_nova
         elif hasattr(usuario, "senha_hash"):
@@ -689,20 +663,19 @@ async def atualizar_usuario(usuario_id: int, dados: UsuarioSchema, db: Session =
         }
     }
 
-
 @app.delete("/api/usuarios/{usuario_id}")
 @app.delete("/api/usuarios/{usuario_id}/")
 async def deletar_usuario(usuario_id: int, db: Session = Depends(get_db)):
     if not Usuario:
         raise HTTPException(status_code=501, detail="Modelo Usuario não configurado.")
-    
+
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado.")
-    
+
     db.delete(usuario)
     db.commit()
-    
+
     return {"status": "deletado", "mensagem": f"Usuário {usuario_id} removido com sucesso."}
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -771,7 +744,7 @@ async def deletar_produto(produto_id: int, db: Session = Depends(get_db)):
     return {"status": "deletado"}
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CRUD VENDAS E UTILITÁRIO
+# UTILITÁRIO DE VENDAS
 # ─────────────────────────────────────────────────────────────────────────────
 
 @app.get("/admin/limpar-vendas-zerar")

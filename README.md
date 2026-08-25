@@ -19,3 +19,10 @@ listar(app.routes)
 "
 
 Get-Content .\app\models\variacao.py
+
+pip install "bcrypt==3.2.2" --force-reinstall
+pip install bcrypt
+
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
