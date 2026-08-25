@@ -12,26 +12,21 @@ def criar(db: Session, armario):
     db.refresh(db_armario)
     return db_armario
 
-def reservar(db: Session, armario_id: int, nome_completo: str):
+def atualizar(db: Session, armario_id: int, armario):
     db_armario = db.query(Armario).filter(Armario.id == armario_id).first()
     if not db_armario:
         return None
-
-    db_armario.status = "Ocupado"
-    db_armario.nome_completo = nome_completo
-
+    dados = armario.model_dump() if hasattr(armario, "model_dump") else armario.dict()
+    for key, value in dados.items():
+        setattr(db_armario, key, value)
     db.commit()
     db.refresh(db_armario)
     return db_armario
 
-def liberar(db: Session, armario_id: int):
+def deletar(db: Session, armario_id: int):
     db_armario = db.query(Armario).filter(Armario.id == armario_id).first()
     if not db_armario:
-        return None
-
-    db_armario.status = "Disponível"
-    db_armario.nome_completo = None
-
+        return False
+    db.delete(db_armario)
     db.commit()
-    db.refresh(db_armario)
-    return db_armario
+    return True

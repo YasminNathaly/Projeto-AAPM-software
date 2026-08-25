@@ -1479,26 +1479,26 @@ cat > /home/claude/index.html << 'HTMLEOF'
     // MEXI AQUI: carrega os armários cadastrados no admin (mesma rota /api/armarios)
     // e normaliza os campos, igual é feito no admin.html.
     async function carregarArmariosPublic() {
-      try {
-        const resposta = await fetch('/api/armarios');
-        if (resposta.ok) {
-          const dados = await resposta.json();
-          if (Array.isArray(dados)) {
-            armariosPublic = dados.map((a) => ({
-              id: a.id,
-              numero: a.numero,
-              localizacao: a.localizacao || '-',
-              status: a.status || 'Disponível',
-              nome_completo: a.nome_completo || a.associado_nome || ''
-            }));
-          }
-        }
-      } catch (erro) {
-        console.warn('Não foi possível carregar os armários do backend.', erro);
+  try {
+    const resposta = await fetch('/api/armarios/');
+    if (resposta.ok) {
+      const dados = await resposta.json();
+      if (Array.isArray(dados)) {
+        armariosPublic = dados.map((a) => ({
+          id: a.id,
+          numero: a.numero,
+          localizacao: a.localizacao || '-',
+          status: a.status || 'Disponível',
+          nome_completo: a.nome_completo || '-'
+        }));
       }
-      renderArmarioStatusPills();
-      filterArmariosPublic();
     }
+  } catch (erro) {
+    console.warn('Não foi possível carregar os armários do backend.', erro);
+  }
+  renderArmarioStatusPills();
+  filterArmariosPublic();
+}
 
     // MEXI AQUI: carrega os associados cadastrados no admin (rota /api/associados)
     // e normaliza os campos, com fallback para nomes alternativos vindos do backend.
