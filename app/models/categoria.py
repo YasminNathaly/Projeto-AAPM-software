@@ -7,6 +7,7 @@ class Categoria(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     nome = Column(String, nullable=False)
+    codigo = Column(String, nullable=True)  # <-- ADICIONE ESTA LINHA
     descricao = Column(String, nullable=True)
 
     produtos = relationship("Produto", back_populates="categoria")
