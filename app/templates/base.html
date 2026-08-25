@@ -1,3 +1,4 @@
+cat > /home/claude/index.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="dark">
 <head>
@@ -186,12 +187,26 @@
       cursor: pointer;
       transition: all 0.25s var(--ease);
       flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
     }
     .icon-btn:hover { color: var(--text-main); border-color: var(--primary); background: var(--primary-soft); }
-    .icon-btn svg { width: 17px; height: 17px; }
+    .icon-btn:active { transform: scale(0.88); }
+    .icon-btn svg { width: 17px; height: 17px; position: relative; z-index: 1; }
     .icon-btn .icon-moon { display: none; }
     html[data-theme="light"] .icon-btn .icon-sun { display: none; }
     html[data-theme="light"] .icon-btn .icon-moon { display: block; }
+
+    /* Ícone gira/some ao trocar de tema */
+    .icon-btn .icon-sun,
+    .icon-btn .icon-moon {
+      transition: transform 0.45s var(--ease), opacity 0.35s var(--ease);
+    }
+    .icon-btn.spin .icon-sun,
+    .icon-btn.spin .icon-moon {
+      transform: rotate(180deg) scale(0.4);
+      opacity: 0;
+    }
  
     .btn-auth {
       padding: 9px 20px;
@@ -696,6 +711,65 @@
       pointer-events: none;
       border: 1px solid var(--border-color);
     }
+
+    /* ================= ANIMAÇÃO DE TROCA DE TEMA ================= */
+    /* Efeito de revelação circular (View Transition API), saindo do botão clicado */
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation: none;
+      mix-blend-mode: normal;
+    }
+    ::view-transition-old(root) { z-index: 1; }
+    ::view-transition-new(root) { z-index: 2; }
+
+    /* Overlay de "carregando" que aparece por cima enquanto o tema troca */
+    #theme-loading-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      opacity: 0;
+    }
+    #theme-loading-overlay .tlo-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 10px 18px 10px 14px;
+      border-radius: var(--radius-pill);
+      box-shadow: var(--shadow);
+      transform: translateY(10px) scale(0.94);
+      opacity: 0;
+    }
+    #theme-loading-overlay .tlo-spinner {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      border: 2px solid var(--primary-soft-border);
+      border-top-color: var(--primary);
+      animation: tlo-spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+    #theme-loading-overlay .tlo-text {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    @keyframes tlo-spin { to { transform: rotate(360deg); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      ::view-transition-group(root),
+      ::view-transition-old(root),
+      ::view-transition-new(root) { animation: none !important; }
+    }
  
     @media (max-width: 900px) {
       .tech-areas-grid, .benefits-grid, .grid-2, .grid-3, .form-grid { grid-template-columns: 1fr; }
@@ -710,6 +784,14 @@
 <body>
  
   <canvas id="bg-canvas"></canvas>
+
+  <!-- MEXI AQUI: overlay de "carregando" mostrado brevemente durante a troca de tema -->
+  <div id="theme-loading-overlay" aria-hidden="true">
+    <div class="tlo-badge">
+      <span class="tlo-spinner"></span>
+      <span class="tlo-text">Ajustando tema</span>
+    </div>
+  </div>
  
   <header class="main-header">
     <a href="#" class="brand-logo" onclick="navigate('inicio', document.querySelectorAll('.nav-item')[0])">
@@ -744,7 +826,7 @@
         <span class="user-name" id="userNameLabel">Admin</span>
       </div>
       <span class="header-location">SENAI BRÁS &mdash; SP</span>
-      <button class="icon-btn" id="themeToggleBtn" onclick="toggleTheme()" aria-label="Alternar tema claro/escuro" title="Alternar tema">
+      <button class="icon-btn" id="themeToggleBtn" onclick="toggleTheme(event)" aria-label="Alternar tema claro/escuro" title="Alternar tema">
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"/></svg>
       </button>
@@ -830,7 +912,7 @@
               <h3>Escola SENAI FRANCISCO MATARAZZO</h3>
             </div>
             <p class="info-text">
-              Projetada para atender aos mais altos padrões exigidos pelo setor produtivo, a unidade Roberto Simonsen une a tradição do ensino técnico SENAI com os avanços da Indústria 4.0.
+              Projetada para atender aos mais altos padrões exigidos pelo setor produtivo, a unidade Francisco Matarazzo une a tradição do ensino técnico SENAI com os avanços da Indústria 4.0.
             </p>
             <div class="location-box">
               <div class="location-header">
@@ -1104,15 +1186,140 @@
    
 
     // ===== TEMA CLARO / ESCURO =====
-    function toggleTheme() {
+    // MEXI AQUI: nova animação de troca de tema:
+    //   1) revelação circular saindo do botão (View Transition API, com fallback pra fade)
+    //   2) badge "Ajustando tema" com spinner, sobreposta por um instante
+    //   3) os cards da seção ativa "recarregam" com o efeito de reveal, como se
+    //      estivessem entrando na tela de novo
+    function getStoredTheme() {
+      try { return localStorage.getItem('theme'); } catch (e) { return null; }
+    }
+    function setStoredTheme(value) {
+      try { localStorage.setItem('theme', value); } catch (e) { /* localStorage indisponível */ }
+    }
+
+    function applyThemeAttribute(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      setStoredTheme(theme);
+    }
+
+    function showThemeLoadingOverlay() {
+      const overlay = document.getElementById('theme-loading-overlay');
+      const badge = overlay ? overlay.querySelector('.tlo-badge') : null;
+      if (!overlay || !badge) return;
+
+      overlay.style.transition = 'opacity 0.18s var(--ease)';
+      badge.style.transition = 'opacity 0.28s var(--ease), transform 0.28s var(--ease)';
+
+      overlay.style.opacity = '1';
+      requestAnimationFrame(() => {
+        badge.style.opacity = '1';
+        badge.style.transform = 'translateY(0) scale(1)';
+      });
+
+      clearTimeout(showThemeLoadingOverlay._hideTimer);
+      showThemeLoadingOverlay._hideTimer = setTimeout(() => {
+        badge.style.opacity = '0';
+        badge.style.transform = 'translateY(10px) scale(0.94)';
+        setTimeout(() => { overlay.style.opacity = '0'; }, 220);
+      }, 620);
+    }
+
+    // Faz os cards/tabelas da seção visível "reaparecerem" com o mesmo efeito de
+    // reveal usado no scroll, simulando um recarregamento suave da tela.
+    function replayLoadingReveal() {
+      const activeView = document.querySelector('.view-content.active');
+      if (!activeView) return;
+      const items = activeView.querySelectorAll('.reveal, .reveal-stagger');
+      items.forEach((el, i) => {
+        el.classList.remove('in-view');
+        void el.offsetWidth; // força reflow para reiniciar a transição CSS
+        setTimeout(() => el.classList.add('in-view'), 60 + i * 70);
+      });
+    }
+
+    function toggleTheme(event) {
       const html = document.documentElement;
       const isLight = html.getAttribute('data-theme') === 'light';
-      html.setAttribute('data-theme', isLight ? 'dark' : 'light');
+      const newTheme = isLight ? 'dark' : 'light';
+      const btn = document.getElementById('themeToggleBtn');
+
+      if (btn) {
+        btn.classList.add('spin');
+        setTimeout(() => btn.classList.remove('spin'), 450);
+      }
+
+      // Ponto de origem do "wipe": posição do clique, ou o centro do botão como fallback
+      let originX = window.innerWidth - 60;
+      let originY = 40;
+      if (event && typeof event.clientX === 'number' && event.clientX) {
+        originX = event.clientX;
+        originY = event.clientY;
+      } else if (btn) {
+        const rect = btn.getBoundingClientRect();
+        originX = rect.left + rect.width / 2;
+        originY = rect.top + rect.height / 2;
+      }
+
+      const endRadius = Math.hypot(
+        Math.max(originX, window.innerWidth - originX),
+        Math.max(originY, window.innerHeight - originY)
+      );
+
+      const finishUp = () => {
+        showThemeLoadingOverlay();
+        replayLoadingReveal();
+      };
+
+      // Navegadores sem suporte à View Transition API: aplica o tema direto e
+      // ainda assim mostra o overlay + replay do reveal.
+      if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        applyThemeAttribute(newTheme);
+        finishUp();
+        return;
+      }
+
+      const transition = document.startViewTransition(() => {
+        applyThemeAttribute(newTheme);
+      });
+
+      transition.ready.then(() => {
+        document.documentElement.animate(
+          {
+            clipPath: [
+              `circle(0px at ${originX}px ${originY}px)`,
+              `circle(${endRadius}px at ${originX}px ${originY}px)`
+            ]
+          },
+          {
+            duration: 620,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+            pseudoElement: '::view-transition-new(root)'
+          }
+        );
+      }).catch(() => { /* transição não suportada nesse navegador, ignora */ });
+
+      transition.finished.then(finishUp).catch(finishUp);
     }
+
     (function initTheme() {
+      const saved = getStoredTheme();
+      if (saved === 'light' || saved === 'dark') {
+        document.documentElement.setAttribute('data-theme', saved);
+        return;
+      }
       const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
       document.documentElement.setAttribute('data-theme', prefersLight ? 'light' : 'dark');
     })();
+
+    // Acompanha o tema do sistema em tempo real, só quando o usuário não escolheu manualmente
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
+        if (!getStoredTheme()) {
+          document.documentElement.setAttribute('data-theme', e.matches ? 'light' : 'dark');
+        }
+      });
+    }
  
     // REDIRECIONAMENTO GOOGLE FORMS
     function redirectToGoogleForms(event) {
