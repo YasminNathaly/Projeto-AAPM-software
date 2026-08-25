@@ -1,4 +1,4 @@
-cat > /home/claude/index.html << 'HTMLEOF'
+
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="dark">
 <head>
@@ -631,16 +631,6 @@ cat > /home/claude/index.html << 'HTMLEOF'
       justify-content: space-between;
     }
     @media (max-width: 900px) { .armarios-summary { grid-template-columns: 1fr; } }
-
-    /* MEXI AQUI: filtros da aba pública de Associados (mesmo padrão de Armários) */
-    .associados-filters {
-      padding: 0 7vw;
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-    }
  
     /* ADMIN - CATEGORIAS */
     .category-manage-list { display: flex; flex-direction: column; gap: 8px; margin-top: 1rem; max-height: 220px; overflow-y: auto; }
@@ -688,7 +678,7 @@ cat > /home/claude/index.html << 'HTMLEOF'
       position: relative; z-index: 1;
     }
 
-    /* MEXI AQUI: paginação (usada em Produtos, Associados e Armários da área pública) */
+    /* MEXI AQUI: paginação (usada em Produtos e Armários da área pública) */
     .paginacao-container {
       display: flex;
       justify-content: space-between;
@@ -786,7 +776,7 @@ cat > /home/claude/index.html << 'HTMLEOF'
       .form-grid .full { grid-column: span 1; }
       .top-nav { display: none; }
       .header-user-area { gap: 0.5rem; }
-      .product-filters, .associados-filters { flex-direction: column; align-items: stretch; }
+      .product-filters { flex-direction: column; align-items: stretch; }
       .product-search-box { max-width: none; }
     }
   </style>
@@ -922,7 +912,7 @@ cat > /home/claude/index.html << 'HTMLEOF'
               <h3>Escola SENAI FRANCISCO MATARAZZO</h3>
             </div>
             <p class="info-text">
-              Projetada para atender aos mais altos padrões exigidos pelo setor produtivo, a unidade Francisco Matarazzo une a tradição do ensino técnico SENAI com os avanços da Indústria 4.0.
+              Projetada para atender aos mais altos padrões exigidos pelo setor produtivo, a unidade Francisco M  atarazzo une a tradição do ensino técnico SENAI com os avanços da Indústria 4.0.
             </p>
             <div class="location-box">
               <div class="location-header">
@@ -1050,15 +1040,6 @@ cat > /home/claude/index.html << 'HTMLEOF'
         <h2>Consulta de Associados</h2>
         <p>Lista oficial de associados cadastrados na AAPM SENAI Brás.</p>
       </div>
-
-      <!-- MEXI AQUI: busca de associados, puxada automaticamente do admin via /api/associados -->
-      <div class="associados-filters reveal">
-        <div class="product-search-box">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-          <input type="text" id="associadoSearchInput" class="form-control" placeholder="Pesquisar por nome, RM ou curso..." oninput="filterAssociadosPublic()">
-        </div>
-        <div class="category-pills" id="associadoStatusPills"></div>
-      </div>
  
       <div class="associados-wrap reveal">
         <div class="card" style="padding: 0.6rem 1.4rem;">
@@ -1073,13 +1054,24 @@ cat > /home/claude/index.html << 'HTMLEOF'
                   <th>Ação</th>
                 </tr>
               </thead>
-              <!-- MEXI AQUI: linhas estáticas removidas; agora renderizadas via JS a partir de /api/associados -->
-              <tbody id="tblAssociadosPublic"></tbody>
+              <tbody>
+                <tr>
+                  <td style="font-weight: 600;">Carlos Eduardo Silva</td>
+                  <td><span class="badge-rm">RM 94821</span></td>
+                  <td>Técnico em Mecatrônica</td>
+                  <td><span class="status-tag active">Ativo</span></td>
+                  <td><button class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.7rem;" onclick="openViewModal('Carlos Eduardo Silva', 'RM 94821', 'Técnico em Mecatrônica', 'Ativo')">Ver</button></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 600;">Mariana Oliveira Souza</td>
+                  <td><span class="badge-rm">RM 88310</span></td>
+                  <td>Técnico em Desenvolvimento de Sistemas</td>
+                  <td><span class="status-tag active">Ativo</span></td>
+                  <td><button class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.7rem;" onclick="openViewModal('Mariana Oliveira Souza', 'RM 88310', 'Técnico em Desenvolvimento de Sistemas', 'Ativo')">Ver</button></td>
+                </tr>
+              </tbody>
             </table>
           </div>
-
-          <!-- MEXI AQUI: paginação da consulta pública de associados -->
-          <div class="paginacao-container" id="paginacaoAssociadosPublic"></div>
         </div>
       </div>
     </section>
@@ -1355,10 +1347,6 @@ cat > /home/claude/index.html << 'HTMLEOF'
     // MEXI AQUI: lista de armários (vem do admin / backend) + filtro de status ativo
     let armariosPublic = [];
     let selectedArmarioStatus = 'all';
-
-    // MEXI AQUI: lista de associados (vem do admin / backend, via /api/associados) + filtro de status ativo
-    let associadosPublic = [];
-    let selectedAssociadoStatus = 'all';
  
     let selectedCategoryId = 'all';
 
@@ -1403,39 +1391,22 @@ cat > /home/claude/index.html << 'HTMLEOF'
     }
  
     // ===== CARREGAMENTO DE DADOS =====
-    // Exemplo: Cadastrar Categoria
-async function cadastrarCategoria(event) {
-  event.preventDefault();
-
-  const payload = {
-    nome: document.getElementById('catNome').value,
-    descricao: document.getElementById('catDescricao')?.value || null
-  };
-
-  try {
-    const response = await fetch('/api/categorias/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    if (response.ok) {
-      alert('Categoria cadastrada com sucesso!');
-      event.target.reset();
-      
-      // Atualiza a lista na tela se a função existir
-      if (typeof carregarCategorias === 'function') carregarCategorias();
-      if (typeof fetchCategorias === 'function') fetchCategorias();
-    } else {
-      const err = await response.json();
-      alert('Erro ao cadastrar: ' + (err.detail || JSON.stringify(err)));
+    async function carregarCategorias() {
+      try {
+        const resposta = await fetch('/api/categorias');
+        if (resposta.ok) {
+          const dados = await resposta.json();
+          if (Array.isArray(dados) && dados.length) {
+            categories = dados.map((c) => ({ id: c.id, nome: c.nome || c.name }));
+          }
+        }
+      } catch (erro) {
+        console.warn('Não foi possível carregar categorias do backend. Mantendo fallback local.', erro);
+      }
+      renderCategoryPills();
+      populateCategorySelect();
+      renderCategoryManageList();
     }
-  } catch (error) {
-    console.error('Erro de rede:', error);
-    alert('Erro de conexão com o servidor.');
-  }
-}
-
 
     async function  loginadmin(params) {
       try{
@@ -1496,49 +1467,25 @@ async function cadastrarCategoria(event) {
     // MEXI AQUI: carrega os armários cadastrados no admin (mesma rota /api/armarios)
     // e normaliza os campos, igual é feito no admin.html.
     async function carregarArmariosPublic() {
-  try {
-    const resposta = await fetch('/api/armarios/');
-    if (resposta.ok) {
-      const dados = await resposta.json();
-      if (Array.isArray(dados)) {
-        armariosPublic = dados.map((a) => ({
-          id: a.id,
-          numero: a.numero,
-          localizacao: a.localizacao || '-',
-          status: a.status || 'Disponível',
-          nome_completo: a.nome_completo || '-'
-        }));
-      }
-    }
-  } catch (erro) {
-    console.warn('Não foi possível carregar os armários do backend.', erro);
-  }
-  renderArmarioStatusPills();
-  filterArmariosPublic();
-}
-
-    // MEXI AQUI: carrega os associados cadastrados no admin (rota /api/associados)
-    // e normaliza os campos, com fallback para nomes alternativos vindos do backend.
-    async function carregarAssociadosPublic() {
       try {
-        const resposta = await fetch('/api/associados');
+        const resposta = await fetch('/api/armarios');
         if (resposta.ok) {
           const dados = await resposta.json();
           if (Array.isArray(dados)) {
-            associadosPublic = dados.map((a) => ({
+            armariosPublic = dados.map((a) => ({
               id: a.id,
-              nome: a.nome || a.nome_completo || a.name || '',
-              rm: a.rm || a.matricula || a.rm_matricula || '',
-              curso: a.curso || a.departamento || a.curso_departamento || '',
-              status: a.status || 'Ativo'
+              numero: a.numero,
+              localizacao: a.localizacao || '-',
+              status: a.status || 'Disponível',
+              nome_completo: a.nome_completo || a.associado_nome || ''
             }));
           }
         }
       } catch (erro) {
-        console.warn('Não foi possível carregar os associados do backend.', erro);
+        console.warn('Não foi possível carregar os armários do backend.', erro);
       }
-      renderAssociadoStatusPills();
-      filterAssociadosPublic();
+      renderArmarioStatusPills();
+      filterArmariosPublic();
     }
  
     // ===== CATEGORIAS: LABEL / PILLS / SELECT / GERENCIAMENTO =====
@@ -1731,87 +1678,6 @@ async function cadastrarCategoria(event) {
       refreshRevealObserver();
     }
 
-    // ===== ASSOCIADOS (ABA PÚBLICA) =====
-    // MEXI AQUI: mesmo padrão visual usado para o badge de status dos armários/produtos.
-    function statusAssociadoClassePublic(status) {
-      if (status === 'Ativo') return 'active';
-      if (status === 'Inativo') return 'inactive';
-      return 'warning';
-    }
-
-    function renderAssociadoStatusPills() {
-      const container = document.getElementById('associadoStatusPills');
-      if (!container) return;
-      const statusList = ['Ativo', 'Inativo'];
-      let html = `<button type="button" class="category-pill ${selectedAssociadoStatus === 'all' ? 'active' : ''}" onclick="setAssociadoStatusFilter('all')">Todos</button>`;
-      statusList.forEach((s) => {
-        html += `<button type="button" class="category-pill ${selectedAssociadoStatus === s ? 'active' : ''}" onclick="setAssociadoStatusFilter('${s}')">${s}</button>`;
-      });
-      container.innerHTML = html;
-    }
-
-    function setAssociadoStatusFilter(status) {
-      selectedAssociadoStatus = status;
-      renderAssociadoStatusPills();
-      filterAssociadosPublic();
-    }
-
-    // MEXI AQUI: guarda a última lista de associados filtrada, para a paginação reaproveitar.
-    let ultimaListaAssociadosFiltrada = null;
-
-    function filterAssociadosPublic() {
-      const searchInput = document.getElementById('associadoSearchInput');
-      const termo = searchInput ? searchInput.value.trim().toLowerCase() : '';
-
-      const filtrados = associadosPublic.filter((a) => {
-        const nome = (a.nome || '').toLowerCase();
-        const rm = String(a.rm || '').toLowerCase();
-        const curso = (a.curso || '').toLowerCase();
-
-        const combinaTexto = !termo || nome.includes(termo) || rm.includes(termo) || curso.includes(termo);
-        const combinaStatus = selectedAssociadoStatus === 'all' || a.status === selectedAssociadoStatus;
-
-        return combinaTexto && combinaStatus;
-      });
-
-      ultimaListaAssociadosFiltrada = filtrados;
-      // MEXI AQUI: sempre que o filtro/busca mudar, volta para a página 1
-      getEstadoPaginacao('associadosPublic').pagina = 1;
-
-      renderAssociadosTablePublic(filtrados);
-    }
-
-    function renderAssociadosTablePublic(lista) {
-      const tbody = document.getElementById('tblAssociadosPublic');
-      if (!tbody) return;
-
-      const listaBase = lista || ultimaListaAssociadosFiltrada || associadosPublic;
-      // MEXI AQUI: pagina a lista de associados (10 por página)
-      const { pageItens, paginaAtual, totalPaginas, totalItens } = paginar(listaBase, 'associadosPublic', 10);
-
-      if (!listaBase.length) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); font-style: italic;">Nenhum associado encontrado.</td></tr>';
-        renderPaginacao('paginacaoAssociadosPublic', 'associadosPublic', totalPaginas, paginaAtual, totalItens, 'rerenderAssociadosPublicPaginaAtual');
-        return;
-      }
-
-      tbody.innerHTML = pageItens.map((a) => `
-        <tr>
-          <td style="font-weight: 600;">${a.nome}</td>
-          <td><span class="badge-rm">RM ${a.rm}</span></td>
-          <td>${a.curso}</td>
-          <td><span class="status-tag ${statusAssociadoClassePublic(a.status)}">${a.status}</span></td>
-          <td><button class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.7rem;" onclick="openViewModal('${(a.nome || '').replace(/'/g, "\\'")}', 'RM ${a.rm}', '${(a.curso || '').replace(/'/g, "\\'")}', '${a.status}')">Ver</button></td>
-        </tr>
-      `).join('');
-      renderPaginacao('paginacaoAssociadosPublic', 'associadosPublic', totalPaginas, paginaAtual, totalItens, 'rerenderAssociadosPublicPaginaAtual');
-    }
-
-    // MEXI AQUI: usada pelos botões Anterior/Próximo — re-renderiza mantendo o filtro atual
-    function rerenderAssociadosPublicPaginaAtual() {
-      renderAssociadosTablePublic(ultimaListaAssociadosFiltrada || associadosPublic);
-    }
-
     // ===== ARMÁRIOS (ABA PÚBLICA) =====
     // MEXI AQUI: mesmo padrão visual usado no admin para o badge de status.
     function statusArmarioClassePublic(status) {
@@ -1965,10 +1831,7 @@ async function cadastrarCategoria(event) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       refreshRevealObserver();
 
-      // MEXI AQUI: garante que os associados e os armários fiquem sempre atualizados ao abrir a aba
-      if (viewId === 'associados') {
-        carregarAssociadosPublic();
-      }
+      // MEXI AQUI: garante que os armários fiquem sempre atualizados ao abrir a aba
       if (viewId === 'armarios') {
         carregarArmariosPublic();
       }
@@ -2165,7 +2028,6 @@ async function cadastrarCategoria(event) {
     window.onload = function() {
       carregarCategorias();
       carregarProdutos();
-      carregarAssociadosPublic();
       carregarArmariosPublic();
       refreshRevealObserver();
     };
