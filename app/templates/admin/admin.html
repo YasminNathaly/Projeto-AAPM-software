@@ -1212,7 +1212,7 @@
       </div>
     </section>
 
-    <!-- 5. ARMARIO -->
+   <!-- 5. ARMARIO -->
 <section id="armario" class="view-content">
   <div class="card reveal">
     <div class="card-title">Cadastrar Armário</div>
@@ -1222,22 +1222,20 @@
         <input type="text" id="armNumero" class="form-control" placeholder="Ex: 001, A-12..." required>
       </div>
       <div class="form-group">
-        <label>Localização <span style="text-transform:none;font-weight:500;">(obrigatório)</span></label>
-        <input type="text" id="armLocalizacao" class="form-control" placeholder="Ex: Bloco A, Corredor 2..." required>
+        <label>Localização <span style="text-transform:none;font-weight:500;">(opcional)</span></label>
+        <input type="text" id="armLocalizacao" class="form-control" placeholder="Ex: Bloco A, Corredor 2...">
       </div>
       <div class="form-group">
         <label>Status</label>
-        <select id="armStatus" class="form-control" required onchange="toggleArmarioAssociadoField()">
+        <select id="armStatus" class="form-control" required onchange="toggleArmarioNomeField()">
           <option value="Disponível">Disponível</option>
           <option value="Ocupado">Ocupado</option>
           <option value="Manutenção">Manutenção</option>
         </select>
       </div>
-      <div class="form-group" id="armAssociadoWrap">
-        <label>Associado <span style="text-transform:none;font-weight:500;">(opcional)</span></label>
-        <select id="armAssociadoId" class="form-control">
-          <option value="">Nenhum</option>
-        </select>
+      <div class="form-group" id="armNomeWrap">
+        <label>Nome Completo <span style="text-transform:none;font-weight:500;">(opcional)</span></label>
+        <input type="text" id="armNomeCompleto" class="form-control" placeholder="Ex: João da Silva">
       </div>
       <input type="hidden" id="armId">
       <div class="form-group full">
@@ -1245,6 +1243,17 @@
       </div>
     </form>
   </div>
+
+  <div class="card reveal">
+    <div class="card-title">Armários Cadastrados</div>
+    <div class="table-responsive">
+      <table>
+        <thead><tr><th>Número</th><th>Localização</th><th>Status</th><th>Nome Completo</th><th>Ações</th></tr></thead>
+        <tbody id="tblArmarios"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
 
   <div class="card reveal">
     <div class="card-title">Armários Cadastrados</div>
@@ -2241,22 +2250,19 @@
       if (status === 'Ocupado') return 'inactive';
       return 'warning';
     }
-
-    function renderArmarios() {
-      const tbody = document.getElementById('tblArmarios');
-      if (!tbody) return;
-      const pagina = paginarLista(armarios, 'armario');
-      tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
-        <tr style="--i:${i}">
-          <td><span class="pill-badge">${item.numero}</span></td>
-          <td>${item.localizacao || '-'}</td>
-          <td><span class="status-tag ${statusArmarioClasse(item.status)}">${item.status || 'Disponível'}</span></td>
-          <td>${item.associado_nome || nomeAssociadoPorId(item.associado_id)}</td>
-          <td>${renderAcoes('arm', item.id)}</td>
-        </tr>
-      `).join('') : emptyRow(5, 'Nenhum armário cadastrado.');
-      renderPaginacaoControles('pagArmarios', 'armario', armarios.length);
-    }
+   function renderArmarios() {
+  const tbody = document.getElementById('tblArmarios');
+  if (!tbody) return;
+  tbody.innerHTML = armarios.length ? armarios.map((item, i) => `
+    <tr style="--i:${i}">
+      <td><span class="pill-badge">${item.numero}</span></td>
+      <td>${item.localizacao || '-'}</td>
+      <td><span class="status-tag ${statusArmarioClasse(item.status)}">${item.status || 'Disponível'}</span></td>
+      <td>${item.nome_completo || '-'}</td>
+      <td>${renderAcoes('arm', item.id)}</td>
+    </tr>
+  `).join('') : emptyRow(5, 'Nenhum armário cadastrado.');
+}
 
     function nomeAssociadoPorId(associadoId) {
       const a = associados.find(a => String(a.id) === String(associadoId));
