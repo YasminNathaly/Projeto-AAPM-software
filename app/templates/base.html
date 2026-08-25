@@ -370,6 +370,8 @@
  
     .status-tag { padding: 0.24rem 0.7rem; border-radius: var(--radius-pill); font-size: 0.7rem; font-weight: 600; display: inline-block; }
     .status-tag.active { background: rgba(31, 191, 130, 0.14); color: var(--success); border: 1px solid rgba(31, 191, 130, 0.3); }
+    .status-tag.inactive { background: rgba(239, 68, 68, 0.14); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+    .status-tag.warning { background: rgba(245, 158, 11, 0.14); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
  
     /* ================= HERO (estrutura inspirada na referência) ================= */
     .hero-container {
@@ -573,7 +575,46 @@
       text-decoration: line-through;
     }
  
-    .associados-wrap, .contact-wrap { padding: 0 7vw 3rem; }
+    .associados-wrap, .contact-wrap, .armarios-wrap { padding: 0 7vw 3rem; }
+
+    /* MEXI AQUI: filtros e resumo da aba pública de Armários */
+    .armarios-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      padding: 0 7vw;
+    }
+    .armario-summary-tile {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .armario-summary-tile .ast-value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      color: var(--primary);
+      line-height: 1;
+    }
+    .armario-summary-tile .ast-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+    .armarios-filters {
+      padding: 0 7vw;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+    @media (max-width: 900px) { .armarios-summary { grid-template-columns: 1fr; } }
  
     /* ADMIN - CATEGORIAS */
     .category-manage-list { display: flex; flex-direction: column; gap: 8px; margin-top: 1rem; max-height: 220px; overflow-y: auto; }
@@ -961,6 +1002,41 @@
         </div>
       </div>
     </section>
+
+    <!-- 5. ARMÁRIOS -->
+    <section id="armarios" class="view-content">
+      <div class="page-title-box reveal">
+        <h2>Consulta de Armários</h2>
+        <p>Situação atual dos armários disponíveis, ocupados e em manutenção na unidade SENAI Brás.</p>
+      </div>
+
+      <div class="armarios-summary reveal" id="armariosSummary"></div>
+
+      <div class="armarios-filters reveal">
+        <div class="product-search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="text" id="armarioSearchInput" class="form-control" placeholder="Pesquisar por número, local ou nome..." oninput="filterArmariosPublic()">
+        </div>
+        <div class="category-pills" id="armarioStatusPills"></div>
+      </div>
+
+      <div class="armarios-wrap reveal">
+        <div class="card" style="padding: 0.6rem 1.4rem;">
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Número</th>
+                  <th>Localização</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="tblArmariosPublic"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
  
 
   <!-- MODAL DE VISUALIZAÇÃO DE ASSOCIADO -->
@@ -1017,6 +1093,10 @@
     let products = [
      
     ];
+
+    // MEXI AQUI: lista de armários (vem do admin / backend) + filtro de status ativo
+    let armariosPublic = [];
+    let selectedArmarioStatus = 'all';
  
     let selectedCategoryId = 'all';
  
@@ -1092,6 +1172,30 @@
         console.warn('Não foi possível carregar os produtos do backend. Mantendo fallback local.', erro);
       }
       filterProducts();
+    }
+
+    // MEXI AQUI: carrega os armários cadastrados no admin (mesma rota /api/armarios)
+    // e normaliza os campos, igual é feito no admin.html.
+    async function carregarArmariosPublic() {
+      try {
+        const resposta = await fetch('/api/armarios');
+        if (resposta.ok) {
+          const dados = await resposta.json();
+          if (Array.isArray(dados)) {
+            armariosPublic = dados.map((a) => ({
+              id: a.id,
+              numero: a.numero,
+              localizacao: a.localizacao || '-',
+              status: a.status || 'Disponível',
+              nome_completo: a.nome_completo || a.associado_nome || ''
+            }));
+          }
+        }
+      } catch (erro) {
+        console.warn('Não foi possível carregar os armários do backend.', erro);
+      }
+      renderArmarioStatusPills();
+      filterArmariosPublic();
     }
  
     // ===== CATEGORIAS: LABEL / PILLS / SELECT / GERENCIAMENTO =====
@@ -1271,6 +1375,90 @@
       });
       refreshRevealObserver();
     }
+
+    // ===== ARMÁRIOS (ABA PÚBLICA) =====
+    // MEXI AQUI: mesmo padrão visual usado no admin para o badge de status.
+    function statusArmarioClassePublic(status) {
+      if (status === 'Disponível') return 'active';
+      if (status === 'Ocupado') return 'inactive';
+      return 'warning';
+    }
+
+    function renderArmarioStatusPills() {
+      const container = document.getElementById('armarioStatusPills');
+      if (!container) return;
+      const statusList = ['Disponível', 'Ocupado', 'Manutenção'];
+      let html = `<button type="button" class="category-pill ${selectedArmarioStatus === 'all' ? 'active' : ''}" onclick="setArmarioStatusFilter('all')">Todos</button>`;
+      statusList.forEach((s) => {
+        html += `<button type="button" class="category-pill ${selectedArmarioStatus === s ? 'active' : ''}" onclick="setArmarioStatusFilter('${s}')">${s}</button>`;
+      });
+      container.innerHTML = html;
+    }
+
+    function setArmarioStatusFilter(status) {
+      selectedArmarioStatus = status;
+      renderArmarioStatusPills();
+      filterArmariosPublic();
+    }
+
+    function renderArmariosSummary(lista) {
+      const container = document.getElementById('armariosSummary');
+      if (!container) return;
+      const total = lista.length;
+      const disponiveis = lista.filter((a) => a.status === 'Disponível').length;
+      const ocupados = lista.filter((a) => a.status === 'Ocupado').length;
+      container.innerHTML = `
+        <div class="armario-summary-tile">
+          <div class="ast-value">${total}</div>
+          <div class="ast-label">Armários Cadastrados</div>
+        </div>
+        <div class="armario-summary-tile">
+          <div class="ast-value">${disponiveis}</div>
+          <div class="ast-label">Disponíveis</div>
+        </div>
+        <div class="armario-summary-tile">
+          <div class="ast-value">${ocupados}</div>
+          <div class="ast-label">Ocupados</div>
+        </div>
+      `;
+    }
+
+    function filterArmariosPublic() {
+      const searchInput = document.getElementById('armarioSearchInput');
+      const termo = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+      const filtrados = armariosPublic.filter((a) => {
+        const numero = String(a.numero || '').toLowerCase();
+        const local = (a.localizacao || '').toLowerCase();
+        const nome = (a.nome_completo || '').toLowerCase();
+
+        const combinaTexto = !termo || numero.includes(termo) || local.includes(termo) || nome.includes(termo);
+        const combinaStatus = selectedArmarioStatus === 'all' || a.status === selectedArmarioStatus;
+
+        return combinaTexto && combinaStatus;
+      });
+
+      renderArmariosSummary(armariosPublic);
+      renderArmariosTablePublic(filtrados);
+    }
+
+    function renderArmariosTablePublic(lista) {
+      const tbody = document.getElementById('tblArmariosPublic');
+      if (!tbody) return;
+
+      if (!lista.length) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted); font-style: italic;">Nenhum armário encontrado.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = lista.map((a) => `
+        <tr>
+          <td><span class="badge-rm">Nº ${a.numero}</span></td>
+          <td>${a.localizacao || '-'}</td>
+          <td><span class="status-tag ${statusArmarioClassePublic(a.status)}">${a.status}</span></td>
+        </tr>
+      `).join('');
+    }
  
     // CONTROLE DE CLIQUE NO BOTÃO "PAINEL ADMIN"
     function handleAdminBtnClick() {
@@ -1322,6 +1510,11 @@
  
       window.scrollTo({ top: 0, behavior: 'smooth' });
       refreshRevealObserver();
+
+      // MEXI AQUI: garante que os armários fiquem sempre atualizados ao abrir a aba
+      if (viewId === 'armarios') {
+        carregarArmariosPublic();
+      }
  
       if (viewId === 'admin-panel') {
         populateCategorySelect();
@@ -1515,6 +1708,7 @@
     window.onload = function() {
       carregarCategorias();
       carregarProdutos();
+      carregarArmariosPublic();
       refreshRevealObserver();
     };
   </script>
