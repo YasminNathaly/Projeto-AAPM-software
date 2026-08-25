@@ -12,6 +12,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
  
   <style>
+    
     :root {
       --bg-main: #09090f;
       --bg-surface: rgba(18, 18, 24, 0.85);
@@ -661,6 +662,40 @@
       font-size: 0.72rem; color: var(--text-dark); text-align: center;
       position: relative; z-index: 1;
     }
+
+    /* MEXI AQUI: paginação (usada em Produtos e Armários da área pública) */
+    .paginacao-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      padding: 10px 0;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .paginacao-container > span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .btn-paginacao {
+      padding: 8px 16px;
+      background-color: var(--primary);
+      color: #fff;
+      text-decoration: none;
+      border-radius: var(--radius-pill);
+      font-size: 0.78rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.25s var(--ease);
+    }
+    .btn-paginacao:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+    .btn-paginacao.desativado {
+      background-color: var(--bg-surface-hover);
+      color: var(--text-dark);
+      pointer-events: none;
+      border: 1px solid var(--border-color);
+    }
  
     @media (max-width: 900px) {
       .tech-areas-grid, .benefits-grid, .grid-2, .grid-3, .form-grid { grid-template-columns: 1fr; }
@@ -910,6 +945,11 @@
       </div>
  
       <div class="product-grid-container reveal-stagger" id="productGallery"></div>
+
+      <!-- MEXI AQUI: paginação da vitrine de produtos -->
+      <div class="section-pad">
+        <div class="paginacao-container" id="paginacaoProdutosPublic"></div>
+      </div>
     </section>
  
     <!-- 3. ASSOCIADOS -->
@@ -1034,6 +1074,9 @@
               <tbody id="tblArmariosPublic"></tbody>
             </table>
           </div>
+
+          <!-- MEXI AQUI: paginação da consulta pública de armários -->
+          <div class="paginacao-container" id="paginacaoArmariosPublic"></div>
         </div>
       </div>
     </section>
@@ -1099,6 +1142,46 @@
     let selectedArmarioStatus = 'all';
  
     let selectedCategoryId = 'all';
+
+    // ===== MEXI AQUI: PAGINAÇÃO (client-side, genérica) =====
+    const PAGINACAO = {};
+
+    function getEstadoPaginacao(chave, limite = 10) {
+      if (!PAGINACAO[chave]) PAGINACAO[chave] = { pagina: 1, limite };
+      return PAGINACAO[chave];
+    }
+
+    function paginar(lista, chave, limite = 10) {
+      const estado = getEstadoPaginacao(chave, limite);
+      const totalItens = lista.length;
+      const totalPaginas = Math.max(1, Math.ceil(totalItens / estado.limite));
+      if (estado.pagina > totalPaginas) estado.pagina = totalPaginas;
+      if (estado.pagina < 1) estado.pagina = 1;
+      const inicio = (estado.pagina - 1) * estado.limite;
+      const pageItens = lista.slice(inicio, inicio + estado.limite);
+      return { pageItens, paginaAtual: estado.pagina, totalPaginas, totalItens };
+    }
+
+    function irParaPagina(chave, novaPagina, nomeFuncaoRender) {
+      const estado = getEstadoPaginacao(chave);
+      estado.pagina = novaPagina;
+      if (typeof window[nomeFuncaoRender] === 'function') window[nomeFuncaoRender]();
+    }
+
+    function renderPaginacao(containerId, chave, totalPaginas, paginaAtual, totalItens, nomeFuncaoRender) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      if (!totalItens) { container.innerHTML = ''; return; }
+      container.innerHTML = `
+        ${paginaAtual > 1
+          ? `<a href="#" class="btn-paginacao" onclick="event.preventDefault(); irParaPagina('${chave}', ${paginaAtual - 1}, '${nomeFuncaoRender}');">Anterior</a>`
+          : `<span class="btn-paginacao desativado">Anterior</span>`}
+        <span>Página <strong>${paginaAtual}</strong> de <strong>${totalPaginas}</strong> (Total de ${totalItens} itens)</span>
+        ${paginaAtual < totalPaginas
+          ? `<a href="#" class="btn-paginacao" onclick="event.preventDefault(); irParaPagina('${chave}', ${paginaAtual + 1}, '${nomeFuncaoRender}');">Próximo</a>`
+          : `<span class="btn-paginacao desativado">Próximo</span>`}
+      `;
+    }
  
     // ===== CARREGAMENTO DE DADOS =====
     async function carregarCategorias() {
@@ -1317,7 +1400,9 @@
  
         return combinaTexto && combinaCategoria;
       });
- 
+
+      // MEXI AQUI: sempre que o filtro/busca mudar, volta para a página 1
+      getEstadoPaginacao('produtosPublic').pagina = 1;
       renderProducts(filtrados);
     }
 
@@ -1342,20 +1427,29 @@
 
       return `<div class="product-variations">${chips}</div>`;
     }
+
+    // MEXI AQUI: guarda a última lista filtrada para que a paginação (Anterior/Próximo)
+    // consiga re-renderizar sem precisar refazer o filtro de busca/categoria.
+    let ultimaListaProdutosFiltrada = null;
  
     function renderProducts(lista) {
       const container = document.getElementById('productGallery');
       if (!container) return;
- 
-      const produtos = lista || products;
+
+      if (lista) ultimaListaProdutosFiltrada = lista;
+      const produtos = ultimaListaProdutosFiltrada || products;
+
+      // MEXI AQUI: pagina a lista filtrada (12 produtos por página)
+      const { pageItens, paginaAtual, totalPaginas, totalItens } = paginar(produtos, 'produtosPublic', 12);
  
       if (!produtos.length) {
         container.innerHTML = '<div class="product-empty-state">Nenhum produto encontrado para essa busca.</div>';
+        renderPaginacao('paginacaoProdutosPublic', 'produtosPublic', totalPaginas, paginaAtual, totalItens, 'renderProducts');
         return;
       }
  
       container.innerHTML = "";
-      produtos.forEach((p) => {
+      pageItens.forEach((p) => {
         const produtoImg = p.imagem_url || p.img || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=400&auto=format&fit=crop';
         const produtoNome = p.nome || p.name || 'Produto';
         const produtoPreco = Number(p.preco || p.price || 0);
@@ -1373,6 +1467,7 @@
           </div>
         `;
       });
+      renderPaginacao('paginacaoProdutosPublic', 'produtosPublic', totalPaginas, paginaAtual, totalItens, 'renderProducts');
       refreshRevealObserver();
     }
 
@@ -1423,6 +1518,9 @@
       `;
     }
 
+    // MEXI AQUI: guarda a última lista de armários filtrada, para a paginação reaproveitar.
+    let ultimaListaArmariosFiltrada = null;
+
     function filterArmariosPublic() {
       const searchInput = document.getElementById('armarioSearchInput');
       const termo = searchInput ? searchInput.value.trim().toLowerCase() : '';
@@ -1438,6 +1536,10 @@
         return combinaTexto && combinaStatus;
       });
 
+      ultimaListaArmariosFiltrada = filtrados;
+      // MEXI AQUI: sempre que o filtro/busca mudar, volta para a página 1
+      getEstadoPaginacao('armariosPublic').pagina = 1;
+
       renderArmariosSummary(armariosPublic);
       renderArmariosTablePublic(filtrados);
     }
@@ -1446,18 +1548,29 @@
       const tbody = document.getElementById('tblArmariosPublic');
       if (!tbody) return;
 
-      if (!lista.length) {
+      const listaBase = lista || ultimaListaArmariosFiltrada || armariosPublic;
+      // MEXI AQUI: pagina a lista de armários (10 por página)
+      const { pageItens, paginaAtual, totalPaginas, totalItens } = paginar(listaBase, 'armariosPublic', 10);
+
+      if (!listaBase.length) {
         tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted); font-style: italic;">Nenhum armário encontrado.</td></tr>';
+        renderPaginacao('paginacaoArmariosPublic', 'armariosPublic', totalPaginas, paginaAtual, totalItens, 'rerenderArmariosPublicPaginaAtual');
         return;
       }
 
-      tbody.innerHTML = lista.map((a) => `
+      tbody.innerHTML = pageItens.map((a) => `
         <tr>
           <td><span class="badge-rm">Nº ${a.numero}</span></td>
           <td>${a.localizacao || '-'}</td>
           <td><span class="status-tag ${statusArmarioClassePublic(a.status)}">${a.status}</span></td>
         </tr>
       `).join('');
+      renderPaginacao('paginacaoArmariosPublic', 'armariosPublic', totalPaginas, paginaAtual, totalItens, 'rerenderArmariosPublicPaginaAtual');
+    }
+
+    // MEXI AQUI: usada pelos botões Anterior/Próximo — re-renderiza mantendo o filtro atual
+    function rerenderArmariosPublicPaginaAtual() {
+      renderArmariosTablePublic(ultimaListaArmariosFiltrada || armariosPublic);
     }
  
     // CONTROLE DE CLIQUE NO BOTÃO "PAINEL ADMIN"

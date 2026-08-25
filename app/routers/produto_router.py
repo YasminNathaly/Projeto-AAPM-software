@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
-from typing import List
-
+# Removido 'List' pois agora o retorno inclui métricas de paginação
 from app.controllers import produto_controller
 from app.database import get_db
 from app.schemas.produto_schema import ProdutoCreate, ProdutoResponse
@@ -16,10 +15,10 @@ router = APIRouter(
 def criar_produto(produto: ProdutoCreate, db: Session = Depends(get_db)):
     return produto_controller.criar_produto(db, produto)
 
-# 2. LISTAR TODOS OS PRODUTOS
-@router.get("/", response_model=List[ProdutoResponse])
-def listar_produtos(db: Session = Depends(get_db)):
-    return produto_controller.listar_produtos(db)
+# 2. LISTAR PRODUTOS (COM PAGINAÇÃO)
+@router.get("/")
+def listar_produtos(pagina: int = 1, limite: int = 10, db: Session = Depends(get_db)):
+    return produto_controller.listar_produtos(db, pagina=pagina, limite=limite)
 
 # 3. BUSCAR UM PRODUTO PELO ID
 @router.get("/{produto_id}", response_model=ProdutoResponse)

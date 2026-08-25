@@ -851,6 +851,46 @@
       font-size: 5rem;
     }
 
+    /* MEXI AQUI: estilização dos botões de paginação (reaproveitada em todas as tabelas do painel) */
+    .paginacao-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+      padding: 10px 4px 0;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+
+    .btn-paginacao {
+      padding: 8px 16px;
+      background-color: var(--primary);
+      color: #fff;
+      text-decoration: none;
+      border-radius: var(--radius-pill);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border: none;
+      cursor: pointer;
+      transition: all .3s var(--ease);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-paginacao:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
+
+    .btn-paginacao.desativado {
+      background-color: var(--bg-surface-hover);
+      color: var(--text-dark);
+      pointer-events: none;
+      border: 1px solid var(--border-color);
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; }
       .reveal { opacity: 1; transform: none; }
@@ -876,6 +916,8 @@
       }
       .page-header-info h2, .page-header-info p { white-space: normal; }
       .top-header-actions { justify-self: stretch; justify-content: flex-end; }
+
+      .paginacao-container { justify-content: center; text-align: center; }
     }
   </style>
 </head>
@@ -1014,6 +1056,7 @@
             <tbody id="tblCategorias"></tbody>
           </table>
         </div>
+        <div class="paginacao-container" id="pagCategorias"></div>
       </div>
     </section>
 
@@ -1052,6 +1095,7 @@
             <tbody id="tblFornecedores"></tbody>
           </table>
         </div>
+        <div class="paginacao-container" id="pagFornecedores"></div>
       </div>
     </section>
 
@@ -1124,6 +1168,7 @@
             <tbody id="tblProdutos"></tbody>
           </table>
         </div>
+        <div class="paginacao-container" id="pagProdutos"></div>
       </div>
     </section>
 
@@ -1163,6 +1208,7 @@
             <tbody id="tblAssociados"></tbody>
           </table>
         </div>
+        <div class="paginacao-container" id="pagAssociados"></div>
       </div>
     </section>
 
@@ -1181,15 +1227,17 @@
       </div>
       <div class="form-group">
         <label>Status</label>
-        <select id="armStatus" class="form-control" required onchange="toggleArmarioNomeField()">
+        <select id="armStatus" class="form-control" required onchange="toggleArmarioAssociadoField()">
           <option value="Disponível">Disponível</option>
           <option value="Ocupado">Ocupado</option>
           <option value="Manutenção">Manutenção</option>
         </select>
       </div>
-      <div class="form-group" id="armNomeWrap">
-        <label>Nome Completo <span style="text-transform:none;font-weight:500;">(obrigatório)</span></label>
-        <input type="text" id="armNomeCompleto" class="form-control" placeholder="Ex: João da Silva" required>
+      <div class="form-group" id="armAssociadoWrap">
+        <label>Associado <span style="text-transform:none;font-weight:500;">(opcional)</span></label>
+        <select id="armAssociadoId" class="form-control">
+          <option value="">Nenhum</option>
+        </select>
       </div>
       <input type="hidden" id="armId">
       <div class="form-group full">
@@ -1202,10 +1250,11 @@
     <div class="card-title">Armários Cadastrados</div>
     <div class="table-responsive">
       <table>
-        <thead><tr><th>Número</th><th>Localização</th><th>Status</th><th>Nome Completo</th><th>Ações</th></tr></thead>
+        <thead><tr><th>Número</th><th>Localização</th><th>Status</th><th>Associado</th><th>Ações</th></tr></thead>
         <tbody id="tblArmarios"></tbody>
       </table>
     </div>
+    <div class="paginacao-container" id="pagArmarios"></div>
   </div>
 </section>
 
@@ -1249,6 +1298,7 @@
             <tbody id="tblUsuarios"></tbody>
           </table>
         </div>
+        <div class="paginacao-container" id="pagUsuarios"></div>
       </div>
     </section>
 
@@ -1294,6 +1344,7 @@
             <tbody id="tblVendas"></tbody>
           </table>
         </div>
+        <div class="paginacao-container" id="pagVendas"></div>
       </div>
     </section>
 
@@ -1457,6 +1508,60 @@
     let armarios = [];
     let usuarios = [];
     let vendas = [];
+
+    // MEXI AQUI: paginação client-side — mantém carregarDadosDoBanco() trazendo
+    // a lista inteira de cada módulo (pois ela também alimenta stats, selects
+    // e notificações), mas cada tabela agora é fatiada e exibida em páginas de
+    // ITENS_POR_PAGINA itens, com os botões "Anterior/Próximo" no rodapé.
+    const ITENS_POR_PAGINA = 10;
+    let paginaAtual = {
+      categoria: 1,
+      fornecedor: 1,
+      produto: 1,
+      associado: 1,
+      armario: 1,
+      usuario: 1,
+      venda: 1
+    };
+
+    // Renderiza os botões de paginação (Anterior / status / Próximo) de uma tabela
+    function renderPaginacaoControles(containerId, chave, totalItens) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+
+      const totalPaginas = Math.max(1, Math.ceil(totalItens / ITENS_POR_PAGINA));
+      if (paginaAtual[chave] > totalPaginas) paginaAtual[chave] = totalPaginas;
+      if (paginaAtual[chave] < 1) paginaAtual[chave] = 1;
+      const atual = paginaAtual[chave];
+
+      if (!totalItens) { el.innerHTML = ''; return; }
+
+      el.innerHTML = `
+        ${atual > 1
+          ? `<a href="#" class="btn-paginacao" onclick="mudarPagina('${chave}', ${atual - 1}); return false;">Anterior</a>`
+          : `<span class="btn-paginacao desativado">Anterior</span>`}
+        <span>Página <strong>${atual}</strong> de <strong>${totalPaginas}</strong> (Total de ${totalItens} itens)</span>
+        ${atual < totalPaginas
+          ? `<a href="#" class="btn-paginacao" onclick="mudarPagina('${chave}', ${atual + 1}); return false;">Próximo</a>`
+          : `<span class="btn-paginacao desativado">Próximo</span>`}
+      `;
+    }
+
+    // Troca a página ativa de uma tabela e re-renderiza apenas ela
+    const renderizadoresPorModulo = {}; // preenchido logo abaixo das funções renderX
+    function mudarPagina(chave, novaPagina) {
+      paginaAtual[chave] = novaPagina;
+      if (renderizadoresPorModulo[chave]) renderizadoresPorModulo[chave]();
+    }
+
+    // Fatia uma lista completa de acordo com a página atual do módulo informado
+    function paginarLista(lista, chave) {
+      const totalPaginas = Math.max(1, Math.ceil(lista.length / ITENS_POR_PAGINA));
+      if (paginaAtual[chave] > totalPaginas) paginaAtual[chave] = totalPaginas;
+      if (paginaAtual[chave] < 1) paginaAtual[chave] = 1;
+      const inicio = (paginaAtual[chave] - 1) * ITENS_POR_PAGINA;
+      return lista.slice(inicio, inicio + ITENS_POR_PAGINA);
+    }
 
     // MEXI AQUI: normaliza o produto que vem do backend, garantindo que "variacoes"
     // sempre exista como array, mesmo que o backend use outro nome de campo
@@ -2012,9 +2117,13 @@
     }
 
     // RENDERS DAS TABELAS
+    // MEXI AQUI: cada render agora fatia a lista completa com paginarLista()
+    // antes de montar as linhas, e chama renderPaginacaoControles() para
+    // desenhar os botões Anterior/Próximo com base no total real de itens.
     function renderCategorias() {
       const tbody = document.getElementById('tblCategorias');
-      tbody.innerHTML = categorias.length ? categorias.map((item, i) => `
+      const pagina = paginarLista(categorias, 'categoria');
+      tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
         <tr style="--i:${i}">
           <td><span class="pill-badge">${item.codigo || item.id}</span></td>
           <td style="font-weight: 700;">${item.nome}</td>
@@ -2023,11 +2132,13 @@
           <td>${renderAcoes('cat', item.id)}</td>
         </tr>
       `).join('') : emptyRow(5, 'Nenhuma categoria cadastrada.');
+      renderPaginacaoControles('pagCategorias', 'categoria', categorias.length);
     }
 
     function renderFornecedores() {
       const tbody = document.getElementById('tblFornecedores');
-      tbody.innerHTML = fornecedores.length ? fornecedores.map((item, i) => `
+      const pagina = paginarLista(fornecedores, 'fornecedor');
+      tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
         <tr style="--i:${i}">
           <td style="font-weight: 700;">${item.nome}</td>
           <td><span class="pill-badge">${item.documento}</span></td>
@@ -2036,6 +2147,7 @@
           <td>${renderAcoes('forn', item.id)}</td>
         </tr>
       `).join('') : emptyRow(5, 'Nenhum fornecedor cadastrado.');
+      renderPaginacaoControles('pagFornecedores', 'fornecedor', fornecedores.length);
     }
 
     function nomeCategoriaPorId(categoriaId) {
@@ -2059,7 +2171,8 @@
 
     function renderProdutos() {
       const tbody = document.getElementById('tblProdutos');
-      tbody.innerHTML = produtos.length ? produtos.map((item, i) => `
+      const pagina = paginarLista(produtos, 'produto');
+      tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
         <tr style="--i:${i}; cursor:pointer;" onclick="abrirProdutoModal('${item.id}')" title="Ver detalhes do produto">
           <td onclick="event.stopPropagation()"><input type="checkbox" name="produtoDeleteCheck" value="${item.id}" style="width: 15px; height: 15px; accent-color: var(--primary);"></td>
           <td>${item.imagem_url ? `<img class="prod-thumb" src="${item.imagem_url}" alt="${item.nome}">` : `<div class="prod-thumb"></div>`}</td>
@@ -2071,6 +2184,7 @@
           <td>${renderAcoes('prod', item.id)}</td>
         </tr>
       `).join('') : emptyRow(8, 'Nenhum produto cadastrado.');
+      renderPaginacaoControles('pagProdutos', 'produto', produtos.length);
     }
 
     async function deletarProdutosSelecionados() {
@@ -2106,7 +2220,8 @@
     function renderAssociados() {
       const tbody = document.getElementById('tblAssociados');
       if (!tbody) return;
-      tbody.innerHTML = associados.length ? associados.map((item, i) => `
+      const pagina = paginarLista(associados, 'associado');
+      tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
         <tr style="--i:${i}">
           <td style="font-weight: 700;">${item.nome}</td>
           <td>${item.email || '-'}</td>
@@ -2116,6 +2231,7 @@
           <td>${renderAcoes('assoc', item.id)}</td>
         </tr>
       `).join('') : emptyRow(6, 'Nenhum associado cadastrado.');
+      renderPaginacaoControles('pagAssociados', 'associado', associados.length);
     }
 
     // MEXI AQUI: badge de status do armário — verde (Disponível), vermelho (Ocupado),
@@ -2127,18 +2243,21 @@
     }
 
     function renderArmarios() {
-  const tbody = document.getElementById('tblArmarios');
-  if (!tbody) return;
-  tbody.innerHTML = armarios.length ? armarios.map((item, i) => `
-    <tr style="--i:${i}">
-      <td><span class="pill-badge">${item.numero}</span></td>
-      <td>${item.localizacao || '-'}</td>
-      <td><span class="status-tag ${statusArmarioClasse(item.status)}">${item.status || 'Disponível'}</span></td>
-      <td>${item.nome_completo || '-'}</td>
-      <td>${renderAcoes('arm', item.id)}</td>
-    </tr>
-  `).join('') : emptyRow(5, 'Nenhum armário cadastrado.');
-}
+      const tbody = document.getElementById('tblArmarios');
+      if (!tbody) return;
+      const pagina = paginarLista(armarios, 'armario');
+      tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
+        <tr style="--i:${i}">
+          <td><span class="pill-badge">${item.numero}</span></td>
+          <td>${item.localizacao || '-'}</td>
+          <td><span class="status-tag ${statusArmarioClasse(item.status)}">${item.status || 'Disponível'}</span></td>
+          <td>${item.associado_nome || nomeAssociadoPorId(item.associado_id)}</td>
+          <td>${renderAcoes('arm', item.id)}</td>
+        </tr>
+      `).join('') : emptyRow(5, 'Nenhum armário cadastrado.');
+      renderPaginacaoControles('pagArmarios', 'armario', armarios.length);
+    }
+
     function nomeAssociadoPorId(associadoId) {
       const a = associados.find(a => String(a.id) === String(associadoId));
       return a ? a.nome : '-';
@@ -2146,7 +2265,8 @@
 
     function renderUsuarios() {
       const tbody = document.getElementById('tblUsuarios');
-      tbody.innerHTML = usuarios.length ? usuarios.map((item, i) => `
+      const pagina = paginarLista(usuarios, 'usuario');
+      tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
         <tr style="--i:${i}">
           <td style="font-weight: 700;">${item.nome}</td>
           <td>${item.email}</td>
@@ -2155,12 +2275,14 @@
           <td>${renderAcoes('usr', item.id)}</td>
         </tr>
       `).join('') : emptyRow(5, 'Nenhum usuário cadastrado.');
+      renderPaginacaoControles('pagUsuarios', 'usuario', usuarios.length);
     }
 
     function renderVendas() {
       const tbody = document.getElementById('tblVendas');
       if (!tbody) return;
-      tbody.innerHTML = vendas.length ? vendas.map((item, i) => `
+      const pagina = paginarLista(vendas, 'venda');
+      tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
         <tr style="--i:${i}">
           <td>${item.data_venda || '-'}</td>
           <td style="font-weight: 700;">${item.comprador || item.cliente || '-'}</td>
@@ -2171,7 +2293,20 @@
           <td>${renderAcoes('vnd', item.id)}</td>
         </tr>
       `).join('') : emptyRow(7, 'Nenhuma venda registrada.');
+      renderPaginacaoControles('pagVendas', 'venda', vendas.length);
     }
+
+    // MEXI AQUI: mapeia cada chave de paginação para a função de render correspondente,
+    // usado por mudarPagina() ao clicar em "Anterior"/"Próximo".
+    Object.assign(renderizadoresPorModulo, {
+      categoria: renderCategorias,
+      fornecedor: renderFornecedores,
+      produto: renderProdutos,
+      associado: renderAssociados,
+      armario: renderArmarios,
+      usuario: renderUsuarios,
+      venda: renderVendas
+    });
 
     // BARRA DE ESTATÍSTICAS DINÂMICA
     function computeStats(viewId) {
