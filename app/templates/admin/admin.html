@@ -438,6 +438,8 @@
     }
     .action-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); transform: scale(1.1); }
     .action-btn.danger:hover { background: var(--danger); border-color: var(--danger); }
+    /* MEXI AQUI: variante azul para o botão de gerar comprovante, pra não confundir com editar/excluir */
+    .action-btn.info:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 
     .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
     .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
@@ -987,6 +989,114 @@
       .top-header-actions { justify-self: stretch; justify-content: flex-end; }
 
       .paginacao-container { justify-content: center; text-align: center; }
+    }
+
+    /* ================================================================== */
+    /* MEXI AQUI: COMPROVANTE DE VENDA IMPRIMÍVEL (estilo cupom fiscal)     */
+    /* ================================================================== */
+    .comprovante-modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      max-width: 420px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .comprovante-paper {
+      background: #fdfdf7;
+      color: #1a1a1a;
+      margin: 1.4rem;
+      border-radius: 10px;
+      padding: 1.5rem 1.4rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+      position: relative;
+    }
+    .comprovante-paper::before,
+    .comprovante-paper::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0;
+      height: 10px;
+      background-image: linear-gradient(135deg, #fdfdf7 25%, transparent 25%), linear-gradient(225deg, #fdfdf7 25%, transparent 25%);
+      background-size: 14px 14px;
+      background-color: var(--bg-card);
+    }
+    .comprovante-paper::before { top: -10px; background-position: 0 10px; }
+    .comprovante-paper::after { bottom: -10px; transform: rotate(180deg); background-position: 0 10px; }
+
+    .comp-header { text-align: center; border-bottom: 2px dashed #ccc; padding-bottom: 0.9rem; margin-bottom: 0.9rem; }
+    .comp-logo-badge {
+      width: 46px; height: 46px; border-radius: 12px; overflow: hidden;
+      margin: 0 auto 0.5rem;
+    }
+    .comp-logo-badge svg { width: 100%; height: 100%; display: block; }
+    .comp-header h4 { font-size: 0.85rem; font-weight: 800; letter-spacing: 0.02em; line-height: 1.35; }
+    .comp-header p { font-size: 0.66rem; color: #666; margin-top: 2px; }
+
+    .comp-title { text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 0.04em; margin-bottom: 2px; }
+    .comp-recibo { text-align: center; font-size: 0.68rem; color: #555; margin-bottom: 0.9rem; }
+    .comp-recibo strong { color: #111; }
+
+    .comp-meta { display: flex; justify-content: space-between; font-size: 0.68rem; color: #555; margin-bottom: 0.7rem; }
+
+    .comp-section-label {
+      font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800;
+      color: #888; border-bottom: 1px dashed #ccc; padding-bottom: 4px; margin-bottom: 6px; margin-top: 12px;
+    }
+    .comp-section-label:first-of-type { margin-top: 0; }
+
+    .comp-cliente-row { display: flex; justify-content: space-between; font-size: 0.76rem; padding: 2px 0; gap: 10px; }
+    .comp-cliente-row span:first-child { color: #666; }
+    .comp-cliente-row span:last-child { font-weight: 700; text-align: right; }
+
+    .comp-itens-table { width: 100%; border-collapse: collapse; font-size: 0.72rem; margin-top: 4px; }
+    .comp-itens-table th { text-align: left; font-size: 0.6rem; text-transform: uppercase; color: #888; padding: 4px 2px; border-bottom: 1px solid #ddd; }
+    .comp-itens-table th:last-child, .comp-itens-table td:last-child { text-align: right; }
+    .comp-itens-table td { padding: 6px 2px; border-bottom: 1px dashed #e2e2e2; }
+    .comp-itens-table .comp-item-desc { font-weight: 600; }
+
+    .comp-totais { margin-top: 10px; }
+    .comp-totais .comp-linha { display: flex; justify-content: space-between; font-size: 0.76rem; padding: 3px 0; }
+    .comp-totais .comp-linha.desconto { color: #b0272f; }
+    .comp-totais .comp-linha.total {
+      font-size: 1.1rem; font-weight: 800; border-top: 2px dashed #ccc; margin-top: 6px; padding-top: 8px;
+      color: #0a7d3c;
+    }
+
+    .comp-pagamento { text-align: center; font-size: 0.74rem; font-weight: 700; margin-top: 10px; padding: 8px; background: #f1f1ea; border-radius: 8px; }
+
+    .comp-validacao { margin-top: 14px; text-align: center; border-top: 2px dashed #ccc; padding-top: 10px; }
+    .comp-validacao .comp-codigo { font-family: monospace; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.04em; }
+    .comp-validacao .comp-qr {
+      width: 74px; height: 74px; margin: 8px auto 4px; border: 1px solid #ccc; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; color: #999; background: #fff;
+    }
+    .comp-validacao .comp-qr svg { width: 46px; height: 46px; }
+    .comp-validacao p { font-size: 0.6rem; color: #777; margin-top: 2px; }
+
+    .comp-footer { text-align: center; margin-top: 12px; font-size: 0.66rem; color: #666; line-height: 1.5; }
+    .comp-footer strong { color: #111; }
+
+    .comp-actions {
+      display: flex; gap: 10px; padding: 0 1.4rem 1.4rem;
+    }
+    .comp-actions .btn { flex: 1; }
+
+    /* Impressão: mostra só o cupom, escondendo o resto do painel */
+    @media print {
+      body * { visibility: hidden; }
+      #comprovanteModalOverlay, #comprovanteModalOverlay * { visibility: visible; }
+      #comprovanteModalOverlay {
+        position: absolute; inset: 0; background: #fff !important; padding: 0; opacity: 1 !important; visibility: visible !important;
+      }
+      .comprovante-modal { box-shadow: none; max-height: none; overflow: visible; max-width: 100%; }
+      .comp-actions, .detail-close { display: none !important; }
+      .comprovante-paper::before, .comprovante-paper::after { display: none; }
     }
   </style>
 </head>
@@ -1550,6 +1660,25 @@
     </div>
   </div>
 
+  <!-- MEXI AQUI: MODAL DE COMPROVANTE DE VENDA IMPRIMÍVEL -->
+  <div class="detail-overlay" id="comprovanteModalOverlay" onclick="fecharComprovanteModal(event)">
+    <div class="comprovante-modal" onclick="event.stopPropagation()">
+      <button class="detail-close" onclick="fecharComprovanteModal()" title="Fechar">&times;</button>
+
+      <div class="comprovante-paper" id="comprovanteConteudo">
+        <!-- preenchido dinamicamente por montarComprovanteHTML() -->
+      </div>
+
+      <div class="comp-actions">
+        <button type="button" class="btn btn-outline" onclick="fecharComprovanteModal()">Fechar</button>
+        <button type="button" class="btn btn-primary" onclick="imprimirComprovante()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Imprimir / Salvar PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- MEXI AQUI: script do Cropper.js, precisa estar carregado antes do script principal -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
@@ -1919,6 +2048,7 @@
       if (e.key !== 'Escape') return;
       document.getElementById('produtoModalOverlay')?.classList.remove('open');
       document.getElementById('avatarModalOverlay')?.classList.remove('open');
+      document.getElementById('comprovanteModalOverlay')?.classList.remove('open');
     });
 
     // MEXI AQUI: ===== RECORTE DE IMAGEM DO PRODUTO (Cropper.js) =====
@@ -2134,6 +2264,24 @@
             <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           </button>
           <button class="action-btn danger" title="Excluir" onclick="removerItem('${tipo}', '${id}')">
+            <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
+      `;
+    }
+
+    // MEXI AQUI: ações específicas da tabela de Venda — inclui o botão extra
+    // de "Gerar comprovante" (impressão) além de Editar/Excluir padrão.
+    function renderAcoesVenda(id) {
+      return `
+        <div class="action-btn-group" onclick="event.stopPropagation()">
+          <button class="action-btn info" title="Gerar comprovante" onclick="abrirComprovanteModal('${id}')">
+            <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          </button>
+          <button class="action-btn" title="Editar" onclick="editarItem('vnd', '${id}')">
+            <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </button>
+          <button class="action-btn danger" title="Excluir" onclick="removerItem('vnd', '${id}')">
             <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
           </button>
         </div>
@@ -2423,7 +2571,7 @@
           <td><span class="pill-badge">${item.quantidade ?? 0}</span></td>
           <td style="font-weight: 700; color: var(--success);">R$ ${Number(item.preco_total ?? item.total ?? 0).toFixed(2)}</td>
           <td>${item.forma_pagamento || '-'}</td>
-          <td>${renderAcoes('vnd', item.id)}</td>
+          <td>${renderAcoesVenda(item.id)}</td>
         </tr>
       `).join('') : emptyRow(7, 'Nenhuma venda registrada.');
       renderPaginacaoControles('pagVendas', 'venda', vendas.length);
@@ -2578,6 +2726,130 @@
       document.getElementById('dwDay').innerText = String(agora.getDate()).padStart(2, '0') + ' ' + meses[agora.getMonth()];
       document.getElementById('dwFull').innerText = agora.toLocaleDateString('pt-BR', { year: 'numeric' });
       document.getElementById('dwClock').innerText = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // ================================================================== //
+    // MEXI AQUI: ===== COMPROVANTE DE VENDA IMPRIMÍVEL (estilo cupom) ===== //
+    // ================================================================== //
+
+    // Gera um número de recibo determinístico a partir do id da venda e da data,
+    // no padrão "SNSP-AAMMDD-XXXX" (mesmo estilo do modelo em papel da SENAI).
+    function gerarNumeroRecibo(item) {
+      const dataRef = item.data_venda ? new Date(item.data_venda) : new Date();
+      const aamm = isNaN(dataRef) ? '000000' :
+        String(dataRef.getFullYear()).slice(-2) + String(dataRef.getMonth() + 1).padStart(2, '0') + String(dataRef.getDate()).padStart(2, '0');
+      const seq = String(item.id ?? 0).padStart(4, '0');
+      return `SNSP-${aamm}-${seq}`;
+    }
+
+    // Gera um código de autenticação/validação pseudo-único (visual, não criptográfico)
+    // a partir do id da venda, só para preencher o layout do comprovante.
+    function gerarCodigoValidacao(item) {
+      const base = `VND${item.id ?? 0}${item.produto_id ?? 0}${item.quantidade ?? 0}`;
+      let hash = 0;
+      for (let i = 0; i < base.length; i++) {
+        hash = (hash * 31 + base.charCodeAt(i)) >>> 0;
+      }
+      const hex = hash.toString(16).toUpperCase().padStart(8, '0');
+      return `${hex.slice(0, 4)}-${hex.slice(4, 8)}-A2C0-4E00`;
+    }
+
+    function formatarDataHoraComprovante(item) {
+      const d = item.data_venda ? new Date(item.data_venda) : new Date();
+      if (isNaN(d)) return item.data_venda || '-';
+      return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // Monta o HTML do cupom a partir dos dados de uma venda já registrada.
+    function montarComprovanteHTML(item) {
+      const produto = produtos.find(p => String(p.id) === String(item.produto_id));
+      const nomeItem = item.produto_nome || (produto ? produto.nome : 'Item');
+      const qtd = Number(item.quantidade ?? 1);
+      const totalItem = Number(item.preco_total ?? item.total ?? (produto ? produto.preco * qtd : 0));
+      const valorUnit = qtd ? totalItem / qtd : totalItem;
+      const cliente = item.comprador || item.cliente || '-';
+      const recibo = gerarNumeroRecibo(item);
+      const codigoValidacao = gerarCodigoValidacao(item);
+
+      return `
+        <div class="comp-header">
+          <div class="comp-logo-badge">
+            <svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="100" fill="#FF0000"/>
+              <text x="150" y="73" font-family="'Arial Black', 'Impact', sans-serif" font-size="62" font-weight="900" font-style="italic" fill="#FFFFFF" text-anchor="middle">SENAI</text>
+            </svg>
+          </div>
+          <h4>SENAI — Serviço Nacional de Aprendizagem Industrial<br>Unidade São Paulo — Campus Brás</h4>
+          <p>AAPM — Associação de Apoio ao Profissional e ao Menor</p>
+        </div>
+
+        <div class="comp-title">COMPROVANTE DE VENDA</div>
+        <div class="comp-recibo">RECIBO Nº <strong>${recibo}</strong></div>
+
+        <div class="comp-meta">
+          <span>Data/Hora: <strong style="color:#111;">${formatarDataHoraComprovante(item)}</strong></span>
+          <span>Venda: <strong style="color:#111;">#${item.id ?? '-'}</strong></span>
+        </div>
+
+        <div class="comp-section-label">Cliente</div>
+        <div class="comp-cliente-row"><span>Nome</span><span>${cliente}</span></div>
+
+        <div class="comp-section-label">Itens Adquiridos</div>
+        <table class="comp-itens-table">
+          <thead>
+            <tr><th>Descrição</th><th>Qtd</th><th>Total (R$)</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="comp-item-desc">${nomeItem}</td>
+              <td>${qtd}</td>
+              <td>${totalItem.toFixed(2)}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="comp-totais">
+          <div class="comp-linha"><span>Valor Unitário</span><span>R$ ${valorUnit.toFixed(2)}</span></div>
+          <div class="comp-linha total"><span>Total a Pagar</span><span>R$ ${totalItem.toFixed(2)}</span></div>
+        </div>
+
+        <div class="comp-pagamento">Forma de Pagamento: ${item.forma_pagamento || '-'}</div>
+
+        <div class="comp-validacao">
+          <div class="comp-codigo">${codigoValidacao}</div>
+          <div class="comp-qr">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM19 14h2v2h-2zM14 19h2v2h-2zM19 19h2v2h-2z"/></svg>
+          </div>
+          <p>Código para validação digital</p>
+        </div>
+
+        <div class="comp-footer">
+          Transação Autorizada com Sucesso<br>
+          Agradecemos a preferência! <strong>SENAI — Formando Profissionais.</strong>
+        </div>
+      `;
+    }
+
+    // Abre o modal de comprovante já preenchido com os dados da venda escolhida.
+    function abrirComprovanteModal(id) {
+      const item = vendas.find(v => String(v.id) === String(id));
+      if (!item) {
+        mostrarToast('Não foi possível localizar essa venda para gerar o comprovante.', 'error');
+        return;
+      }
+      const conteudo = document.getElementById('comprovanteConteudo');
+      conteudo.innerHTML = montarComprovanteHTML(item);
+      document.getElementById('comprovanteModalOverlay').classList.add('open');
+    }
+
+    function fecharComprovanteModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('comprovanteModalOverlay').classList.remove('open');
+    }
+
+    // Dispara a impressão do navegador — a regra @media print isola só o cupom.
+    function imprimirComprovante() {
+      window.print();
     }
 
     // ===== CADASTROS/EDIÇÕES VIA API =====
