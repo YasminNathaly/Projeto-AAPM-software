@@ -1,5 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String
 from app.database import Base
 
 class Armario(Base):
@@ -10,8 +9,4 @@ class Armario(Base):
     localizacao = Column(String, nullable=True)
     status = Column(String, default="Disponível")
     
-    associado_id = Column(Integer, ForeignKey("associados.id"), nullable=True)
-
-    @property
-    def associado_nome(self):
-        return self.associado.nome if hasattr(self, "associado") and self.associado else None
+    nome_completo = Column(String, nullable=True)

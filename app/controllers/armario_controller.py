@@ -12,15 +12,13 @@ def criar(db: Session, armario):
     db.refresh(db_armario)
     return db_armario
 
-def reservar(db: Session, armario_id: int, dados_reserva):
+def reservar(db: Session, armario_id: int, nome_completo: str):
     db_armario = db.query(Armario).filter(Armario.id == armario_id).first()
     if not db_armario:
         return None
 
-    db_armario.status = "RESERVADO"
-    db_armario.nome = dados_reserva.nome
-    db_armario.matricula = dados_reserva.matricula
-    db_armario.cpf = dados_reserva.cpf
+    db_armario.status = "Ocupado"
+    db_armario.nome_completo = nome_completo
 
     db.commit()
     db.refresh(db_armario)
@@ -31,10 +29,8 @@ def liberar(db: Session, armario_id: int):
     if not db_armario:
         return None
 
-    db_armario.status = "LIVRE"
-    db_armario.nome = None
-    db_armario.matricula = None
-    db_armario.cpf = None
+    db_armario.status = "Disponível"
+    db_armario.nome_completo = None
 
     db.commit()
     db.refresh(db_armario)

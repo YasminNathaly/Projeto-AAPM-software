@@ -12,27 +12,17 @@ router = APIRouter(prefix="/api/armarios", tags=["Armários"])
 # --- Schemas Pydantic ---
 class ArmarioBase(BaseModel):
     numero: str
-    bloco: str
-    andar: str
-    opcao: Optional[str] = None
-    status: Optional[str] = "LIVRE"
+    localizacao: Optional[str] = None
+    status: Optional[str] = "Disponível"
+    nome_completo: Optional[str] = None
 
 
 class ArmarioCreate(ArmarioBase):
     pass
 
 
-class ArmarioReserva(BaseModel):
-    nome: str
-    matricula: str
-    cpf: str
-
-
 class ArmarioResponse(ArmarioBase):
     id: int
-    nome: Optional[str] = None
-    matricula: Optional[str] = None
-    cpf: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -47,14 +37,6 @@ def listar(db: Session = Depends(get_db)):
 @router.post("/", response_model=ArmarioResponse, status_code=status.HTTP_201_CREATED)
 def criar(armario: ArmarioCreate, db: Session = Depends(get_db)):
     return armario_controller.criar(db, armario)
-
-
-@router.put("/{armario_id}/reservar", response_model=ArmarioResponse)
-def reservar(armario_id: int, dados: ArmarioReserva, db: Session = Depends(get_db)):
-    res = armario_controller.reservar(db, armario_id, dados)
-    if not res:
-        raise HTTPException(status_code=404, detail="Armário não encontrado.")
-    return res
 
 
 @router.put("/{armario_id}/liberar", response_model=ArmarioResponse)

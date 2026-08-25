@@ -9,6 +9,7 @@ from app.models.categoria import Categoria
 from app.models.produto import Produto
 from app.models.associado import Associado
 from app.models.venda import Venda
+from app.models.armario import Armario  # <-- Importado o modelo Armario
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -67,7 +68,7 @@ async def popular_banco_dados():
         if produtos_oficiais:
             db.add_all(produtos_oficiais)
 
-            # 4. ASSOCIADOS DE TESTE
+        # 4. ASSOCIADOS DE TESTE
         print("👥 Inserindo associados no banco...")
         assoc1 = Associado(
             nome="Carlos Eduardo Silva",
@@ -81,8 +82,23 @@ async def popular_banco_dados():
             telefone="11977776666",
             endereco="Av. Brasil, 456"
         )
-
         db.add_all([assoc1, assoc2])
+
+        # 5. ARMÁRIOS DE TESTE (Usando nome_completo)
+        print("🚪 Inserindo armários de teste...")
+        arm1 = Armario(
+            numero="001",
+            localizacao="Bloco A, Corredor 1",
+            status="Ocupado",
+            nome_completo="João da Silva"
+        )
+        arm2 = Armario(
+            numero="002",
+            localizacao="Bloco A, Corredor 1",
+            status="Disponível",
+            nome_completo=None
+        )
+        db.add_all([arm1, arm2])
 
         # Confirma todas as inserções no banco
         db.commit()
