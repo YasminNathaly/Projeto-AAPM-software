@@ -7,7 +7,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- MEXI AQUI: CSS do Cropper.js para o recorte de foto do produto -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">
 
@@ -1222,10 +1222,6 @@
     <section id="categoria" class="view-content active">
       <div class="card reveal">
         <div class="card-title">Cadastrar Categoria <span id="quickActionLabel" style="font-size:0.68rem;color:var(--text-muted);text-transform:none;letter-spacing:0;">Nova Categoria</span></div>
-        <!-- MEXI AQUI: corrigido - antes o <form> era fechado logo após abrir
-             (</form> sobrando) e chamava uma função inexistente
-             (cadastrarCategoria). Agora usa addCategoria(event), que já existe
-             no script, e engloba todos os campos corretamente. -->
         <form onsubmit="addCategoria(event)" class="form-grid">
           <div class="form-group">
             <label>Nome da Categoria</label>
@@ -1527,7 +1523,6 @@
               <option value="Dinheiro">Dinheiro</option>
             </select>
           </div>
-          <!-- MEXI AQUI: seleção de associado — quando preenchida, aplica 10% de desconto automático na venda -->
           <div class="form-group">
             <label>Associado <span style="text-transform:none;font-weight:500;">(opcional — aplica 10% de desconto)</span></label>
             <select id="vendaAssociado" class="form-control" onchange="atualizarResumoVenda()">
@@ -1536,7 +1531,6 @@
           </div>
           <input type="hidden" id="vendaId">
 
-          <!-- MEXI AQUI: resumo de valores da venda (subtotal / desconto associado / total), atualizado em tempo real -->
           <div class="form-group full" id="vendaResumoWrap" style="display:none;">
             <div class="venda-resumo-box">
               <span>Subtotal: <strong id="vendaResumoSubtotal">R$ 0,00</strong></span>
@@ -1625,8 +1619,8 @@
 
   <!-- MODAL DE DETALHES DO PRODUTO -->
   <div class="detail-overlay" id="produtoModalOverlay" onclick="fecharProdutoModal(event)">
-    <div class="detail-modal" onclick="event.stopPropagation()">
-      <button class="detail-close" onclick="fecharProdutoModal()" title="Fechar">&times;</button>
+    <div class="detail-modal" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="produtoModalNome">
+      <button class="detail-close" onclick="fecharProdutoModal()" title="Fechar" aria-label="Fechar">&times;</button>
       <img id="produtoModalImg" class="detail-modal-img" src="" alt="" style="display:none;">
       <div id="produtoModalImgEmpty" class="detail-modal-img-empty" style="display:none;">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
@@ -1658,8 +1652,8 @@
 
   <!-- MODAL DE FOTO DO ADMINISTRADOR AMPLIADA -->
   <div class="detail-overlay" id="avatarModalOverlay" onclick="fecharAvatarModal(event)">
-    <div class="avatar-modal" onclick="event.stopPropagation()">
-      <button class="detail-close" onclick="fecharAvatarModal()" title="Fechar">&times;</button>
+    <div class="avatar-modal" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Foto do administrador ampliada">
+      <button class="detail-close" onclick="fecharAvatarModal()" title="Fechar" aria-label="Fechar">&times;</button>
       <img id="avatarModalImg" class="avatar-modal-img" src="" alt="Foto do administrador" style="display:none;">
       <div id="avatarModalLetter" class="avatar-modal-letter" style="display:none;">A</div>
     </div>
@@ -1667,8 +1661,8 @@
 
   <!-- MEXI AQUI: MODAL DE RECORTE DE IMAGEM DO PRODUTO (Cropper.js) -->
   <div class="detail-overlay" id="cropModalOverlay">
-    <div class="detail-modal" style="max-width: 520px;" onclick="event.stopPropagation()">
-      <button class="detail-close" onclick="cancelarCrop()" title="Cancelar">&times;</button>
+    <div class="detail-modal" style="max-width: 520px;" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Ajustar foto do produto">
+      <button class="detail-close" onclick="cancelarCrop()" title="Cancelar" aria-label="Cancelar">&times;</button>
       <div class="detail-modal-body">
         <h3 style="font-size: 1.4rem; margin-bottom: 1rem;">Ajustar Foto do Produto</h3>
 
@@ -1693,8 +1687,8 @@
 
   <!-- MEXI AQUI: MODAL DE COMPROVANTE DE VENDA IMPRIMÍVEL -->
   <div class="detail-overlay" id="comprovanteModalOverlay" onclick="fecharComprovanteModal(event)">
-    <div class="comprovante-modal" onclick="event.stopPropagation()">
-      <button class="detail-close" onclick="fecharComprovanteModal()" title="Fechar">&times;</button>
+    <div class="comprovante-modal" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Comprovante de venda">
+      <button class="detail-close" onclick="fecharComprovanteModal()" title="Fechar" aria-label="Fechar">&times;</button>
 
       <div class="comprovante-paper" id="comprovanteConteudo">
         <!-- preenchido dinamicamente por montarComprovanteHTML() -->
@@ -1706,6 +1700,20 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
           Imprimir / Salvar PDF
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEXI AQUI: MODAL DE CONFIRMAÇÃO GENÉRICO (substitui window.confirm nativo) -->
+  <div class="detail-overlay" id="confirmModalOverlay">
+    <div class="detail-modal" style="max-width: 400px;" onclick="event.stopPropagation()" role="alertdialog" aria-modal="true" aria-labelledby="confirmModalTitulo">
+      <div class="detail-modal-body">
+        <h3 id="confirmModalTitulo" style="font-size: 1.3rem; margin-bottom: 0.6rem;">Confirmar ação</h3>
+        <p id="confirmModalTexto" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.4rem;"></p>
+        <div style="display:flex; gap:10px;">
+          <button type="button" class="btn btn-outline" style="flex:1;" id="confirmModalCancelar">Cancelar</button>
+          <button type="button" class="btn btn-primary" style="flex:1;" id="confirmModalOk">Confirmar</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1734,6 +1742,85 @@
       upload: '/api/upload-imagem'
     };
 
+    // ================================================================== //
+    // MEXI AQUI: ===== CAMADA DE SEGURANÇA (auth + XSS) =====             //
+    // ================================================================== //
+
+    // Wrapper único para TODAS as chamadas à API: sempre injeta o Bearer
+    // token no header e trata 401/403 fazendo logout automático. Antes,
+    // nenhuma chamada `fetch()` mandava o token — o "acesso restrito" do
+    // topo do arquivo era só cosmético, e qualquer requisição direta à API
+    // passava sem autenticação nenhuma.
+    async function apiFetch(url, options = {}) {
+      const tokenAtual = localStorage.getItem('access_token');
+      const headers = {
+        ...(options.headers || {}),
+        ...(tokenAtual ? { 'Authorization': `Bearer ${tokenAtual}` } : {})
+      };
+
+      const resposta = await fetch(url, { ...options, headers });
+
+      if (resposta.status === 401 || resposta.status === 403) {
+        localStorage.removeItem('access_token');
+        mostrarToast('Sessão expirada. Faça login novamente.', 'error');
+        setTimeout(() => { window.location.href = 'login.html'; }, 1200);
+        throw new Error('Não autenticado');
+      }
+
+      return resposta;
+    }
+
+    // Escapa qualquer texto antes de injetar em innerHTML, prevenindo XSS.
+    // Antes, campos como nome/email/descrição vindos do banco eram jogados
+    // direto em template strings dentro de innerHTML sem nenhum tratamento —
+    // um nome de produto ou cliente contendo HTML/JS malicioso seria executado.
+    function escapeHTML(valor) {
+      if (valor === null || valor === undefined) return '';
+      return String(valor)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // Formata valores monetários no padrão brasileiro (R$ 1.234,56) em vez
+    // do antigo `'R$ ' + Number(x).toFixed(2)`, que não agrupava milhares
+    // nem usava vírgula decimal.
+    const formatadorMoeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+    function formatarMoeda(valor) {
+      const numero = Number(valor);
+      return formatadorMoeda.format(isNaN(numero) ? 0 : numero);
+    }
+
+    // Substitui window.confirm() nativo por um modal customizado que segue
+    // a identidade visual do painel. Retorna uma Promise<boolean>, então o
+    // código que chama continua podendo usar `await confirmarAcao(...)`.
+    function confirmarAcao(mensagem, tituloBotaoConfirmar = 'Confirmar') {
+      return new Promise((resolve) => {
+        const overlay = document.getElementById('confirmModalOverlay');
+        const textoEl = document.getElementById('confirmModalTexto');
+        const btnOk = document.getElementById('confirmModalOk');
+        const btnCancelar = document.getElementById('confirmModalCancelar');
+
+        textoEl.textContent = mensagem;
+        btnOk.textContent = tituloBotaoConfirmar;
+        overlay.classList.add('open');
+
+        function limpar(resultado) {
+          overlay.classList.remove('open');
+          btnOk.removeEventListener('click', onOk);
+          btnCancelar.removeEventListener('click', onCancelar);
+          resolve(resultado);
+        }
+        function onOk() { limpar(true); }
+        function onCancelar() { limpar(false); }
+
+        btnOk.addEventListener('click', onOk);
+        btnCancelar.addEventListener('click', onCancelar);
+      });
+    }
+
     // BASES DE DADOS (carregadas via API do Banco)
     let categorias = [];
     let fornecedores = [];
@@ -1759,8 +1846,6 @@
     };
 
     // MEXI AQUI: ===== TOASTS DE FEEDBACK (sucesso / erro) PARA TODOS OS CRUDS =====
-    // Config com nome de exibição e gênero gramatical de cada módulo, usado para
-    // montar frases corretas tipo "Categoria adicionada" / "Armário adicionado".
     const modulosConfig = {
       categoria: { nome: 'Categoria', genero: 'f' },
       fornecedor: { nome: 'Fornecedor', genero: 'm' },
@@ -1771,14 +1856,12 @@
       venda: { nome: 'Venda', genero: 'f' }
     };
 
-    // Textos de ação por gênero: adicionar/editar/remover
     const acoesTexto = {
       criar: { m: 'adicionado', f: 'adicionada' },
       editar: { m: 'atualizado', f: 'atualizada' },
       remover: { m: 'removido', f: 'removida' }
     };
 
-    // Monta a mensagem de sucesso final pro toast, ex: "Produto adicionado com sucesso!"
     function mensagemSucesso(endpointKey, acao) {
       const cfg = modulosConfig[endpointKey];
       if (!cfg) return 'Operação realizada com sucesso!';
@@ -1793,7 +1876,9 @@
       warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
     };
 
-    // Exibe um card de notificação (toast) flutuante — tipo 'success' | 'error' | 'warning'
+    // MEXI AQUI: mensagem e sub também passam por escapeHTML() antes de virar
+    // innerHTML — o texto do toast normalmente vem de constantes internas,
+    // mas parte dele (ex: erroDetalhe.detail vindo do backend) é dado externo.
     function mostrarToast(mensagem, tipo = 'success', sub = '') {
       const container = document.getElementById('toastContainer');
       if (!container) return;
@@ -1803,8 +1888,8 @@
       toast.innerHTML = `
         <div class="toast-icon">${toastIcons[tipo] || toastIcons.success}</div>
         <div class="toast-text">
-          <div class="toast-title">${mensagem}</div>
-          ${sub ? `<div class="toast-sub">${sub}</div>` : ''}
+          <div class="toast-title">${escapeHTML(mensagem)}</div>
+          ${sub ? `<div class="toast-sub">${escapeHTML(sub)}</div>` : ''}
         </div>
         <div class="toast-close" title="Fechar">
           <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -1820,13 +1905,11 @@
       toast.querySelector('.toast-close').addEventListener('click', fecharToast);
       container.appendChild(toast);
 
-      // força reflow pra animação de entrada funcionar
       requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
 
       setTimeout(fecharToast, 4200);
     }
 
-    // Renderiza os botões de paginação (Anterior / status / Próximo) de uma tabela
     function renderPaginacaoControles(containerId, chave, totalItens) {
       const el = document.getElementById(containerId);
       if (!el) return;
@@ -1849,14 +1932,12 @@
       `;
     }
 
-    // Troca a página ativa de uma tabela e re-renderiza apenas ela
-    const renderizadoresPorModulo = {}; // preenchido logo abaixo das funções renderX
+    const renderizadoresPorModulo = {};
     function mudarPagina(chave, novaPagina) {
       paginaAtual[chave] = novaPagina;
       if (renderizadoresPorModulo[chave]) renderizadoresPorModulo[chave]();
     }
 
-    // Fatia uma lista completa de acordo com a página atual do módulo informado
     function paginarLista(lista, chave) {
       const totalPaginas = Math.max(1, Math.ceil(lista.length / ITENS_POR_PAGINA));
       if (paginaAtual[chave] > totalPaginas) paginaAtual[chave] = totalPaginas;
@@ -1865,9 +1946,6 @@
       return lista.slice(inicio, inicio + ITENS_POR_PAGINA);
     }
 
-    // MEXI AQUI: normaliza o produto que vem do backend, garantindo que "variacoes"
-    // sempre exista como array, mesmo que o backend use outro nome de campo
-    // (ex: "variantes"/"variations") ou mande null/undefined.
     function normalizarProduto(p) {
       return {
         ...p,
@@ -1876,8 +1954,6 @@
       };
     }
 
-    // MEXI AQUI: normaliza o armário vindo do backend — garante status padrão
-    // e nome_completo sempre presente (mesmo que venha null do banco).
     function normalizarArmario(a) {
       return {
         ...a,
@@ -1886,8 +1962,6 @@
       };
     }
 
-    // MEXI AQUI: normaliza a venda vinda do backend — garante campos de desconto
-    // e associado sempre presentes, mesmo que o backend ainda não os retorne.
     function normalizarVenda(v) {
       return {
         ...v,
@@ -1897,28 +1971,26 @@
     }
 
     // ===== CONTROLADOR DE CARREGAMENTO (GET DE TODAS AS ENTIDADES) =====
+    // MEXI AQUI: todas as chamadas fetch() trocadas por apiFetch(), que já
+    // injeta o Bearer token automaticamente.
     async function carregarDadosDoBanco() {
       try {
         const [resCat, resForn, resProd, resAssoc, resArm, resUsr, resVnd] = await Promise.all([
-          fetch(API_URLS.categoria),
-          fetch(API_URLS.fornecedor),
-          fetch(API_URLS.produto),
-          fetch(API_URLS.associado),
-          fetch(API_URLS.armario),
-          fetch(API_URLS.usuario),
-          fetch(API_URLS.venda)
+          apiFetch(API_URLS.categoria),
+          apiFetch(API_URLS.fornecedor),
+          apiFetch(API_URLS.produto),
+          apiFetch(API_URLS.associado),
+          apiFetch(API_URLS.armario),
+          apiFetch(API_URLS.usuario),
+          apiFetch(API_URLS.venda)
         ]);
 
         categorias = resCat.ok ? await resCat.json() : [];
         fornecedores = resForn.ok ? await resForn.json() : [];
-        // MEXI AQUI: passa cada produto por normalizarProduto() para garantir
-        // que "variacoes" chegue certinho até as funções de render.
         produtos = resProd.ok ? (await resProd.json()).map(normalizarProduto) : [];
         associados = resAssoc.ok ? await resAssoc.json() : [];
-        // MEXI AQUI: passa cada armário por normalizarArmario()
         armarios = resArm.ok ? (await resArm.json()).map(normalizarArmario) : [];
         usuarios = resUsr.ok ? await resUsr.json() : [];
-        // MEXI AQUI: passa cada venda por normalizarVenda()
         vendas = resVnd.ok ? (await resVnd.json()).map(normalizarVenda) : [];
 
         renderCategorias();
@@ -1940,27 +2012,27 @@
       }
     }
 
-    // Preenche os selects de Categoria (no form de produto), Produto e Associado
-    // (no form de venda) sempre com os dados reais vindos do banco.
+    // MEXI AQUI: nomes de categoria/produto/associado nos <option> também
+    // passam por escapeHTML() — evita que um nome cadastrado com aspas ou
+    // tags quebre o innerHTML do select.
     function popularSelectsDinamicos() {
       const selCategoria = document.getElementById('prodCategoria');
       const valorAtualCat = selCategoria.value;
       selCategoria.innerHTML = '<option value="">Selecione...</option>' +
-        categorias.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+        categorias.map(c => `<option value="${escapeHTML(c.id)}">${escapeHTML(c.nome)}</option>`).join('');
       if (valorAtualCat) selCategoria.value = valorAtualCat;
 
       const selProduto = document.getElementById('vendaProduto');
       const valorAtualProd = selProduto.value;
       selProduto.innerHTML = '<option value="">Selecione...</option>' +
-        produtos.map(p => `<option value="${p.id}">${p.nome} (R$ ${Number(p.preco).toFixed(2)})</option>`).join('');
+        produtos.map(p => `<option value="${escapeHTML(p.id)}">${escapeHTML(p.nome)} (${formatarMoeda(p.preco)})</option>`).join('');
       if (valorAtualProd) selProduto.value = valorAtualProd;
 
-      // MEXI AQUI: popula o select de associado no form de venda
       const selAssociado = document.getElementById('vendaAssociado');
       if (selAssociado) {
         const valorAtualAssoc = selAssociado.value;
         selAssociado.innerHTML = '<option value="">Não é associado</option>' +
-          associados.map(a => `<option value="${a.id}">${a.nome}</option>`).join('');
+          associados.map(a => `<option value="${escapeHTML(a.id)}">${escapeHTML(a.nome)}</option>`).join('');
         if (valorAtualAssoc) selAssociado.value = valorAtualAssoc;
       }
     }
@@ -1988,6 +2060,7 @@
       return itens.sort((a, b) => (b.ordem || 0) - (a.ordem || 0)).slice(0, 6);
     }
 
+    // MEXI AQUI: título/sub das notificações passam por escapeHTML()
     function renderNotificacoes() {
       const list = document.getElementById('notifList');
       const dot = document.querySelector('.notif-dot');
@@ -1996,8 +2069,8 @@
         <div class="notif-item">
           <div class="ni-icon">${notificacoesIcones[n.tipo] || notificacoesIcones.venda}</div>
           <div>
-            <div class="ni-title">${n.titulo}</div>
-            <div class="ni-time">${n.sub}</div>
+            <div class="ni-title">${escapeHTML(n.titulo)}</div>
+            <div class="ni-time">${escapeHTML(n.sub)}</div>
           </div>
         </div>
       `).join('') : '<div class="recent-empty">Nenhuma notificação nova.</div>';
@@ -2019,7 +2092,6 @@
       }
     });
 
-    // FOTO DO ADMINISTRADOR (apenas visual local, não é produto)
     function handleAvatarUpload(e) {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
@@ -2037,7 +2109,7 @@
       const modalLetter = document.getElementById('avatarModalLetter');
 
       if (bgImage && bgImage !== 'none' && bgImage !== '') {
-        const url = bgImage.slice(5, -2); // remove url(" e ")
+        const url = bgImage.slice(5, -2);
         modalImg.src = url;
         modalImg.style.display = 'block';
         modalLetter.style.display = 'none';
@@ -2056,6 +2128,8 @@
     }
 
     // ===== MODAL: DETALHES DO PRODUTO =====
+    // MEXI AQUI: nome/categoria/tamanho e nome_variacao agora passam por
+    // escapeHTML() ou são atribuídos via textContent, e não innerHTML cru.
     function abrirProdutoModal(id) {
       const item = produtos.find(p => String(p.id) === String(id));
       if (!item) return;
@@ -2072,18 +2146,18 @@
         imgEmpty.style.display = 'flex';
       }
 
-      document.getElementById('produtoModalNome').innerText = item.nome;
-      document.getElementById('produtoModalCategoria').innerText = nomeCategoriaPorId(item.categoria_id);
-      document.getElementById('produtoModalTamanho').innerText = item.tamanho || (item.variacoes && item.variacoes.length ? item.variacoes.map(v => v.nome_variacao).join(', ') : '-');
-      document.getElementById('produtoModalQtd').innerText = item.quantidade ?? item.estoque ?? 0;
-      document.getElementById('produtoModalPreco').innerText = 'R$ ' + Number(item.preco).toFixed(2);
+      document.getElementById('produtoModalNome').textContent = item.nome;
+      document.getElementById('produtoModalCategoria').textContent = nomeCategoriaPorId(item.categoria_id);
+      document.getElementById('produtoModalTamanho').textContent = item.tamanho || (item.variacoes && item.variacoes.length ? item.variacoes.map(v => v.nome_variacao).join(', ') : '-');
+      document.getElementById('produtoModalQtd').textContent = item.quantidade ?? item.estoque ?? 0;
+      document.getElementById('produtoModalPreco').textContent = formatarMoeda(item.preco);
       const variacaoWrap = document.getElementById('produtoModalVariacoes');
       if (variacaoWrap) {
         const variacoes = Array.isArray(item.variacoes) && item.variacoes.length ? item.variacoes : [];
         variacaoWrap.innerHTML = variacoes.length ? variacoes.map(v => `
           <div style="display:flex; justify-content:space-between; gap:12px; padding: 0.55rem 0.75rem; border:1px solid var(--border-color); border-radius:12px; background: var(--bg-surface-hover);">
-            <span>${v.nome_variacao}</span>
-            <strong style="color: var(--primary);">${v.estoque ?? 0} und.</strong>
+            <span>${escapeHTML(v.nome_variacao)}</span>
+            <strong style="color: var(--primary);">${escapeHTML(v.estoque ?? 0)} und.</strong>
           </div>
         `).join('') : '<div style="color: var(--text-muted);">Sem variações cadastradas.</div>';
       }
@@ -2100,13 +2174,11 @@
       document.getElementById('produtoModalOverlay')?.classList.remove('open');
       document.getElementById('avatarModalOverlay')?.classList.remove('open');
       document.getElementById('comprovanteModalOverlay')?.classList.remove('open');
+      document.getElementById('cropModalOverlay')?.classList.remove('open');
+      document.getElementById('confirmModalOverlay')?.classList.remove('open');
     });
 
     // MEXI AQUI: ===== RECORTE DE IMAGEM DO PRODUTO (Cropper.js) =====
-    // Antes, handleProdutoImagem enviava a foto direto pro backend assim que
-    // era escolhida. Agora ela abre um modal de recorte primeiro, e só depois
-    // do usuário confirmar o enquadramento é que a imagem (já cortada) é
-    // enviada — resolve o corte automático "errado" do object-fit: cover.
     let cropperInstance = null;
     let cropArquivoOriginal = null;
 
@@ -2120,11 +2192,10 @@
 
       document.getElementById('cropModalOverlay').classList.add('open');
 
-      // Precisa esperar a imagem carregar antes de instanciar o Cropper
       imgSrc.onload = () => {
         if (cropperInstance) cropperInstance.destroy();
         cropperInstance = new Cropper(imgSrc, {
-          aspectRatio: NaN, // livre por padrão
+          aspectRatio: NaN,
           viewMode: 1,
           dragMode: 'move',
           autoCropArea: 0.9,
@@ -2142,7 +2213,6 @@
     function cancelarCrop() {
       document.getElementById('cropModalOverlay').classList.remove('open');
       if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
-      // limpa o input de arquivo pra permitir escolher o mesmo arquivo de novo se quiser
       const inputFile = document.getElementById('prodImagem');
       if (inputFile) inputFile.value = '';
     }
@@ -2161,11 +2231,9 @@
           mostrarToast('Não foi possível processar o recorte da imagem.', 'error');
           return;
         }
-        // Usa o mesmo nome/extensão do arquivo original
         const nomeArquivo = cropArquivoOriginal ? cropArquivoOriginal.name : 'produto.png';
         const arquivoRecortado = new File([blob], nomeArquivo, { type: blob.type || 'image/png' });
 
-        // Mostra preview já recortado
         const preview = document.getElementById('prodImgPreview');
         preview.src = URL.createObjectURL(arquivoRecortado);
         preview.style.display = 'block';
@@ -2179,8 +2247,8 @@
     }
 
     // FOTO DO PRODUTO — envia para o backend e guarda a URL retornada.
-    // MEXI AQUI: agora recebe o arquivo já recortado pelo Cropper.js
-    // (antes recebia direto o evento do input file).
+    // MEXI AQUI: usa apiFetch() em vez de fetch() para incluir o Bearer token
+    // (o upload de imagem também é um endpoint autenticado).
     async function enviarImagemProduto(file) {
       const fileNameLabel = document.getElementById('prodImagemFileName');
       if (fileNameLabel) fileNameLabel.innerText = file.name;
@@ -2193,7 +2261,7 @@
       formData.append('arquivo', file);
 
       try {
-        const resposta = await fetch(API_URLS.upload, { method: 'POST', body: formData });
+        const resposta = await apiFetch(API_URLS.upload, { method: 'POST', body: formData });
         if (resposta.ok) {
           const dados = await resposta.json();
           document.getElementById('prodImagemUrl').value = dados.url;
@@ -2212,6 +2280,10 @@
     // ===== VARIAÇÕES DO PRODUTO (tamanho/cor/etc, cada uma com seu próprio estoque) =====
     let variacaoRowSeq = 0;
 
+    // MEXI AQUI: o valor de "nome" agora é atribuído via propriedade .value
+    // do input (depois de criado), não mais interpolado dentro do innerHTML —
+    // elimina o escape manual de aspas que só cobria um caso e ainda deixava
+    // brecha para XSS via outros caracteres.
     function adicionarVariacaoRow(nome = '', estoque = '') {
       const wrap = document.getElementById('variacoesList');
       if (!wrap) return;
@@ -2220,12 +2292,14 @@
       row.className = 'variacao-row';
       row.id = rowId;
       row.innerHTML = `
-        <input type="text" class="form-control var-nome" placeholder="Ex: Tamanho M - Azul" value="${(nome || '').replace(/"/g, '&quot;')}">
-        <input type="number" class="form-control var-estoque" placeholder="Estoque" min="0" step="1" value="${estoque === '' || estoque === null || estoque === undefined ? '' : estoque}">
+        <input type="text" class="form-control var-nome" placeholder="Ex: Tamanho M - Azul">
+        <input type="number" class="form-control var-estoque" placeholder="Estoque" min="0" step="1">
         <button type="button" class="action-btn danger" title="Remover variação" onclick="document.getElementById('${rowId}').remove()">
           <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
         </button>
       `;
+      row.querySelector('.var-nome').value = nome || '';
+      row.querySelector('.var-estoque').value = (estoque === '' || estoque === null || estoque === undefined) ? '' : estoque;
       wrap.appendChild(row);
     }
 
@@ -2243,8 +2317,6 @@
       if (wrap) wrap.innerHTML = '';
     }
 
-    // MEXI AQUI: mostra/esconde o campo "Nome Completo" no form de armário —
-    // só faz sentido preencher um nome quando o status é "Ocupado".
     function toggleArmarioNomeField() {
       const statusEl = document.getElementById('armStatus');
       const wrap = document.getElementById('armNomeWrap');
@@ -2321,8 +2393,6 @@
       `;
     }
 
-    // MEXI AQUI: ações específicas da tabela de Venda — inclui o botão extra
-    // de "Gerar comprovante" (impressão) além de Editar/Excluir padrão.
     function renderAcoesVenda(id) {
       return `
         <div class="action-btn-group" onclick="event.stopPropagation()">
@@ -2379,8 +2449,6 @@
           const fileNameLabel = document.getElementById('prodImagemFileName');
           if (fileNameLabel) fileNameLabel.innerText = 'Imagem atual mantida (opcional trocar)';
         }
-        // MEXI AQUI: usa sempre item.variacoes (já normalizado em normalizarProduto)
-        // para preencher as linhas de variação ao editar um produto existente.
         limparVariacoes();
         (item.variacoes || []).forEach(v => adicionarVariacaoRow(v.nome_variacao || v.nome || v.name || '', v.estoque ?? v.quantidade ?? ''));
         document.getElementById('prodSubmitBtn').innerText = 'Salvar Alterações';
@@ -2418,7 +2486,6 @@
         document.getElementById('vendaProduto').value = item.produto_id ?? '';
         document.getElementById('vendaQtd').value = item.quantidade ?? 1;
         document.getElementById('vendaPagamento').value = item.forma_pagamento || 'PIX';
-        // MEXI AQUI: preenche o associado vinculado à venda (se houver) ao editar
         const selAssoc = document.getElementById('vendaAssociado');
         if (selAssoc) selAssoc.value = item.associado_id ?? '';
         document.getElementById('vendaSubmitBtn').innerText = 'Salvar Alterações';
@@ -2429,14 +2496,17 @@
     }
 
     // ===== EXCLUSÃO DE ITEM NO BANCO (DELETE) =====
+    // MEXI AQUI: troca window.confirm() pelo modal customizado confirmarAcao(),
+    // e fetch() por apiFetch() para incluir autenticação.
     async function removerItem(tipo, id) {
-      if (!confirm("Confirma a exclusão deste item no banco de dados?")) return;
+      const confirmado = await confirmarAcao('Confirma a exclusão deste item no banco de dados?', 'Excluir');
+      if (!confirmado) return;
 
       const endpointKey = mapaModulos[tipo];
       if (!endpointKey) return;
 
       try {
-        const resposta = await fetch(`${API_URLS[endpointKey]}/${id}`, { method: 'DELETE' });
+        const resposta = await apiFetch(`${API_URLS[endpointKey]}/${id}`, { method: 'DELETE' });
         if (resposta.ok) {
           await carregarDadosDoBanco();
           mostrarToast(mensagemSucesso(endpointKey, 'remover'), 'success');
@@ -2450,21 +2520,21 @@
     }
 
     function emptyRow(cols, msg) {
-      return `<tr class="empty-row"><td colspan="${cols}">${msg}</td></tr>`;
+      return `<tr class="empty-row"><td colspan="${cols}">${escapeHTML(msg)}</td></tr>`;
     }
 
     // RENDERS DAS TABELAS
-    // MEXI AQUI: cada render agora fatia a lista completa com paginarLista()
-    // antes de montar as linhas, e chama renderPaginacaoControles() para
-    // desenhar os botões Anterior/Próximo com base no total real de itens.
+    // MEXI AQUI: todo campo de texto vindo do banco (nome, descrição, código,
+    // email, telefone, endereço, forma de pagamento etc.) agora passa por
+    // escapeHTML() antes de entrar no innerHTML das linhas da tabela.
     function renderCategorias() {
       const tbody = document.getElementById('tblCategorias');
       const pagina = paginarLista(categorias, 'categoria');
       tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
         <tr style="--i:${i}">
-          <td><span class="pill-badge">${item.codigo || item.id}</span></td>
-          <td style="font-weight: 700;">${item.nome}</td>
-          <td>${item.descricao || '-'}</td>
+          <td><span class="pill-badge">${escapeHTML(item.codigo || item.id)}</span></td>
+          <td style="font-weight: 700;">${escapeHTML(item.nome)}</td>
+          <td>${escapeHTML(item.descricao) || '-'}</td>
           <td><span class="status-tag active">Ativo</span></td>
           <td>${renderAcoes('cat', item.id)}</td>
         </tr>
@@ -2477,10 +2547,10 @@
       const pagina = paginarLista(fornecedores, 'fornecedor');
       tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
         <tr style="--i:${i}">
-          <td style="font-weight: 700;">${item.nome}</td>
-          <td><span class="pill-badge">${item.documento}</span></td>
-          <td>${item.email || '-'}</td>
-          <td>${item.telefone || '-'}</td>
+          <td style="font-weight: 700;">${escapeHTML(item.nome)}</td>
+          <td><span class="pill-badge">${escapeHTML(item.documento)}</span></td>
+          <td>${escapeHTML(item.email) || '-'}</td>
+          <td>${escapeHTML(item.telefone) || '-'}</td>
           <td>${renderAcoes('forn', item.id)}</td>
         </tr>
       `).join('') : emptyRow(5, 'Nenhum fornecedor cadastrado.');
@@ -2492,23 +2562,22 @@
       return cat ? cat.nome : '-';
     }
 
-    // MEXI AQUI: retorna o nome do associado a partir do id (usado na tabela de vendas)
     function nomeAssociadoPorId(associadoId) {
       if (!associadoId) return null;
       const assoc = associados.find(a => String(a.id) === String(associadoId));
       return assoc ? assoc.nome : null;
     }
 
-    // MEXI AQUI: monta as chips de variação para exibir na tabela de produtos do admin
+    // MEXI AQUI: monta as chips de variação com escapeHTML() no nome e no estoque
     function renderVariationChipsAdmin(item) {
       const variacoes = Array.isArray(item.variacoes) ? item.variacoes : [];
       if (!variacoes.length) {
-        return item.tamanho ? item.tamanho : '-';
+        return item.tamanho ? escapeHTML(item.tamanho) : '-';
       }
       const chips = variacoes.map(v => {
         const nome = v.nome_variacao || v.nome || v.name || '';
         const estoque = v.estoque ?? v.quantidade ?? 0;
-        return `<span class="table-variation-chip">${nome}<strong>${estoque}</strong></span>`;
+        return `<span class="table-variation-chip">${escapeHTML(nome)}<strong>${escapeHTML(estoque)}</strong></span>`;
       }).join('');
       return `<div class="table-variations">${chips}</div>`;
     }
@@ -2519,18 +2588,20 @@
       tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
         <tr style="--i:${i}; cursor:pointer;" onclick="abrirProdutoModal('${item.id}')" title="Ver detalhes do produto">
           <td onclick="event.stopPropagation()"><input type="checkbox" name="produtoDeleteCheck" value="${item.id}" style="width: 15px; height: 15px; accent-color: var(--primary);"></td>
-          <td>${item.imagem_url ? `<img class="prod-thumb" src="${item.imagem_url}" alt="${item.nome}">` : `<div class="prod-thumb"></div>`}</td>
-          <td style="font-weight: 700;">${item.nome}</td>
-          <td>${nomeCategoriaPorId(item.categoria_id)}</td>
+          <td>${item.imagem_url ? `<img class="prod-thumb" src="${escapeHTML(item.imagem_url)}" alt="${escapeHTML(item.nome)}">` : `<div class="prod-thumb"></div>`}</td>
+          <td style="font-weight: 700;">${escapeHTML(item.nome)}</td>
+          <td>${escapeHTML(nomeCategoriaPorId(item.categoria_id))}</td>
           <td>${renderVariationChipsAdmin(item)}</td>
-          <td><span class="pill-badge">${item.quantidade ?? 0}</span></td>
-          <td style="font-weight: 700; color: var(--success);">R$ ${Number(item.preco).toFixed(2)}</td>
+          <td><span class="pill-badge">${escapeHTML(item.quantidade ?? 0)}</span></td>
+          <td style="font-weight: 700; color: var(--success);">${formatarMoeda(item.preco)}</td>
           <td>${renderAcoes('prod', item.id)}</td>
         </tr>
       `).join('') : emptyRow(8, 'Nenhum produto cadastrado.');
       renderPaginacaoControles('pagProdutos', 'produto', produtos.length);
     }
 
+    // MEXI AQUI: troca window.confirm() pelo modal customizado confirmarAcao()
+    // e fetch() por apiFetch().
     async function deletarProdutosSelecionados() {
       const selecionados = [...document.querySelectorAll('input[name="produtoDeleteCheck"]:checked')].map(el => Number(el.value)).filter(Boolean);
       if (!selecionados.length) {
@@ -2538,12 +2609,12 @@
         return;
       }
 
-      const confirmar = confirm(`Deseja excluir ${selecionados.length} produto(s) selecionado(s)?`);
-      if (!confirmar) return;
+      const confirmado = await confirmarAcao(`Deseja excluir ${selecionados.length} produto(s) selecionado(s)?`, 'Excluir');
+      if (!confirmado) return;
 
       for (const id of selecionados) {
         try {
-          const resposta = await fetch(`${API_URLS.produto}/${id}`, { method: 'DELETE' });
+          const resposta = await apiFetch(`${API_URLS.produto}/${id}`, { method: 'DELETE' });
           if (!resposta.ok) {
             throw new Error(`Erro ao apagar produto ${id}`);
           }
@@ -2558,48 +2629,39 @@
       mostrarToast(`${selecionados.length} produto(s) removido(s) com sucesso!`, 'success');
     }
 
-    // MEXI AQUI: renderAssociados segue exatamente o mesmo padrão de renderUsuarios,
-    // usando as classes globais da tabela (.pill-badge, .status-tag, renderAcoes) em
-    // vez de estilos inline, e o mesmo tipo de card de cadastro/listagem.
     function renderAssociados() {
       const tbody = document.getElementById('tblAssociados');
       if (!tbody) return;
       const pagina = paginarLista(associados, 'associado');
       tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
         <tr style="--i:${i}">
-          <td style="font-weight: 700;">${item.nome}</td>
-          <td>${item.email || '-'}</td>
-          <td>${item.telefone || '-'}</td>
-          <td>${item.endereco || '-'}</td>
-          <td><span class="status-tag ${(item.status || 'Ativo') === 'Ativo' ? 'active' : 'inactive'}">${item.status || 'Ativo'}</span></td>
+          <td style="font-weight: 700;">${escapeHTML(item.nome)}</td>
+          <td>${escapeHTML(item.email) || '-'}</td>
+          <td>${escapeHTML(item.telefone) || '-'}</td>
+          <td>${escapeHTML(item.endereco) || '-'}</td>
+          <td><span class="status-tag ${(item.status || 'Ativo') === 'Ativo' ? 'active' : 'inactive'}">${escapeHTML(item.status || 'Ativo')}</span></td>
           <td>${renderAcoes('assoc', item.id)}</td>
         </tr>
       `).join('') : emptyRow(6, 'Nenhum associado cadastrado.');
       renderPaginacaoControles('pagAssociados', 'associado', associados.length);
     }
 
-    // MEXI AQUI: badge de status do armário — verde (Disponível), vermelho (Ocupado),
-    // amarelo (Manutenção ou qualquer outro status não previsto).
     function statusArmarioClasse(status) {
       if (status === 'Disponível') return 'active';
       if (status === 'Ocupado') return 'inactive';
       return 'warning';
     }
 
-    // MEXI AQUI: única versão de renderArmarios — antes havia duas funções
-    // com o mesmo nome (a segunda sobrescrevia a primeira sem paginação e
-    // sem usar as mesmas ações genéricas editarItem/removerItem do resto do
-    // painel). Agora segue exatamente o mesmo padrão das outras tabelas.
     function renderArmarios() {
       const tbody = document.getElementById('tblArmarios');
       if (!tbody) return;
       const pagina = paginarLista(armarios, 'armario');
       tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
         <tr style="--i:${i}">
-          <td><span class="pill-badge">${item.numero}</span></td>
-          <td>${item.localizacao || '-'}</td>
-          <td><span class="status-tag ${statusArmarioClasse(item.status)}">${item.status || 'Disponível'}</span></td>
-          <td>${item.nome_completo || '-'}</td>
+          <td><span class="pill-badge">${escapeHTML(item.numero)}</span></td>
+          <td>${escapeHTML(item.localizacao) || '-'}</td>
+          <td><span class="status-tag ${statusArmarioClasse(item.status)}">${escapeHTML(item.status || 'Disponível')}</span></td>
+          <td>${escapeHTML(item.nome_completo) || '-'}</td>
           <td>${renderAcoes('arm', item.id)}</td>
         </tr>
       `).join('') : emptyRow(5, 'Nenhum armário cadastrado.');
@@ -2611,10 +2673,10 @@
       const pagina = paginarLista(usuarios, 'usuario');
       tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
         <tr style="--i:${i}">
-          <td style="font-weight: 700;">${item.nome}</td>
-          <td>${item.email}</td>
-          <td><span class="pill-badge">${item.perfil}</span></td>
-          <td><span class="status-tag ${(item.status || 'Ativo') === 'Ativo' ? 'active' : 'inactive'}">${item.status || 'Ativo'}</span></td>
+          <td style="font-weight: 700;">${escapeHTML(item.nome)}</td>
+          <td>${escapeHTML(item.email)}</td>
+          <td><span class="pill-badge">${escapeHTML(item.perfil)}</span></td>
+          <td><span class="status-tag ${(item.status || 'Ativo') === 'Ativo' ? 'active' : 'inactive'}">${escapeHTML(item.status || 'Ativo')}</span></td>
           <td>${renderAcoes('usr', item.id)}</td>
         </tr>
       `).join('') : emptyRow(5, 'Nenhum usuário cadastrado.');
@@ -2626,17 +2688,16 @@
       if (!tbody) return;
       const pagina = paginarLista(vendas, 'venda');
       tbody.innerHTML = pagina.length ? pagina.map((item, i) => {
-        // MEXI AQUI: exibe o nome do associado vinculado (se houver) na coluna "Associado"
         const nomeAssoc = nomeAssociadoPorId(item.associado_id);
         return `
         <tr style="--i:${i}">
-          <td>${item.data_venda || '-'}</td>
-          <td style="font-weight: 700;">${item.comprador || item.cliente || '-'}</td>
-          <td>${item.produto_nome || '-'}</td>
-          <td><span class="pill-badge">${item.quantidade ?? 0}</span></td>
-          <td>${nomeAssoc ? `<span class="status-tag active">${nomeAssoc} · -10%</span>` : '-'}</td>
-          <td style="font-weight: 700; color: var(--success);">R$ ${Number(item.preco_total ?? item.total ?? 0).toFixed(2)}</td>
-          <td>${item.forma_pagamento || '-'}</td>
+          <td>${escapeHTML(item.data_venda) || '-'}</td>
+          <td style="font-weight: 700;">${escapeHTML(item.comprador || item.cliente) || '-'}</td>
+          <td>${escapeHTML(item.produto_nome) || '-'}</td>
+          <td><span class="pill-badge">${escapeHTML(item.quantidade ?? 0)}</span></td>
+          <td>${nomeAssoc ? `<span class="status-tag active">${escapeHTML(nomeAssoc)} · -10%</span>` : '-'}</td>
+          <td style="font-weight: 700; color: var(--success);">${formatarMoeda(item.preco_total ?? item.total ?? 0)}</td>
+          <td>${escapeHTML(item.forma_pagamento) || '-'}</td>
           <td>${renderAcoesVenda(item.id)}</td>
         </tr>
       `;
@@ -2644,8 +2705,6 @@
       renderPaginacaoControles('pagVendas', 'venda', vendas.length);
     }
 
-    // MEXI AQUI: mapeia cada chave de paginação para a função de render correspondente,
-    // usado por mudarPagina() ao clicar em "Anterior"/"Próximo".
     Object.assign(renderizadoresPorModulo, {
       categoria: renderCategorias,
       fornecedor: renderFornecedores,
@@ -2657,6 +2716,7 @@
     });
 
     // BARRA DE ESTATÍSTICAS DINÂMICA
+    // MEXI AQUI: valores monetários usam formatarMoeda() em vez de toFixed(2) cru
     function computeStats(viewId) {
       switch (viewId) {
         case 'categoria':
@@ -2675,7 +2735,7 @@
           return [
             { value: produtos.length, label: 'Produtos Cadastrados' },
             { value: new Set(produtos.map(p => p.categoria_id)).size, label: 'Categorias Utilizadas' },
-            { value: 'R$ ' + produtos.reduce((a, p) => a + Number(p.preco || 0), 0).toFixed(2), label: 'Valor em Catálogo' }
+            { value: formatarMoeda(produtos.reduce((a, p) => a + Number(p.preco || 0), 0)), label: 'Valor em Catálogo' }
           ];
         case 'associado':
           return [
@@ -2699,7 +2759,7 @@
           return [
             { value: vendas.length, label: 'Vendas Registradas' },
             { value: vendas.reduce((a, v) => a + Number(v.quantidade || 0), 0), label: 'Itens Vendidos' },
-            { value: 'R$ ' + vendas.reduce((a, v) => a + Number(v.preco_total || 0), 0).toFixed(2), label: 'Faturamento Total' }
+            { value: formatarMoeda(vendas.reduce((a, v) => a + Number(v.preco_total || 0), 0)), label: 'Faturamento Total' }
           ];
         default:
           return [];
@@ -2720,8 +2780,8 @@
         <div class="stat-tile reveal">
           <div class="stat-icon">${statIcons[i] || statIcons[0]}</div>
           <div class="stat-value-wrap">
-            <div class="stat-value">${s.value}</div>
-            <div class="stat-label">${s.label}</div>
+            <div class="stat-value">${escapeHTML(s.value)}</div>
+            <div class="stat-label">${escapeHTML(s.label)}</div>
           </div>
         </div>
       `).join('');
@@ -2745,7 +2805,7 @@
         case 'fornecedor':
           return fornecedores.slice(-3).reverse().map(f => ({ title: f.nome, sub: f.documento }));
         case 'produto':
-          return produtos.slice(-3).reverse().map(p => ({ title: p.nome, sub: 'R$ ' + Number(p.preco).toFixed(2) }));
+          return produtos.slice(-3).reverse().map(p => ({ title: p.nome, sub: formatarMoeda(p.preco) }));
         case 'associado':
           return associados.slice(-3).reverse().map(a => ({ title: a.nome, sub: a.email || a.telefone || '-' }));
         case 'armario':
@@ -2759,6 +2819,7 @@
       }
     }
 
+    // MEXI AQUI: título/sub dos "últimos registros" passam por escapeHTML()
     function renderRecentList(viewId) {
       const list = document.getElementById('recentList');
       if (!list) return;
@@ -2767,8 +2828,8 @@
         <div class="recent-item">
           <div class="ri-tag">${recentIcon}</div>
           <div>
-            <div class="ri-title">${e.title}</div>
-            <div class="ri-sub">${e.sub}</div>
+            <div class="ri-title">${escapeHTML(e.title)}</div>
+            <div class="ri-sub">${escapeHTML(e.sub)}</div>
           </div>
         </div>
       `).join('') : '<div class="recent-empty">Nenhum registro recente.</div>';
@@ -2796,7 +2857,7 @@
     }
 
     // MEXI AQUI: ===== RESUMO DE VALORES DA VENDA (subtotal / desconto associado 10% / total) =====
-    // Recalcula em tempo real toda vez que o produto, a quantidade ou o associado mudam.
+    // Agora usa formatarMoeda() em vez de 'R$ ' + toFixed(2).
     function atualizarResumoVenda() {
       const produtoId = document.getElementById('vendaProduto').value;
       const qtd = parseInt(document.getElementById('vendaQtd').value || '0', 10);
@@ -2814,10 +2875,10 @@
       const desconto = temDesconto ? subtotal * 0.10 : 0;
       const total = subtotal - desconto;
 
-      document.getElementById('vendaResumoSubtotal').innerText = 'R$ ' + subtotal.toFixed(2);
-      document.getElementById('vendaResumoDesconto').innerText = '- R$ ' + desconto.toFixed(2);
+      document.getElementById('vendaResumoSubtotal').innerText = formatarMoeda(subtotal);
+      document.getElementById('vendaResumoDesconto').innerText = '- ' + formatarMoeda(desconto);
       document.getElementById('vendaResumoDescontoWrap').classList.toggle('show', temDesconto);
-      document.getElementById('vendaResumoTotal').innerText = 'R$ ' + total.toFixed(2);
+      document.getElementById('vendaResumoTotal').innerText = formatarMoeda(total);
       resumoWrap.style.display = 'block';
     }
 
@@ -2825,8 +2886,6 @@
     // MEXI AQUI: ===== COMPROVANTE DE VENDA IMPRIMÍVEL (estilo cupom) ===== //
     // ================================================================== //
 
-    // Gera um número de recibo determinístico a partir do id da venda e da data,
-    // no padrão "SNSP-AAMMDD-XXXX" (mesmo estilo do modelo em papel da SENAI).
     function gerarNumeroRecibo(item) {
       const dataRef = item.data_venda ? new Date(item.data_venda) : new Date();
       const aamm = isNaN(dataRef) ? '000000' :
@@ -2835,8 +2894,6 @@
       return `SNSP-${aamm}-${seq}`;
     }
 
-    // Gera um código de autenticação/validação pseudo-único (visual, não criptográfico)
-    // a partir do id da venda, só para preencher o layout do comprovante.
     function gerarCodigoValidacao(item) {
       const base = `VND${item.id ?? 0}${item.produto_id ?? 0}${item.quantidade ?? 0}`;
       let hash = 0;
@@ -2854,8 +2911,8 @@
     }
 
     // Monta o HTML do cupom a partir dos dados de uma venda já registrada.
-    // MEXI AQUI: agora também exibe o associado vinculado e a linha de desconto (10%)
-    // quando a venda tiver sido feita com desconto de associado.
+    // MEXI AQUI: campos vindos de dados do cliente/associado/produto agora
+    // passam por escapeHTML(), e valores monetários usam formatarMoeda().
     function montarComprovanteHTML(item) {
       const produto = produtos.find(p => String(p.id) === String(item.produto_id));
       const nomeItem = item.produto_nome || (produto ? produto.nome : 'Item');
@@ -2863,7 +2920,6 @@
       const totalFinal = Number(item.preco_total ?? item.total ?? (produto ? produto.preco * qtd : 0));
       const temDesconto = !!item.associado_id && Number(item.desconto_percentual || 0) > 0;
       const percentualDesconto = temDesconto ? Number(item.desconto_percentual || 10) : 0;
-      // Reconstrói o subtotal (sem desconto) a partir do total final já com desconto aplicado
       const subtotalItem = temDesconto ? totalFinal / (1 - percentualDesconto / 100) : totalFinal;
       const valorDesconto = subtotalItem - totalFinal;
       const valorUnit = qtd ? subtotalItem / qtd : subtotalItem;
@@ -2885,16 +2941,16 @@
         </div>
 
         <div class="comp-title">COMPROVANTE DE VENDA</div>
-        <div class="comp-recibo">RECIBO Nº <strong>${recibo}</strong></div>
+        <div class="comp-recibo">RECIBO Nº <strong>${escapeHTML(recibo)}</strong></div>
 
         <div class="comp-meta">
-          <span>Data/Hora: <strong style="color:#111;">${formatarDataHoraComprovante(item)}</strong></span>
-          <span>Venda: <strong style="color:#111;">#${item.id ?? '-'}</strong></span>
+          <span>Data/Hora: <strong style="color:#111;">${escapeHTML(formatarDataHoraComprovante(item))}</strong></span>
+          <span>Venda: <strong style="color:#111;">#${escapeHTML(item.id ?? '-')}</strong></span>
         </div>
 
         <div class="comp-section-label">Cliente</div>
-        <div class="comp-cliente-row"><span>Nome</span><span>${cliente}</span></div>
-        ${nomeAssoc ? `<div class="comp-cliente-row"><span>Associado</span><span>${nomeAssoc}</span></div>` : ''}
+        <div class="comp-cliente-row"><span>Nome</span><span>${escapeHTML(cliente)}</span></div>
+        ${nomeAssoc ? `<div class="comp-cliente-row"><span>Associado</span><span>${escapeHTML(nomeAssoc)}</span></div>` : ''}
 
         <div class="comp-section-label">Itens Adquiridos</div>
         <table class="comp-itens-table">
@@ -2903,23 +2959,23 @@
           </thead>
           <tbody>
             <tr>
-              <td class="comp-item-desc">${nomeItem}</td>
-              <td>${qtd}</td>
+              <td class="comp-item-desc">${escapeHTML(nomeItem)}</td>
+              <td>${escapeHTML(qtd)}</td>
               <td>${subtotalItem.toFixed(2)}</td>
             </tr>
           </tbody>
         </table>
 
         <div class="comp-totais">
-          <div class="comp-linha"><span>Valor Unitário</span><span>R$ ${valorUnit.toFixed(2)}</span></div>
-          ${temDesconto ? `<div class="comp-linha desconto"><span>Desconto Associado (${percentualDesconto}%)</span><span>- R$ ${valorDesconto.toFixed(2)}</span></div>` : ''}
-          <div class="comp-linha total"><span>Total a Pagar</span><span>R$ ${totalFinal.toFixed(2)}</span></div>
+          <div class="comp-linha"><span>Valor Unitário</span><span>${formatarMoeda(valorUnit)}</span></div>
+          ${temDesconto ? `<div class="comp-linha desconto"><span>Desconto Associado (${percentualDesconto}%)</span><span>- ${formatarMoeda(valorDesconto)}</span></div>` : ''}
+          <div class="comp-linha total"><span>Total a Pagar</span><span>${formatarMoeda(totalFinal)}</span></div>
         </div>
 
-        <div class="comp-pagamento">Forma de Pagamento: ${item.forma_pagamento || '-'}</div>
+        <div class="comp-pagamento">Forma de Pagamento: ${escapeHTML(item.forma_pagamento) || '-'}</div>
 
         <div class="comp-validacao">
-          <div class="comp-codigo">${codigoValidacao}</div>
+          <div class="comp-codigo">${escapeHTML(codigoValidacao)}</div>
           <div class="comp-qr">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM19 14h2v2h-2zM14 19h2v2h-2zM19 19h2v2h-2z"/></svg>
           </div>
@@ -2933,7 +2989,6 @@
       `;
     }
 
-    // Abre o modal de comprovante já preenchido com os dados da venda escolhida.
     function abrirComprovanteModal(id) {
       const item = vendas.find(v => String(v.id) === String(id));
       if (!item) {
@@ -2950,22 +3005,16 @@
       document.getElementById('comprovanteModalOverlay').classList.remove('open');
     }
 
-    // Dispara a impressão do navegador — a regra @media print isola só o cupom.
     function imprimirComprovante() {
       window.print();
     }
 
     // ===== CADASTROS/EDIÇÕES VIA API =====
-    // MEXI AQUI: salvarNoBanco agora recebe também "endpointKey" (categoria, produto,
-    // etc.) para poder disparar o toast de sucesso certo — "Categoria adicionada",
-    // "Produto atualizado" — de acordo com o método (POST = criar, PUT = editar).
-    // MEXI AQUI: quando o backend retorna um erro com "detail" (ex: "Esse e-mail
-    // já está cadastrado."), esse detail agora é usado como TÍTULO do toast de
-    // erro, em vez de aparecer só como texto pequeno embaixo de uma mensagem
-    // genérica — assim a pessoa lê direto o motivo real do erro.
+    // MEXI AQUI: usa apiFetch() em vez de fetch() para incluir o Bearer token
+    // em toda operação de escrita (POST/PUT).
     async function salvarNoBanco(endpoint, payload, formEvent, method = 'POST', endpointKey = null) {
       try {
-        const resposta = await fetch(endpoint, {
+        const resposta = await apiFetch(endpoint, {
           method,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -2986,22 +3035,17 @@
           if (armBtn) armBtn.innerText = '+ Cadastrar Armário';
           const vendaBtn = document.getElementById('vendaSubmitBtn');
           if (vendaBtn) vendaBtn.innerText = '+ Concluir Venda';
-          // MEXI AQUI: esconde o resumo de valores da venda após salvar/resetar o formulário
           const vendaResumo = document.getElementById('vendaResumoWrap');
           if (vendaResumo) vendaResumo.style.display = 'none';
           toggleArmarioNomeField();
           await carregarDadosDoBanco();
 
-          // MEXI AQUI: dispara o card de sucesso (toast) correspondente ao módulo e à ação
           if (endpointKey) {
             const acao = method === 'POST' ? 'criar' : 'editar';
             mostrarToast(mensagemSucesso(endpointKey, acao), 'success');
           }
         } else {
           const erroDetalhe = await resposta.json().catch(() => ({}));
-          // MEXI AQUI: se o backend mandou uma mensagem específica (detail),
-          // ela vira o título do toast (ex: "Esse e-mail já está cadastrado.").
-          // Se não mandou nada específico, cai na mensagem genérica de sempre.
           if (erroDetalhe.detail) {
             mostrarToast(erroDetalhe.detail, 'error');
           } else {
@@ -3051,8 +3095,6 @@
         tamanho: document.getElementById('prodTamanho').value || '',
         quantidade: parseInt(document.getElementById('prodQuantidade').value || '0', 10),
         imagem_url: document.getElementById('prodImagemUrl').value || '',
-        // MEXI AQUI: garante que as variações preenchidas no formulário sejam
-        // sempre coletadas e enviadas no payload de cadastro/edição do produto.
         variacoes: coletarVariacoes(),
         disponivel: 1
       };
@@ -3062,8 +3104,6 @@
       document.getElementById('prodImagemUrl').value = '';
     }
 
-    // MEXI AQUI: addAssociado segue o mesmo fluxo de addUsuario/addCategoria,
-    // usando salvarNoBanco (POST para novo, PUT para edição).
     function addAssociado(e) {
       e.preventDefault();
       const id = document.getElementById('assocId').value;
@@ -3079,11 +3119,6 @@
       document.getElementById('assocId').value = '';
     }
 
-    // MEXI AQUI: addArmario — ÚNICA versão agora (antes havia duas funções com
-    // o mesmo nome; a segunda, que sobrescrevia a primeira, tentava ler um
-    // campo "armAssociadoId" que não existe mais no formulário, o que
-    // quebrava o cadastro com um erro de JS silencioso). Usa salvarNoBanco,
-    // como todos os outros módulos, enviando numero/localizacao/status/nome_completo.
     function addArmario(e) {
       e.preventDefault();
       const id = document.getElementById('armId').value;
@@ -3113,10 +3148,6 @@
       document.getElementById('usrId').value = '';
     }
 
-    // MEXI AQUI: addVenda agora lê o associado selecionado e, se houver um,
-    // calcula e envia 10% de desconto sobre o subtotal (preço do produto × quantidade).
-    // O backend precisa aceitar os campos "associado_id", "desconto_percentual" e
-    // usar/validar "preco_total" para o desconto realmente ser persistido.
     function addVenda(e) {
       e.preventDefault();
       const id = document.getElementById('vendaId').value;
@@ -3150,18 +3181,15 @@
   if (overlay) overlay.classList.add('active');
 
   setTimeout(() => {
-    // 1. Limpa os dados armazenados na sessão/armazenamento local
     localStorage.clear();
     sessionStorage.clear();
 
-    // 2. Limpa os cookies
     document.cookie.split(";").forEach((c) => {
       document.cookie = c
         .replace(/^ +/, "")
         .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
     });
 
-    // 3. Redireciona para a rota base '/' (ou substitua por 'base.html' / '/base' se essa for a URL exata da sua rota)
     window.location.href = '/'; 
   }, 1200);
 }
