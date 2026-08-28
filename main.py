@@ -3,17 +3,19 @@ import re
 import shutil
 import uuid
 from typing import Optional, Union
+
 from fastapi import FastAPI, Request, Depends, Form, HTTPException, status, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
+
+from pydantic import BaseModel, field_validator
+from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
 
 # Hash de senha (bcrypt puro, sem depender do passlib)
 from app.auth_utils import hash_senha
-from pydantic import BaseModel, field_validator
-from sqlalchemy import inspect, text
 
 # 1. Importações do banco e dos routers
 from app.database import engine, Base, get_db
@@ -72,6 +74,26 @@ except ImportError:
 # Cria as tabelas no Banco de Dados após carregar os modelos
 Base.metadata.create_all(bind=engine)
 
+# ─────────────────────────────────────────────────────────────────────────────
+# INICIALIZAÇÃO DA APLICAÇÃO FASTAPI
+# ─────────────────────────────────────────────────────────────────────────────
+
+app = FastAPI(
+    title="Sistema AAPM - Gestão de Estoque e Vendas",
+    version="1.1.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# GARANTIA DE COLUNAS/MIGRAÇÕES AUTOMÁTICAS
+# ─────────────────────────────────────────────────────────────────────────────
 
 def garantir_colunas_vendas():
     with engine.begin() as conn:
@@ -84,6 +106,9 @@ def garantir_colunas_vendas():
             "quantidade": "INTEGER",
             "forma_pagamento": "TEXT",
             "preco_total": "REAL",
+            "associado_id": "INTEGER",
+            "desconto_percentual": "REAL",
+            "valor_desconto": "REAL"
         }
 
         for nome, tipo in colunas_para_adicionar.items():
@@ -116,32 +141,21 @@ def garantir_colunas_fornecedores():
 
 garantir_colunas_fornecedores()
 
-app = FastAPI(
-    title="Sistema AAPM - Gestão de Estoque e Vendas",
-    version="1.1.0"
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 # ─────────────────────────────────────────────────────────────────────────────
-# CAMINHOS E STATIC
+# CAMINHOS E ARQUIVOS ESTÁTICOS
 # ─────────────────────────────────────────────────────────────────────────────
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "app", "templates"))
 caminho_static_correto = os.path.join(BASE_DIR, "app", "static")
+
 app.mount("/static", StaticFiles(directory=caminho_static_correto), name="static")
 
 # Pasta de uploads (fotos de produtos) dentro da própria pasta static
 CAMINHO_UPLOADS = os.path.join(caminho_static_correto, "uploads")
 os.makedirs(CAMINHO_UPLOADS, exist_ok=True)
 
+# Inclusion dos Routers
 app.include_router(auth_router)
 app.include_router(produto_router.router)
 app.include_router(categoria_router.router)
@@ -397,7 +411,7 @@ async def pagina_dashboard_vendas(request: Request, db: Session = Depends(get_db
     )
 
 # ─────────────────────────────────────────────────────────────────────────────
-# API GET ENDPOINTS (listagem)
+# API GET ENDPOINTS (LISTAGEM)
 # ─────────────────────────────────────────────────────────────────────────────
 
 @app.get("/api/categorias")
@@ -456,11 +470,6 @@ async def api_listar_produtos(db: Session = Depends(get_db)):
             "variacoes": variacoes
         })
     return retorno
-
-# NOTA: a listagem/criação de vendas (GET e POST /api/vendas) já é feita
-# pelo venda_router.py (incluído acima via app.include_router(venda_router)).
-# A rota GET /api/vendas que existia aqui foi removida para não duplicar/
-# conflitar com a rota equivalente do router.
 
 # ─────────────────────────────────────────────────────────────────────────────
 # UPLOAD DE IMAGEM
