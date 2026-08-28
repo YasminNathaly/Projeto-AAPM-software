@@ -14,6 +14,12 @@ class Venda(Base):
     produto_id = Column(Integer, ForeignKey("produtos.id"), nullable=True)
     quantidade = Column(Integer, nullable=True, default=1)
     forma_pagamento = Column(String(30), nullable=True, default="PIX")
+    
+    # --- NOVOS CAMPOS PARA DESCONTO ---
+    desconto_percentual = Column(Float, nullable=True, default=0.0)
+    valor_desconto = Column(Float, nullable=True, default=0.0)
+    # ----------------------------------
+
     valor_total = Column(Float, nullable=False, default=0.0)
     preco_total = Column(Float, nullable=True, default=0.0)
     status = Column(String(30), default="Concluída") # ex: "Pendente", "Concluída", "Cancelada"
@@ -38,4 +44,3 @@ class ItemVenda(Base):
     venda = relationship("Venda", back_populates="itens")
     produto = relationship("Produto")
     variacao = relationship("VariacaoProduto")
-    # Em Venda

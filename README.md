@@ -26,3 +26,5 @@ pip install bcrypt
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
+
+git checkout . - caso não esteja atualizando as branchs

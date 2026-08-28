@@ -8,8 +8,8 @@ from app.models.usuario import Usuario
 from app.models.categoria import Categoria
 from app.models.produto import Produto
 from app.models.associado import Associado
-from app.models.venda import Venda
-from app.models.armario import Armario  # <-- Importado o modelo Armario
+from app.models.venda import Venda, ItemVenda
+from app.models.armario import Armario
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -45,28 +45,22 @@ async def popular_banco_dados():
             role="FUNCIONARIO",
             ativo=True
         )
-        db.add(admin)
-        db.add(funcionario)
+        db.add_all([admin, funcionario])
         db.flush()
 
-        # 2. CATEGORIAS OFICIAIS DA AAPM
-        print("🗂️ Criando categorias organizadas...")
-        cat_taxas = Categoria(nome="Taxas e Serviços")
+        # 2. CATEGORIAS
+        print("🗂️ Criando categorias...")
         cat_uniformes = Categoria(nome="Uniformes")
         cat_papelaria = Categoria(nome="Papelaria e Desenho")
-        cat_ferramentas = Categoria(nome="Ferramentas e Oficina")
-        cat_lazer = Categoria(nome="Lazer e Diversos")
-        
-        db.add_all([cat_taxas, cat_uniformes, cat_papelaria, cat_ferramentas, cat_lazer])
+        db.add_all([cat_uniformes, cat_papelaria])
         db.flush()
 
-        # 3. EXTRAÇÃO COMPLETA DA SUA LISTA DE MATERIAIS AAPM
-        print("👕 Inserindo catálogo massivo extraído da AAPM...")
-        produtos_oficiais = [
-            # Adicione seus produtos aqui caso queira
-        ]
-        if produtos_oficiais:
-            db.add_all(produtos_oficiais)
+        # 3. PRODUTOS DE TESTE
+        print("👕 Inserindo produtos de teste...")
+        prod1 = Produto(nome="Camiseta SENAI M", preco=50.0, categoria_id=cat_uniformes.id, estoque=20)
+        prod2 = Produto(nome="Caderno Universitario", preco=20.0, categoria_id=cat_papelaria.id, estoque=50)
+        db.add_all([prod1, prod2])
+        db.flush()
 
         # 4. ASSOCIADOS DE TESTE
         print("👥 Inserindo associados no banco...")
@@ -83,8 +77,9 @@ async def popular_banco_dados():
             endereco="Av. Brasil, 456"
         )
         db.add_all([assoc1, assoc2])
+        db.flush()
 
-        # 5. ARMÁRIOS DE TESTE (Usando nome_completo)
+        # 5. ARMÁRIOS DE TESTE
         print("🚪 Inserindo armários de teste...")
         arm1 = Armario(
             numero="001",
@@ -100,7 +95,51 @@ async def popular_banco_dados():
         )
         db.add_all([arm1, arm2])
 
-        # Confirma todas as inserções no banco
+        # 6. VENDAS DE TESTE (Sem desconto vs Com desconto)
+        print("🛒 Inserindo vendas de teste...")
+        
+        # Venda 1: Cliente comum (sem desconto)
+        venda_comum = Venda(
+            cliente="Cliente Balcão",
+            comprador="Cliente Balcão",
+            produto_id=prod1.id,
+            quantidade=1,
+            forma_pagamento="PIX",
+            associado_id=None,
+            desconto_percentual=0.0,
+            valor_desconto=0.0,
+            valor_total=50.0,
+            preco_total=50.0,
+            status="Concluída"
+        )
+
+        # Venda 2: Associado Carlos Eduardo (10% de desconto -> R$ 5,00 off)
+        subtotal = prod1.preco * 1  # 50.00
+        desconto = subtotal * 0.10  # 5.00
+        total_com_desconto = subtotal - desconto  # 45.00
+
+        venda_associado = Venda(
+            cliente=assoc1.nome,
+            comprador=assoc1.nome,
+            produto_id=prod1.id,
+            quantidade=1,
+            forma_pagamento="PIX",
+            associado_id=assoc1.id,
+            desconto_percentual=10.0,
+            valor_desconto=desconto,
+            valor_total=total_com_desconto,
+            preco_total=total_com_desconto,
+            status="Concluída"
+        )
+
+        db.add_all([venda_comum, venda_associado])
+        db.flush()
+
+        # Itens das vendas
+        item1 = ItemVenda(venda_id=venda_comum.id, produto_id=prod1.id, quantidade=1, preco_unitario=50.0)
+        item2 = ItemVenda(venda_id=venda_associado.id, produto_id=prod1.id, quantidade=1, preco_unitario=50.0)
+        db.add_all([item1, item2])
+
         db.commit()
         print("🚀 Sucesso! Banco populado com sucesso.")
 
