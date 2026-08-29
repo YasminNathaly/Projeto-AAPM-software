@@ -1,3 +1,9 @@
+from dotenv import load_dotenv
+load_dotenv()
+
+from dotenv import load_dotenv
+load_dotenv()
+
 import os
 import re
 import shutil
@@ -141,6 +147,21 @@ def garantir_colunas_fornecedores():
 
 garantir_colunas_fornecedores()
 
+
+def garantir_colunas_usuarios():
+    with engine.begin() as conn:
+        inspector = inspect(conn)
+        colunas = {c["name"] for c in inspector.get_columns("usuarios")}
+        colunas_para_adicionar = {
+            "reset_code_hash": "TEXT",
+            "reset_code_expires_at": "TIMESTAMP",
+            "reset_code_used": "BOOLEAN DEFAULT 1",
+        }
+        for nome, tipo in colunas_para_adicionar.items():
+            if nome not in colunas:
+                conn.execute(text(f"ALTER TABLE usuarios ADD COLUMN {nome} {tipo}"))
+
+garantir_colunas_usuarios()
 # ─────────────────────────────────────────────────────────────────────────────
 # CAMINHOS E ARQUIVOS ESTÁTICOS
 # ─────────────────────────────────────────────────────────────────────────────

@@ -4,6 +4,7 @@ import hmac
 import secrets
 import smtplib
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -204,14 +205,12 @@ def codigos_conferem(codigo_informado: str, hash_salvo: str) -> bool:
 
 
 def enviar_email_codigo(destinatario: str, codigo: str) -> None:
-    """Envia o código de verificação por e-mail via Gmail SMTP."""
+    """Envia o código de verificação por e-mail via Gmail SMTP, em HTML formatado."""
     if not SMTP_EMAIL or not SMTP_APP_PASSWORD:
-        # Não derruba a aplicação se o e-mail não estiver configurado ainda,
-        # mas deixa bem visível no log do servidor durante o desenvolvimento.
         print(f"[AVISO] SMTP não configurado. Código gerado para {destinatario}: {codigo}")
         return
 
-    corpo = (
+    texto_simples = (
         f"Olá,\n\n"
         f"Recebemos uma solicitação para redefinir sua senha na AAPM.\n"
         f"Seu código de verificação é: {codigo}\n\n"
@@ -219,15 +218,85 @@ def enviar_email_codigo(destinatario: str, codigo: str) -> None:
         f"Se você não solicitou isso, ignore este e-mail."
     )
 
-    msg = MIMEText(corpo, "plain", "utf-8")
-    msg["Subject"] = "Código de redefinição de senha - AAPM"
+    html = f"""\
+<!DOCTYPE html>
+<html lang="pt-BR">
+<body style="margin:0; padding:0; background-color:#f4f5f9; font-family: 'Segoe UI', Arial, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f5f9; padding: 32px 0;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background-color:#101018; border-radius:16px; overflow:hidden;">
+
+          <!-- Cabeçalho -->
+          <tr>
+            <td style="background-color:#FF0000; padding:20px 32px;">
+              <span style="font-family: Arial, sans-serif; font-weight:900; font-style:italic; font-size:22px; color:#ffffff; letter-spacing:1px;">SENAI</span>
+              <span style="font-family: Arial, sans-serif; font-size:16px; color:#ffffff; letter-spacing:2px; margin-left:10px; border-left:1px solid rgba(255,255,255,0.5); padding-left:10px;">AAPM</span>
+            </td>
+          </tr>
+
+          <!-- Corpo -->
+          <tr>
+            <td style="padding:32px;">
+              <span style="display:inline-block; background:rgba(214,50,80,0.12); border:1px solid rgba(214,50,80,0.3); color:#d63250; padding:4px 10px; border-radius:999px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:16px;">
+                Recuperação de senha
+              </span>
+
+              <h1 style="color:#ffffff; font-size:22px; margin:16px 0 8px 0;">Seu código de verificação</h1>
+              <p style="color:rgba(255,255,255,0.64); font-size:14px; line-height:1.6; margin:0 0 24px 0;">
+                Recebemos uma solicitação para redefinir a senha da sua conta no Painel Administrativo AAPM SENAI Brás.
+                Use o código abaixo para continuar:
+              </p>
+
+              <!-- Código em destaque -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="background-color:#1a1a24; border:1px solid rgba(255,255,255,0.09); border-radius:12px; padding:20px;">
+                    <span style="font-family: 'Courier New', monospace; font-size:32px; font-weight:700; letter-spacing:8px; color:#ffffff;">{codigo}</span>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="color:rgba(255,255,255,0.38); font-size:12px; margin:20px 0 0 0;">
+                Este código expira em {CODE_EXPIRATION_MINUTES} minutos. Se você não solicitou essa redefinição,
+                pode ignorar este e-mail com segurança — sua senha continuará a mesma.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Rodapé -->
+          <tr>
+            <td style="padding:20px 32px; border-top:1px solid rgba(255,255,255,0.09);">
+              <p style="color:rgba(255,255,255,0.38); font-size:11px; margin:0;">
+                Este é um e-mail automático do Painel Administrativo AAPM — SENAI Brás. Não responda a esta mensagem.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+"""
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = "Código de redefinição de senha - AAPM SENAI Brás"
     msg["From"] = f"{SMTP_FROM_NAME} <{SMTP_EMAIL}>"
     msg["To"] = destinatario
+
+    msg.attach(MIMEText(texto_simples, "plain", "utf-8"))
+    msg.attach(MIMEText(html, "html", "utf-8"))
+
+    print(f"[DEBUG EMAIL] Tentando enviar de '{SMTP_EMAIL}' para '{destinatario}' | código: {codigo}")
 
     with smtplib.SMTP("smtp.gmail.com", 587) as servidor:
         servidor.starttls()
         servidor.login(SMTP_EMAIL, SMTP_APP_PASSWORD)
         servidor.sendmail(SMTP_EMAIL, [destinatario], msg.as_string())
+
+    print("[DEBUG EMAIL] sendmail() concluído sem erros.")
 
 
 def solicitar_reset_senha(db: Session, email: str) -> None:
