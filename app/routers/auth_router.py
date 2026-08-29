@@ -198,3 +198,38 @@ async def verificar_saude():
         "mensagem": "Servidor de autenticação operacional",
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
+
+# ── Adicione estes 2 schemas junto aos outros (perto de UsuarioLoginSchema) ──
+
+class EsqueciSenhaSchema(BaseModel):
+    email: str
+
+
+class RedefinirSenhaSchema(BaseModel):
+    email: str
+    code: str
+    new_password: str
+
+
+# ── Adicione estas 2 rotas junto às outras rotas de /api/auth/... ──
+
+@router.post("/api/auth/forgot-password")
+async def esqueci_senha(
+    dados: EsqueciSenhaSchema,
+    db: Session = Depends(get_db)
+):
+    """
+    Sempre responde 200 com mensagem genérica, exista ou não o e-mail,
+    para não revelar quais e-mails estão cadastrados no sistema.
+    """
+    usuario_controller.solicitar_reset_senha(db, dados.email)
+    return {"message": "Se o e-mail estiver cadastrado, você receberá o código em instantes."}
+
+
+@router.post("/api/auth/reset-password")
+async def redefinir_senha_rota(
+    dados: RedefinirSenhaSchema,
+    db: Session = Depends(get_db)
+):
+    usuario_controller.redefinir_senha(db, dados.email, dados.code, dados.new_password)
+    return {"message": "Senha redefinida com sucesso."}

@@ -1,4 +1,9 @@
 import os
+import hashlib
+import hmac
+import secrets
+import smtplib
+from email.mime.text import MIMEText
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -14,6 +19,17 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SECRET_KEY = os.getenv("SECRET_KEY", "sua-chave-secreta-muito-segura-aqui-2024")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 1440
+
+CODE_EXPIRATION_MINUTES = 15
+CODE_LENGTH = 6
+
+# Config do e-mail (Gmail SMTP). Defina essas 3 variáveis de ambiente no seu .env:
+#   SMTP_EMAIL=seuemail@gmail.com
+#   SMTP_APP_PASSWORD=xxxxxxxxxxxxxxxx   <- App Password do Gmail, não a senha normal
+#   SMTP_FROM_NAME=AAPM SENAI Brás
+SMTP_EMAIL = os.getenv("SMTP_EMAIL")
+SMTP_APP_PASSWORD = os.getenv("SMTP_APP_PASSWORD")
+SMTP_FROM_NAME = os.getenv("SMTP_FROM_NAME", "AAPM SENAI Brás")
 
 
 def verificar_senha(senha_plana: str, hash_senha: str) -> bool:
@@ -168,3 +184,99 @@ def registrar_usuario(db: Session, dados):
         "usuario_id": novo_usuario.id,
         "usuario_nome": novo_usuario.nome,
     }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RECUPERAÇÃO DE SENHA ("Esqueci minha senha")
+# ─────────────────────────────────────────────────────────────────────────────
+
+def gerar_codigo_numerico(tamanho: int = CODE_LENGTH) -> str:
+    """Gera um código numérico criptograficamente seguro, ex: '048213'."""
+    return "".join(secrets.choice("0123456789") for _ in range(tamanho))
+
+
+def hash_codigo(codigo: str) -> str:
+    return hashlib.sha256(codigo.encode()).hexdigest()
+
+
+def codigos_conferem(codigo_informado: str, hash_salvo: str) -> bool:
+    return hmac.compare_digest(hash_codigo(codigo_informado), hash_salvo)
+
+
+def enviar_email_codigo(destinatario: str, codigo: str) -> None:
+    """Envia o código de verificação por e-mail via Gmail SMTP."""
+    if not SMTP_EMAIL or not SMTP_APP_PASSWORD:
+        # Não derruba a aplicação se o e-mail não estiver configurado ainda,
+        # mas deixa bem visível no log do servidor durante o desenvolvimento.
+        print(f"[AVISO] SMTP não configurado. Código gerado para {destinatario}: {codigo}")
+        return
+
+    corpo = (
+        f"Olá,\n\n"
+        f"Recebemos uma solicitação para redefinir sua senha na AAPM.\n"
+        f"Seu código de verificação é: {codigo}\n\n"
+        f"Este código expira em {CODE_EXPIRATION_MINUTES} minutos.\n"
+        f"Se você não solicitou isso, ignore este e-mail."
+    )
+
+    msg = MIMEText(corpo, "plain", "utf-8")
+    msg["Subject"] = "Código de redefinição de senha - AAPM"
+    msg["From"] = f"{SMTP_FROM_NAME} <{SMTP_EMAIL}>"
+    msg["To"] = destinatario
+
+    with smtplib.SMTP("smtp.gmail.com", 587) as servidor:
+        servidor.starttls()
+        servidor.login(SMTP_EMAIL, SMTP_APP_PASSWORD)
+        servidor.sendmail(SMTP_EMAIL, [destinatario], msg.as_string())
+
+
+def solicitar_reset_senha(db: Session, email: str) -> None:
+    """
+    Gera e envia o código de reset, se o e-mail existir.
+    Não levanta exceção se o e-mail não existir (a rota sempre responde
+    a mesma mensagem genérica, pra não revelar quais e-mails existem).
+    """
+    usuario = db.query(Usuario).filter(Usuario.email == email).first()
+    if not usuario:
+        return
+
+    codigo = gerar_codigo_numerico()
+    usuario.reset_code_hash = hash_codigo(codigo)
+    usuario.reset_code_expires_at = datetime.now(timezone.utc) + timedelta(minutes=CODE_EXPIRATION_MINUTES)
+    usuario.reset_code_used = False
+
+    db.add(usuario)
+    db.commit()
+
+    enviar_email_codigo(usuario.email, codigo)
+
+
+def redefinir_senha(db: Session, email: str, codigo: str, nova_senha: str) -> None:
+    if len(nova_senha) < 8:
+        raise HTTPException(status_code=422, detail="A senha deve ter no mínimo 8 caracteres.")
+
+    usuario = db.query(Usuario).filter(Usuario.email == email).first()
+
+    if not usuario or not usuario.reset_code_hash or not usuario.reset_code_expires_at:
+        raise HTTPException(status_code=400, detail="Código inválido ou expirado.")
+
+    if usuario.reset_code_used:
+        raise HTTPException(status_code=400, detail="Este código já foi utilizado.")
+
+    expira_em = usuario.reset_code_expires_at
+    if expira_em.tzinfo is None:
+        expira_em = expira_em.replace(tzinfo=timezone.utc)
+
+    if datetime.now(timezone.utc) > expira_em:
+        raise HTTPException(status_code=400, detail="Código expirado. Solicite um novo.")
+
+    if not codigos_conferem(codigo, usuario.reset_code_hash):
+        raise HTTPException(status_code=400, detail="Código inválido ou expirado.")
+
+    usuario.senha = gerar_hash_senha(nova_senha)
+    usuario.reset_code_hash = None
+    usuario.reset_code_expires_at = None
+    usuario.reset_code_used = True
+
+    db.add(usuario)
+    db.commit()

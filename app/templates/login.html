@@ -291,6 +291,24 @@
       box-shadow: 0 10px 24px rgba(214, 50, 80, 0.35);
     }
 
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-link {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .btn-link:hover { color: var(--primary-hover); text-decoration: underline; }
+
     .form-footer {
       display: flex;
       flex-direction: column;
@@ -306,6 +324,13 @@
     .form-footer a {
       color: var(--primary);
       text-decoration: none;
+    }
+
+    .forgot-link-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: -0.5rem;
+      margin-bottom: 1rem;
     }
 
     /* MENSAGENS DE ERRO E SUCESSO */
@@ -361,10 +386,62 @@
       font-weight: 600;
     }
 
+    /* ================= MODAL ESQUECI SENHA ================= */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .modal-backdrop.show { display: flex; }
+
+    .modal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 420px;
+      padding: 2.3rem;
+      box-shadow: var(--card-shadow);
+      animation: modalEntry 0.3s var(--ease) forwards;
+      position: relative;
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 1.2rem;
+      right: 1.2rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+    }
+    .modal-close-btn:hover { color: var(--text-main); }
+
+    .modal-step { display: none; }
+    .modal-step.active { display: block; }
+
+    .resend-row {
+      display: flex;
+      justify-content: center;
+      margin-top: 0.75rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
     @media (max-width: 600px) {
       .login-box { padding: 1.75rem; }
       main.wrapper { padding: 1rem; }
       .login-header h1 { font-size: 1.6rem; }
+      .modal-box { padding: 1.75rem; }
     }
   </style>
 </head>
@@ -413,6 +490,10 @@
             <input type="password" id="password" class="form-control" placeholder="••••••••" required />
           </div>
 
+          <div class="forgot-link-row">
+            <button type="button" class="btn-link" id="openForgotModal">Esqueci minha senha</button>
+          </div>
+
           <button type="submit" class="btn btn-primary">Acessar Painel</button>
         </form>
 
@@ -428,6 +509,64 @@
       </div>
     </div>
   </main>
+
+  <!-- ===== MODAL: ESQUECI MINHA SENHA ===== -->
+  <div class="modal-backdrop" id="forgotModal">
+    <div class="modal-box">
+      <button class="modal-close-btn" id="closeForgotModal" title="Fechar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+
+      <div class="error-message" id="forgotErrorMsg"></div>
+      <div class="success-message" id="forgotSuccessMsg"></div>
+
+      <!-- Etapa 1: informar e-mail -->
+      <div class="modal-step active" id="stepRequestEmail">
+        <div class="login-header">
+          <span class="login-badge">Recuperação</span>
+          <h1>Esqueci minha senha</h1>
+          <p>Informe seu e-mail corporativo. Enviaremos um código de verificação para redefinir sua senha.</p>
+        </div>
+
+        <form id="requestCodeForm">
+          <div class="form-group">
+            <label>E-mail Corporativo</label>
+            <input type="email" id="forgotEmail" class="form-control" placeholder="admin@sp.senai.br" required />
+          </div>
+          <button type="submit" class="btn btn-primary" id="requestCodeBtn">Enviar código</button>
+        </form>
+      </div>
+
+      <!-- Etapa 2: informar código + nova senha -->
+      <div class="modal-step" id="stepResetPassword">
+        <div class="login-header">
+          <span class="login-badge">Recuperação</span>
+          <h1>Redefinir senha</h1>
+          <p>Digite o código de 6 dígitos enviado ao seu e-mail e escolha uma nova senha.</p>
+        </div>
+
+        <form id="resetPasswordForm">
+          <div class="form-group">
+            <label>Código de Verificação</label>
+            <input type="text" id="resetCode" class="form-control" placeholder="000000" maxlength="6" inputmode="numeric" required />
+          </div>
+          <div class="form-group">
+            <label>Nova Senha</label>
+            <input type="password" id="newPassword" class="form-control" placeholder="••••••••" minlength="8" required />
+          </div>
+          <div class="form-group">
+            <label>Confirmar Nova Senha</label>
+            <input type="password" id="confirmPassword" class="form-control" placeholder="••••••••" minlength="8" required />
+          </div>
+          <button type="submit" class="btn btn-primary" id="resetPasswordBtn">Redefinir senha</button>
+        </form>
+
+        <div class="resend-row">
+          <button type="button" class="btn-link" id="resendCodeBtn">Reenviar código</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
 
@@ -597,7 +736,179 @@
       }
     });
 
-    
+    // ===== FLUXO: ESQUECI MINHA SENHA =====
+    const forgotModal = document.getElementById('forgotModal');
+    const openForgotModalBtn = document.getElementById('openForgotModal');
+    const closeForgotModalBtn = document.getElementById('closeForgotModal');
+
+    const stepRequestEmail = document.getElementById('stepRequestEmail');
+    const stepResetPassword = document.getElementById('stepResetPassword');
+
+    const requestCodeForm = document.getElementById('requestCodeForm');
+    const resetPasswordForm = document.getElementById('resetPasswordForm');
+    const resendCodeBtn = document.getElementById('resendCodeBtn');
+    const requestCodeBtn = document.getElementById('requestCodeBtn');
+    const resetPasswordBtn = document.getElementById('resetPasswordBtn');
+
+    const forgotErrorMsg = document.getElementById('forgotErrorMsg');
+    const forgotSuccessMsg = document.getElementById('forgotSuccessMsg');
+
+    let lastRequestedEmail = '';
+
+    function showForgotError(message) {
+      forgotErrorMsg.textContent = message;
+      forgotErrorMsg.classList.add('show');
+      forgotSuccessMsg.classList.remove('show');
+      setTimeout(() => forgotErrorMsg.classList.remove('show'), 5000);
+    }
+
+    function showForgotSuccess(message) {
+      forgotSuccessMsg.textContent = message;
+      forgotSuccessMsg.classList.add('show');
+      forgotErrorMsg.classList.remove('show');
+    }
+
+    function resetModalState() {
+      stepRequestEmail.classList.add('active');
+      stepResetPassword.classList.remove('active');
+      requestCodeForm.reset();
+      resetPasswordForm.reset();
+      forgotErrorMsg.classList.remove('show');
+      forgotSuccessMsg.classList.remove('show');
+    }
+
+    function openModal() {
+      resetModalState();
+      forgotModal.classList.add('show');
+      // Pré-preenche com o e-mail já digitado no login, se houver
+      const currentEmail = document.getElementById('email').value.trim();
+      if (currentEmail) document.getElementById('forgotEmail').value = currentEmail;
+    }
+
+    function closeModal() {
+      forgotModal.classList.remove('show');
+    }
+
+    openForgotModalBtn.addEventListener('click', openModal);
+    closeForgotModalBtn.addEventListener('click', closeModal);
+    forgotModal.addEventListener('click', (e) => {
+      if (e.target === forgotModal) closeModal();
+    });
+
+    async function requestResetCode(email) {
+      requestCodeBtn.disabled = true;
+      requestCodeBtn.textContent = 'Enviando...';
+      try {
+        const response = await fetch('/api/auth/forgot-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        // O backend sempre deve responder OK aqui, mesmo se o e-mail
+        // não existir, para não revelar quais e-mails estão cadastrados.
+        if (response.ok) {
+          lastRequestedEmail = email;
+          showForgotSuccess(data.message || 'Se o e-mail estiver cadastrado, um código foi enviado.');
+          stepRequestEmail.classList.remove('active');
+          stepResetPassword.classList.add('active');
+        } else {
+          let msg = 'Não foi possível enviar o código. Tente novamente.';
+          if (data.detail) {
+            msg = typeof data.detail === 'string' ? data.detail : data.detail[0]?.msg || msg;
+          }
+          showForgotError(msg);
+        }
+      } catch (error) {
+        console.error('Erro ao solicitar código:', error);
+        showForgotError('Erro ao conectar com o servidor. Tente novamente.');
+      } finally {
+        requestCodeBtn.disabled = false;
+        requestCodeBtn.textContent = 'Enviar código';
+      }
+    }
+
+    requestCodeForm.addEventListener('submit', async function(event) {
+      event.preventDefault();
+      const email = document.getElementById('forgotEmail').value.trim();
+      if (!email) {
+        showForgotError('Informe seu e-mail.');
+        return;
+      }
+      await requestResetCode(email);
+    });
+
+    resendCodeBtn.addEventListener('click', async function() {
+      if (!lastRequestedEmail) return;
+      resendCodeBtn.disabled = true;
+      const originalText = resendCodeBtn.textContent;
+      resendCodeBtn.textContent = 'Reenviando...';
+      await requestResetCode(lastRequestedEmail);
+      resendCodeBtn.disabled = false;
+      resendCodeBtn.textContent = originalText;
+    });
+
+    resetPasswordForm.addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const code = document.getElementById('resetCode').value.trim();
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (!code || !newPassword || !confirmPassword) {
+        showForgotError('Preencha todos os campos.');
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        showForgotError('As senhas não coincidem.');
+        return;
+      }
+      if (newPassword.length < 8) {
+        showForgotError('A nova senha deve ter no mínimo 8 caracteres.');
+        return;
+      }
+
+      resetPasswordBtn.disabled = true;
+      resetPasswordBtn.textContent = 'Redefinindo...';
+
+      try {
+        const response = await fetch('/api/auth/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: lastRequestedEmail,
+            code: code,
+            new_password: newPassword
+          })
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (response.ok) {
+          showForgotSuccess('Senha redefinida com sucesso! Você já pode fazer login.');
+          setTimeout(() => {
+            closeModal();
+            document.getElementById('email').value = lastRequestedEmail;
+            document.getElementById('password').focus();
+          }, 1800);
+        } else {
+          let msg = 'Código inválido ou expirado.';
+          if (data.detail) {
+            msg = typeof data.detail === 'string' ? data.detail : data.detail[0]?.msg || msg;
+          }
+          showForgotError(msg);
+        }
+      } catch (error) {
+        console.error('Erro ao redefinir senha:', error);
+        showForgotError('Erro ao conectar com o servidor. Tente novamente.');
+      } finally {
+        resetPasswordBtn.disabled = false;
+        resetPasswordBtn.textContent = 'Redefinir senha';
+      }
+    });
+
   </script>
 </body>
 </html>
