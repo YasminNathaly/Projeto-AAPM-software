@@ -564,6 +564,7 @@
         <div class="resend-row">
           <button type="button" class="btn-link" id="resendCodeBtn">Reenviar código</button>
         </div>
+        <div id="resendCountdown" style="text-align:center; font-size:0.75rem; color: var(--text-dark); margin-top:4px;"></div>
       </div>
     </div>
   </div>
@@ -754,6 +755,31 @@
     const forgotSuccessMsg = document.getElementById('forgotSuccessMsg');
 
     let lastRequestedEmail = '';
+    let resendCooldownInterval = null;
+    const resendCountdownEl = document.getElementById('resendCountdown');
+
+    function startResendCooldown(seconds) {
+      clearInterval(resendCooldownInterval);
+      let restante = seconds;
+
+      resendCodeBtn.disabled = true;
+      resendCodeBtn.style.opacity = '0.5';
+      resendCodeBtn.style.cursor = 'not-allowed';
+      resendCountdownEl.textContent = `Você pode reenviar em ${restante}s`;
+
+      resendCooldownInterval = setInterval(() => {
+        restante -= 1;
+        if (restante <= 0) {
+          clearInterval(resendCooldownInterval);
+          resendCodeBtn.disabled = false;
+          resendCodeBtn.style.opacity = '1';
+          resendCodeBtn.style.cursor = 'pointer';
+          resendCountdownEl.textContent = '';
+        } else {
+          resendCountdownEl.textContent = `Você pode reenviar em ${restante}s`;
+        }
+      }, 1000);
+    }
 
     function showForgotError(message) {
       forgotErrorMsg.textContent = message;
@@ -775,6 +801,11 @@
       resetPasswordForm.reset();
       forgotErrorMsg.classList.remove('show');
       forgotSuccessMsg.classList.remove('show');
+      clearInterval(resendCooldownInterval);
+      resendCodeBtn.disabled = false;
+      resendCodeBtn.style.opacity = '1';
+      resendCodeBtn.style.cursor = 'pointer';
+      resendCountdownEl.textContent = '';
     }
 
     function openModal() {
@@ -807,17 +838,25 @@
 
         const data = await response.json().catch(() => ({}));
 
-        // O backend sempre deve responder OK aqui, mesmo se o e-mail
-        // não existir, para não revelar quais e-mails estão cadastrados.
         if (response.ok) {
           lastRequestedEmail = email;
-          showForgotSuccess(data.message || 'Se o e-mail estiver cadastrado, um código foi enviado.');
+          showForgotSuccess(data.message || 'Código enviado com sucesso. Verifique seu e-mail.');
           stepRequestEmail.classList.remove('active');
           stepResetPassword.classList.add('active');
+          startResendCooldown(60);
+        } else if (response.status === 429) {
+          lastRequestedEmail = email;
+          const detalhe = data.detail;
+          const retryAfter = (detalhe && typeof detalhe === 'object' && detalhe.retry_after) || 60;
+          const msg = (detalhe && typeof detalhe === 'object' && detalhe.message) || 'Aguarde antes de reenviar o código.';
+          showForgotError(msg);
+          stepRequestEmail.classList.remove('active');
+          stepResetPassword.classList.add('active');
+          startResendCooldown(retryAfter);
         } else {
           let msg = 'Não foi possível enviar o código. Tente novamente.';
           if (data.detail) {
-            msg = typeof data.detail === 'string' ? data.detail : data.detail[0]?.msg || msg;
+            msg = typeof data.detail === 'string' ? data.detail : (data.detail.message || data.detail[0]?.msg || msg);
           }
           showForgotError(msg);
         }
@@ -841,12 +880,13 @@
     });
 
     resendCodeBtn.addEventListener('click', async function() {
-      if (!lastRequestedEmail) return;
+      if (!lastRequestedEmail || resendCodeBtn.disabled) return;
       resendCodeBtn.disabled = true;
       const originalText = resendCodeBtn.textContent;
       resendCodeBtn.textContent = 'Reenviando...';
       await requestResetCode(lastRequestedEmail);
-      resendCodeBtn.disabled = false;
+      // Não reabilita aqui: startResendCooldown() (chamado dentro de
+      // requestResetCode) já controla o estado do botão pelos próximos 60s.
       resendCodeBtn.textContent = originalText;
     });
 

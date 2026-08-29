@@ -23,6 +23,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 1440
 
 CODE_EXPIRATION_MINUTES = 15
 CODE_LENGTH = 6
+RESEND_COOLDOWN_SECONDS = 60
 
 # Config do e-mail (Gmail SMTP). Defina essas 3 variáveis de ambiente no seu .env:
 #   SMTP_EMAIL=seuemail@gmail.com
@@ -301,13 +302,28 @@ def enviar_email_codigo(destinatario: str, codigo: str) -> None:
 
 def solicitar_reset_senha(db: Session, email: str) -> None:
     """
-    Gera e envia o código de reset, se o e-mail existir.
-    Não levanta exceção se o e-mail não existir (a rota sempre responde
-    a mesma mensagem genérica, pra não revelar quais e-mails existem).
+    Gera e envia o código de reset. Levanta HTTPException 404 se o e-mail
+    não estiver cadastrado, e 429 se o último código foi gerado há menos
+    de RESEND_COOLDOWN_SECONDS segundos (evita spam de e-mail).
     """
     usuario = db.query(Usuario).filter(Usuario.email == email).first()
     if not usuario:
-        return
+        raise HTTPException(status_code=404, detail="E-mail não cadastrado no sistema.")
+
+    if usuario.reset_code_expires_at and not usuario.reset_code_used:
+        expira_em = usuario.reset_code_expires_at
+        if expira_em.tzinfo is None:
+            expira_em = expira_em.replace(tzinfo=timezone.utc)
+
+        enviado_em = expira_em - timedelta(minutes=CODE_EXPIRATION_MINUTES)
+        segundos_desde_envio = (datetime.now(timezone.utc) - enviado_em).total_seconds()
+
+        if segundos_desde_envio < RESEND_COOLDOWN_SECONDS:
+            restante = int(RESEND_COOLDOWN_SECONDS - segundos_desde_envio)
+            raise HTTPException(
+                status_code=429,
+                detail={"message": f"Aguarde {restante} segundos para reenviar o código.", "retry_after": restante},
+            )
 
     codigo = gerar_codigo_numerico()
     usuario.reset_code_hash = hash_codigo(codigo)

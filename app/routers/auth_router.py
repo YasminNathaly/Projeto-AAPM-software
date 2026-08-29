@@ -213,17 +213,21 @@ class RedefinirSenhaSchema(BaseModel):
 
 # ── Adicione estas 2 rotas junto às outras rotas de /api/auth/... ──
 
+# Substitua a rota @router.post("/api/auth/forgot-password") existente por esta versão:
+
 @router.post("/api/auth/forgot-password")
 async def esqueci_senha(
     dados: EsqueciSenhaSchema,
     db: Session = Depends(get_db)
 ):
     """
-    Sempre responde 200 com mensagem genérica, exista ou não o e-mail,
-    para não revelar quais e-mails estão cadastrados no sistema.
+    Agora retorna erro 404 com mensagem específica se o e-mail não
+    estiver cadastrado (a pedido do projeto). A função lança a
+    HTTPException, então não precisa de try/except aqui: o FastAPI
+    já converte a exceção na resposta 404 correta.
     """
     usuario_controller.solicitar_reset_senha(db, dados.email)
-    return {"message": "Se o e-mail estiver cadastrado, você receberá o código em instantes."}
+    return {"message": "Código enviado com sucesso. Verifique seu e-mail."}
 
 
 @router.post("/api/auth/reset-password")
