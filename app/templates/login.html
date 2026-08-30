@@ -437,6 +437,77 @@
       color: var(--text-muted);
     }
 
+    /* ===== CÓDIGO EM CAIXINHAS ===== */
+    .code-input-row {
+      display: flex;
+      gap: 8px;
+      justify-content: space-between;
+    }
+    .code-box {
+      width: 100%;
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 0;
+      padding: 0.7rem 0;
+    }
+    .code-box.filled { border-color: var(--primary); }
+    .code-box.invalid { border-color: var(--danger); animation: shakeCode 0.3s; }
+    @keyframes shakeCode {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+
+    /* ===== MOSTRAR/OCULTAR SENHA ===== */
+    .password-field-wrap { position: relative; }
+    .password-field-wrap .form-control { padding-right: 42px; }
+    .password-toggle-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-dark);
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+    }
+    .password-toggle-btn:hover { color: var(--text-muted); }
+
+    /* ===== FORÇA DA SENHA ===== */
+    .password-strength-bar {
+      height: 4px;
+      background: var(--border-color);
+      border-radius: 999px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .password-strength-bar span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      transition: width 0.3s var(--ease), background-color 0.3s var(--ease);
+    }
+    .password-strength-bar.weak span { width: 33%; background: var(--danger); }
+    .password-strength-bar.medium span { width: 66%; background: #f59e0b; }
+    .password-strength-bar.strong span { width: 100%; background: var(--success); }
+
+    /* ===== CORRESPONDÊNCIA DE SENHA ===== */
+    .password-match-hint {
+      font-size: 0.74rem;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      min-height: 16px;
+    }
+    .password-match-hint.match { color: var(--success); }
+    .password-match-hint.no-match { color: var(--danger); }
+
     @media (max-width: 600px) {
       .login-box { padding: 1.75rem; }
       main.wrapper { padding: 1rem; }
@@ -548,15 +619,36 @@
         <form id="resetPasswordForm">
           <div class="form-group">
             <label>Código de Verificação</label>
-            <input type="text" id="resetCode" class="form-control" placeholder="000000" maxlength="6" inputmode="numeric" required />
+            <div class="code-input-row" id="codeInputRow">
+              <input type="text" class="form-control code-box" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code" />
+              <input type="text" class="form-control code-box" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+              <input type="text" class="form-control code-box" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+              <input type="text" class="form-control code-box" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+              <input type="text" class="form-control code-box" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+              <input type="text" class="form-control code-box" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+            </div>
           </div>
           <div class="form-group">
             <label>Nova Senha</label>
-            <input type="password" id="newPassword" class="form-control" placeholder="••••••••" minlength="8" required />
+            <div class="password-field-wrap">
+              <input type="password" id="newPassword" class="form-control" placeholder="••••••••" minlength="8" required />
+              <button type="button" class="password-toggle-btn" data-target="newPassword" aria-label="Mostrar senha">
+                <svg class="eye-open" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="eye-closed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.4 20.4 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a20.5 20.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+            </div>
+            <div id="passwordStrengthBar" class="password-strength-bar"><span></span></div>
           </div>
           <div class="form-group">
             <label>Confirmar Nova Senha</label>
-            <input type="password" id="confirmPassword" class="form-control" placeholder="••••••••" minlength="8" required />
+            <div class="password-field-wrap">
+              <input type="password" id="confirmPassword" class="form-control" placeholder="••••••••" minlength="8" required />
+              <button type="button" class="password-toggle-btn" data-target="confirmPassword" aria-label="Mostrar senha">
+                <svg class="eye-open" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="eye-closed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.4 20.4 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a20.5 20.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+            </div>
+            <div id="passwordMatchHint" class="password-match-hint"></div>
           </div>
           <button type="submit" class="btn btn-primary" id="resetPasswordBtn">Redefinir senha</button>
         </form>
@@ -737,6 +829,110 @@
       }
     });
 
+    // ===== CÓDIGO EM CAIXINHAS: auto-avanço, backspace, colar =====
+    const codeBoxes = Array.from(document.querySelectorAll('.code-box'));
+
+    function getCodeValue() {
+      return codeBoxes.map(box => box.value).join('');
+    }
+
+    function clearCodeInvalidState() {
+      codeBoxes.forEach(box => box.classList.remove('invalid'));
+    }
+
+    codeBoxes.forEach((box, index) => {
+      box.addEventListener('input', () => {
+        box.value = box.value.replace(/[^0-9]/g, '');
+        clearCodeInvalidState();
+        box.classList.toggle('filled', box.value.length === 1);
+        if (box.value.length === 1 && index < codeBoxes.length - 1) {
+          codeBoxes[index + 1].focus();
+        }
+      });
+
+      box.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !box.value && index > 0) {
+          codeBoxes[index - 1].focus();
+        }
+      });
+
+      box.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const texto = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '');
+        if (!texto) return;
+        texto.split('').slice(0, codeBoxes.length).forEach((digito, i) => {
+          if (codeBoxes[i]) {
+            codeBoxes[i].value = digito;
+            codeBoxes[i].classList.add('filled');
+          }
+        });
+        const proximo = codeBoxes[Math.min(texto.length, codeBoxes.length - 1)];
+        if (proximo) proximo.focus();
+      });
+    });
+
+    // ===== MOSTRAR/OCULTAR SENHA =====
+    document.querySelectorAll('.password-toggle-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const targetInput = document.getElementById(btn.dataset.target);
+        const eyeOpen = btn.querySelector('.eye-open');
+        const eyeClosed = btn.querySelector('.eye-closed');
+        const mostrando = targetInput.type === 'text';
+
+        targetInput.type = mostrando ? 'password' : 'text';
+        eyeOpen.style.display = mostrando ? 'block' : 'none';
+        eyeClosed.style.display = mostrando ? 'none' : 'block';
+      });
+    });
+
+    // ===== FORÇA DA SENHA =====
+    const newPasswordInput = document.getElementById('newPassword');
+    const strengthBar = document.getElementById('passwordStrengthBar');
+
+    function avaliarForcaSenha(senha) {
+      let pontos = 0;
+      if (senha.length >= 8) pontos++;
+      if (senha.length >= 12) pontos++;
+      if (/[A-Z]/.test(senha) && /[a-z]/.test(senha)) pontos++;
+      if (/[0-9]/.test(senha)) pontos++;
+      if (/[^A-Za-z0-9]/.test(senha)) pontos++;
+
+      strengthBar.classList.remove('weak', 'medium', 'strong');
+      if (!senha) return;
+      if (pontos <= 2) strengthBar.classList.add('weak');
+      else if (pontos <= 3) strengthBar.classList.add('medium');
+      else strengthBar.classList.add('strong');
+    }
+
+    newPasswordInput.addEventListener('input', () => {
+      avaliarForcaSenha(newPasswordInput.value);
+      atualizarCorrespondenciaSenha();
+    });
+
+    // ===== CORRESPONDÊNCIA DE SENHAS EM TEMPO REAL =====
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const matchHint = document.getElementById('passwordMatchHint');
+
+    function atualizarCorrespondenciaSenha() {
+      const senha = newPasswordInput.value;
+      const confirmacao = confirmPasswordInput.value;
+
+      matchHint.classList.remove('match', 'no-match');
+      if (!confirmacao) {
+        matchHint.textContent = '';
+        return;
+      }
+      if (senha === confirmacao) {
+        matchHint.textContent = '✓ As senhas coincidem';
+        matchHint.classList.add('match');
+      } else {
+        matchHint.textContent = '✗ As senhas não coincidem';
+        matchHint.classList.add('no-match');
+      }
+    }
+
+    confirmPasswordInput.addEventListener('input', atualizarCorrespondenciaSenha);
+
     // ===== FLUXO: ESQUECI MINHA SENHA =====
     const forgotModal = document.getElementById('forgotModal');
     const openForgotModalBtn = document.getElementById('openForgotModal');
@@ -806,6 +1002,10 @@
       resendCodeBtn.style.opacity = '1';
       resendCodeBtn.style.cursor = 'pointer';
       resendCountdownEl.textContent = '';
+      codeBoxes.forEach(box => { box.value = ''; box.classList.remove('filled', 'invalid'); });
+      strengthBar.classList.remove('weak', 'medium', 'strong');
+      matchHint.textContent = '';
+      matchHint.classList.remove('match', 'no-match');
     }
 
     function openModal() {
@@ -893,11 +1093,16 @@
     resetPasswordForm.addEventListener('submit', async function(event) {
       event.preventDefault();
 
-      const code = document.getElementById('resetCode').value.trim();
+      const code = getCodeValue();
       const newPassword = document.getElementById('newPassword').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
 
-      if (!code || !newPassword || !confirmPassword) {
+      if (code.length !== 6) {
+        codeBoxes.forEach(box => { if (!box.value) box.classList.add('invalid'); });
+        showForgotError('Digite o código de 6 dígitos completo.');
+        return;
+      }
+      if (!newPassword || !confirmPassword) {
         showForgotError('Preencha todos os campos.');
         return;
       }
@@ -934,6 +1139,7 @@
             document.getElementById('password').focus();
           }, 1800);
         } else {
+          codeBoxes.forEach(box => box.classList.add('invalid'));
           let msg = 'Código inválido ou expirado.';
           if (data.detail) {
             msg = typeof data.detail === 'string' ? data.detail : data.detail[0]?.msg || msg;
@@ -951,4 +1157,3 @@
 
   </script>
 </body>
-</html>
