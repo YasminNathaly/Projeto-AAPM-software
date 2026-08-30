@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="dark">
 <head>
@@ -229,20 +228,39 @@
     main.wrapper {
       margin-top: var(--header-height);
       width: 100%;
-      min-height: calc(100vh - var(--header-height));
+      height: calc(100vh - var(--header-height));
       position: relative;
       z-index: 1;
+      /* MEXI AQUI: o wrapper agora é o "trilho" horizontal entre as seções */
+      display: flex;
+      flex-direction: row;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
+    main.wrapper::-webkit-scrollbar { display: none; }
  
     .section-pad { padding: 0 7vw; }
  
     .view-content {
-      display: none;
+      display: flex;
       flex-direction: column;
       gap: 2rem;
+      /* MEXI AQUI: cada seção agora ocupa uma "tela" inteira do trilho, com
+         rolagem vertical própria para o conteúdo que não couber. Todas ficam
+         visíveis ao mesmo tempo, lado a lado, para permitir a rolagem lateral. */
+      flex: 0 0 100%;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
     }
  
-    .view-content.active { display: flex; }
     .view-content .section-pad:first-of-type { padding-top: 3rem; }
     .view-content > .section-pad { padding-top: 0; }
     
@@ -484,6 +502,38 @@
       .hero-stats { grid-template-columns: repeat(2, auto); row-gap: 1.4rem; }
     }
  
+    /* MEXI AQUI: faixa de destaques logo abaixo do hero, estilo "feature strip" */
+    .highlight-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-card);
+    }
+    .highlight-item {
+      padding: 1.8rem 1.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-right: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: background-color 0.3s var(--ease);
+    }
+    .highlight-item:last-child { border-right: none; }
+    .highlight-item:hover { background-color: var(--bg-surface-hover); }
+    .highlight-item .icon-circle { width: 24px; height: 24px; color: var(--primary); }
+    .highlight-item h4 { font-size: 0.88rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; color: var(--text-main); }
+    .highlight-item p { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
+    .highlight-item .highlight-link { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--primary); margin-top: 4px; display: inline-flex; align-items: center; gap: 4px; }
+    @media (max-width: 900px) {
+      .highlight-strip { grid-template-columns: repeat(2, 1fr); }
+      .highlight-item:nth-child(2) { border-right: none; }
+    }
+    @media (max-width: 560px) {
+      .highlight-strip { grid-template-columns: 1fr; }
+      .highlight-item { border-right: none !important; border-bottom: 1px solid var(--border-color); }
+    }
+
     .content-stack { padding-top: 0.5rem; display: flex; flex-direction: column; gap: 2rem; padding-bottom: 3rem; }
  
     .senai-info-card { display: flex; flex-direction: column; gap: 1.1rem; }
@@ -554,11 +604,29 @@
       color: var(--text-muted);
       font-size: 0.88rem;
     }
-    .product-grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.4rem; padding: 0 7vw 3rem; }
-    .product-item { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease); }
-    .product-item:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
-    .product-thumb { width: 100%; height: 180px; object-fit: cover; }
-    .product-body { padding: 1.25rem; display: flex; flex-direction: column; gap: 6px; }
+    .product-grid-container {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .product-grid-container::-webkit-scrollbar { display: none; }
+    .product-grid-page {
+      flex: 0 0 100%;
+      scroll-snap-align: start;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.4rem;
+      padding: 0 7vw 1.5rem;
+    }
+    .product-item { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; cursor: pointer; transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease), border-color 0.35s var(--ease); }
+    .product-item:hover { transform: translateY(-6px); box-shadow: var(--shadow); border-color: var(--primary-soft-border); }
+    .product-thumb-wrap { overflow: hidden; }
+    .product-thumb { width: 100%; height: 200px; object-fit: cover; display: block; transition: transform 0.5s var(--ease); }
+    .product-item:hover .product-thumb { transform: scale(1.08); }
+    .product-body { padding: 1.35rem; display: flex; flex-direction: column; gap: 6px; }
     .product-category { font-size: 0.64rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.06em; }
     .product-title { font-size: 1.05rem; font-weight: 600; color: var(--text-main); }
     .product-price { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: var(--text-main); margin-top: 4px; letter-spacing: 0.02em; }
@@ -904,6 +972,33 @@
         </div>
       </div>
  
+      <div class="highlight-strip reveal">
+        <div class="highlight-item" onclick="navigate('produtos', document.querySelectorAll('.nav-item')[1])">
+          <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span>
+          <h4>Loja AAPM</h4>
+          <p>Uniformes, materiais didáticos e produtos oficiais da unidade Brás.</p>
+          <span class="highlight-link">Ver produtos →</span>
+        </div>
+        <div class="highlight-item" onclick="navigate('associados', document.querySelectorAll('.nav-item')[2])">
+          <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+          <h4>Associados</h4>
+          <p>Consulte a lista oficial de associados cadastrados na AAPM.</p>
+          <span class="highlight-link">Consultar →</span>
+        </div>
+        <div class="highlight-item" onclick="navigate('armarios', document.querySelectorAll('.nav-item')[4])">
+          <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="2" width="18" height="20" rx="2"/><path d="M12 2v20M8 10h.01M8 16h.01"/></svg></span>
+          <h4>Armários</h4>
+          <p>Veja a disponibilidade de armários em tempo real na unidade.</p>
+          <span class="highlight-link">Ver disponibilidade →</span>
+        </div>
+        <div class="highlight-item" onclick="navigate('fale-conosco', document.querySelectorAll('.nav-item')[3])">
+          <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+          <h4>Fale Conosco</h4>
+          <p>Dúvidas, sugestões ou quer ser associado? Fale com a gente.</p>
+          <span class="highlight-link">Entrar em contato →</span>
+        </div>
+      </div>
+ 
       <div class="content-stack">
         <div class="grid-2 reveal">
           <div class="card senai-info-card">
@@ -1164,6 +1259,22 @@
     </section>
  
 
+  <!-- MODAL DE DETALHE DO PRODUTO -->
+  <div class="modal-backdrop" id="productModal" onclick="if(event.target === this) closeProductModal()">
+    <div class="modal-box" style="max-width: 560px; padding: 0; overflow: hidden;">
+      <button type="button" class="modal-close" style="z-index: 2;" onclick="closeProductModal()">&times;</button>
+      <img id="pm-img" src="" alt="" style="width: 100%; height: 260px; object-fit: cover; display: block;">
+      <div style="padding: 1.75rem;">
+        <span class="product-category" id="pm-category"></span>
+        <h3 class="modal-title" style="font-size: 1.6rem; margin-top: 4px;" id="pm-title"></h3>
+        <div class="product-price" style="font-size: 1.9rem; margin: 10px 0;" id="pm-price"></div>
+        <div id="pm-variations"></div>
+        <div class="product-sku" style="margin-top: 10px;" id="pm-sku"></div>
+        <button class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;" onclick="closeProductModal()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL DE VISUALIZAÇÃO DE ASSOCIADO -->
   <div class="modal-backdrop" id="viewModal" onclick="if(event.target === this) closeViewModal()">
     <div class="modal-box">
@@ -1228,7 +1339,15 @@
     // Faz os cards/tabelas da seção visível "reaparecerem" com o mesmo efeito de
     // reveal usado no scroll, simulando um recarregamento suave da tela.
     function replayLoadingReveal() {
-      const activeView = document.querySelector('.view-content.active');
+      // MEXI AQUI: como todas as seções ficam sempre visíveis lado a lado agora,
+      // pega a seção mais próxima da posição atual do scroll horizontal.
+      const wrapper = document.querySelector('main.wrapper');
+      const secoes = Array.from(document.querySelectorAll('.view-content'));
+      if (!wrapper || !secoes.length) return;
+      const posicaoAtual = wrapper.scrollLeft;
+      const activeView = secoes.reduce((maisProxima, secao) =>
+        Math.abs(secao.offsetLeft - posicaoAtual) < Math.abs(maisProxima.offsetLeft - posicaoAtual) ? secao : maisProxima
+      );
       if (!activeView) return;
       const items = activeView.querySelectorAll('.reveal, .reveal-stagger');
       items.forEach((el, i) => {
@@ -1372,6 +1491,17 @@
     function irParaPagina(chave, novaPagina, nomeFuncaoRender) {
       const estado = getEstadoPaginacao(chave);
       estado.pagina = novaPagina;
+
+      // MEXI AQUI: para o carrossel de produtos, só desliza suavemente até a
+      // página (ela já existe no DOM) em vez de reconstruir tudo do zero.
+      if (chave === 'produtosPublic') {
+        scrollProdutosParaPagina(novaPagina, true);
+        const produtos = ultimaListaProdutosFiltrada || products;
+        const totalPaginas = Math.max(1, Math.ceil(produtos.length / estado.limite));
+        renderPaginacao('paginacaoProdutosPublic', 'produtosPublic', totalPaginas, novaPagina, produtos.length, 'renderProducts');
+        return;
+      }
+
       if (typeof window[nomeFuncaoRender] === 'function') window[nomeFuncaoRender]();
     }
 
@@ -1639,6 +1769,28 @@
     // consiga re-renderizar sem precisar refazer o filtro de busca/categoria.
     let ultimaListaProdutosFiltrada = null;
  
+    // MEXI AQUI: renderiza UM card de produto (usado dentro de cada "página" do carrossel)
+    function renderProductCard(p) {
+      const produtoImg = p.imagem_url || p.img || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=400&auto=format&fit=crop';
+      const produtoNome = p.nome || p.name || 'Produto';
+      const produtoPreco = Number(p.preco || p.price || 0);
+
+      return `
+        <div class="product-item" onclick="openProductModal(${p.id})">
+          <div class="product-thumb-wrap">
+            <img src="${produtoImg}" class="product-thumb" alt="${produtoNome}">
+          </div>
+          <div class="product-body">
+            <span class="product-category">${getProductCategoryLabel(p)}</span>
+            <div class="product-title">${produtoNome}</div>
+            <div class="product-price">R$ ${produtoPreco.toFixed(2)}</div>
+            ${renderVariationChips(p)}
+            <div class="product-sku">SKU: ${p.sku || ('PROD-' + (p.id || 'N/A'))}</div>
+          </div>
+        </div>
+      `;
+    }
+
     function renderProducts(lista) {
       const container = document.getElementById('productGallery');
       if (!container) return;
@@ -1646,37 +1798,63 @@
       if (lista) ultimaListaProdutosFiltrada = lista;
       const produtos = ultimaListaProdutosFiltrada || products;
 
-      // MEXI AQUI: pagina a lista filtrada (12 produtos por página)
-      const { pageItens, paginaAtual, totalPaginas, totalItens } = paginar(produtos, 'produtosPublic', 12);
- 
+      const ITENS_POR_PAGINA = 12;
+
       if (!produtos.length) {
         container.innerHTML = '<div class="product-empty-state">Nenhum produto encontrado para essa busca.</div>';
-        renderPaginacao('paginacaoProdutosPublic', 'produtosPublic', totalPaginas, paginaAtual, totalItens, 'renderProducts');
+        renderPaginacao('paginacaoProdutosPublic', 'produtosPublic', 1, 1, 0, 'renderProducts');
         return;
       }
- 
-      container.innerHTML = "";
-      pageItens.forEach((p) => {
-        const produtoImg = p.imagem_url || p.img || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=400&auto=format&fit=crop';
-        const produtoNome = p.nome || p.name || 'Produto';
-        const produtoPreco = Number(p.preco || p.price || 0);
- 
-        container.innerHTML += `
-          <div class="product-item">
-            <img src="${produtoImg}" class="product-thumb" alt="${produtoNome}">
-            <div class="product-body">
-              <span class="product-category">${getProductCategoryLabel(p)}</span>
-              <div class="product-title">${produtoNome}</div>
-              <div class="product-price">R$ ${produtoPreco.toFixed(2)}</div>
-              ${renderVariationChips(p)}
-              <div class="product-sku">SKU: ${p.sku || ('PROD-' + (p.id || 'N/A'))}</div>
-            </div>
-          </div>
-        `;
-      });
-      renderPaginacao('paginacaoProdutosPublic', 'produtosPublic', totalPaginas, paginaAtual, totalItens, 'renderProducts');
+
+      // MEXI AQUI: monta TODAS as páginas lado a lado (uma div .product-grid-page por
+      // página), permitindo rolagem lateral (scroll-snap) entre elas.
+      const totalPaginas = Math.max(1, Math.ceil(produtos.length / ITENS_POR_PAGINA));
+      let html = '';
+      for (let pagina = 0; pagina < totalPaginas; pagina++) {
+        const inicio = pagina * ITENS_POR_PAGINA;
+        const itensDaPagina = produtos.slice(inicio, inicio + ITENS_POR_PAGINA);
+        html += `<div class="product-grid-page" data-pagina="${pagina + 1}">${itensDaPagina.map(renderProductCard).join('')}</div>`;
+      }
+      container.innerHTML = html;
+
+      const estado = getEstadoPaginacao('produtosPublic', ITENS_POR_PAGINA);
+      if (estado.pagina > totalPaginas) estado.pagina = totalPaginas;
+      scrollProdutosParaPagina(estado.pagina, false);
+
+      renderPaginacao('paginacaoProdutosPublic', 'produtosPublic', totalPaginas, estado.pagina, produtos.length, 'renderProducts');
       refreshRevealObserver();
     }
+
+    // MEXI AQUI: rola o carrossel de produtos até a página pedida (usado pelos
+    // botões Anterior/Próximo e ao trocar filtro/busca).
+    function scrollProdutosParaPagina(pagina, smooth = true) {
+      const container = document.getElementById('productGallery');
+      if (!container) return;
+      const larguraPagina = container.clientWidth;
+      container.scrollTo({ left: larguraPagina * (pagina - 1), behavior: smooth ? 'smooth' : 'auto' });
+    }
+
+    // Atualiza o indicador de página (e os botões Anterior/Próximo) conforme o
+    // usuário arrasta/rola o carrossel manualmente (touch, trackpad, etc).
+    (function observarScrollProdutos() {
+      const container = document.getElementById('productGallery');
+      if (!container) return;
+      let debounceTimer = null;
+      container.addEventListener('scroll', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          const larguraPagina = container.clientWidth || 1;
+          const paginaAtual = Math.round(container.scrollLeft / larguraPagina) + 1;
+          const totalPaginas = container.querySelectorAll('.product-grid-page').length;
+          const estado = getEstadoPaginacao('produtosPublic', 12);
+          if (estado.pagina !== paginaAtual) {
+            estado.pagina = paginaAtual;
+            const produtos = ultimaListaProdutosFiltrada || products;
+            renderPaginacao('paginacaoProdutosPublic', 'produtosPublic', totalPaginas, paginaAtual, produtos.length, 'renderProducts');
+          }
+        }, 120);
+      });
+    })();
 
     // ===== ARMÁRIOS (ABA PÚBLICA) =====
     // MEXI AQUI: mesmo padrão visual usado no admin para o badge de status.
@@ -1821,14 +1999,17 @@
  
     // NAVEGAÇÃO DE SEÇÕES
     function navigate(viewId, element) {
-      document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
- 
-      const targetView = document.getElementById(viewId);
-      if (targetView) targetView.classList.add('active');
       if (element) element.classList.add('active');
- 
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // MEXI AQUI: agora "navegar" desliza o trilho horizontal até a seção,
+      // em vez de esconder/mostrar. As seções ficam sempre lado a lado.
+      const targetView = document.getElementById(viewId);
+      const wrapper = document.querySelector('main.wrapper');
+      if (targetView && wrapper) {
+        wrapper.scrollTo({ left: targetView.offsetLeft, behavior: 'smooth' });
+      }
+
       refreshRevealObserver();
 
       // MEXI AQUI: garante que os armários fiquem sempre atualizados ao abrir a aba
@@ -1842,7 +2023,55 @@
         if (!adminChart) setTimeout(initAdminChart, 100);
       }
     }
+
+    // MEXI AQUI: mantém o item do menu destacado sozinho conforme o usuário
+    // arrasta o trilho manualmente (touch/trackpad), sem precisar clicar no menu.
+    (function observarScrollSecoes() {
+      const wrapper = document.querySelector('main.wrapper');
+      if (!wrapper) return;
+      const secoes = Array.from(document.querySelectorAll('.view-content'));
+      const navItems = document.querySelectorAll('.nav-item');
+      let debounceTimer = null;
+
+      wrapper.addEventListener('scroll', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          const posicaoAtual = wrapper.scrollLeft;
+          let indiceMaisProximo = 0;
+          let menorDistancia = Infinity;
+          secoes.forEach((secao, i) => {
+            const distancia = Math.abs(secao.offsetLeft - posicaoAtual);
+            if (distancia < menorDistancia) { menorDistancia = distancia; indiceMaisProximo = i; }
+          });
+          navItems.forEach(item => item.classList.remove('active'));
+          if (navItems[indiceMaisProximo]) navItems[indiceMaisProximo].classList.add('active');
+        }, 120);
+      });
+    })();
  
+    // MEXI AQUI: modal de detalhe do produto, aberto ao clicar no card
+    function openProductModal(produtoId) {
+      const produto = products.find((p) => String(p.id) === String(produtoId));
+      if (!produto) return;
+
+      const produtoImg = produto.imagem_url || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=800&auto=format&fit=crop';
+      const produtoPreco = Number(produto.preco || 0);
+
+      document.getElementById('pm-img').src = produtoImg;
+      document.getElementById('pm-img').alt = produto.nome || 'Produto';
+      document.getElementById('pm-category').innerText = getProductCategoryLabel(produto);
+      document.getElementById('pm-title').innerText = produto.nome || 'Produto';
+      document.getElementById('pm-price').innerText = `R$ ${produtoPreco.toFixed(2)}`;
+      document.getElementById('pm-variations').innerHTML = renderVariationChips(produto);
+      document.getElementById('pm-sku').innerText = `SKU: ${produto.sku || ('PROD-' + (produto.id || 'N/A'))}`;
+
+      document.getElementById('productModal').classList.add('active');
+    }
+
+    function closeProductModal() {
+      document.getElementById('productModal').classList.remove('active');
+    }
+
     function openViewModal(name, rm, curso, status) {
       document.getElementById('v-name').innerText = name;
       document.getElementById('v-rm').innerText = rm;
