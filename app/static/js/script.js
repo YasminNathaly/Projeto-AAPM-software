@@ -117,7 +117,8 @@
       associado: 1,
       armario: 1,
       usuario: 1,
-      venda: 1
+      venda: 1,
+      relatorio: 1 // MEXI AQUI: paginação do novo módulo de relatório
     };
 
     // MEXI AQUI: ===== TOASTS DE FEEDBACK (sucesso / erro) PARA TODOS OS CRUDS =====
@@ -277,6 +278,7 @@
         renderVendas();
         popularSelectsDinamicos();
         renderNotificacoes();
+        renderRelatorio(); // MEXI AQUI: atualiza a tabela do relatório junto com o resto
 
         const active = document.querySelector('.view-content.active');
         const activeId = active ? active.id : 'categoria';
@@ -323,7 +325,100 @@
       fornecedor: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-8h6v8"/></svg>'
     };
 
+    // MEXI AQUI: ===== RELATÓRIO DE NOTIFICAÇÕES LIDAS (persistido no localStorage) =====
+    // Ao clicar numa notificação, ela é marcada como lida: sai da lista do
+    // sino (montarNotificacoes filtra o que já foi lido) e passa a aparecer
+    // na aba "Relatório" do menu lateral, com data/hora de leitura.
+    const CHAVE_RELATORIO_NOTIF = 'aapm_relatorio_notificacoes';
+
+    // Identificador único e estável de cada notificação (tipo + id do registro
+    // que a originou), usado para saber se ela já foi marcada como lida.
+    function idNotificacao(n) {
+      return `${n.tipo}-${n.ordem}`;
+    }
+
+    function carregarRelatorioNotificacoes() {
+      try {
+        return JSON.parse(localStorage.getItem(CHAVE_RELATORIO_NOTIF)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function salvarRelatorioNotificacoes(lista) {
+      localStorage.setItem(CHAVE_RELATORIO_NOTIF, JSON.stringify(lista));
+    }
+
+    // Move uma notificação do sino para o relatório (com timestamp de leitura).
+    function marcarNotificacaoComoLida(n) {
+      const relatorio = carregarRelatorioNotificacoes();
+      const id = idNotificacao(n);
+      if (relatorio.some(r => r.id === id)) return; // já está no relatório
+
+      relatorio.unshift({
+        id,
+        tipo: n.tipo,
+        titulo: n.titulo,
+        sub: n.sub,
+        lidoEm: new Date().toISOString()
+      });
+      salvarRelatorioNotificacoes(relatorio);
+      renderNotificacoes();
+      if (document.querySelector('.view-content.active')?.id === 'relatorio') renderRelatorio();
+    }
+
+    function marcarTodasNotificacoesComoLidas(e) {
+      if (e) e.stopPropagation();
+      const notificacoes = montarNotificacoes();
+      if (!notificacoes.length) return;
+      notificacoes.forEach(n => marcarNotificacaoComoLida(n));
+      mostrarToast('Todas as notificações foram marcadas como lidas.', 'success');
+    }
+
+    // Apaga todo o histórico do relatório (pede confirmação pelo modal customizado).
+    async function limparRelatorioNotificacoes() {
+      const confirmado = await confirmarAcao('Deseja apagar todo o histórico do relatório de notificações?', 'Limpar');
+      if (!confirmado) return;
+      salvarRelatorioNotificacoes([]);
+      renderRelatorio();
+      mostrarToast('Relatório limpo com sucesso!', 'success');
+    }
+
+    // Remove apenas uma entrada específica do relatório.
+    function removerEntradaRelatorio(id) {
+      const relatorio = carregarRelatorioNotificacoes().filter(r => r.id !== id);
+      salvarRelatorioNotificacoes(relatorio);
+      renderRelatorio();
+    }
+
+    function renderRelatorio() {
+      const tbody = document.getElementById('tblRelatorio');
+      if (!tbody) return;
+      const relatorio = carregarRelatorioNotificacoes();
+      const pagina = paginarLista(relatorio, 'relatorio');
+      tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
+        <tr style="--i:${i}">
+          <td><span class="pill-badge">${escapeHTML(item.tipo)}</span></td>
+          <td style="font-weight:700;">${escapeHTML(item.titulo)}</td>
+          <td>${escapeHTML(item.sub) || '-'}</td>
+          <td>${escapeHTML(new Date(item.lidoEm).toLocaleString('pt-BR'))}</td>
+          <td>
+            <div class="action-btn-group">
+              <button class="action-btn danger" title="Remover do relatório" onclick="removerEntradaRelatorio('${item.id}')">
+                <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('') : emptyRow(5, 'Nenhuma notificação lida ainda.');
+      renderPaginacaoControles('pagRelatorio', 'relatorio', relatorio.length);
+    }
+
+    // MEXI AQUI: montarNotificacoes agora exclui o que já está no relatório
+    // (lido), e cada item carrega os dados brutos (tipo/titulo/sub/ordem)
+    // usados por marcarNotificacaoComoLida() ao ser clicado.
     function montarNotificacoes() {
+      const lidas = new Set(carregarRelatorioNotificacoes().map(r => r.id));
       const itens = [];
       vendas.slice(0, 3).forEach(v => itens.push({ tipo: 'venda', titulo: 'Nova venda registrada', sub: `${v.produto_nome} · ${v.data_venda || ''}`, ordem: v.id }));
       produtos.slice(-2).reverse().forEach(p => itens.push({ tipo: 'produto', titulo: 'Produto cadastrado', sub: p.nome, ordem: p.id }));
@@ -332,16 +427,21 @@
       usuarios.slice(-2).reverse().forEach(u => itens.push({ tipo: 'usuario', titulo: 'Novo usuário cadastrado', sub: u.nome, ordem: u.id }));
       categorias.slice(-1).reverse().forEach(c => itens.push({ tipo: 'categoria', titulo: 'Categoria cadastrada', sub: c.nome, ordem: c.id }));
       fornecedores.slice(-1).reverse().forEach(f => itens.push({ tipo: 'fornecedor', titulo: 'Fornecedor cadastrado', sub: f.nome, ordem: f.id }));
-      return itens.sort((a, b) => (b.ordem || 0) - (a.ordem || 0)).slice(0, 6);
+      return itens
+        .filter(n => !lidas.has(idNotificacao(n)))
+        .sort((a, b) => (b.ordem || 0) - (a.ordem || 0))
+        .slice(0, 6);
     }
 
-    // MEXI AQUI: título/sub das notificações passam por escapeHTML()
+    // MEXI AQUI: título/sub das notificações passam por escapeHTML(); cada
+    // item agora é clicável (onclick chama marcarNotificacaoComoLida com o
+    // objeto da própria notificação) e some da lista assim que é lido.
     function renderNotificacoes() {
       const list = document.getElementById('notifList');
       const dot = document.querySelector('.notif-dot');
       const notificacoes = montarNotificacoes();
       list.innerHTML = notificacoes.length ? notificacoes.map(n => `
-        <div class="notif-item">
+        <div class="notif-item" style="cursor:pointer;" title="Clique para marcar como lida" onclick='marcarNotificacaoComoLida(${JSON.stringify(n).replace(/'/g, "&#39;")})'>
           <div class="ni-icon">${notificacoesIcones[n.tipo] || notificacoesIcones.venda}</div>
           <div>
             <div class="ni-title">${escapeHTML(n.titulo)}</div>
@@ -613,7 +713,9 @@
       'associado': ['Associados', 'Consulta e cadastro dos associados da AAPM.', 'Novo Associado'],
       'armario': ['Armários', 'Controle de disponibilidade e ocupação dos armários.', 'Novo Armário'],
       'usuario': ['Usuários', 'Controle de acessos e permissões.', 'Novo Usuário'],
-      'venda': ['Vendas', 'Registro de pedidos e transações.', 'Nova Venda']
+      'venda': ['Vendas', 'Registro de pedidos e transações.', 'Nova Venda'],
+      // MEXI AQUI: título/subtítulo do novo módulo de relatório (sem botão de "novo registro" — por isso o 3º item vem vazio)
+      'relatorio': ['Relatório', 'Histórico de notificações marcadas como lidas.', '']
     };
 
     // MOTOR DE NAVEGAÇÃO
@@ -633,6 +735,8 @@
 
       const searchInput = document.getElementById('tableSearch');
       if (searchInput) searchInput.value = '';
+
+      if (viewId === 'relatorio') renderRelatorio(); // MEXI AQUI: garante a tabela atualizada ao entrar na aba
 
       renderStatsBar(viewId);
       renderRecentList(viewId);
@@ -987,7 +1091,8 @@
       associado: renderAssociados,
       armario: renderArmarios,
       usuario: renderUsuarios,
-      venda: renderVendas
+      venda: renderVendas,
+      relatorio: renderRelatorio // MEXI AQUI: paginação "Anterior/Próximo" também funciona no relatório
     });
 
     // BARRA DE ESTATÍSTICAS DINÂMICA
@@ -1036,6 +1141,16 @@
             { value: vendas.reduce((a, v) => a + Number(v.quantidade || 0), 0), label: 'Itens Vendidos' },
             { value: formatarMoeda(vendas.reduce((a, v) => a + Number(v.preco_total || 0), 0)), label: 'Faturamento Total' }
           ];
+        // MEXI AQUI: cards de estatística do novo módulo de relatório
+        case 'relatorio': {
+          const relatorio = carregarRelatorioNotificacoes();
+          const hoje = new Date().toDateString();
+          return [
+            { value: relatorio.length, label: 'Notificações Lidas' },
+            { value: relatorio.filter(r => new Date(r.lidoEm).toDateString() === hoje).length, label: 'Lidas Hoje' },
+            { value: montarNotificacoes().length, label: 'Pendentes no Sino' }
+          ];
+        }
         default:
           return [];
       }
@@ -1089,6 +1204,9 @@
           return usuarios.slice(-3).reverse().map(u => ({ title: u.nome, sub: u.perfil }));
         case 'venda':
           return vendas.slice(0, 3).map(v => ({ title: v.comprador, sub: v.produto_nome }));
+        // MEXI AQUI: "últimos registros" do relatório mostram as últimas leituras
+        case 'relatorio':
+          return carregarRelatorioNotificacoes().slice(0, 3).map(r => ({ title: r.titulo, sub: r.sub || r.tipo }));
         default:
           return [];
       }

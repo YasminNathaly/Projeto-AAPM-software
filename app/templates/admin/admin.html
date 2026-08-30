@@ -13,7 +13,7 @@
 
 
   <link rel="stylesheet" href="/static/css/style.css">
-...
+
 <script src="/static/js/script.js" defer></script>
 </head>
 <body>
@@ -80,6 +80,14 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.8h7.2a2 2 0 0 0 2-1.6L21 8H6"/></svg>
       </div>
       <span class="menu-tooltip">Venda</span>
+    </a>
+
+    <!-- MEXI AQUI: novo item de menu — Relatório de notificações lidas -->
+    <a class="menu-item" onclick="navigate('relatorio', this)">
+      <div class="menu-item-content">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/><path d="M9 17h6M9 13h6M9 9h1"/></svg>
+      </div>
+      <span class="menu-tooltip">Relatório</span>
     </a>
   </nav>
 
@@ -459,6 +467,25 @@
       </div>
     </section>
 
+    <!-- MEXI AQUI: 8. RELATÓRIO — notificações marcadas como lidas -->
+    <section id="relatorio" class="view-content">
+      <div class="card reveal">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap: 12px; flex-wrap: wrap; margin-bottom: 1rem;">
+          <div class="card-title" style="margin: 0;">Notificações Lidas</div>
+          <button type="button" class="btn btn-outline" onclick="limparRelatorioNotificacoes()" style="padding: 0.65rem 0.9rem; font-size: 0.72rem;">
+            Limpar relatório
+          </button>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>Tipo</th><th>Evento</th><th>Detalhe</th><th>Lido em</th><th>Ações</th></tr></thead>
+            <tbody id="tblRelatorio"></tbody>
+          </table>
+        </div>
+        <div class="paginacao-container" id="pagRelatorio"></div>
+      </div>
+    </section>
+
   </main>
 
   <!-- COLUNA LATERAL DIREITA -->
@@ -486,7 +513,11 @@
         <div class="notif-panel" id="notifPanel">
           <div class="notif-panel-header">
             <span>Notificações</span>
-            <span class="notif-close" onclick="toggleNotifications(event, true)">Fechar</span>
+            <!-- MEXI AQUI: botão "marcar todas" ao lado de "Fechar" -->
+            <div style="display:flex; gap:10px; align-items:center;">
+              <span class="notif-close" style="color:var(--accent);" onclick="marcarTodasNotificacoesComoLidas(event)">Marcar todas</span>
+              <span class="notif-close" onclick="toggleNotifications(event, true)">Fechar</span>
+            </div>
           </div>
           <div class="notif-list" id="notifList"></div>
         </div>

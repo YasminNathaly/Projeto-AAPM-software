@@ -622,7 +622,9 @@
     .notif-panel-header .notif-close { font-size: 0.68rem; color: var(--primary); cursor: pointer; font-weight: 700; }
 
     .notif-list { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; }
-    .notif-item { display: flex; gap: 10px; padding: 0.7rem 0.75rem; border-radius: 16px; background: var(--bg-surface-hover); border: 1px solid var(--border-color); }
+    .notif-item { display: flex; gap: 10px; padding: 0.7rem 0.75rem; border-radius: 16px; background: var(--bg-surface-hover); border: 1px solid var(--border-color); transition: background-color .25s var(--ease), transform .2s var(--ease); }
+    /* MEXI AQUI: feedback visual de que o item do sino é clicável (marca como lido) */
+    .notif-item:hover { background: var(--primary-soft); border-color: var(--primary); transform: translateX(-2px); }
     .notif-item .ni-icon {
       width: 32px; height: 32px; border-radius: 10px;
       background: var(--accent-soft); color: var(--accent);
@@ -839,7 +841,7 @@
       font-size: 5rem;
     }
 
-    /* MEXI AQUI: estilização dos botões de paginação (reaproveitada em todas as tabelas do painel) */
+    /* MEXI AQUI: estilização dos botões de paginação (reaproveitada em todas as tabelas do painel, incluindo o relatório) */
     .paginacao-container {
       display: flex;
       justify-content: space-between;
