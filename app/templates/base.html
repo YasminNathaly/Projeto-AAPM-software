@@ -294,6 +294,15 @@
       transform: rotate(180deg) scale(0.4);
       opacity: 0;
     }
+
+    /* MEXI AQUI: pulso do logo agora é um keyframe CSS puro — roda em paralelo
+       com a troca de tema, sem precisar de setTimeout bloqueando o JS */
+    @keyframes logoTogglePulse {
+      0%   { transform: scale(1);    box-shadow: 0 4px 14px rgba(214, 50, 80, 0.35); }
+      35%  { transform: scale(1.18); box-shadow: 0 0 0 8px rgba(214, 50, 80, 0.35), 0 4px 14px rgba(214, 50, 80, 0.55); }
+      100% { transform: scale(1);    box-shadow: 0 4px 14px rgba(214, 50, 80, 0.35); }
+    }
+    .logo-senai-svg.pulse { animation: logoTogglePulse 0.5s var(--ease); }
  
     .btn-auth {
       padding: 9px 20px;
@@ -1491,7 +1500,8 @@
     }
 
     // MEXI AQUI: explosão de partículas saindo do botão ao trocar de tema —
-    // substitui o antigo overlay "Ajustando tema" (que parecia travar)
+    // agora dispara junto com o wipe circular (não depois dele), então tudo
+    // acontece ao mesmo tempo em vez de em fila
     function spawnThemeBurst(x, y, toDark) {
       const palette = toDark
         ? ['255, 255, 255', '214, 50, 80', '255, 210, 130']
@@ -1517,7 +1527,7 @@
           z-index: 9999;
           transform: translate(-50%, -50%) scale(1);
           opacity: 1;
-          transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         `;
         document.body.appendChild(el);
 
@@ -1526,7 +1536,7 @@
           el.style.opacity = '0';
         });
 
-        setTimeout(() => el.remove(), 820);
+        setTimeout(() => el.remove(), 650);
       }
 
       // um brilho central que "pulsa" no ponto de origem, dando o toque de encantamento
@@ -1541,16 +1551,18 @@
         z-index: 9999;
         transform: translate(-50%, -50%) scale(0);
         opacity: 1;
-        transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease-out;
+        transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease-out;
       `;
       document.body.appendChild(glow);
       requestAnimationFrame(() => {
         glow.style.transform = 'translate(-50%, -50%) scale(6)';
         glow.style.opacity = '0';
       });
-      setTimeout(() => glow.remove(), 620);
+      setTimeout(() => glow.remove(), 520);
     }
 
+    // MEXI AQUI: stagger mais curto (40ms em vez de 70ms) pra não parecer
+    // que a página trava depois do clique de tema
     function replayLoadingReveal() {
       const activeView = document.querySelector('.view-content.active');
       if (!activeView) return;
@@ -1558,10 +1570,14 @@
       items.forEach((el, i) => {
         el.classList.remove('in-view');
         void el.offsetWidth;
-        setTimeout(() => el.classList.add('in-view'), 60 + i * 70);
+        setTimeout(() => el.classList.add('in-view'), 30 + i * 40);
       });
     }
 
+    // MEXI AQUI: toggleTheme reescrito para rodar tudo em paralelo —
+    // o pulso do logo é só uma classe CSS (sem setTimeout bloqueando),
+    // a explosão de partículas dispara junto com o início do wipe (no "ready",
+    // não no "finished"), e o wipe ficou mais curto e mais "seco".
     function toggleTheme(event) {
       const html = document.documentElement;
       const isLight = html.getAttribute('data-theme') === 'light';
@@ -1574,7 +1590,15 @@
         setTimeout(() => btn.classList.remove('spin'), 450);
       }
 
-      // MEXI AQUI: a animação nasce sempre do logo do SENAI, não do botão clicado
+      // pulso do logo via classe CSS — roda sozinho, sem travar o resto
+      if (logo) {
+        logo.classList.remove('pulse');
+        void logo.offsetWidth;
+        logo.classList.add('pulse');
+        setTimeout(() => logo.classList.remove('pulse'), 520);
+      }
+
+      // origem da animação: sempre o logo do SENAI (ou o clique, como fallback)
       let originX = window.innerWidth / 2;
       let originY = 40;
       if (logo) {
@@ -1591,56 +1615,43 @@
         Math.max(originY, window.innerHeight - originY)
       );
 
-      const finishUp = () => {
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (!document.startViewTransition || reducedMotion) {
+        applyThemeAttribute(newTheme);
         spawnThemeBurst(originX, originY, newTheme === 'dark');
         replayLoadingReveal();
-      };
-
-      // pulsada rápida no logo, como se ele "carregasse" a explosão antes de disparar
-      if (logo) {
-        logo.style.transition = 'transform 0.18s ease-out, box-shadow 0.18s ease-out';
-        logo.style.transform = 'scale(1.18)';
-        logo.style.boxShadow = '0 0 0 8px rgba(214, 50, 80, 0.35), 0 4px 14px rgba(214, 50, 80, 0.55)';
+        return;
       }
 
-      const runTransition = () => {
-        if (logo) {
-          logo.style.transform = '';
-          logo.style.boxShadow = '';
-        }
+      const transition = document.startViewTransition(() => {
+        applyThemeAttribute(newTheme);
+      });
 
-        if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-          applyThemeAttribute(newTheme);
-          finishUp();
-          return;
-        }
+      // dispara a explosão de partículas e o replay dos cards ASSIM QUE o
+      // DOM já virou (ready) — em paralelo com o wipe circular, não depois
+      transition.ready.then(() => {
+        document.documentElement.animate(
+          {
+            clipPath: [
+              `circle(0px at ${originX}px ${originY}px)`,
+              `circle(${endRadius}px at ${originX}px ${originY}px)`
+            ]
+          },
+          {
+            duration: 600,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+            pseudoElement: '::view-transition-new(root)'
+          }
+        );
 
-        const transition = document.startViewTransition(() => {
-          applyThemeAttribute(newTheme);
-        });
-
-        transition.ready.then(() => {
-          document.documentElement.animate(
-            {
-              clipPath: [
-                `circle(0px at ${originX}px ${originY}px)`,
-                `circle(${endRadius}px at ${originX}px ${originY}px)`
-              ]
-            },
-            {
-              duration: 820,
-              easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-              pseudoElement: '::view-transition-new(root)'
-            }
-          );
-
-        }).catch(() => { /* transição não suportada nesse navegador, ignora */ });
-
-        transition.finished.then(finishUp).catch(finishUp);
-      };
-
-      // dá tempo da pulsada no logo aparecer antes de disparar a explosão
-      setTimeout(runTransition, logo ? 160 : 0);
+        spawnThemeBurst(originX, originY, newTheme === 'dark');
+        replayLoadingReveal();
+      }).catch(() => {
+        // transição não suportada nesse navegador: garante que o efeito ainda rode
+        spawnThemeBurst(originX, originY, newTheme === 'dark');
+        replayLoadingReveal();
+      });
     }
 
     (function initTheme() {
@@ -2418,7 +2429,7 @@
       document.querySelectorAll('.reveal:not(.in-view), .reveal-stagger:not(.in-view)').forEach(el => revealObserver.observe(el));
     }
  
-    // BACKGROUND CANVAS — MEXI AQUI: cena espacial premium (nebulosa + estrelas em profundidade + cadentes)
+    // BACKGROUND CANVAS — cena espacial premium (nebulosa + estrelas em profundidade + cadentes)
     (function initCanvas() {
       const canvas = document.getElementById('bg-canvas');
       if (!canvas) return;
@@ -2537,8 +2548,7 @@
           const px = star.x + parX * (star.layer + 1) * 6;
           const py = star.y + parY * (star.layer + 1) * 6;
 
-          // MEXI AQUI: no tema claro as estrelinhas viram "confete" nas cores
-          // da marca (rosa/dourado), sem o glow forte usado no escuro
+          // no tema claro as estrelinhas viram "confete" nas cores da marca (rosa/dourado)
           const color = light ? (star.color === '255, 255, 255' ? '214, 50, 80' : '255, 157, 108') : star.color;
 
           ctx.beginPath();
@@ -2614,4 +2624,4 @@
     };
   </script>
 </body>
-</html>
+</html> 

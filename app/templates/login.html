@@ -16,7 +16,7 @@
       --bg-surface: rgba(18, 18, 24, 0.85);
       --bg-surface-hover: rgba(255, 255, 255, 0.05);
       --bg-card: #101018;
-      --bg-backdrop: rgba(5, 5, 10, 0.7);
+      --bg-backdrop: rgba(5, 5, 10, 0.55);
       --border-color: rgba(255, 255, 255, 0.09);
       
       --primary: #d63250;
@@ -28,18 +28,16 @@
       --text-muted: rgba(255, 255, 255, 0.64);
       --text-dark: rgba(255, 255, 255, 0.38);
       
-      --particle-color: rgba(214, 50, 80, 0.6);
-      --particle-line: rgba(214, 50, 80, 0.2);
       --card-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
     }
 
     /* ================= VARIÁVEIS GLOBAIS - TEMA CLARO ================= */
     :root[data-theme="light"] {
-      --bg-main: #f4f5f9;
+      --bg-main: #f7f3ee;
       --bg-surface: rgba(255, 255, 255, 0.85);
       --bg-surface-hover: rgba(0, 0, 0, 0.04);
-      --bg-card: #ffffff;
-      --bg-backdrop: rgba(240, 242, 248, 0.65);
+      --bg-card: rgba(255, 255, 255, 0.86);
+      --bg-backdrop: rgba(240, 242, 248, 0.55);
       --border-color: rgba(0, 0, 0, 0.08);
       
       --primary: #d63250;
@@ -51,9 +49,18 @@
       --text-muted: rgba(26, 26, 36, 0.68);
       --text-dark: rgba(26, 26, 36, 0.45);
       
-      --particle-color: rgba(214, 50, 80, 0.35);
-      --particle-line: rgba(214, 50, 80, 0.12);
-      --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+      --card-shadow: 0 20px 40px rgba(214, 50, 80, 0.1);
+    }
+
+    /* fundo do tema claro: degradê suave saindo de um creme quente para um toque rosado da marca,
+       igual ao usado na página principal */
+    :root[data-theme="light"] body {
+      background:
+        radial-gradient(90% 60% at 15% 0%, rgba(214, 50, 80, 0.10) 0%, rgba(214, 50, 80, 0) 55%),
+        radial-gradient(70% 50% at 100% 20%, rgba(255, 196, 140, 0.16) 0%, rgba(255, 196, 140, 0) 60%),
+        radial-gradient(120% 90% at 50% 100%, rgba(214, 50, 80, 0.06) 0%, rgba(214, 50, 80, 0) 55%),
+        var(--bg-main);
+      background-attachment: fixed;
     }
 
     /* VARIÁVEIS ESTRUTURAIS */
@@ -86,13 +93,18 @@
       position: relative;
     }
 
+    /* fundo animado: cena espacial (nebulosa + estrelas + estrelas cadentes), igual à página principal */
     #bg-canvas {
       position: fixed;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
-      z-index: 0;
+      z-index: 9998;
+      mix-blend-mode: screen;
       pointer-events: none;
+      opacity: 1;
+      transition: opacity 0.4s var(--ease);
     }
+    :root[data-theme="light"] #bg-canvas { opacity: 0.4; mix-blend-mode: normal; }
 
     header.main-header {
       height: var(--header-height);
@@ -691,64 +703,187 @@
       applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
     });
 
-    // ===== ANIMAÇÃO DE CANVAS =====
+    // ===== ANIMAÇÃO DE FUNDO: CENA ESPACIAL (nebulosa + estrelas em profundidade + cadentes) =====
+    // (igual à usada na página principal da AAPM)
     (function initCanvas() {
       const canvas = document.getElementById('bg-canvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      let particles = [];
 
-      function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        generateScene();
+      }
+
+      let stars = [];
+      let nebulae = [];
+      let shootingStars = [];
+
+      // ===== ESTRELAS EM 3 CAMADAS (parallax de profundidade) =====
+      function generateStars() {
+        stars = [];
+        const layers = [
+          { count: Math.round((canvas.width * canvas.height) / 22000), sizeMin: 0.5, sizeMax: 1.1, alphaMax: 0.55, drift: 0.015 },
+          { count: Math.round((canvas.width * canvas.height) / 16000), sizeMin: 0.8, sizeMax: 1.6, alphaMax: 0.75, drift: 0.03  },
+          { count: Math.round((canvas.width * canvas.height) / 30000), sizeMin: 1.3, sizeMax: 2.3, alphaMax: 0.95, drift: 0.05  }
+        ];
+        layers.forEach((layer, layerIndex) => {
+          for (let i = 0; i < layer.count; i++) {
+            const isRed = Math.random() < 0.15;
+            stars.push({
+              x: Math.random() * canvas.width,
+              y: Math.random() * canvas.height,
+              size: Math.random() * (layer.sizeMax - layer.sizeMin) + layer.sizeMin,
+              baseAlpha: Math.random() * 0.4 + (layer.alphaMax - 0.4),
+              twinkleSpeed: Math.random() * 0.018 + 0.004,
+              twinklePhase: Math.random() * Math.PI * 2,
+              drift: (Math.random() - 0.5) * layer.drift,
+              layer: layerIndex,
+              color: isRed ? '214, 50, 80' : '255, 255, 255'
+            });
+          }
+        });
+      }
+
+      // ===== NEBULOSAS: manchas de luz grandes, suaves, pulsando devagar =====
+      function generateNebulae() {
+        nebulae = [
+          { xR: 0.22, yR: 0.28, radius: Math.max(canvas.width, canvas.height) * 0.42, hue: 344, phase: 0,   speed: 0.0016 },
+          { xR: 0.80, yR: 0.62, radius: Math.max(canvas.width, canvas.height) * 0.38, hue: 260, phase: 2.1, speed: 0.0012 },
+          { xR: 0.55, yR: 0.85, radius: Math.max(canvas.width, canvas.height) * 0.34, hue: 200, phase: 4.4, speed: 0.0019 }
+        ];
+      }
+
+      function generateScene() {
+        generateStars();
+        generateNebulae();
+      }
+
       resize();
       window.addEventListener('resize', resize);
 
-      class Particle {
-        constructor() {
-          this.x = Math.random() * canvas.width;
-          this.y = Math.random() * canvas.height;
-          this.size = Math.random() * 2 + 1;
-          this.speedX = (Math.random() - 0.5) * 0.6;
-          this.speedY = (Math.random() - 0.5) * 0.6;
-        }
-        update() {
-          this.x += this.speedX;
-          this.y += this.speedY;
-          if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-          if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-        }
-        draw() {
-          const style = getComputedStyle(document.documentElement);
-          ctx.fillStyle = style.getPropertyValue('--particle-color').trim();
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-          ctx.fill();
+      // parallax bem sutil seguindo o mouse (dá profundidade real à cena)
+      let mouseX = 0, mouseY = 0, parX = 0, parY = 0;
+      window.addEventListener('mousemove', (e) => {
+        mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+        mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+      });
+
+      function maybeSpawnShootingStar() {
+        if (Math.random() < 0.012 && shootingStars.length < 5) {
+          const startX = Math.random() * canvas.width * 0.8 + canvas.width * 0.1;
+          const big = Math.random() < 0.25; // uma em cada quatro é maior/mais brilhante
+          const tint = Math.random() < 0.2 ? '255, 210, 210' : '255, 255, 255'; // toque rosado ocasional
+          shootingStars.push({
+            x: startX,
+            y: -20,
+            vx: -(2.6 + Math.random() * 3.2),
+            vy: 3.8 + Math.random() * 3.4,
+            life: 1,
+            length: (big ? 130 : 80) + Math.random() * 60,
+            headSize: big ? 2.6 : 1.5,
+            width: big ? 2.6 : 1.6,
+            color: tint
+          });
         }
       }
 
-      for (let i = 0; i < 60; i++) particles.push(new Particle());
+      function isLightTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'light';
+      }
 
-      function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const style = getComputedStyle(document.documentElement);
-        const lineColor = style.getPropertyValue('--particle-line').trim();
+      function drawNebulae(time) {
+        if (isLightTheme()) return; // no claro o fundo já tem o gradiente via CSS
+        nebulae.forEach((n) => {
+          const pulse = (Math.sin(time * n.speed + n.phase) + 1) / 2; // 0..1
+          const cx = canvas.width * n.xR + parX * 20;
+          const cy = canvas.height * n.yR + parY * 20;
+          const r = n.radius * (0.85 + pulse * 0.18);
+          const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+          grad.addColorStop(0, `hsla(${n.hue}, 75%, 48%, ${0.14 + pulse * 0.07})`);
+          grad.addColorStop(0.5, `hsla(${n.hue}, 75%, 42%, ${0.07 + pulse * 0.04})`);
+          grad.addColorStop(1, `hsla(${n.hue}, 75%, 32%, 0)`);
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        });
+      }
 
-        for (let i = 0; i < particles.length; i++) {
-          particles[i].update();
-          particles[i].draw();
-          for (let j = i + 1; j < particles.length; j++) {
-            const dx = particles[i].x - particles[j].x;
-            const dy = particles[i].y - particles[j].y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 120) {
-              ctx.strokeStyle = lineColor;
-              ctx.lineWidth = 1;
-              ctx.beginPath();
-              ctx.moveTo(particles[i].x, particles[i].y);
-              ctx.lineTo(particles[j].x, particles[j].y);
-              ctx.stroke();
-            }
+      function drawStars() {
+        const light = isLightTheme();
+        stars.forEach((star) => {
+          star.twinklePhase += star.twinkleSpeed;
+          const twinkle = (Math.sin(star.twinklePhase) + 1) / 2;
+          const alpha = star.baseAlpha * (0.3 + twinkle * 0.7) * (light ? 0.7 : 1);
+
+          star.x += star.drift;
+          if (star.x < 0) star.x = canvas.width;
+          if (star.x > canvas.width) star.x = 0;
+
+          const px = star.x + parX * (star.layer + 1) * 6;
+          const py = star.y + parY * (star.layer + 1) * 6;
+
+          // no tema claro as estrelinhas viram "confete" nas cores da marca (rosa/dourado)
+          const color = light ? (star.color === '255, 255, 255' ? '214, 50, 80' : '255, 157, 108') : star.color;
+
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(${color}, ${alpha})`;
+          if (!light) {
+            ctx.shadowColor = `rgba(${color}, ${Math.min(alpha + 0.25, 1)})`;
+            ctx.shadowBlur = star.size * (2.5 + star.layer * 1.5);
           }
-        }
+          ctx.arc(px, py, star.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.shadowBlur = 0;
+      }
+
+      function drawShootingStars() {
+        const light = isLightTheme();
+        shootingStars.forEach((s) => {
+          const color = light ? '214, 50, 80' : s.color;
+          const tailX = s.x - s.vx * (s.length / 10);
+          const tailY = s.y - s.vy * (s.length / 10);
+          const grad = ctx.createLinearGradient(s.x, s.y, tailX, tailY);
+          grad.addColorStop(0, `rgba(${color}, ${s.life * (light ? 0.55 : 1)})`);
+          grad.addColorStop(1, `rgba(${color}, 0)`);
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = s.width;
+          ctx.beginPath();
+          ctx.moveTo(s.x, s.y);
+          ctx.lineTo(tailX, tailY);
+          ctx.stroke();
+
+          // cabeça brilhante
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(${color}, ${s.life * (light ? 0.55 : 1)})`;
+          if (!light) {
+            ctx.shadowColor = `rgba(${color}, 0.9)`;
+            ctx.shadowBlur = s.headSize * 5;
+          }
+          ctx.arc(s.x, s.y, s.headSize, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+
+          s.x += s.vx;
+          s.y += s.vy;
+          if (s.y > canvas.height * 0.9 || s.x < -50) s.life -= 1; // sai da tela: remove
+        });
+        shootingStars = shootingStars.filter((s) => s.life > 0 && s.y < canvas.height + 50);
+      }
+
+      let t = 0;
+      function animate() {
+        parX += (mouseX - parX) * 0.03;
+        parY += (mouseY - parY) * 0.03;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawNebulae(t);
+        drawStars();
+        maybeSpawnShootingStar();
+        drawShootingStars();
+
+        t += 1;
         requestAnimationFrame(animate);
       }
       animate();
@@ -1157,3 +1292,4 @@
 
   </script>
 </body>
+</html>
