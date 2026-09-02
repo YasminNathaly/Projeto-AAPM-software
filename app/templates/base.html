@@ -49,12 +49,12 @@
     }
  
     html[data-theme="light"] {
-      --bg-main: #f6f4f1;
-      --bg-surface: rgba(255, 255, 255, 0.82);
+      --bg-main: #f7f3ee;
+      --bg-surface: rgba(255, 255, 255, 0.78);
       --bg-surface-hover: rgba(9, 9, 15, 0.04);
-      --bg-card: #ffffff;
-      --bg-card-2: #fbfaf8;
-      --border-color: rgba(9, 9, 15, 0.09);
+      --bg-card: rgba(255, 255, 255, 0.86);
+      --bg-card-2: #fbf7f2;
+      --border-color: rgba(9, 9, 15, 0.08);
       --border-color-soft: rgba(9, 9, 15, 0.05);
  
       --primary-soft: rgba(214, 50, 80, 0.08);
@@ -64,8 +64,19 @@
       --text-muted: rgba(20, 20, 26, 0.62);
       --text-dark: rgba(20, 20, 26, 0.4);
  
-      --shadow: 0 20px 50px rgba(20, 20, 26, 0.1);
-      --shadow-soft: 0 10px 24px rgba(20, 20, 26, 0.07);
+      --shadow: 0 24px 55px rgba(214, 50, 80, 0.1);
+      --shadow-soft: 0 10px 26px rgba(214, 50, 80, 0.08);
+    }
+ 
+    /* MEXI AQUI: fundo do tema claro deixa de ser branco liso — ganha um
+       degradê suave saindo de um creme quente para um toque rosado da marca */
+    html[data-theme="light"] body {
+      background:
+        radial-gradient(90% 60% at 15% 0%, rgba(214, 50, 80, 0.10) 0%, rgba(214, 50, 80, 0) 55%),
+        radial-gradient(70% 50% at 100% 20%, rgba(255, 196, 140, 0.16) 0%, rgba(255, 196, 140, 0) 60%),
+        radial-gradient(120% 90% at 50% 100%, rgba(214, 50, 80, 0.06) 0%, rgba(214, 50, 80, 0) 55%),
+        var(--bg-main);
+      background-attachment: fixed;
     }
  
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', 'Inter', sans-serif; }
@@ -89,12 +100,15 @@
       position: fixed;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
-      z-index: 0;
+      /* MEXI AQUI: agora fica por cima de todo o conteúdo, mas com blend "screen"
+         então só clareia onde a onda passa — não tampa texto nem imagens */
+      z-index: 9998;
+      mix-blend-mode: screen;
       pointer-events: none;
       opacity: 1;
       transition: opacity 0.4s var(--ease);
     }
-    html[data-theme="light"] #bg-canvas { opacity: 0.35; }
+    html[data-theme="light"] #bg-canvas { opacity: 0.4; mix-blend-mode: normal; }
  
     /* ================= HEADER ================= */
     header.main-header {
@@ -121,15 +135,41 @@
       color: var(--text-main);
     }
  
-    .logo-senai-svg { height: 30px; width: auto; display: block; border-radius: 4px; }
- 
-    .brand-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.4rem;
-      letter-spacing: 0.12em;
+    .logo-senai-svg {
+      height: 32px;
+      width: auto;
+      display: block;
+      border-radius: 8px;
+      box-shadow: 0 4px 14px rgba(214, 50, 80, 0.35);
+      transition: box-shadow 0.3s var(--ease), transform 0.3s var(--ease);
+    }
+    .brand-logo:hover .logo-senai-svg { box-shadow: 0 6px 18px rgba(214, 50, 80, 0.5); transform: translateY(-1px); }
+
+    .brand-title-group {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2px;
       border-left: 1px solid var(--border-color);
       padding-left: 14px;
+      line-height: 1;
+    }
+
+    .brand-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: 0.14em;
       color: var(--text-main);
+      line-height: 1;
+    }
+
+    .brand-subtitle {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--primary);
+      opacity: 0.85;
     }
  
     .header-location {
@@ -142,6 +182,14 @@
     }
     @media (min-width: 1180px) { .header-location { display: inline; } }
  
+    /* MEXI AQUI: wrapper novo para posicionar as setinhas/gradiente sobre o menu */
+    .top-nav-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      max-width: 46vw;
+    }
+
     .top-nav {
       display: flex;
       align-items: center;
@@ -150,7 +198,47 @@
       padding: 5px;
       border-radius: var(--radius-pill);
       border: 1px solid var(--border-color);
+      /* MEXI AQUI: rolagem horizontal + esconder a barra de rolagem nativa */
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      transition: box-shadow 0.25s var(--ease);
     }
+    .top-nav::-webkit-scrollbar { display: none; }
+
+    /* MEXI AQUI: setinhas com gradiente indicando que dá pra rolar pros lados */
+    .nav-fade {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 34px;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      opacity: 0;
+      transition: opacity 0.25s var(--ease);
+      z-index: 2;
+      border-radius: var(--radius-pill);
+    }
+    .nav-fade svg { width: 12px; height: 12px; color: var(--text-muted); }
+    .nav-fade.left {
+      left: 0;
+      justify-content: flex-start;
+      padding-left: 4px;
+      background: linear-gradient(90deg, var(--bg-surface) 30%, transparent 100%);
+    }
+    .nav-fade.right {
+      right: 0;
+      justify-content: flex-end;
+      padding-right: 4px;
+      background: linear-gradient(270deg, var(--bg-surface) 30%, transparent 100%);
+    }
+    .top-nav-wrap.can-scroll-left .nav-fade.left { opacity: 1; }
+    .top-nav-wrap.can-scroll-right .nav-fade.right { opacity: 1; }
+
+    /* MEXI AQUI: leve "pulso" visual enquanto o usuário rola com a roda do mouse */
+    .top-nav.wheel-scrolling { box-shadow: inset 0 0 0 1px var(--primary-soft-border); }
  
     .nav-item {
       display: flex;
@@ -163,11 +251,12 @@
       font-weight: 600;
       letter-spacing: 0.04em;
       border-radius: var(--radius-pill);
-      transition: color 0.25s var(--ease), background 0.25s var(--ease);
+      transition: color 0.25s var(--ease), background 0.25s var(--ease), transform 0.2s var(--ease);
       cursor: pointer;
+      flex-shrink: 0;
     }
  
-    .nav-item:hover { color: var(--text-main); background: var(--bg-surface-hover); }
+    .nav-item:hover { color: var(--text-main); background: var(--bg-surface-hover); transform: translateY(-1px); }
     .nav-item.active { background-color: var(--primary); color: #fff; }
  
     .header-user-area { display: flex; align-items: center; gap: 0.85rem; }
@@ -196,7 +285,6 @@
     html[data-theme="light"] .icon-btn .icon-sun { display: none; }
     html[data-theme="light"] .icon-btn .icon-moon { display: block; }
 
-    /* Ícone gira/some ao trocar de tema */
     .icon-btn .icon-sun,
     .icon-btn .icon-moon {
       transition: transform 0.45s var(--ease), opacity 0.35s var(--ease);
@@ -228,44 +316,25 @@
     main.wrapper {
       margin-top: var(--header-height);
       width: 100%;
-      height: calc(100vh - var(--header-height));
+      min-height: calc(100vh - var(--header-height));
       position: relative;
       z-index: 1;
-      /* MEXI AQUI: o wrapper agora é o "trilho" horizontal entre as seções */
-      display: flex;
-      flex-direction: row;
-      overflow-x: auto;
-      overflow-y: hidden;
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
     }
-    main.wrapper::-webkit-scrollbar { display: none; }
  
     .section-pad { padding: 0 7vw; }
  
     .view-content {
-      display: flex;
+      display: none;
       flex-direction: column;
       gap: 2rem;
-      /* MEXI AQUI: cada seção agora ocupa uma "tela" inteira do trilho, com
-         rolagem vertical própria para o conteúdo que não couber. Todas ficam
-         visíveis ao mesmo tempo, lado a lado, para permitir a rolagem lateral. */
-      flex: 0 0 100%;
-      width: 100%;
-      height: 100%;
-      overflow-y: auto;
-      overflow-x: hidden;
-      scroll-snap-align: start;
-      scroll-snap-stop: always;
     }
  
+    .view-content.active { display: flex; }
     .view-content .section-pad:first-of-type { padding-top: 3rem; }
     .view-content > .section-pad { padding-top: 0; }
     
  
-    .admin-only { display: none; }
+    .admin-only { display: none; } /* mantido: pode ser usado por elementos que vierem do admin.html */
  
     /* Scroll reveal */
     .reveal {
@@ -313,8 +382,24 @@
       padding: 1.75rem;
       box-shadow: var(--shadow-soft);
       transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease), background-color 0.4s var(--ease), border-color 0.4s var(--ease);
+      position: relative;
+      overflow: hidden;
     }
     .card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+
+    /* MEXI AQUI: filete gradiente no topo dos cards — só aparece no tema claro,
+       dando um toque de cor de marca sem pesar no visual clean */
+    html[data-theme="light"] .card::before,
+    html[data-theme="light"] .product-item::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary) 0%, #ff9d6c 55%, transparent 100%);
+      opacity: 0.85;
+    }
+    html[data-theme="light"] .card,
+    html[data-theme="light"] .product-item { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
  
     .btn {
       padding: 0.8rem 1.5rem;
@@ -486,7 +571,6 @@
     .hero-tab .tab-progress { position: absolute; bottom: 0; left: 0; width: 0%; height: 2px; background: var(--primary); transition: width 0.3s var(--ease); }
     .hero-tab.active .tab-progress { width: 100%; }
  
-    /* barra de estatísticas sobreposta na imagem, como na referência */
     .hero-stats {
       position: relative; z-index: 3;
       display: grid;
@@ -502,38 +586,6 @@
       .hero-stats { grid-template-columns: repeat(2, auto); row-gap: 1.4rem; }
     }
  
-    /* MEXI AQUI: faixa de destaques logo abaixo do hero, estilo "feature strip" */
-    .highlight-strip {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      border-top: 1px solid var(--border-color);
-      border-bottom: 1px solid var(--border-color);
-      background: var(--bg-card);
-    }
-    .highlight-item {
-      padding: 1.8rem 1.6rem;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      border-right: 1px solid var(--border-color);
-      cursor: pointer;
-      transition: background-color 0.3s var(--ease);
-    }
-    .highlight-item:last-child { border-right: none; }
-    .highlight-item:hover { background-color: var(--bg-surface-hover); }
-    .highlight-item .icon-circle { width: 24px; height: 24px; color: var(--primary); }
-    .highlight-item h4 { font-size: 0.88rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; color: var(--text-main); }
-    .highlight-item p { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
-    .highlight-item .highlight-link { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--primary); margin-top: 4px; display: inline-flex; align-items: center; gap: 4px; }
-    @media (max-width: 900px) {
-      .highlight-strip { grid-template-columns: repeat(2, 1fr); }
-      .highlight-item:nth-child(2) { border-right: none; }
-    }
-    @media (max-width: 560px) {
-      .highlight-strip { grid-template-columns: 1fr; }
-      .highlight-item { border-right: none !important; border-bottom: 1px solid var(--border-color); }
-    }
-
     .content-stack { padding-top: 0.5rem; display: flex; flex-direction: column; gap: 2rem; padding-bottom: 3rem; }
  
     .senai-info-card { display: flex; flex-direction: column; gap: 1.1rem; }
@@ -604,35 +656,16 @@
       color: var(--text-muted);
       font-size: 0.88rem;
     }
-    .product-grid-container {
-      display: flex;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-    .product-grid-container::-webkit-scrollbar { display: none; }
-    .product-grid-page {
-      flex: 0 0 100%;
-      scroll-snap-align: start;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.4rem;
-      padding: 0 7vw 1.5rem;
-    }
-    .product-item { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; cursor: pointer; transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease), border-color 0.35s var(--ease); }
-    .product-item:hover { transform: translateY(-6px); box-shadow: var(--shadow); border-color: var(--primary-soft-border); }
-    .product-thumb-wrap { overflow: hidden; }
-    .product-thumb { width: 100%; height: 200px; object-fit: cover; display: block; transition: transform 0.5s var(--ease); }
-    .product-item:hover .product-thumb { transform: scale(1.08); }
-    .product-body { padding: 1.35rem; display: flex; flex-direction: column; gap: 6px; }
+    .product-grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.4rem; padding: 0 7vw 3rem; }
+    .product-item { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; position: relative; transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease); }
+    .product-item:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+    .product-thumb { width: 100%; height: 180px; object-fit: cover; }
+    .product-body { padding: 1.25rem; display: flex; flex-direction: column; gap: 6px; }
     .product-category { font-size: 0.64rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.06em; }
     .product-title { font-size: 1.05rem; font-weight: 600; color: var(--text-main); }
     .product-price { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: var(--text-main); margin-top: 4px; letter-spacing: 0.02em; }
     .product-sku { font-size: 0.7rem; color: var(--text-dark); }
 
-    /* MEXI AQUI: chips para exibir as variações (tamanho/cor/voltagem etc.) no card do produto */
     .product-variations {
       display: flex;
       flex-wrap: wrap;
@@ -661,7 +694,6 @@
  
     .associados-wrap, .contact-wrap, .armarios-wrap { padding: 0 7vw 3rem; }
 
-    /* MEXI AQUI: filtros e resumo da aba pública de Armários */
     .armarios-summary {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -746,7 +778,6 @@
       position: relative; z-index: 1;
     }
 
-    /* MEXI AQUI: paginação (usada em Produtos e Armários da área pública) */
     .paginacao-container {
       display: flex;
       justify-content: space-between;
@@ -781,7 +812,6 @@
     }
 
     /* ================= ANIMAÇÃO DE TROCA DE TEMA ================= */
-    /* Efeito de revelação circular (View Transition API), saindo do botão clicado */
     ::view-transition-old(root),
     ::view-transition-new(root) {
       animation: none;
@@ -789,49 +819,6 @@
     }
     ::view-transition-old(root) { z-index: 1; }
     ::view-transition-new(root) { z-index: 2; }
-
-    /* Overlay de "carregando" que aparece por cima enquanto o tema troca */
-    #theme-loading-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-      opacity: 0;
-    }
-    #theme-loading-overlay .tlo-badge {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      padding: 10px 18px 10px 14px;
-      border-radius: var(--radius-pill);
-      box-shadow: var(--shadow);
-      transform: translateY(10px) scale(0.94);
-      opacity: 0;
-    }
-    #theme-loading-overlay .tlo-spinner {
-      width: 16px; height: 16px;
-      border-radius: 50%;
-      border: 2px solid var(--primary-soft-border);
-      border-top-color: var(--primary);
-      animation: tlo-spin 0.7s linear infinite;
-      flex-shrink: 0;
-    }
-    #theme-loading-overlay .tlo-text {
-      font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-    @keyframes tlo-spin { to { transform: rotate(360deg); } }
 
     @media (prefers-reduced-motion: reduce) {
       ::view-transition-group(root),
@@ -842,10 +829,196 @@
     @media (max-width: 900px) {
       .tech-areas-grid, .benefits-grid, .grid-2, .grid-3, .form-grid { grid-template-columns: 1fr; }
       .form-grid .full { grid-column: span 1; }
-      .top-nav { display: none; }
+      .top-nav-wrap { display: none; }
       .header-user-area { gap: 0.5rem; }
       .product-filters { flex-direction: column; align-items: stretch; }
       .product-search-box { max-width: none; }
+    }
+
+    /* ================= MEXI AQUI: MENU MOBILE (drawer) ================= */
+    .mobile-menu-btn { display: none; }
+    @media (max-width: 900px) { .mobile-menu-btn { display: flex; } }
+
+    .mobile-menu-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(5, 5, 10, 0.6);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      z-index: 190;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s var(--ease);
+    }
+    .mobile-menu-backdrop.active { opacity: 1; pointer-events: auto; }
+
+    .mobile-menu {
+      position: fixed; top: 0; right: 0;
+      height: 100vh; width: min(78vw, 320px);
+      background: var(--bg-surface);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border-left: 1px solid var(--border-color);
+      z-index: 195;
+      display: flex; flex-direction: column;
+      padding: 1.4rem 1.2rem;
+      transform: translateX(100%);
+      transition: transform 0.35s var(--ease);
+      box-shadow: -20px 0 50px rgba(0,0,0,0.35);
+    }
+    .mobile-menu.active { transform: translateX(0); }
+
+    .mobile-menu-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; }
+    .mobile-menu-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 0.06em; color: var(--text-main); }
+    .mobile-menu .modal-close { position: static; }
+
+    .mobile-nav-item {
+      padding: 0.95rem 0.9rem;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s var(--ease), color 0.2s var(--ease);
+    }
+    .mobile-nav-item:hover, .mobile-nav-item.active { background: var(--primary); color: #fff; }
+    .mobile-nav-item + .mobile-nav-item { margin-top: 4px; }
+
+    /* ================= MEXI AQUI: CARRINHO DE COMPRAS ================= */
+    .cart-btn { position: relative; }
+    .cart-badge {
+      position: absolute;
+      top: -4px; right: -4px;
+      min-width: 17px; height: 17px;
+      padding: 0 4px;
+      border-radius: var(--radius-pill);
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.62rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--bg-surface);
+      transition: transform 0.2s var(--ease);
+    }
+    .cart-badge.bump { transform: scale(1.35); }
+
+    .cart-drawer {
+      position: fixed; top: 0; right: 0;
+      height: 100vh; width: min(88vw, 380px);
+      background: var(--bg-surface);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border-left: 1px solid var(--border-color);
+      z-index: 195;
+      display: flex; flex-direction: column;
+      padding: 1.4rem 1.2rem;
+      transform: translateX(100%);
+      transition: transform 0.35s var(--ease);
+      box-shadow: -20px 0 50px rgba(0,0,0,0.35);
+    }
+    .cart-drawer.active { transform: translateX(0); }
+
+    .cart-items { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 2px; }
+    .cart-empty { color: var(--text-dark); font-size: 0.85rem; text-align: center; padding: 3rem 1rem; }
+
+    .cart-item {
+      display: flex; gap: 10px;
+      background: var(--bg-surface-hover);
+      border: 1px solid var(--border-color-soft);
+      border-radius: var(--radius-sm);
+      padding: 0.7rem;
+    }
+    .cart-item-thumb { width: 54px; height: 54px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+    .cart-item-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .cart-item-name { font-size: 0.82rem; font-weight: 600; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cart-item-price { font-size: 0.76rem; color: var(--text-muted); }
+    .cart-item-controls { display: flex; align-items: center; gap: 8px; }
+    .cart-qty-btn {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 1px solid var(--border-color);
+      background: transparent; color: var(--text-main);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; cursor: pointer; line-height: 1;
+      transition: background 0.2s var(--ease);
+    }
+    .cart-qty-btn:hover { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .cart-qty-value { font-size: 0.8rem; font-weight: 600; min-width: 16px; text-align: center; }
+    .cart-item-remove { margin-left: auto; background: transparent; border: none; color: var(--danger); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; }
+
+    .cart-summary { border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 1rem; }
+    .cart-total-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.9rem; margin-bottom: 0.9rem; }
+    .cart-total-row strong { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: var(--primary); letter-spacing: 0.02em; }
+
+    /* botão "Adicionar" nos cards de produto */
+    .product-add-btn {
+      margin-top: 8px;
+      width: 100%;
+      padding: 0.65rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--primary-soft-border);
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: background 0.25s var(--ease), color 0.25s var(--ease);
+    }
+    .product-add-btn:hover { background: var(--primary); color: #fff; }
+    .product-add-btn.added { background: var(--success); border-color: var(--success); color: #fff; }
+
+
+    /* ================= MEXI AQUI: RESPONSIVIDADE PARA CELULARES ================= */
+    @media (max-width: 600px) {
+      :root { --header-height: 64px; }
+
+      header.main-header { padding: 0 4vw; }
+      .brand-logo { gap: 10px; }
+      .logo-senai-svg { height: 26px; }
+      .brand-title-group { padding-left: 10px; }
+      .brand-title { font-size: 1.2rem; }
+      .brand-subtitle { font-size: 0.54rem; letter-spacing: 0.12em; }
+
+      .header-user-area { gap: 0.4rem; }
+      .icon-btn { width: 34px; height: 34px; }
+      .icon-btn svg { width: 15px; height: 15px; }
+      .btn-auth { padding: 7px 12px; font-size: 0.66rem; letter-spacing: 0.02em; }
+
+      .section-pad, .page-title-box, .grid-2, .grid-3, .benefits-grid,
+      .product-filters, .product-grid-container, .armarios-summary,
+      .armarios-filters, .associados-wrap, .contact-wrap, .armarios-wrap { padding-left: 5vw; padding-right: 5vw; }
+
+      .hero-container { height: auto; min-height: 480px; padding-top: 1rem; }
+      .hero-inner { padding: 0 5vw; padding-bottom: 1.6rem; }
+      .hero-tag { font-size: 0.62rem; gap: 6px; }
+      .hero-description { font-size: 0.85rem; max-width: 100%; }
+      .hero-cta-row { gap: 0.9rem; }
+      .btn-hero-primary { padding: 0.8rem 1.3rem; font-size: 0.78rem; }
+      .hero-indicators { gap: 1rem; flex-wrap: wrap; }
+      .hero-stats { padding: 0 5vw 1.8rem; gap: 1.4rem 2rem; }
+      .hero-stat-number { font-size: 1.7rem; }
+      .hero-stat-label { font-size: 0.64rem; }
+
+      .card { padding: 1.25rem; }
+      .info-header h3 { font-size: 1.4rem; }
+
+      .modal-box { max-width: 92vw; padding: 1.6rem; }
+      .modal-title { font-size: 1.5rem; }
+
+      .paginacao-container { flex-direction: column; align-items: stretch; text-align: center; }
+      .paginacao-container > span { order: 2; }
+      .paginacao-container .btn-paginacao, .paginacao-container .desativado { text-align: center; }
+
+      .category-pill { padding: 0.5rem 0.9rem; font-size: 0.68rem; }
+
+      table { border-spacing: 0 8px; }
+      th { padding: 0.6rem 0.8rem; font-size: 0.62rem; }
+      td { padding: 0.85rem 0.8rem; font-size: 0.8rem; }
+    }
+
+    @media (max-width: 400px) {
+      .brand-subtitle { display: none; }
+      .header-location { display: none; }
+      .btn-auth { padding: 6px 10px; font-size: 0.6rem; }
+      .hero-stats { grid-template-columns: repeat(2, auto); }
+      .benefit-item, .tech-area-item { padding: 0.9rem; }
     }
   </style>
 </head>
@@ -853,40 +1026,49 @@
  
   <canvas id="bg-canvas"></canvas>
 
-  <!-- MEXI AQUI: overlay de "carregando" mostrado brevemente durante a troca de tema -->
-  <div id="theme-loading-overlay" aria-hidden="true">
-    <div class="tlo-badge">
-      <span class="tlo-spinner"></span>
-      <span class="tlo-text">Ajustando tema</span>
-    </div>
-  </div>
- 
   <header class="main-header">
     <a href="#" class="brand-logo" onclick="navigate('inicio', document.querySelectorAll('.nav-item')[0])">
       <svg class="logo-senai-svg" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
-        <rect width="300" height="100" fill="#FF0000"/>
-        <line x1="0" y1="20" x2="25" y2="20" stroke="#FFFFFF" stroke-width="5"/>
-        <line x1="0" y1="35" x2="25" y2="35" stroke="#FFFFFF" stroke-width="5"/>
-        <line x1="0" y1="50" x2="25" y2="50" stroke="#FFFFFF" stroke-width="5"/>
-        <line x1="0" y1="65" x2="25" y2="65" stroke="#FFFFFF" stroke-width="5"/>
-        <line x1="0" y1="80" x2="25" y2="80" stroke="#FFFFFF" stroke-width="5"/>
-        <line x1="275" y1="20" x2="300" y2="20" stroke="#FFFFFF" stroke-width="5"/>
-        <line x1="275" y1="35" x2="300" y2="35" stroke="#FFFFFF" stroke-width="5"/>
-        <line x1="275" y1="50" x2="300" y2="50" stroke="#FFFFFF" stroke-width="5"/>
-        <line x1="275" y1="65" x2="300" y2="65" stroke="#FFFFFF" stroke-width="5"/>
-        <line x1="275" y1="80" x2="300" y2="80" stroke="#FFFFFF" stroke-width="5"/>
+        <defs>
+          <linearGradient id="senaiRedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ff2d44"/>
+            <stop offset="100%" stop-color="#c40d21"/>
+          </linearGradient>
+        </defs>
+        <rect width="300" height="100" rx="8" fill="url(#senaiRedGrad)"/>
+        <line x1="0" y1="20" x2="25" y2="20" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+        <line x1="0" y1="35" x2="25" y2="35" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+        <line x1="0" y1="50" x2="25" y2="50" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+        <line x1="0" y1="65" x2="25" y2="65" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+        <line x1="0" y1="80" x2="25" y2="80" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+        <line x1="275" y1="20" x2="300" y2="20" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+        <line x1="275" y1="35" x2="300" y2="35" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+        <line x1="275" y1="50" x2="300" y2="50" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+        <line x1="275" y1="65" x2="300" y2="65" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+        <line x1="275" y1="80" x2="300" y2="80" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
         <text x="150" y="73" font-family="'Arial Black', 'Impact', sans-serif" font-size="62" font-weight="900" font-style="italic" fill="#FFFFFF" text-anchor="middle">SENAI</text>
       </svg>
-      <span class="brand-title">AAPM</span>
+      <span class="brand-title-group">
+        <span class="brand-title">AAPM</span>
+        <span class="brand-subtitle">SENAI Brás</span>
+      </span>
     </a>
  
-    <nav class="top-nav">
-      <a class="nav-item active" onclick="navigate('inicio', this)">Início</a>
-      <a class="nav-item" onclick="navigate('produtos', this)">Produtos</a>
-      <a class="nav-item" onclick="navigate('associados', this)">Associados</a>
-      <a class="nav-item" onclick="navigate('fale-conosco', this)">Fale Conosco</a>
-      <a class="nav-item" onclick="navigate('armarios', this)">Armários</a>
-    </nav>
+    <div class="top-nav-wrap" id="topNavWrap">
+      <div class="nav-fade left" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </div>
+      <nav class="top-nav" id="topNav">
+        <a class="nav-item active" onclick="navigate('inicio', this)">Início</a>
+        <a class="nav-item" onclick="navigate('produtos', this)">Produtos</a>
+        <a class="nav-item" onclick="navigate('associados', this)">Associados</a>
+        <a class="nav-item" onclick="navigate('fale-conosco', this)">Fale Conosco</a>
+        <a class="nav-item" onclick="navigate('armarios', this)">Armários</a>
+      </nav>
+      <div class="nav-fade right" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+    </div>
  
     <div class="header-user-area">
       <div class="user-box" id="userBox" style="display: none;">
@@ -894,12 +1076,56 @@
         <span class="user-name" id="userNameLabel">Admin</span>
       </div>
       <span class="header-location">SENAI BRÁS &mdash; SP</span>
+      <button class="icon-btn cart-btn" id="cartBtn" onclick="openCart()" aria-label="Abrir carrinho" title="Carrinho">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1.4"/><circle cx="19" cy="21" r="1.4"/><path d="M1 1h3.6l2.6 13.2a2 2 0 0 0 2 1.6h9.2a2 2 0 0 0 2-1.6L22.4 6H5.2"/></svg>
+        <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
+      </button>
       <button class="icon-btn" id="themeToggleBtn" onclick="toggleTheme(event)" aria-label="Alternar tema claro/escuro" title="Alternar tema">
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"/></svg>
       </button>
       <a href="/login" class="btn-auth" id="authBtn">PAINEL ADMIN</a>
+      <button class="icon-btn mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()" aria-label="Abrir menu" title="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
   </header>
+
+  <!-- MEXI AQUI: menu mobile (drawer) — substitui o top-nav quando ele fica escondido em telas pequenas -->
+  <div class="mobile-menu-backdrop" id="mobileMenuBackdrop" onclick="closeMobileMenu()"></div>
+  <nav class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+      <span class="mobile-menu-title">Menu</span>
+      <button class="modal-close" onclick="closeMobileMenu()" aria-label="Fechar menu">&times;</button>
+    </div>
+    <a class="mobile-nav-item active" onclick="navigateMobile('inicio', this)">Início</a>
+    <a class="mobile-nav-item" onclick="navigateMobile('produtos', this)">Produtos</a>
+    <a class="mobile-nav-item" onclick="navigateMobile('associados', this)">Associados</a>
+    <a class="mobile-nav-item" onclick="navigateMobile('fale-conosco', this)">Fale Conosco</a>
+    <a class="mobile-nav-item" onclick="navigateMobile('armarios', this)">Armários</a>
+  </nav>
+
+  <!-- MEXI AQUI: carrinho de compras (drawer lateral) -->
+  <div class="mobile-menu-backdrop" id="cartBackdrop" onclick="closeCart()"></div>
+  <aside class="cart-drawer" id="cartDrawer">
+    <div class="mobile-menu-header">
+      <span class="mobile-menu-title">Seu Carrinho</span>
+      <button class="modal-close" onclick="closeCart()" aria-label="Fechar carrinho">&times;</button>
+    </div>
+
+    <div class="cart-items" id="cartItemsList"></div>
+
+    <div class="cart-summary">
+      <div class="cart-total-row">
+        <span>Total</span>
+        <strong id="cartTotalValue">R$ 0,00</strong>
+      </div>
+      <button class="btn btn-whatsapp" style="width: 100%;" onclick="checkoutCartWhatsapp()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.762.459 3.48 1.333 5.005l-1.417 5.18 5.301-1.39a9.92 9.92 0 0 0 4.77 1.218h.004c5.505 0 9.988-4.478 9.989-9.985 0-2.667-1.037-5.176-2.923-7.062A9.925 9.925 0 0 0 12.012 2z"/></svg>
+        Finalizar pelo WhatsApp
+      </button>
+      <button class="btn btn-ghost" style="width: 100%; margin-top: 8px;" onclick="clearCart()">Esvaziar carrinho</button>
+    </div>
+  </aside>
  
   <main class="wrapper">
  
@@ -969,33 +1195,6 @@
             <div class="hero-stat-number">100%</div>
             <div class="hero-stat-label">Infraestrutura Industrial</div>
           </div>
-        </div>
-      </div>
- 
-      <div class="highlight-strip reveal">
-        <div class="highlight-item" onclick="navigate('produtos', document.querySelectorAll('.nav-item')[1])">
-          <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span>
-          <h4>Loja AAPM</h4>
-          <p>Uniformes, materiais didáticos e produtos oficiais da unidade Brás.</p>
-          <span class="highlight-link">Ver produtos →</span>
-        </div>
-        <div class="highlight-item" onclick="navigate('associados', document.querySelectorAll('.nav-item')[2])">
-          <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-          <h4>Associados</h4>
-          <p>Consulte a lista oficial de associados cadastrados na AAPM.</p>
-          <span class="highlight-link">Consultar →</span>
-        </div>
-        <div class="highlight-item" onclick="navigate('armarios', document.querySelectorAll('.nav-item')[4])">
-          <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="2" width="18" height="20" rx="2"/><path d="M12 2v20M8 10h.01M8 16h.01"/></svg></span>
-          <h4>Armários</h4>
-          <p>Veja a disponibilidade de armários em tempo real na unidade.</p>
-          <span class="highlight-link">Ver disponibilidade →</span>
-        </div>
-        <div class="highlight-item" onclick="navigate('fale-conosco', document.querySelectorAll('.nav-item')[3])">
-          <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
-          <h4>Fale Conosco</h4>
-          <p>Dúvidas, sugestões ou quer ser associado? Fale com a gente.</p>
-          <span class="highlight-link">Entrar em contato →</span>
         </div>
       </div>
  
@@ -1123,7 +1322,6 @@
  
       <div class="product-grid-container reveal-stagger" id="productGallery"></div>
 
-      <!-- MEXI AQUI: paginação da vitrine de produtos -->
       <div class="section-pad">
         <div class="paginacao-container" id="paginacaoProdutosPublic"></div>
       </div>
@@ -1252,28 +1450,11 @@
             </table>
           </div>
 
-          <!-- MEXI AQUI: paginação da consulta pública de armários -->
           <div class="paginacao-container" id="paginacaoArmariosPublic"></div>
         </div>
       </div>
     </section>
  
-
-  <!-- MODAL DE DETALHE DO PRODUTO -->
-  <div class="modal-backdrop" id="productModal" onclick="if(event.target === this) closeProductModal()">
-    <div class="modal-box" style="max-width: 560px; padding: 0; overflow: hidden;">
-      <button type="button" class="modal-close" style="z-index: 2;" onclick="closeProductModal()">&times;</button>
-      <img id="pm-img" src="" alt="" style="width: 100%; height: 260px; object-fit: cover; display: block;">
-      <div style="padding: 1.75rem;">
-        <span class="product-category" id="pm-category"></span>
-        <h3 class="modal-title" style="font-size: 1.6rem; margin-top: 4px;" id="pm-title"></h3>
-        <div class="product-price" style="font-size: 1.9rem; margin: 10px 0;" id="pm-price"></div>
-        <div id="pm-variations"></div>
-        <div class="product-sku" style="margin-top: 10px;" id="pm-sku"></div>
-        <button class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;" onclick="closeProductModal()">Fechar</button>
-      </div>
-    </div>
-  </div>
 
   <!-- MODAL DE VISUALIZAÇÃO DE ASSOCIADO -->
   <div class="modal-backdrop" id="viewModal" onclick="if(event.target === this) closeViewModal()">
@@ -1297,11 +1478,6 @@
    
 
     // ===== TEMA CLARO / ESCURO =====
-    // MEXI AQUI: nova animação de troca de tema:
-    //   1) revelação circular saindo do botão (View Transition API, com fallback pra fade)
-    //   2) badge "Ajustando tema" com spinner, sobreposta por um instante
-    //   3) os cards da seção ativa "recarregam" com o efeito de reveal, como se
-    //      estivessem entrando na tela de novo
     function getStoredTheme() {
       try { return localStorage.getItem('theme'); } catch (e) { return null; }
     }
@@ -1314,45 +1490,74 @@
       setStoredTheme(theme);
     }
 
-    function showThemeLoadingOverlay() {
-      const overlay = document.getElementById('theme-loading-overlay');
-      const badge = overlay ? overlay.querySelector('.tlo-badge') : null;
-      if (!overlay || !badge) return;
+    // MEXI AQUI: explosão de partículas saindo do botão ao trocar de tema —
+    // substitui o antigo overlay "Ajustando tema" (que parecia travar)
+    function spawnThemeBurst(x, y, toDark) {
+      const palette = toDark
+        ? ['255, 255, 255', '214, 50, 80', '255, 210, 130']
+        : ['214, 50, 80', '255, 157, 108', '255, 214, 140'];
 
-      overlay.style.transition = 'opacity 0.18s var(--ease)';
-      badge.style.transition = 'opacity 0.28s var(--ease), transform 0.28s var(--ease)';
+      const count = 16;
+      for (let i = 0; i < count; i++) {
+        const el = document.createElement('span');
+        const angle = (Math.PI * 2 * i) / count + (Math.random() * 0.4 - 0.2);
+        const distance = 46 + Math.random() * 70;
+        const size = Math.random() * 4 + 2.5;
+        const color = palette[Math.floor(Math.random() * palette.length)];
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance;
 
-      overlay.style.opacity = '1';
+        el.style.cssText = `
+          position: fixed; left: ${x}px; top: ${y}px;
+          width: ${size}px; height: ${size}px;
+          border-radius: 50%;
+          background: rgba(${color}, 0.95);
+          box-shadow: 0 0 ${size * 2.5}px rgba(${color}, 0.85);
+          pointer-events: none;
+          z-index: 9999;
+          transform: translate(-50%, -50%) scale(1);
+          opacity: 1;
+          transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+        `;
+        document.body.appendChild(el);
+
+        requestAnimationFrame(() => {
+          el.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.3)`;
+          el.style.opacity = '0';
+        });
+
+        setTimeout(() => el.remove(), 820);
+      }
+
+      // um brilho central que "pulsa" no ponto de origem, dando o toque de encantamento
+      const glow = document.createElement('span');
+      glow.style.cssText = `
+        position: fixed; left: ${x}px; top: ${y}px;
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        background: rgba(${palette[0]}, 0.9);
+        box-shadow: 0 0 40px 14px rgba(${palette[0]}, 0.55);
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+        transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease-out;
+      `;
+      document.body.appendChild(glow);
       requestAnimationFrame(() => {
-        badge.style.opacity = '1';
-        badge.style.transform = 'translateY(0) scale(1)';
+        glow.style.transform = 'translate(-50%, -50%) scale(6)';
+        glow.style.opacity = '0';
       });
-
-      clearTimeout(showThemeLoadingOverlay._hideTimer);
-      showThemeLoadingOverlay._hideTimer = setTimeout(() => {
-        badge.style.opacity = '0';
-        badge.style.transform = 'translateY(10px) scale(0.94)';
-        setTimeout(() => { overlay.style.opacity = '0'; }, 220);
-      }, 620);
+      setTimeout(() => glow.remove(), 620);
     }
 
-    // Faz os cards/tabelas da seção visível "reaparecerem" com o mesmo efeito de
-    // reveal usado no scroll, simulando um recarregamento suave da tela.
     function replayLoadingReveal() {
-      // MEXI AQUI: como todas as seções ficam sempre visíveis lado a lado agora,
-      // pega a seção mais próxima da posição atual do scroll horizontal.
-      const wrapper = document.querySelector('main.wrapper');
-      const secoes = Array.from(document.querySelectorAll('.view-content'));
-      if (!wrapper || !secoes.length) return;
-      const posicaoAtual = wrapper.scrollLeft;
-      const activeView = secoes.reduce((maisProxima, secao) =>
-        Math.abs(secao.offsetLeft - posicaoAtual) < Math.abs(maisProxima.offsetLeft - posicaoAtual) ? secao : maisProxima
-      );
+      const activeView = document.querySelector('.view-content.active');
       if (!activeView) return;
       const items = activeView.querySelectorAll('.reveal, .reveal-stagger');
       items.forEach((el, i) => {
         el.classList.remove('in-view');
-        void el.offsetWidth; // força reflow para reiniciar a transição CSS
+        void el.offsetWidth;
         setTimeout(() => el.classList.add('in-view'), 60 + i * 70);
       });
     }
@@ -1362,22 +1567,23 @@
       const isLight = html.getAttribute('data-theme') === 'light';
       const newTheme = isLight ? 'dark' : 'light';
       const btn = document.getElementById('themeToggleBtn');
+      const logo = document.querySelector('.logo-senai-svg');
 
       if (btn) {
         btn.classList.add('spin');
         setTimeout(() => btn.classList.remove('spin'), 450);
       }
 
-      // Ponto de origem do "wipe": posição do clique, ou o centro do botão como fallback
-      let originX = window.innerWidth - 60;
+      // MEXI AQUI: a animação nasce sempre do logo do SENAI, não do botão clicado
+      let originX = window.innerWidth / 2;
       let originY = 40;
-      if (event && typeof event.clientX === 'number' && event.clientX) {
-        originX = event.clientX;
-        originY = event.clientY;
-      } else if (btn) {
-        const rect = btn.getBoundingClientRect();
+      if (logo) {
+        const rect = logo.getBoundingClientRect();
         originX = rect.left + rect.width / 2;
         originY = rect.top + rect.height / 2;
+      } else if (event && typeof event.clientX === 'number' && event.clientX) {
+        originX = event.clientX;
+        originY = event.clientY;
       }
 
       const endRadius = Math.hypot(
@@ -1386,39 +1592,55 @@
       );
 
       const finishUp = () => {
-        showThemeLoadingOverlay();
+        spawnThemeBurst(originX, originY, newTheme === 'dark');
         replayLoadingReveal();
       };
 
-      // Navegadores sem suporte à View Transition API: aplica o tema direto e
-      // ainda assim mostra o overlay + replay do reveal.
-      if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        applyThemeAttribute(newTheme);
-        finishUp();
-        return;
+      // pulsada rápida no logo, como se ele "carregasse" a explosão antes de disparar
+      if (logo) {
+        logo.style.transition = 'transform 0.18s ease-out, box-shadow 0.18s ease-out';
+        logo.style.transform = 'scale(1.18)';
+        logo.style.boxShadow = '0 0 0 8px rgba(214, 50, 80, 0.35), 0 4px 14px rgba(214, 50, 80, 0.55)';
       }
 
-      const transition = document.startViewTransition(() => {
-        applyThemeAttribute(newTheme);
-      });
+      const runTransition = () => {
+        if (logo) {
+          logo.style.transform = '';
+          logo.style.boxShadow = '';
+        }
 
-      transition.ready.then(() => {
-        document.documentElement.animate(
-          {
-            clipPath: [
-              `circle(0px at ${originX}px ${originY}px)`,
-              `circle(${endRadius}px at ${originX}px ${originY}px)`
-            ]
-          },
-          {
-            duration: 620,
-            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-            pseudoElement: '::view-transition-new(root)'
-          }
-        );
-      }).catch(() => { /* transição não suportada nesse navegador, ignora */ });
+        if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          applyThemeAttribute(newTheme);
+          finishUp();
+          return;
+        }
 
-      transition.finished.then(finishUp).catch(finishUp);
+        const transition = document.startViewTransition(() => {
+          applyThemeAttribute(newTheme);
+        });
+
+        transition.ready.then(() => {
+          document.documentElement.animate(
+            {
+              clipPath: [
+                `circle(0px at ${originX}px ${originY}px)`,
+                `circle(${endRadius}px at ${originX}px ${originY}px)`
+              ]
+            },
+            {
+              duration: 820,
+              easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+              pseudoElement: '::view-transition-new(root)'
+            }
+          );
+
+        }).catch(() => { /* transição não suportada nesse navegador, ignora */ });
+
+        transition.finished.then(finishUp).catch(finishUp);
+      };
+
+      // dá tempo da pulsada no logo aparecer antes de disparar a explosão
+      setTimeout(runTransition, logo ? 160 : 0);
     }
 
     (function initTheme() {
@@ -1431,7 +1653,6 @@
       document.documentElement.setAttribute('data-theme', prefersLight ? 'light' : 'dark');
     })();
 
-    // Acompanha o tema do sistema em tempo real, só quando o usuário não escolheu manualmente
     if (window.matchMedia) {
       window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
         if (!getStoredTheme()) {
@@ -1439,6 +1660,43 @@
         }
       });
     }
+
+    // ===== MEXI AQUI: TOP NAV COM ROLAGEM PELA RODA DO MOUSE + SETINHAS/GRADIENTE + ANIMAÇÃO =====
+    (function enableTopNavWheelScroll() {
+      const wrap = document.getElementById('topNavWrap');
+      const topNav = document.getElementById('topNav');
+      if (!wrap || !topNav) return;
+
+      // Mostra/esconde as setinhas de gradiente conforme a posição do scroll
+      function updateFadeState() {
+        const maxScroll = topNav.scrollWidth - topNav.clientWidth;
+        const scrollable = maxScroll > 2;
+        wrap.classList.toggle('can-scroll-left', scrollable && topNav.scrollLeft > 2);
+        wrap.classList.toggle('can-scroll-right', scrollable && topNav.scrollLeft < maxScroll - 2);
+      }
+
+      // Converte a rolagem vertical do mouse (wheel) em rolagem horizontal suave,
+      // com uma pequena animação de "pulso" no container enquanto rola
+      topNav.addEventListener('wheel', (e) => {
+        const maxScroll = topNav.scrollWidth - topNav.clientWidth;
+        if (maxScroll <= 0) return; // nada pra rolar, deixa a página rolar normalmente
+
+        e.preventDefault();
+
+        topNav.classList.add('wheel-scrolling');
+        clearTimeout(topNav._wheelTimer);
+        topNav._wheelTimer = setTimeout(() => topNav.classList.remove('wheel-scrolling'), 220);
+
+        topNav.scrollLeft += (e.deltaY || e.deltaX) * 1.15;
+        updateFadeState();
+      }, { passive: false });
+
+      topNav.addEventListener('scroll', updateFadeState, { passive: true });
+      window.addEventListener('resize', updateFadeState);
+
+      updateFadeState();
+      window.addEventListener('load', updateFadeState);
+    })();
  
     // REDIRECIONAMENTO GOOGLE FORMS
     function redirectToGoogleForms(event) {
@@ -1448,28 +1706,22 @@
     }
  
     // ===== ESTADO GLOBAL =====
-    let userLogged = false;
-    let adminChart = null;
- 
-    // Categorias (vêm do admin / backend)
+
     let categories = [
       { id: 1, nome: 'Uniformes' },
       { id: 2, nome: 'Ferramentas' },
       { id: 3, nome: 'Material Didático' }
     ];
  
-    // Produtos
     let products = [
      
     ];
 
-    // MEXI AQUI: lista de armários (vem do admin / backend) + filtro de status ativo
     let armariosPublic = [];
     let selectedArmarioStatus = 'all';
  
     let selectedCategoryId = 'all';
 
-    // ===== MEXI AQUI: PAGINAÇÃO (client-side, genérica) =====
     const PAGINACAO = {};
 
     function getEstadoPaginacao(chave, limite = 10) {
@@ -1491,17 +1743,6 @@
     function irParaPagina(chave, novaPagina, nomeFuncaoRender) {
       const estado = getEstadoPaginacao(chave);
       estado.pagina = novaPagina;
-
-      // MEXI AQUI: para o carrossel de produtos, só desliza suavemente até a
-      // página (ela já existe no DOM) em vez de reconstruir tudo do zero.
-      if (chave === 'produtosPublic') {
-        scrollProdutosParaPagina(novaPagina, true);
-        const produtos = ultimaListaProdutosFiltrada || products;
-        const totalPaginas = Math.max(1, Math.ceil(produtos.length / estado.limite));
-        renderPaginacao('paginacaoProdutosPublic', 'produtosPublic', totalPaginas, novaPagina, produtos.length, 'renderProducts');
-        return;
-      }
-
       if (typeof window[nomeFuncaoRender] === 'function') window[nomeFuncaoRender]();
     }
 
@@ -1537,37 +1778,7 @@
       populateCategorySelect();
       renderCategoryManageList();
     }
-
-    async function  loginadmin(params) {
-      try{
-
-        const resposta = await fetch('/api/loginadmin', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(params)
-        });
-        if (resposta.ok) {
-          const dados = await resposta.json();
-          if (dados && dados.success) {
-            userLogged = true;
-            alert('Login realizado com sucesso!');
-            // Aqui você pode redirecionar para a página de administração ou atualizar a interface
-          } else {
-            alert('Falha no login. Verifique suas credenciais.');
-          }
-        } else {
-          alert('Erro ao tentar logar. Tente novamente mais tarde.');
-        }
-      } catch (erro) {
-        console.warn('Erro ao tentar logar no backend.', erro);
-        alert('Erro ao tentar logar. Tente novamente mais tarde.');
-      }
-      
-    }
  
-    // MEXI AQUI: agora também mapeamos "variacoes" e "tamanho" que vêm do backend,
-    // com fallback para nomes alternativos de campo (variantes/variations), caso o
-    // backend salve com outro nome de chave.
     async function carregarProdutos() {
       try {
         const resposta = await fetch('/api/produtos');
@@ -1583,7 +1794,6 @@
               sku: p.sku || null,
               tamanho: p.tamanho || '',
               quantidade: p.quantidade ?? p.estoque ?? 0,
-              // MEXI AQUI: garante que as variações cadastradas no admin cheguem até o card do produto
               variacoes: p.variacoes || p.variantes || p.variations || []
             }));
           }
@@ -1594,8 +1804,6 @@
       filterProducts();
     }
 
-    // MEXI AQUI: carrega os armários cadastrados no admin (mesma rota /api/armarios)
-    // e normaliza os campos, igual é feito no admin.html.
     async function carregarArmariosPublic() {
       try {
         const resposta = await fetch('/api/armarios');
@@ -1738,16 +1946,13 @@
         return combinaTexto && combinaCategoria;
       });
 
-      // MEXI AQUI: sempre que o filtro/busca mudar, volta para a página 1
       getEstadoPaginacao('produtosPublic').pagina = 1;
       renderProducts(filtrados);
     }
 
-    // MEXI AQUI: monta o HTML das "chips" de variação de um produto (ex: Tamanho M - Azul · 12 und.)
     function renderVariationChips(produto) {
       const variacoes = Array.isArray(produto.variacoes) ? produto.variacoes : [];
 
-      // Se não houver variações cadastradas, mas existir um campo "tamanho" simples, mostra ele.
       if (!variacoes.length) {
         if (produto.tamanho) {
           return `<div class="product-variations"><span class="variation-chip">${produto.tamanho}</span></div>`;
@@ -1765,32 +1970,8 @@
       return `<div class="product-variations">${chips}</div>`;
     }
 
-    // MEXI AQUI: guarda a última lista filtrada para que a paginação (Anterior/Próximo)
-    // consiga re-renderizar sem precisar refazer o filtro de busca/categoria.
     let ultimaListaProdutosFiltrada = null;
  
-    // MEXI AQUI: renderiza UM card de produto (usado dentro de cada "página" do carrossel)
-    function renderProductCard(p) {
-      const produtoImg = p.imagem_url || p.img || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=400&auto=format&fit=crop';
-      const produtoNome = p.nome || p.name || 'Produto';
-      const produtoPreco = Number(p.preco || p.price || 0);
-
-      return `
-        <div class="product-item" onclick="openProductModal(${p.id})">
-          <div class="product-thumb-wrap">
-            <img src="${produtoImg}" class="product-thumb" alt="${produtoNome}">
-          </div>
-          <div class="product-body">
-            <span class="product-category">${getProductCategoryLabel(p)}</span>
-            <div class="product-title">${produtoNome}</div>
-            <div class="product-price">R$ ${produtoPreco.toFixed(2)}</div>
-            ${renderVariationChips(p)}
-            <div class="product-sku">SKU: ${p.sku || ('PROD-' + (p.id || 'N/A'))}</div>
-          </div>
-        </div>
-      `;
-    }
-
     function renderProducts(lista) {
       const container = document.getElementById('productGallery');
       if (!container) return;
@@ -1798,66 +1979,193 @@
       if (lista) ultimaListaProdutosFiltrada = lista;
       const produtos = ultimaListaProdutosFiltrada || products;
 
-      const ITENS_POR_PAGINA = 12;
-
+      const { pageItens, paginaAtual, totalPaginas, totalItens } = paginar(produtos, 'produtosPublic', 12);
+ 
       if (!produtos.length) {
         container.innerHTML = '<div class="product-empty-state">Nenhum produto encontrado para essa busca.</div>';
-        renderPaginacao('paginacaoProdutosPublic', 'produtosPublic', 1, 1, 0, 'renderProducts');
+        renderPaginacao('paginacaoProdutosPublic', 'produtosPublic', totalPaginas, paginaAtual, totalItens, 'renderProducts');
         return;
       }
-
-      // MEXI AQUI: monta TODAS as páginas lado a lado (uma div .product-grid-page por
-      // página), permitindo rolagem lateral (scroll-snap) entre elas.
-      const totalPaginas = Math.max(1, Math.ceil(produtos.length / ITENS_POR_PAGINA));
-      let html = '';
-      for (let pagina = 0; pagina < totalPaginas; pagina++) {
-        const inicio = pagina * ITENS_POR_PAGINA;
-        const itensDaPagina = produtos.slice(inicio, inicio + ITENS_POR_PAGINA);
-        html += `<div class="product-grid-page" data-pagina="${pagina + 1}">${itensDaPagina.map(renderProductCard).join('')}</div>`;
-      }
-      container.innerHTML = html;
-
-      const estado = getEstadoPaginacao('produtosPublic', ITENS_POR_PAGINA);
-      if (estado.pagina > totalPaginas) estado.pagina = totalPaginas;
-      scrollProdutosParaPagina(estado.pagina, false);
-
-      renderPaginacao('paginacaoProdutosPublic', 'produtosPublic', totalPaginas, estado.pagina, produtos.length, 'renderProducts');
+ 
+      container.innerHTML = "";
+      pageItens.forEach((p) => {
+        const produtoImg = p.imagem_url || p.img || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=400&auto=format&fit=crop';
+        const produtoNome = p.nome || p.name || 'Produto';
+        const produtoPreco = Number(p.preco || p.price || 0);
+ 
+        container.innerHTML += `
+          <div class="product-item">
+            <img src="${produtoImg}" class="product-thumb" alt="${produtoNome}">
+            <div class="product-body">
+              <span class="product-category">${getProductCategoryLabel(p)}</span>
+              <div class="product-title">${produtoNome}</div>
+              <div class="product-price">R$ ${produtoPreco.toFixed(2)}</div>
+              ${renderVariationChips(p)}
+              <div class="product-sku">SKU: ${p.sku || ('PROD-' + (p.id || 'N/A'))}</div>
+              <button type="button" class="product-add-btn" data-product-id="${p.id}" onclick="addToCartFromButton(this, ${p.id})">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                Adicionar
+              </button>
+            </div>
+          </div>
+        `;
+      });
+      renderPaginacao('paginacaoProdutosPublic', 'produtosPublic', totalPaginas, paginaAtual, totalItens, 'renderProducts');
       refreshRevealObserver();
     }
 
-    // MEXI AQUI: rola o carrossel de produtos até a página pedida (usado pelos
-    // botões Anterior/Próximo e ao trocar filtro/busca).
-    function scrollProdutosParaPagina(pagina, smooth = true) {
-      const container = document.getElementById('productGallery');
-      if (!container) return;
-      const larguraPagina = container.clientWidth;
-      container.scrollTo({ left: larguraPagina * (pagina - 1), behavior: smooth ? 'smooth' : 'auto' });
+    // ===== MEXI AQUI: CARRINHO DE COMPRAS =====
+    let cart = [];
+
+    function loadCart() {
+      try {
+        const saved = localStorage.getItem('aapm_cart');
+        cart = saved ? JSON.parse(saved) : [];
+      } catch (e) {
+        cart = [];
+      }
     }
 
-    // Atualiza o indicador de página (e os botões Anterior/Próximo) conforme o
-    // usuário arrasta/rola o carrossel manualmente (touch, trackpad, etc).
-    (function observarScrollProdutos() {
-      const container = document.getElementById('productGallery');
-      if (!container) return;
-      let debounceTimer = null;
-      container.addEventListener('scroll', () => {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-          const larguraPagina = container.clientWidth || 1;
-          const paginaAtual = Math.round(container.scrollLeft / larguraPagina) + 1;
-          const totalPaginas = container.querySelectorAll('.product-grid-page').length;
-          const estado = getEstadoPaginacao('produtosPublic', 12);
-          if (estado.pagina !== paginaAtual) {
-            estado.pagina = paginaAtual;
-            const produtos = ultimaListaProdutosFiltrada || products;
-            renderPaginacao('paginacaoProdutosPublic', 'produtosPublic', totalPaginas, paginaAtual, produtos.length, 'renderProducts');
-          }
-        }, 120);
+    function saveCart() {
+      try { localStorage.setItem('aapm_cart', JSON.stringify(cart)); } catch (e) { /* indisponível */ }
+    }
+
+    function findProductById(id) {
+      return products.find((p) => String(p.id) === String(id));
+    }
+
+    function addToCartFromButton(btnEl, productId) {
+      addToCart(productId, 1);
+      if (btnEl) {
+        btnEl.classList.add('added');
+        const original = btnEl.innerHTML;
+        btnEl.innerHTML = '✓ Adicionado';
+        setTimeout(() => {
+          btnEl.classList.remove('added');
+          btnEl.innerHTML = original;
+        }, 1100);
+      }
+    }
+
+    function addToCart(productId, qty) {
+      const produto = findProductById(productId);
+      if (!produto) return;
+
+      const existing = cart.find((item) => String(item.id) === String(productId));
+      if (existing) {
+        existing.qty += qty;
+      } else {
+        cart.push({
+          id: produto.id,
+          nome: produto.nome || 'Produto',
+          preco: Number(produto.preco || 0),
+          imagem_url: produto.imagem_url || '',
+          qty: qty
+        });
+      }
+      saveCart();
+      renderCart();
+      bumpCartBadge();
+    }
+
+    function updateCartQty(productId, delta) {
+      const item = cart.find((i) => String(i.id) === String(productId));
+      if (!item) return;
+      item.qty += delta;
+      if (item.qty <= 0) {
+        cart = cart.filter((i) => String(i.id) !== String(productId));
+      }
+      saveCart();
+      renderCart();
+    }
+
+    function removeCartItem(productId) {
+      cart = cart.filter((i) => String(i.id) !== String(productId));
+      saveCart();
+      renderCart();
+    }
+
+    function clearCart() {
+      if (cart.length && !confirm('Esvaziar o carrinho?')) return;
+      cart = [];
+      saveCart();
+      renderCart();
+    }
+
+    function cartTotal() {
+      return cart.reduce((sum, item) => sum + item.preco * item.qty, 0);
+    }
+
+    function cartCount() {
+      return cart.reduce((sum, item) => sum + item.qty, 0);
+    }
+
+    function bumpCartBadge() {
+      const badge = document.getElementById('cartBadge');
+      if (!badge) return;
+      badge.classList.remove('bump');
+      void badge.offsetWidth;
+      badge.classList.add('bump');
+    }
+
+    function renderCart() {
+      const list = document.getElementById('cartItemsList');
+      const totalEl = document.getElementById('cartTotalValue');
+      const badge = document.getElementById('cartBadge');
+      if (!list || !totalEl || !badge) return;
+
+      const count = cartCount();
+      badge.textContent = count;
+      badge.style.display = count > 0 ? 'flex' : 'none';
+
+      totalEl.textContent = `R$ ${cartTotal().toFixed(2)}`;
+
+      if (!cart.length) {
+        list.innerHTML = '<div class="cart-empty">Seu carrinho está vazio.<br>Adicione produtos na Loja AAPM.</div>';
+        return;
+      }
+
+      list.innerHTML = cart.map((item) => `
+        <div class="cart-item">
+          <img src="${item.imagem_url || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=200&auto=format&fit=crop'}" class="cart-item-thumb" alt="${item.nome}">
+          <div class="cart-item-info">
+            <div class="cart-item-name">${item.nome}</div>
+            <div class="cart-item-price">R$ ${item.preco.toFixed(2)} un.</div>
+            <div class="cart-item-controls">
+              <button type="button" class="cart-qty-btn" onclick="updateCartQty('${item.id}', -1)">&minus;</button>
+              <span class="cart-qty-value">${item.qty}</span>
+              <button type="button" class="cart-qty-btn" onclick="updateCartQty('${item.id}', 1)">+</button>
+              <button type="button" class="cart-item-remove" onclick="removeCartItem('${item.id}')">Remover</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openCart() {
+      document.getElementById('cartDrawer').classList.add('active');
+      document.getElementById('cartBackdrop').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeCart() {
+      document.getElementById('cartDrawer').classList.remove('active');
+      document.getElementById('cartBackdrop').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function checkoutCartWhatsapp() {
+      if (!cart.length) { alert('Seu carrinho está vazio.'); return; }
+
+      let msg = 'Olá! Gostaria de fazer o seguinte pedido na Loja AAPM:%0A%0A';
+      cart.forEach((item) => {
+        msg += `• ${item.qty}x ${item.nome} — R$ ${(item.preco * item.qty).toFixed(2)}%0A`;
       });
-    })();
+      msg += `%0ATotal: R$ ${cartTotal().toFixed(2)}`;
+
+      window.open(`https://wa.me/5511951611320?text=${msg}`, '_blank');
+    }
 
     // ===== ARMÁRIOS (ABA PÚBLICA) =====
-    // MEXI AQUI: mesmo padrão visual usado no admin para o badge de status.
     function statusArmarioClassePublic(status) {
       if (status === 'Disponível') return 'active';
       if (status === 'Ocupado') return 'inactive';
@@ -1903,7 +2211,6 @@
       `;
     }
 
-    // MEXI AQUI: guarda a última lista de armários filtrada, para a paginação reaproveitar.
     let ultimaListaArmariosFiltrada = null;
 
     function filterArmariosPublic() {
@@ -1922,7 +2229,6 @@
       });
 
       ultimaListaArmariosFiltrada = filtrados;
-      // MEXI AQUI: sempre que o filtro/busca mudar, volta para a página 1
       getEstadoPaginacao('armariosPublic').pagina = 1;
 
       renderArmariosSummary(armariosPublic);
@@ -1934,7 +2240,6 @@
       if (!tbody) return;
 
       const listaBase = lista || ultimaListaArmariosFiltrada || armariosPublic;
-      // MEXI AQUI: pagina a lista de armários (10 por página)
       const { pageItens, paginaAtual, totalPaginas, totalItens } = paginar(listaBase, 'armariosPublic', 10);
 
       if (!listaBase.length) {
@@ -1953,125 +2258,56 @@
       renderPaginacao('paginacaoArmariosPublic', 'armariosPublic', totalPaginas, paginaAtual, totalItens, 'rerenderArmariosPublicPaginaAtual');
     }
 
-    // MEXI AQUI: usada pelos botões Anterior/Próximo — re-renderiza mantendo o filtro atual
     function rerenderArmariosPublicPaginaAtual() {
       renderArmariosTablePublic(ultimaListaArmariosFiltrada || armariosPublic);
     }
  
-    // CONTROLE DE CLIQUE NO BOTÃO "PAINEL ADMIN"
-    function handleAdminBtnClick() {
-      if (userLogged) {
-        // Se já está logado, desloga
-        userLogged = false;
-        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
-        document.getElementById('userBox').style.display = 'none';
-        document.getElementById('authBtn').innerText = 'PAINEL ADMIN';
-        navigate('inicio', document.querySelectorAll('.nav-item')[0]);
-      } else {
-        // Se não está logado, ABRE A TELA DE LOGIN
-        document.getElementById('loginModal').classList.add('active');
-      }
-    }
- 
-    function cancelLogin() {
-      document.getElementById('loginModal').classList.remove('active');
-    }
- 
-    function confirmLogin(e) {
-      e.preventDefault();
-      userLogged = true;
- 
-      // Exibe os elementos restritos do admin
-      document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
-      document.getElementById('loginModal').classList.remove('active');
- 
-      const email = document.getElementById('loginEmail').value;
-      const name = email.split('@')[0];
- 
-      document.getElementById('userNameLabel').innerText = name.charAt(0).toUpperCase() + name.slice(1);
-      document.getElementById('avatarText').innerText = name.substring(0, 2).toUpperCase();
-      document.getElementById('userBox').style.display = 'flex';
-      document.getElementById('authBtn').innerText = 'SAIR DO ADMIN';
- 
-      // Navega diretamente para o painel admin após o login
-      navigate('admin-panel');
-    }
- 
     // NAVEGAÇÃO DE SEÇÕES
     function navigate(viewId, element) {
-      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(i => i.classList.remove('active'));
+ 
+      const targetView = document.getElementById(viewId);
+      if (targetView) targetView.classList.add('active');
       if (element) element.classList.add('active');
 
-      // MEXI AQUI: agora "navegar" desliza o trilho horizontal até a seção,
-      // em vez de esconder/mostrar. As seções ficam sempre lado a lado.
-      const targetView = document.getElementById(viewId);
-      const wrapper = document.querySelector('main.wrapper');
-      if (targetView && wrapper) {
-        wrapper.scrollTo({ left: targetView.offsetLeft, behavior: 'smooth' });
+      // mantém os dois menus (desktop e mobile) sincronizados, não importa qual foi clicado
+      const idx = { 'inicio': 0, 'produtos': 1, 'associados': 2, 'fale-conosco': 3, 'armarios': 4 }[viewId];
+      if (idx !== undefined) {
+        const desktopItems = document.querySelectorAll('.nav-item');
+        const mobileItems = document.querySelectorAll('.mobile-nav-item');
+        if (desktopItems[idx]) desktopItems[idx].classList.add('active');
+        if (mobileItems[idx]) mobileItems[idx].classList.add('active');
       }
-
+ 
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       refreshRevealObserver();
 
-      // MEXI AQUI: garante que os armários fiquem sempre atualizados ao abrir a aba
       if (viewId === 'armarios') {
         carregarArmariosPublic();
       }
+    }
+
+    // ===== MEXI AQUI: MENU MOBILE (drawer) =====
+    function toggleMobileMenu() {
+      const isOpen = document.getElementById('mobileMenu').classList.contains('active');
+      if (isOpen) closeMobileMenu(); else openMobileMenu();
+    }
+    function openMobileMenu() {
+      document.getElementById('mobileMenu').classList.add('active');
+      document.getElementById('mobileMenuBackdrop').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMobileMenu() {
+      document.getElementById('mobileMenu').classList.remove('active');
+      document.getElementById('mobileMenuBackdrop').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    function navigateMobile(viewId, element) {
+      navigate(viewId, element);
+      closeMobileMenu();
+    }
  
-      if (viewId === 'admin-panel') {
-        populateCategorySelect();
-        renderCategoryManageList();
-        if (!adminChart) setTimeout(initAdminChart, 100);
-      }
-    }
-
-    // MEXI AQUI: mantém o item do menu destacado sozinho conforme o usuário
-    // arrasta o trilho manualmente (touch/trackpad), sem precisar clicar no menu.
-    (function observarScrollSecoes() {
-      const wrapper = document.querySelector('main.wrapper');
-      if (!wrapper) return;
-      const secoes = Array.from(document.querySelectorAll('.view-content'));
-      const navItems = document.querySelectorAll('.nav-item');
-      let debounceTimer = null;
-
-      wrapper.addEventListener('scroll', () => {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-          const posicaoAtual = wrapper.scrollLeft;
-          let indiceMaisProximo = 0;
-          let menorDistancia = Infinity;
-          secoes.forEach((secao, i) => {
-            const distancia = Math.abs(secao.offsetLeft - posicaoAtual);
-            if (distancia < menorDistancia) { menorDistancia = distancia; indiceMaisProximo = i; }
-          });
-          navItems.forEach(item => item.classList.remove('active'));
-          if (navItems[indiceMaisProximo]) navItems[indiceMaisProximo].classList.add('active');
-        }, 120);
-      });
-    })();
- 
-    // MEXI AQUI: modal de detalhe do produto, aberto ao clicar no card
-    function openProductModal(produtoId) {
-      const produto = products.find((p) => String(p.id) === String(produtoId));
-      if (!produto) return;
-
-      const produtoImg = produto.imagem_url || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=800&auto=format&fit=crop';
-      const produtoPreco = Number(produto.preco || 0);
-
-      document.getElementById('pm-img').src = produtoImg;
-      document.getElementById('pm-img').alt = produto.nome || 'Produto';
-      document.getElementById('pm-category').innerText = getProductCategoryLabel(produto);
-      document.getElementById('pm-title').innerText = produto.nome || 'Produto';
-      document.getElementById('pm-price').innerText = `R$ ${produtoPreco.toFixed(2)}`;
-      document.getElementById('pm-variations').innerHTML = renderVariationChips(produto);
-      document.getElementById('pm-sku').innerText = `SKU: ${produto.sku || ('PROD-' + (produto.id || 'N/A'))}`;
-
-      document.getElementById('productModal').classList.add('active');
-    }
-
-    function closeProductModal() {
-      document.getElementById('productModal').classList.remove('active');
-    }
-
     function openViewModal(name, rm, curso, status) {
       document.getElementById('v-name').innerText = name;
       document.getElementById('v-rm').innerText = rm;
@@ -2125,19 +2361,6 @@
           filterProducts();
           e.target.reset();
         });
-    }
- 
-    function initAdminChart() {
-      const ctx = document.getElementById('adminChart');
-      if (!ctx) return;
-      adminChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
-          datasets: [{ label: 'Novos Associados', data: [12, 19, 15, 25, 30], borderColor: '#d63250', backgroundColor: 'rgba(214, 50, 80, 0.2)', fill: true, tension: 0.35 }]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
-      });
     }
  
     // SLIDER HERO
@@ -2195,60 +2418,187 @@
       document.querySelectorAll('.reveal:not(.in-view), .reveal-stagger:not(.in-view)').forEach(el => revealObserver.observe(el));
     }
  
-    // BACKGROUND CANVAS
+    // BACKGROUND CANVAS — MEXI AQUI: cena espacial premium (nebulosa + estrelas em profundidade + cadentes)
     (function initCanvas() {
       const canvas = document.getElementById('bg-canvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      let particles = [];
- 
-      function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        generateScene();
+      }
+
+      let stars = [];
+      let nebulae = [];
+      let shootingStars = [];
+
+      // ===== ESTRELAS EM 3 CAMADAS (parallax de profundidade) =====
+      function generateStars() {
+        stars = [];
+        const layers = [
+          { count: Math.round((canvas.width * canvas.height) / 22000), sizeMin: 0.5, sizeMax: 1.1, alphaMax: 0.55, drift: 0.015 },
+          { count: Math.round((canvas.width * canvas.height) / 16000), sizeMin: 0.8, sizeMax: 1.6, alphaMax: 0.75, drift: 0.03  },
+          { count: Math.round((canvas.width * canvas.height) / 30000), sizeMin: 1.3, sizeMax: 2.3, alphaMax: 0.95, drift: 0.05  }
+        ];
+        layers.forEach((layer, layerIndex) => {
+          for (let i = 0; i < layer.count; i++) {
+            const isRed = Math.random() < 0.15;
+            stars.push({
+              x: Math.random() * canvas.width,
+              y: Math.random() * canvas.height,
+              size: Math.random() * (layer.sizeMax - layer.sizeMin) + layer.sizeMin,
+              baseAlpha: Math.random() * 0.4 + (layer.alphaMax - 0.4),
+              twinkleSpeed: Math.random() * 0.018 + 0.004,
+              twinklePhase: Math.random() * Math.PI * 2,
+              drift: (Math.random() - 0.5) * layer.drift,
+              layer: layerIndex,
+              color: isRed ? '214, 50, 80' : '255, 255, 255'
+            });
+          }
+        });
+      }
+
+      // ===== NEBULOSAS: manchas de luz grandes, suaves, pulsando devagar =====
+      function generateNebulae() {
+        nebulae = [
+          { xR: 0.22, yR: 0.28, radius: Math.max(canvas.width, canvas.height) * 0.42, hue: 344, phase: 0,   speed: 0.0016 },
+          { xR: 0.80, yR: 0.62, radius: Math.max(canvas.width, canvas.height) * 0.38, hue: 260, phase: 2.1, speed: 0.0012 },
+          { xR: 0.55, yR: 0.85, radius: Math.max(canvas.width, canvas.height) * 0.34, hue: 200, phase: 4.4, speed: 0.0019 }
+        ];
+      }
+
+      function generateScene() {
+        generateStars();
+        generateNebulae();
+      }
+
       resize();
       window.addEventListener('resize', resize);
- 
-      class Particle {
-        constructor() {
-          this.x = Math.random() * canvas.width;
-          this.y = Math.random() * canvas.height;
-          this.size = Math.random() * 2 + 1;
-          this.speedX = (Math.random() - 0.5) * 0.6;
-          this.speedY = (Math.random() - 0.5) * 0.6;
-        }
-        update() {
-          this.x += this.speedX;
-          this.y += this.speedY;
-          if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-          if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-        }
-        draw() {
-          ctx.fillStyle = 'rgba(214, 50, 80, 0.6)';
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-          ctx.fill();
+
+      // parallax bem sutil seguindo o mouse (dá profundidade real à cena)
+      let mouseX = 0, mouseY = 0, parX = 0, parY = 0;
+      window.addEventListener('mousemove', (e) => {
+        mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+        mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+      });
+
+      function maybeSpawnShootingStar() {
+        if (Math.random() < 0.012 && shootingStars.length < 5) {
+          const startX = Math.random() * canvas.width * 0.8 + canvas.width * 0.1;
+          const big = Math.random() < 0.25; // uma em cada quatro é maior/mais brilhante
+          const tint = Math.random() < 0.2 ? '255, 210, 210' : '255, 255, 255'; // toque rosado ocasional
+          shootingStars.push({
+            x: startX,
+            y: -20,
+            vx: -(2.6 + Math.random() * 3.2),
+            vy: 3.8 + Math.random() * 3.4,
+            life: 1,
+            length: (big ? 130 : 80) + Math.random() * 60,
+            headSize: big ? 2.6 : 1.5,
+            width: big ? 2.6 : 1.6,
+            color: tint
+          });
         }
       }
- 
-      for (let i = 0; i < 70; i++) particles.push(new Particle());
- 
-      function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        for (let i = 0; i < particles.length; i++) {
-          particles[i].update();
-          particles[i].draw();
-          for (let j = i + 1; j < particles.length; j++) {
-            const dx = particles[i].x - particles[j].x;
-            const dy = particles[i].y - particles[j].y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 120) {
-              ctx.strokeStyle = `rgba(214, 50, 80, ${0.2 - dist / 600})`;
-              ctx.lineWidth = 1;
-              ctx.beginPath();
-              ctx.moveTo(particles[i].x, particles[i].y);
-              ctx.lineTo(particles[j].x, particles[j].y);
-              ctx.stroke();
-            }
+
+      function isLightTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'light';
+      }
+
+      function drawNebulae(time) {
+        if (isLightTheme()) return; // no claro o fundo já tem o gradiente via CSS
+        nebulae.forEach((n) => {
+          const pulse = (Math.sin(time * n.speed + n.phase) + 1) / 2; // 0..1
+          const cx = canvas.width * n.xR + parX * 20;
+          const cy = canvas.height * n.yR + parY * 20;
+          const r = n.radius * (0.85 + pulse * 0.18);
+          const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+          grad.addColorStop(0, `hsla(${n.hue}, 75%, 48%, ${0.14 + pulse * 0.07})`);
+          grad.addColorStop(0.5, `hsla(${n.hue}, 75%, 42%, ${0.07 + pulse * 0.04})`);
+          grad.addColorStop(1, `hsla(${n.hue}, 75%, 32%, 0)`);
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        });
+      }
+
+      function drawStars() {
+        const light = isLightTheme();
+        stars.forEach((star) => {
+          star.twinklePhase += star.twinkleSpeed;
+          const twinkle = (Math.sin(star.twinklePhase) + 1) / 2;
+          const alpha = star.baseAlpha * (0.3 + twinkle * 0.7) * (light ? 0.7 : 1);
+
+          star.x += star.drift;
+          if (star.x < 0) star.x = canvas.width;
+          if (star.x > canvas.width) star.x = 0;
+
+          const px = star.x + parX * (star.layer + 1) * 6;
+          const py = star.y + parY * (star.layer + 1) * 6;
+
+          // MEXI AQUI: no tema claro as estrelinhas viram "confete" nas cores
+          // da marca (rosa/dourado), sem o glow forte usado no escuro
+          const color = light ? (star.color === '255, 255, 255' ? '214, 50, 80' : '255, 157, 108') : star.color;
+
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(${color}, ${alpha})`;
+          if (!light) {
+            ctx.shadowColor = `rgba(${color}, ${Math.min(alpha + 0.25, 1)})`;
+            ctx.shadowBlur = star.size * (2.5 + star.layer * 1.5);
           }
-        }
+          ctx.arc(px, py, star.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.shadowBlur = 0;
+      }
+
+      function drawShootingStars() {
+        const light = isLightTheme();
+        shootingStars.forEach((s) => {
+          const color = light ? '214, 50, 80' : s.color;
+          const tailX = s.x - s.vx * (s.length / 10);
+          const tailY = s.y - s.vy * (s.length / 10);
+          const grad = ctx.createLinearGradient(s.x, s.y, tailX, tailY);
+          grad.addColorStop(0, `rgba(${color}, ${s.life * (light ? 0.55 : 1)})`);
+          grad.addColorStop(1, `rgba(${color}, 0)`);
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = s.width;
+          ctx.beginPath();
+          ctx.moveTo(s.x, s.y);
+          ctx.lineTo(tailX, tailY);
+          ctx.stroke();
+
+          // cabeça brilhante
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(${color}, ${s.life * (light ? 0.55 : 1)})`;
+          if (!light) {
+            ctx.shadowColor = `rgba(${color}, 0.9)`;
+            ctx.shadowBlur = s.headSize * 5;
+          }
+          ctx.arc(s.x, s.y, s.headSize, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+
+          s.x += s.vx;
+          s.y += s.vy;
+          if (s.y > canvas.height * 0.9 || s.x < -50) s.life -= 1; // sai da tela: remove
+        });
+        shootingStars = shootingStars.filter((s) => s.life > 0 && s.y < canvas.height + 50);
+      }
+
+      let t = 0;
+      function animate() {
+        parX += (mouseX - parX) * 0.03;
+        parY += (mouseY - parY) * 0.03;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawNebulae(t);
+        drawStars();
+        maybeSpawnShootingStar();
+        drawShootingStars();
+
+        t += 1;
         requestAnimationFrame(animate);
       }
       animate();
@@ -2258,6 +2608,8 @@
       carregarCategorias();
       carregarProdutos();
       carregarArmariosPublic();
+      loadCart();
+      renderCart();
       refreshRevealObserver();
     };
   </script>

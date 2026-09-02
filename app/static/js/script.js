@@ -751,12 +751,149 @@
       if (firstInput) setTimeout(() => firstInput.focus(), 350);
     }
 
-    // TEMA CLARO / ESCURO
-    function toggleTheme() {
-      const html = document.documentElement;
-      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      html.setAttribute('data-theme', next);
+    // ===== MEXI AQUI: TEMA CLARO / ESCURO — animação nascendo do logo do SENAI,
+    // com pulsada no logo + explosão de partículas + revelação circular suave
+    // (mesma experiência aplicada no index.html) =====
+    function applyThemeAttribute(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      try { localStorage.setItem('admin_theme', theme); } catch (e) { /* indisponível */ }
     }
+
+    function spawnThemeBurst(x, y, toDark) {
+      const palette = toDark
+        ? ['255, 255, 255', '214, 50, 80', '0, 140, 255']
+        : ['214, 50, 80', '0, 140, 255', '255, 210, 130'];
+
+      const count = 16;
+      for (let i = 0; i < count; i++) {
+        const el = document.createElement('span');
+        const angle = (Math.PI * 2 * i) / count + (Math.random() * 0.4 - 0.2);
+        const distance = 46 + Math.random() * 70;
+        const size = Math.random() * 4 + 2.5;
+        const color = palette[Math.floor(Math.random() * palette.length)];
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance;
+
+        el.style.cssText = `
+          position: fixed; left: ${x}px; top: ${y}px;
+          width: ${size}px; height: ${size}px;
+          border-radius: 50%;
+          background: rgba(${color}, 0.95);
+          box-shadow: 0 0 ${size * 2.5}px rgba(${color}, 0.85);
+          pointer-events: none;
+          z-index: 9999;
+          transform: translate(-50%, -50%) scale(1);
+          opacity: 1;
+          transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+        `;
+        document.body.appendChild(el);
+
+        requestAnimationFrame(() => {
+          el.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.3)`;
+          el.style.opacity = '0';
+        });
+
+        setTimeout(() => el.remove(), 820);
+      }
+
+      const glow = document.createElement('span');
+      glow.style.cssText = `
+        position: fixed; left: ${x}px; top: ${y}px;
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        background: rgba(${palette[0]}, 0.9);
+        box-shadow: 0 0 40px 14px rgba(${palette[0]}, 0.55);
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+        transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease-out;
+      `;
+      document.body.appendChild(glow);
+      requestAnimationFrame(() => {
+        glow.style.transform = 'translate(-50%, -50%) scale(6)';
+        glow.style.opacity = '0';
+      });
+      setTimeout(() => glow.remove(), 620);
+    }
+
+    function toggleTheme(event) {
+      const html = document.documentElement;
+      const isLight = html.getAttribute('data-theme') === 'light';
+      const newTheme = isLight ? 'dark' : 'light';
+      const logo = document.querySelector('.logo-senai-svg');
+
+      // a animação nasce sempre do logo do SENAI na sidebar
+      let originX = 66;
+      let originY = 60;
+      if (logo) {
+        const rect = logo.getBoundingClientRect();
+        originX = rect.left + rect.width / 2;
+        originY = rect.top + rect.height / 2;
+      } else if (event && typeof event.clientX === 'number' && event.clientX) {
+        originX = event.clientX;
+        originY = event.clientY;
+      }
+
+      const endRadius = Math.hypot(
+        Math.max(originX, window.innerWidth - originX),
+        Math.max(originY, window.innerHeight - originY)
+      );
+
+      const finishUp = () => spawnThemeBurst(originX, originY, newTheme === 'dark');
+
+      // pulsada rápida no logo, como se ele "carregasse" a explosão antes de disparar
+      if (logo) {
+        logo.style.transition = 'transform 0.18s ease-out, box-shadow 0.18s ease-out';
+        logo.style.transform = 'scale(1.18)';
+        logo.style.boxShadow = '0 0 0 8px rgba(214, 50, 80, 0.35), 0 4px 14px rgba(214, 50, 80, 0.55)';
+      }
+
+      const runTransition = () => {
+        if (logo) {
+          logo.style.transform = '';
+          logo.style.boxShadow = '';
+        }
+
+        if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          applyThemeAttribute(newTheme);
+          finishUp();
+          return;
+        }
+
+        const transition = document.startViewTransition(() => {
+          applyThemeAttribute(newTheme);
+        });
+
+        transition.ready.then(() => {
+          document.documentElement.animate(
+            {
+              clipPath: [
+                `circle(0px at ${originX}px ${originY}px)`,
+                `circle(${endRadius}px at ${originX}px ${originY}px)`
+              ]
+            },
+            {
+              duration: 820,
+              easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+              pseudoElement: '::view-transition-new(root)'
+            }
+          );
+        }).catch(() => { /* transição não suportada nesse navegador, ignora */ });
+
+        transition.finished.then(finishUp).catch(finishUp);
+      };
+
+      setTimeout(runTransition, logo ? 160 : 0);
+    }
+
+    (function initTheme() {
+      let saved = null;
+      try { saved = localStorage.getItem('admin_theme'); } catch (e) { /* indisponível */ }
+      if (saved === 'light' || saved === 'dark') {
+        document.documentElement.setAttribute('data-theme', saved);
+      }
+    })();
 
     // BOTÕES DE AÇÃO GENÉRICOS (EDITAR/EXCLUIR)
     function renderAcoes(tipo, id) {
@@ -1587,42 +1724,187 @@
   }, 1200);
 }
 
-    (function initInteractiveCanvas() {
+    // ===== MEXI AQUI: CENA ESPACIAL DE FUNDO (nebulosa + estrelas em profundidade
+    // + cadentes) — mesma animação usada no index.html, agora com a paleta
+    // vermelho/azul do painel admin. Substitui o antigo initInteractiveCanvas()
+    // (partículas simples conectadas por linhas). =====
+    (function initSpaceScene() {
       const canvas = document.getElementById('bg-canvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      let particles = [];
 
-      function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        generateScene();
+      }
+
+      let stars = [];
+      let nebulae = [];
+      let shootingStars = [];
+
+      function generateStars() {
+        stars = [];
+        const layers = [
+          { count: Math.round((canvas.width * canvas.height) / 22000), sizeMin: 0.5, sizeMax: 1.1, alphaMax: 0.55, drift: 0.015 },
+          { count: Math.round((canvas.width * canvas.height) / 16000), sizeMin: 0.8, sizeMax: 1.6, alphaMax: 0.75, drift: 0.03  },
+          { count: Math.round((canvas.width * canvas.height) / 30000), sizeMin: 1.3, sizeMax: 2.3, alphaMax: 0.95, drift: 0.05  }
+        ];
+        layers.forEach((layer, layerIndex) => {
+          for (let i = 0; i < layer.count; i++) {
+            const r = Math.random();
+            let color = '255, 255, 255';
+            if (r < 0.15) color = '214, 50, 80';       // rosa/vermelho (--primary)
+            else if (r < 0.28) color = '0, 140, 255';  // azul (--accent)
+            stars.push({
+              x: Math.random() * canvas.width,
+              y: Math.random() * canvas.height,
+              size: Math.random() * (layer.sizeMax - layer.sizeMin) + layer.sizeMin,
+              baseAlpha: Math.random() * 0.4 + (layer.alphaMax - 0.4),
+              twinkleSpeed: Math.random() * 0.018 + 0.004,
+              twinklePhase: Math.random() * Math.PI * 2,
+              drift: (Math.random() - 0.5) * layer.drift,
+              layer: layerIndex,
+              color
+            });
+          }
+        });
+      }
+
+      function generateNebulae() {
+        nebulae = [
+          { xR: 0.20, yR: 0.25, radius: Math.max(canvas.width, canvas.height) * 0.40, hue: 344, phase: 0,   speed: 0.0016 },
+          { xR: 0.82, yR: 0.60, radius: Math.max(canvas.width, canvas.height) * 0.36, hue: 205, phase: 2.1, speed: 0.0012 },
+          { xR: 0.55, yR: 0.88, radius: Math.max(canvas.width, canvas.height) * 0.32, hue: 260, phase: 4.4, speed: 0.0019 }
+        ];
+      }
+
+      function generateScene() {
+        generateStars();
+        generateNebulae();
+      }
+
       resize();
       window.addEventListener('resize', resize);
 
-      class Particle {
-        constructor() {
-          this.x = Math.random() * canvas.width;
-          this.y = Math.random() * canvas.height;
-          this.size = Math.random() * 2 + 1;
-          this.speedX = (Math.random() - 0.5) * 0.4;
-          this.speedY = (Math.random() - 0.5) * 0.4;
-        }
-        update() {
-          this.x += this.speedX; this.y += this.speedY;
-          if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-          if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-        }
-        draw() {
-          ctx.fillStyle = 'rgba(0, 140, 255, 0.4)';
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-          ctx.fill();
+      let mouseX = 0, mouseY = 0, parX = 0, parY = 0;
+      window.addEventListener('mousemove', (e) => {
+        mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+        mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+      });
+
+      function maybeSpawnShootingStar() {
+        if (Math.random() < 0.012 && shootingStars.length < 5) {
+          const startX = Math.random() * canvas.width * 0.8 + canvas.width * 0.1;
+          const big = Math.random() < 0.25;
+          const tint = Math.random() < 0.25 ? '0, 140, 255' : '255, 255, 255';
+          shootingStars.push({
+            x: startX,
+            y: -20,
+            vx: -(2.6 + Math.random() * 3.2),
+            vy: 3.8 + Math.random() * 3.4,
+            life: 1,
+            length: (big ? 130 : 80) + Math.random() * 60,
+            headSize: big ? 2.6 : 1.5,
+            width: big ? 2.6 : 1.6,
+            color: tint
+          });
         }
       }
 
-      for (let i = 0; i < 50; i++) particles.push(new Particle());
+      function isLightTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'light';
+      }
 
+      function drawNebulae(time) {
+        if (isLightTheme()) return;
+        nebulae.forEach((n) => {
+          const pulse = (Math.sin(time * n.speed + n.phase) + 1) / 2;
+          const cx = canvas.width * n.xR + parX * 20;
+          const cy = canvas.height * n.yR + parY * 20;
+          const r = n.radius * (0.85 + pulse * 0.18);
+          const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+          grad.addColorStop(0, `hsla(${n.hue}, 75%, 48%, ${0.14 + pulse * 0.07})`);
+          grad.addColorStop(0.5, `hsla(${n.hue}, 75%, 42%, ${0.07 + pulse * 0.04})`);
+          grad.addColorStop(1, `hsla(${n.hue}, 75%, 32%, 0)`);
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        });
+      }
+
+      function drawStars() {
+        const light = isLightTheme();
+        stars.forEach((star) => {
+          star.twinklePhase += star.twinkleSpeed;
+          const twinkle = (Math.sin(star.twinklePhase) + 1) / 2;
+          const alpha = star.baseAlpha * (0.3 + twinkle * 0.7) * (light ? 0.7 : 1);
+
+          star.x += star.drift;
+          if (star.x < 0) star.x = canvas.width;
+          if (star.x > canvas.width) star.x = 0;
+
+          const px = star.x + parX * (star.layer + 1) * 6;
+          const py = star.y + parY * (star.layer + 1) * 6;
+
+          const color = light ? (star.color === '255, 255, 255' ? '214, 50, 80' : star.color) : star.color;
+
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(${color}, ${alpha})`;
+          if (!light) {
+            ctx.shadowColor = `rgba(${color}, ${Math.min(alpha + 0.25, 1)})`;
+            ctx.shadowBlur = star.size * (2.5 + star.layer * 1.5);
+          }
+          ctx.arc(px, py, star.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.shadowBlur = 0;
+      }
+
+      function drawShootingStars() {
+        const light = isLightTheme();
+        shootingStars.forEach((s) => {
+          const color = light ? '214, 50, 80' : s.color;
+          const tailX = s.x - s.vx * (s.length / 10);
+          const tailY = s.y - s.vy * (s.length / 10);
+          const grad = ctx.createLinearGradient(s.x, s.y, tailX, tailY);
+          grad.addColorStop(0, `rgba(${color}, ${s.life * (light ? 0.55 : 1)})`);
+          grad.addColorStop(1, `rgba(${color}, 0)`);
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = s.width;
+          ctx.beginPath();
+          ctx.moveTo(s.x, s.y);
+          ctx.lineTo(tailX, tailY);
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(${color}, ${s.life * (light ? 0.55 : 1)})`;
+          if (!light) {
+            ctx.shadowColor = `rgba(${color}, 0.9)`;
+            ctx.shadowBlur = s.headSize * 5;
+          }
+          ctx.arc(s.x, s.y, s.headSize, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+
+          s.x += s.vx;
+          s.y += s.vy;
+          if (s.y > canvas.height * 0.9 || s.x < -50) s.life -= 1;
+        });
+        shootingStars = shootingStars.filter((s) => s.life > 0 && s.y < canvas.height + 50);
+      }
+
+      let t = 0;
       function animate() {
+        parX += (mouseX - parX) * 0.03;
+        parY += (mouseY - parY) * 0.03;
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        particles.forEach(p => { p.update(); p.draw(); });
+        drawNebulae(t);
+        drawStars();
+        maybeSpawnShootingStar();
+        drawShootingStars();
+
+        t += 1;
         requestAnimationFrame(animate);
       }
       animate();

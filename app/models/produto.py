@@ -30,7 +30,7 @@ class Produto(Base):
 # ==========================================
 # FUNÇÃO DE PAGINAÇÃO (Fora da classe)
 # ==========================================
-def buscar_produtos_paginado(db: Session, pagina: int = 1, limite: int = 10):
+def buscar_produtos_paginado(db: Session, pagina: int = 1, limite: int = 12):
     offset = (pagina - 1) * limite
     total = db.query(Produto).count()
     itens = db.query(Produto).order_by(Produto.id.desc()).offset(offset).limit(limite).all()
