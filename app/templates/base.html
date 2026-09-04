@@ -68,8 +68,6 @@
       --shadow-soft: 0 10px 26px rgba(214, 50, 80, 0.08);
     }
  
-    /* MEXI AQUI: fundo do tema claro deixa de ser branco liso — ganha um
-       degradê suave saindo de um creme quente para um toque rosado da marca */
     html[data-theme="light"] body {
       background:
         radial-gradient(90% 60% at 15% 0%, rgba(214, 50, 80, 0.10) 0%, rgba(214, 50, 80, 0) 55%),
@@ -81,7 +79,7 @@
  
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', 'Inter', sans-serif; }
  
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
  
     body {
       background-color: var(--bg-main);
@@ -100,8 +98,6 @@
       position: fixed;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
-      /* MEXI AQUI: agora fica por cima de todo o conteúdo, mas com blend "screen"
-         então só clareia onde a onda passa — não tampa texto nem imagens */
       z-index: 9998;
       mix-blend-mode: screen;
       pointer-events: none;
@@ -110,7 +106,6 @@
     }
     html[data-theme="light"] #bg-canvas { opacity: 0.4; mix-blend-mode: normal; }
  
-    /* ================= HEADER ================= */
     header.main-header {
       height: var(--header-height);
       background-color: var(--bg-surface);
@@ -145,32 +140,16 @@
     }
     .brand-logo:hover .logo-senai-svg { box-shadow: 0 6px 18px rgba(214, 50, 80, 0.5); transform: translateY(-1px); }
 
-    .brand-title-group {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 2px;
-      border-left: 1px solid var(--border-color);
-      padding-left: 14px;
-      line-height: 1;
+    .aapm-emblem {
+      height: 58px;
+      width: 58px;
+      display: block;
+      flex-shrink: 0;
+      filter: drop-shadow(0 3px 8px rgba(214, 50, 80, 0.4));
+      transition: transform 0.3s var(--ease), filter 0.3s var(--ease);
     }
-
-    .brand-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.5rem;
-      letter-spacing: 0.14em;
-      color: var(--text-main);
-      line-height: 1;
-    }
-
-    .brand-subtitle {
-      font-size: 0.6rem;
-      font-weight: 600;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--primary);
-      opacity: 0.85;
-    }
+    .brand-logo:hover .aapm-emblem { transform: translateY(-1px) scale(1.04); filter: drop-shadow(0 5px 12px rgba(214, 50, 80, 0.55)); }
+    @media (max-width: 600px) { .aapm-emblem { height: 46px; width: 46px; } }
  
     .header-location {
       font-size: 0.7rem;
@@ -182,7 +161,6 @@
     }
     @media (min-width: 1180px) { .header-location { display: inline; } }
  
-    /* MEXI AQUI: wrapper novo para posicionar as setinhas/gradiente sobre o menu */
     .top-nav-wrap {
       position: relative;
       display: flex;
@@ -198,7 +176,6 @@
       padding: 5px;
       border-radius: var(--radius-pill);
       border: 1px solid var(--border-color);
-      /* MEXI AQUI: rolagem horizontal + esconder a barra de rolagem nativa */
       overflow-x: auto;
       overflow-y: hidden;
       scroll-behavior: smooth;
@@ -207,8 +184,9 @@
       transition: box-shadow 0.25s var(--ease);
     }
     .top-nav::-webkit-scrollbar { display: none; }
+    .top-nav { cursor: grab; }
+    .top-nav.dragging { cursor: grabbing; scroll-behavior: auto; }
 
-    /* MEXI AQUI: setinhas com gradiente indicando que dá pra rolar pros lados */
     .nav-fade {
       position: absolute;
       top: 0; bottom: 0;
@@ -237,7 +215,6 @@
     .top-nav-wrap.can-scroll-left .nav-fade.left { opacity: 1; }
     .top-nav-wrap.can-scroll-right .nav-fade.right { opacity: 1; }
 
-    /* MEXI AQUI: leve "pulso" visual enquanto o usuário rola com a roda do mouse */
     .top-nav.wheel-scrolling { box-shadow: inset 0 0 0 1px var(--primary-soft-border); }
  
     .nav-item {
@@ -295,14 +272,12 @@
       opacity: 0;
     }
 
-    /* MEXI AQUI: pulso do logo agora é um keyframe CSS puro — roda em paralelo
-       com a troca de tema, sem precisar de setTimeout bloqueando o JS */
     @keyframes logoTogglePulse {
       0%   { transform: scale(1);    box-shadow: 0 4px 14px rgba(214, 50, 80, 0.35); }
-      35%  { transform: scale(1.18); box-shadow: 0 0 0 8px rgba(214, 50, 80, 0.35), 0 4px 14px rgba(214, 50, 80, 0.55); }
+      40%  { transform: scale(1.22); box-shadow: 0 0 0 10px rgba(214, 50, 80, 0.32), 0 4px 14px rgba(214, 50, 80, 0.55); }
       100% { transform: scale(1);    box-shadow: 0 4px 14px rgba(214, 50, 80, 0.35); }
     }
-    .logo-senai-svg.pulse { animation: logoTogglePulse 0.5s var(--ease); }
+    .logo-senai-svg.pulse { animation: logoTogglePulse 0.9s var(--ease); }
  
     .btn-auth {
       padding: 9px 20px;
@@ -321,7 +296,6 @@
  
     .btn-auth:hover { background: var(--primary); border-color: var(--primary); color: #fff; transform: translateY(-1px); }
  
-    /* ================= LAYOUT ================= */
     main.wrapper {
       margin-top: var(--header-height);
       width: 100%;
@@ -343,9 +317,8 @@
     .view-content > .section-pad { padding-top: 0; }
     
  
-    .admin-only { display: none; } /* mantido: pode ser usado por elementos que vierem do admin.html */
+    .admin-only { display: none; }
  
-    /* Scroll reveal */
     .reveal {
       opacity: 0;
       transform: translateY(28px);
@@ -396,8 +369,6 @@
     }
     .card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
 
-    /* MEXI AQUI: filete gradiente no topo dos cards — só aparece no tema claro,
-       dando um toque de cor de marca sem pesar no visual clean */
     html[data-theme="light"] .card::before,
     html[data-theme="light"] .product-item::before {
       content: '';
@@ -446,7 +417,6 @@
     }
     .icon-circle svg { width: 100%; height: 100%; }
  
-    /* FORMS */
     .form-group { display: flex; flex-direction: column; gap: 7px; }
     .form-group label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; color: var(--text-muted); text-transform: uppercase; }
     .form-control {
@@ -464,7 +434,6 @@
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .form-grid .full { grid-column: span 2; }
  
-    /* TABLES */
     .table-responsive { width: 100%; overflow-x: auto; }
  
     table { width: 100%; border-collapse: separate; border-spacing: 0 10px; text-align: left; }
@@ -501,7 +470,6 @@
     .status-tag.inactive { background: rgba(239, 68, 68, 0.14); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
     .status-tag.warning { background: rgba(245, 158, 11, 0.14); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
  
-    /* ================= HERO (estrutura inspirada na referência) ================= */
     .hero-container {
       position: relative;
       width: 100%;
@@ -510,9 +478,18 @@
       overflow: hidden;
       display: flex;
       align-items: center;
+      cursor: grab;
+      scroll-snap-align: start;
+      scroll-margin-top: var(--header-height);
     }
+    .hero-container.dragging { cursor: grabbing; }
  
-    .hero-bg-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+    .hero-bg-wrapper {
+      position: absolute; top: -3%; left: -6%; width: 112%; height: 106%; z-index: 1;
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform;
+    }
+    .hero-bg-wrapper.no-transition { transition: none; }
  
     .hero-bg {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -596,6 +573,7 @@
     }
  
     .content-stack { padding-top: 0.5rem; display: flex; flex-direction: column; gap: 2rem; padding-bottom: 3rem; }
+    .content-stack > * { scroll-snap-align: start; scroll-margin-top: var(--header-height); }
  
     .senai-info-card { display: flex; flex-direction: column; gap: 1.1rem; }
     .info-header .info-badge { font-size: 0.64rem; font-weight: 700; color: var(--primary); letter-spacing: 0.16em; text-transform: uppercase; }
@@ -627,7 +605,6 @@
     .benefit-item h4 { font-size: 0.92rem; color: var(--text-main); font-weight: 600; }
     .benefit-item p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.55; }
  
-    /* PRODUTOS */
     .product-filters {
       padding: 0 7vw;
       display: flex;
@@ -741,7 +718,6 @@
     }
     @media (max-width: 900px) { .armarios-summary { grid-template-columns: 1fr; } }
  
-    /* ADMIN - CATEGORIAS */
     .category-manage-list { display: flex; flex-direction: column; gap: 8px; margin-top: 1rem; max-height: 220px; overflow-y: auto; }
     .category-manage-item {
       display: flex; align-items: center; justify-content: space-between;
@@ -753,7 +729,6 @@
       font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
     }
  
-    /* MODAIS */
     .modal-backdrop {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       background: rgba(5, 5, 10, 0.7); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
@@ -820,7 +795,6 @@
       border: 1px solid var(--border-color);
     }
 
-    /* ================= ANIMAÇÃO DE TROCA DE TEMA ================= */
     ::view-transition-old(root),
     ::view-transition-new(root) {
       animation: none;
@@ -844,7 +818,6 @@
       .product-search-box { max-width: none; }
     }
 
-    /* ================= MEXI AQUI: MENU MOBILE (drawer) ================= */
     .mobile-menu-btn { display: none; }
     @media (max-width: 900px) { .mobile-menu-btn { display: flex; } }
 
@@ -890,7 +863,6 @@
     .mobile-nav-item:hover, .mobile-nav-item.active { background: var(--primary); color: #fff; }
     .mobile-nav-item + .mobile-nav-item { margin-top: 4px; }
 
-    /* ================= MEXI AQUI: CARRINHO DE COMPRAS ================= */
     .cart-btn { position: relative; }
     .cart-badge {
       position: absolute;
@@ -954,7 +926,6 @@
     .cart-total-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.9rem; margin-bottom: 0.9rem; }
     .cart-total-row strong { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: var(--primary); letter-spacing: 0.02em; }
 
-    /* botão "Adicionar" nos cards de produto */
     .product-add-btn {
       margin-top: 8px;
       width: 100%;
@@ -974,16 +945,12 @@
     .product-add-btn.added { background: var(--success); border-color: var(--success); color: #fff; }
 
 
-    /* ================= MEXI AQUI: RESPONSIVIDADE PARA CELULARES ================= */
     @media (max-width: 600px) {
       :root { --header-height: 64px; }
 
       header.main-header { padding: 0 4vw; }
       .brand-logo { gap: 10px; }
       .logo-senai-svg { height: 26px; }
-      .brand-title-group { padding-left: 10px; }
-      .brand-title { font-size: 1.2rem; }
-      .brand-subtitle { font-size: 0.54rem; letter-spacing: 0.12em; }
 
       .header-user-area { gap: 0.4rem; }
       .icon-btn { width: 34px; height: 34px; }
@@ -1023,7 +990,6 @@
     }
 
     @media (max-width: 400px) {
-      .brand-subtitle { display: none; }
       .header-location { display: none; }
       .btn-auth { padding: 6px 10px; font-size: 0.6rem; }
       .hero-stats { grid-template-columns: repeat(2, auto); }
@@ -1057,10 +1023,31 @@
         <line x1="275" y1="80" x2="300" y2="80" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
         <text x="150" y="73" font-family="'Arial Black', 'Impact', sans-serif" font-size="62" font-weight="900" font-style="italic" fill="#FFFFFF" text-anchor="middle">SENAI</text>
       </svg>
-      <span class="brand-title-group">
-        <span class="brand-title">AAPM</span>
-        <span class="brand-subtitle">SENAI Brás</span>
-      </span>
+      <svg class="aapm-emblem" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="aapmEmblemGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ff2d44"/>
+            <stop offset="100%" stop-color="#a80d1e"/>
+          </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="47" fill="url(#aapmEmblemGrad)"/>
+        <circle cx="50" cy="50" r="47" fill="none" stroke="#ffffff" stroke-width="1.4" opacity="0.55"/>
+        <circle cx="50" cy="50" r="40" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.35" stroke-dasharray="2 3"/>
+
+        <g opacity="0.85" stroke="#ffffff" stroke-width="1.6" fill="none" stroke-linecap="round">
+          <path d="M22 62 C18 52, 18 40, 24 30"/>
+          <path d="M22 56 L16 54M23 50 L17 47M25 44 L19 40M27 38 L22 34M30 33 L26 28"/>
+        </g>
+        <g opacity="0.85" stroke="#ffffff" stroke-width="1.6" fill="none" stroke-linecap="round">
+          <path d="M78 62 C82 52, 82 40, 76 30"/>
+          <path d="M78 56 L84 54M77 50 L83 47M75 44 L81 40M73 38 L78 34M70 33 L74 28"/>
+        </g>
+
+        <text x="50" y="47" font-family="'Bebas Neue', sans-serif" font-size="30" letter-spacing="1" fill="#ffffff" text-anchor="middle">AAPM</text>
+        <text x="50" y="63" font-family="'Poppins', sans-serif" font-size="8" font-weight="700" letter-spacing="2.5" fill="#ffd9df" text-anchor="middle">SENAI BRÁS</text>
+
+        <path d="M50 82 l-6 10 h12 z" fill="#ffffff" opacity="0.9"/>
+      </svg>
     </a>
  
     <div class="top-nav-wrap" id="topNavWrap">
@@ -1099,7 +1086,6 @@
       </button>
   </header>
 
-  <!-- MEXI AQUI: menu mobile (drawer) — substitui o top-nav quando ele fica escondido em telas pequenas -->
   <div class="mobile-menu-backdrop" id="mobileMenuBackdrop" onclick="closeMobileMenu()"></div>
   <nav class="mobile-menu" id="mobileMenu">
     <div class="mobile-menu-header">
@@ -1113,7 +1099,6 @@
     <a class="mobile-nav-item" onclick="navigateMobile('armarios', this)">Armários</a>
   </nav>
 
-  <!-- MEXI AQUI: carrinho de compras (drawer lateral) -->
   <div class="mobile-menu-backdrop" id="cartBackdrop" onclick="closeCart()"></div>
   <aside class="cart-drawer" id="cartDrawer">
     <div class="mobile-menu-header">
@@ -1499,9 +1484,6 @@
       setStoredTheme(theme);
     }
 
-    // MEXI AQUI: explosão de partículas saindo do botão ao trocar de tema —
-    // agora dispara junto com o wipe circular (não depois dele), então tudo
-    // acontece ao mesmo tempo em vez de em fila
     function spawnThemeBurst(x, y, toDark) {
       const palette = toDark
         ? ['255, 255, 255', '214, 50, 80', '255, 210, 130']
@@ -1527,7 +1509,7 @@
           z-index: 9999;
           transform: translate(-50%, -50%) scale(1);
           opacity: 1;
-          transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: transform 1.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.3s cubic-bezier(0.16, 1, 0.3, 1);
         `;
         document.body.appendChild(el);
 
@@ -1536,10 +1518,9 @@
           el.style.opacity = '0';
         });
 
-        setTimeout(() => el.remove(), 650);
+        setTimeout(() => el.remove(), 1350);
       }
 
-      // um brilho central que "pulsa" no ponto de origem, dando o toque de encantamento
       const glow = document.createElement('span');
       glow.style.cssText = `
         position: fixed; left: ${x}px; top: ${y}px;
@@ -1551,18 +1532,16 @@
         z-index: 9999;
         transform: translate(-50%, -50%) scale(0);
         opacity: 1;
-        transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease-out;
+        transition: transform 0.9s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 1s ease-out;
       `;
       document.body.appendChild(glow);
       requestAnimationFrame(() => {
         glow.style.transform = 'translate(-50%, -50%) scale(6)';
         glow.style.opacity = '0';
       });
-      setTimeout(() => glow.remove(), 520);
+      setTimeout(() => glow.remove(), 1000);
     }
 
-    // MEXI AQUI: stagger mais curto (40ms em vez de 70ms) pra não parecer
-    // que a página trava depois do clique de tema
     function replayLoadingReveal() {
       const activeView = document.querySelector('.view-content.active');
       if (!activeView) return;
@@ -1570,14 +1549,10 @@
       items.forEach((el, i) => {
         el.classList.remove('in-view');
         void el.offsetWidth;
-        setTimeout(() => el.classList.add('in-view'), 30 + i * 40);
+        setTimeout(() => el.classList.add('in-view'), 60 + i * 70);
       });
     }
 
-    // MEXI AQUI: toggleTheme reescrito para rodar tudo em paralelo —
-    // o pulso do logo é só uma classe CSS (sem setTimeout bloqueando),
-    // a explosão de partículas dispara junto com o início do wipe (no "ready",
-    // não no "finished"), e o wipe ficou mais curto e mais "seco".
     function toggleTheme(event) {
       const html = document.documentElement;
       const isLight = html.getAttribute('data-theme') === 'light';
@@ -1590,15 +1565,6 @@
         setTimeout(() => btn.classList.remove('spin'), 450);
       }
 
-      // pulso do logo via classe CSS — roda sozinho, sem travar o resto
-      if (logo) {
-        logo.classList.remove('pulse');
-        void logo.offsetWidth;
-        logo.classList.add('pulse');
-        setTimeout(() => logo.classList.remove('pulse'), 520);
-      }
-
-      // origem da animação: sempre o logo do SENAI (ou o clique, como fallback)
       let originX = window.innerWidth / 2;
       let originY = 40;
       if (logo) {
@@ -1615,12 +1581,23 @@
         Math.max(originY, window.innerHeight - originY)
       );
 
+      const finishUp = () => {
+        spawnThemeBurst(originX, originY, newTheme === 'dark');
+        replayLoadingReveal();
+      };
+
+      if (logo) {
+        logo.classList.remove('pulse');
+        void logo.offsetWidth;
+        logo.classList.add('pulse');
+        setTimeout(() => logo.classList.remove('pulse'), 900);
+      }
+
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       if (!document.startViewTransition || reducedMotion) {
         applyThemeAttribute(newTheme);
-        spawnThemeBurst(originX, originY, newTheme === 'dark');
-        replayLoadingReveal();
+        finishUp();
         return;
       }
 
@@ -1628,8 +1605,6 @@
         applyThemeAttribute(newTheme);
       });
 
-      // dispara a explosão de partículas e o replay dos cards ASSIM QUE o
-      // DOM já virou (ready) — em paralelo com o wipe circular, não depois
       transition.ready.then(() => {
         document.documentElement.animate(
           {
@@ -1639,19 +1614,16 @@
             ]
           },
           {
-            duration: 600,
-            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+            duration: 1400,
+            easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
             pseudoElement: '::view-transition-new(root)'
           }
         );
 
         spawnThemeBurst(originX, originY, newTheme === 'dark');
-        replayLoadingReveal();
-      }).catch(() => {
-        // transição não suportada nesse navegador: garante que o efeito ainda rode
-        spawnThemeBurst(originX, originY, newTheme === 'dark');
-        replayLoadingReveal();
-      });
+      }).catch(() => { /* transição não suportada nesse navegador, ignora */ });
+
+      transition.finished.then(replayLoadingReveal).catch(replayLoadingReveal);
     }
 
     (function initTheme() {
@@ -1672,13 +1644,12 @@
       });
     }
 
-    // ===== MEXI AQUI: TOP NAV COM ROLAGEM PELA RODA DO MOUSE + SETINHAS/GRADIENTE + ANIMAÇÃO =====
+    // ===== TOP NAV COM ROLAGEM PELA RODA DO MOUSE + SETINHAS/GRADIENTE + ANIMAÇÃO =====
     (function enableTopNavWheelScroll() {
       const wrap = document.getElementById('topNavWrap');
       const topNav = document.getElementById('topNav');
       if (!wrap || !topNav) return;
 
-      // Mostra/esconde as setinhas de gradiente conforme a posição do scroll
       function updateFadeState() {
         const maxScroll = topNav.scrollWidth - topNav.clientWidth;
         const scrollable = maxScroll > 2;
@@ -1686,11 +1657,9 @@
         wrap.classList.toggle('can-scroll-right', scrollable && topNav.scrollLeft < maxScroll - 2);
       }
 
-      // Converte a rolagem vertical do mouse (wheel) em rolagem horizontal suave,
-      // com uma pequena animação de "pulso" no container enquanto rola
       topNav.addEventListener('wheel', (e) => {
         const maxScroll = topNav.scrollWidth - topNav.clientWidth;
-        if (maxScroll <= 0) return; // nada pra rolar, deixa a página rolar normalmente
+        if (maxScroll <= 0) return;
 
         e.preventDefault();
 
@@ -1707,6 +1676,106 @@
 
       updateFadeState();
       window.addEventListener('load', updateFadeState);
+
+      let isDragging = false;
+      let dragStartX = 0;
+      let dragScrollStart = 0;
+      let dragMoved = false;
+
+      topNav.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        dragMoved = false;
+        dragStartX = e.pageX;
+        dragScrollStart = topNav.scrollLeft;
+        topNav.classList.add('dragging');
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const delta = e.pageX - dragStartX;
+        if (Math.abs(delta) > 4) dragMoved = true;
+        topNav.scrollLeft = dragScrollStart - delta;
+        updateFadeState();
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        topNav.classList.remove('dragging');
+      });
+
+      topNav.addEventListener('click', (e) => {
+        if (dragMoved) { e.preventDefault(); e.stopPropagation(); dragMoved = false; }
+      }, true);
+    })();
+
+    (function enableHeroDragParallax() {
+      const hero = document.querySelector('.hero-container');
+      const wrapper = document.querySelector('.hero-bg-wrapper');
+      if (!hero || !wrapper) return;
+
+      const MAX_OFFSET = 46;
+      let isDragging = false;
+      let startX = 0;
+      let startY = 0;
+      let currentX = 0;
+      let currentY = 0;
+
+      function applyOffset(x, y) {
+        wrapper.style.transform = `translate(${x}px, ${y}px) scale(1.02)`;
+      }
+
+      hero.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX - currentX;
+        startY = e.clientY - currentY;
+        wrapper.classList.add('no-transition');
+        hero.classList.add('dragging');
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        let x = e.clientX - startX;
+        let y = e.clientY - startY;
+        x = Math.max(-MAX_OFFSET, Math.min(MAX_OFFSET, x));
+        y = Math.max(-MAX_OFFSET * 0.4, Math.min(MAX_OFFSET * 0.4, y));
+        currentX = x;
+        currentY = y;
+        applyOffset(x, y);
+      });
+
+      function endDrag() {
+        if (!isDragging) return;
+        isDragging = false;
+        hero.classList.remove('dragging');
+        wrapper.classList.remove('no-transition');
+        currentX = 0;
+        currentY = 0;
+        applyOffset(0, 0);
+      }
+
+      window.addEventListener('mouseup', endDrag);
+      hero.addEventListener('mouseleave', endDrag);
+
+      hero.addEventListener('touchstart', (e) => {
+        const t = e.touches[0];
+        isDragging = true;
+        startX = t.clientX - currentX;
+        startY = t.clientY - currentY;
+        wrapper.classList.add('no-transition');
+      }, { passive: true });
+
+      hero.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        const t = e.touches[0];
+        let x = Math.max(-MAX_OFFSET, Math.min(MAX_OFFSET, t.clientX - startX));
+        let y = Math.max(-MAX_OFFSET * 0.4, Math.min(MAX_OFFSET * 0.4, t.clientY - startY));
+        currentX = x;
+        currentY = y;
+        applyOffset(x, y);
+      }, { passive: true });
+
+      hero.addEventListener('touchend', endDrag);
     })();
  
     // REDIRECIONAMENTO GOOGLE FORMS
@@ -1716,6 +1785,33 @@
       window.open(googleFormsUrl, '_blank');
     }
  
+    // ===== SEGURANÇA: SANITIZAÇÃO DE DADOS ANTES DE INSERIR NO DOM =====
+    // Qualquer texto vindo da API (nome de produto, categoria, armário, item do
+    // carrinho etc.) passa por aqui antes de entrar em um template usado com
+    // innerHTML. Isso evita que um valor malicioso salvo no banco (ex.:
+    // "<img src=x onerror=alert(1)>") vire HTML/JS executável no navegador.
+    function escapeHtml(valor) {
+      const texto = valor === null || valor === undefined ? '' : String(valor);
+      const div = document.createElement('div');
+      div.textContent = texto;
+      return div.innerHTML;
+    }
+
+    // Só aceita URLs http/https (ou caminhos relativos) para usar em src="".
+    // Bloqueia esquemas perigosos como javascript: ou data: que poderiam
+    // executar código ao serem inseridos em um atributo src/href.
+    function sanitizeUrl(url) {
+      if (!url) return '';
+      const valor = String(url).trim();
+      if (/^(https?:)?\/\//i.test(valor) || valor.startsWith('/') || valor.startsWith('./') || valor.startsWith('../')) {
+        return escapeHtml(valor);
+      }
+      // fallback: caminho relativo simples (ex.: "app/static/...")
+      if (!/^[a-z]+:/i.test(valor)) return escapeHtml(valor);
+      console.warn('URL de imagem bloqueada por segurança:', valor);
+      return '';
+    }
+
     // ===== ESTADO GLOBAL =====
 
     let categories = [
@@ -1786,8 +1882,6 @@
         console.warn('Não foi possível carregar categorias do backend. Mantendo fallback local.', erro);
       }
       renderCategoryPills();
-      populateCategorySelect();
-      renderCategoryManageList();
     }
  
     async function carregarProdutos() {
@@ -1854,7 +1948,8 @@
  
       let html = `<button type="button" class="category-pill ${selectedCategoryId === 'all' ? 'active' : ''}" onclick="setCategoryFilter('all')">Todos</button>`;
       categories.forEach((c) => {
-        html += `<button type="button" class="category-pill ${String(selectedCategoryId) === String(c.id) ? 'active' : ''}" onclick="setCategoryFilter('${c.id}')">${c.nome}</button>`;
+        const idSeguro = encodeURIComponent(String(c.id));
+        html += `<button type="button" class="category-pill ${String(selectedCategoryId) === String(c.id) ? 'active' : ''}" onclick="setCategoryFilter('${idSeguro}')">${escapeHtml(c.nome)}</button>`;
       });
       container.innerHTML = html;
     }
@@ -1863,82 +1958,6 @@
       selectedCategoryId = categoryId;
       renderCategoryPills();
       filterProducts();
-    }
- 
-    function populateCategorySelect() {
-      const select = document.getElementById('categoryInput');
-      if (!select) return;
-      const currentValue = select.value;
-      select.innerHTML = '<option value="">Selecione...</option>' +
-        categories.map((c) => `<option value="${c.id}">${c.nome}</option>`).join('');
-      if (currentValue) select.value = currentValue;
-    }
- 
-    function renderCategoryManageList() {
-      const container = document.getElementById('categoryManageList');
-      if (!container) return;
-      if (!categories.length) {
-        container.innerHTML = '<div style="color: var(--text-dark); font-size: 0.78rem;">Nenhuma categoria cadastrada.</div>';
-        return;
-      }
-      container.innerHTML = categories.map((c) => `
-        <div class="category-manage-item">
-          <span>${c.nome}</span>
-          <button type="button" onclick="removeCategory(${c.id})">Remover</button>
-        </div>
-      `).join('');
-    }
- 
-    function saveCategory(e) {
-      e.preventDefault();
-      const input = document.getElementById('newCategoryInput');
-      const nome = input.value.trim();
-      if (!nome) return;
- 
-      fetch('/api/categorias', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome })
-      })
-        .then(async (resposta) => {
-          if (!resposta.ok) {
-            const detalhe = await resposta.json().catch(() => ({}));
-            throw new Error(detalhe.detail || 'Erro ao cadastrar categoria.');
-          }
-          return resposta.json();
-        })
-        .then(async () => {
-          input.value = '';
-          await carregarCategorias();
-        })
-        .catch((erro) => {
-          console.warn('Backend indisponível, adicionando categoria localmente.', erro);
-          const novoId = categories.length ? Math.max(...categories.map((c) => c.id)) + 1 : 1;
-          categories.push({ id: novoId, nome });
-          input.value = '';
-          renderCategoryPills();
-          populateCategorySelect();
-          renderCategoryManageList();
-        });
-    }
- 
-    function removeCategory(categoryId) {
-      if (!confirm('Remover esta categoria?')) return;
- 
-      fetch(`/api/categorias/${categoryId}`, { method: 'DELETE' })
-        .then(async (resposta) => {
-          if (!resposta.ok) throw new Error('Erro ao remover categoria.');
-          await carregarCategorias();
-        })
-        .catch((erro) => {
-          console.warn('Backend indisponível, removendo categoria localmente.', erro);
-          categories = categories.filter((c) => c.id !== categoryId);
-          if (String(selectedCategoryId) === String(categoryId)) selectedCategoryId = 'all';
-          renderCategoryPills();
-          populateCategorySelect();
-          renderCategoryManageList();
-          filterProducts();
-        });
     }
  
     // ===== PRODUTOS: FILTRO SIMULTÂNEO (BUSCA + CATEGORIA) =====
@@ -1957,7 +1976,7 @@
         return combinaTexto && combinaCategoria;
       });
 
-      getEstadoPaginacao('produtosPublic').pagina = 1;
+      getEstadoPaginacao('produtosPublic', 12).pagina = 1;
       renderProducts(filtrados);
     }
 
@@ -1966,16 +1985,16 @@
 
       if (!variacoes.length) {
         if (produto.tamanho) {
-          return `<div class="product-variations"><span class="variation-chip">${produto.tamanho}</span></div>`;
+          return `<div class="product-variations"><span class="variation-chip">${escapeHtml(produto.tamanho)}</span></div>`;
         }
         return '';
       }
 
       const chips = variacoes.map((v) => {
         const nome = v.nome_variacao || v.nome || v.name || '';
-        const estoque = v.estoque ?? v.quantidade ?? 0;
-        const semEstoque = Number(estoque) <= 0;
-        return `<span class="variation-chip${semEstoque ? ' out-of-stock' : ''}">${nome}<strong>${estoque}</strong></span>`;
+        const estoque = Number(v.estoque ?? v.quantidade ?? 0) || 0;
+        const semEstoque = estoque <= 0;
+        return `<span class="variation-chip${semEstoque ? ' out-of-stock' : ''}">${escapeHtml(nome)}<strong>${estoque}</strong></span>`;
       }).join('');
 
       return `<div class="product-variations">${chips}</div>`;
@@ -2000,20 +2019,24 @@
  
       container.innerHTML = "";
       pageItens.forEach((p) => {
-        const produtoImg = p.imagem_url || p.img || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=400&auto=format&fit=crop';
-        const produtoNome = p.nome || p.name || 'Produto';
+        const produtoImgBruto = p.imagem_url || p.img || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=400&auto=format&fit=crop';
+        const produtoImg = sanitizeUrl(produtoImgBruto);
+        const produtoNome = escapeHtml(p.nome || p.name || 'Produto');
         const produtoPreco = Number(p.preco || p.price || 0);
+        const produtoSku = escapeHtml(p.sku || ('PROD-' + (p.id || 'N/A')));
+        // id sempre tratado como número: evita quebrar o atributo onclick com aspas/JS injetado
+        const produtoIdNum = Number(p.id) || 0;
  
         container.innerHTML += `
           <div class="product-item">
             <img src="${produtoImg}" class="product-thumb" alt="${produtoNome}">
             <div class="product-body">
-              <span class="product-category">${getProductCategoryLabel(p)}</span>
+              <span class="product-category">${escapeHtml(getProductCategoryLabel(p))}</span>
               <div class="product-title">${produtoNome}</div>
               <div class="product-price">R$ ${produtoPreco.toFixed(2)}</div>
               ${renderVariationChips(p)}
-              <div class="product-sku">SKU: ${p.sku || ('PROD-' + (p.id || 'N/A'))}</div>
-              <button type="button" class="product-add-btn" data-product-id="${p.id}" onclick="addToCartFromButton(this, ${p.id})">
+              <div class="product-sku">SKU: ${produtoSku}</div>
+              <button type="button" class="product-add-btn" data-product-id="${produtoIdNum}" onclick="addToCartFromButton(this, ${produtoIdNum})">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
                 Adicionar
               </button>
@@ -2025,7 +2048,7 @@
       refreshRevealObserver();
     }
 
-    // ===== MEXI AQUI: CARRINHO DE COMPRAS =====
+    // ===== CARRINHO DE COMPRAS =====
     let cart = [];
 
     function loadCart() {
@@ -2136,21 +2159,26 @@
         return;
       }
 
-      list.innerHTML = cart.map((item) => `
+      list.innerHTML = cart.map((item) => {
+        const itemImg = sanitizeUrl(item.imagem_url) || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=200&auto=format&fit=crop';
+        const itemNome = escapeHtml(item.nome);
+        const itemIdNum = Number(item.id) || 0;
+        return `
         <div class="cart-item">
-          <img src="${item.imagem_url || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=200&auto=format&fit=crop'}" class="cart-item-thumb" alt="${item.nome}">
+          <img src="${itemImg}" class="cart-item-thumb" alt="${itemNome}">
           <div class="cart-item-info">
-            <div class="cart-item-name">${item.nome}</div>
+            <div class="cart-item-name">${itemNome}</div>
             <div class="cart-item-price">R$ ${item.preco.toFixed(2)} un.</div>
             <div class="cart-item-controls">
-              <button type="button" class="cart-qty-btn" onclick="updateCartQty('${item.id}', -1)">&minus;</button>
+              <button type="button" class="cart-qty-btn" onclick="updateCartQty('${itemIdNum}', -1)">&minus;</button>
               <span class="cart-qty-value">${item.qty}</span>
-              <button type="button" class="cart-qty-btn" onclick="updateCartQty('${item.id}', 1)">+</button>
-              <button type="button" class="cart-item-remove" onclick="removeCartItem('${item.id}')">Remover</button>
+              <button type="button" class="cart-qty-btn" onclick="updateCartQty('${itemIdNum}', 1)">+</button>
+              <button type="button" class="cart-item-remove" onclick="removeCartItem('${itemIdNum}')">Remover</button>
             </div>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
 
     function openCart() {
@@ -2167,12 +2195,15 @@
     function checkoutCartWhatsapp() {
       if (!cart.length) { alert('Seu carrinho está vazio.'); return; }
 
-      let msg = 'Olá! Gostaria de fazer o seguinte pedido na Loja AAPM:%0A%0A';
+      const linhas = ['Olá! Gostaria de fazer o seguinte pedido na Loja AAPM:', ''];
       cart.forEach((item) => {
-        msg += `• ${item.qty}x ${item.nome} — R$ ${(item.preco * item.qty).toFixed(2)}%0A`;
+        linhas.push(`• ${item.qty}x ${item.nome} — R$ ${(item.preco * item.qty).toFixed(2)}`);
       });
-      msg += `%0ATotal: R$ ${cartTotal().toFixed(2)}`;
+      linhas.push('', `Total: R$ ${cartTotal().toFixed(2)}`);
 
+      // encodeURIComponent trata corretamente quebras de linha e caracteres
+      // especiais (&, #, %, etc.) que poderiam quebrar ou adulterar a URL
+      const msg = encodeURIComponent(linhas.join('\n'));
       window.open(`https://wa.me/5511951611320?text=${msg}`, '_blank');
     }
 
@@ -2261,9 +2292,9 @@
 
       tbody.innerHTML = pageItens.map((a) => `
         <tr>
-          <td><span class="badge-rm">Nº ${a.numero}</span></td>
-          <td>${a.localizacao || '-'}</td>
-          <td><span class="status-tag ${statusArmarioClassePublic(a.status)}">${a.status}</span></td>
+          <td><span class="badge-rm">Nº ${escapeHtml(a.numero)}</span></td>
+          <td>${escapeHtml(a.localizacao || '-')}</td>
+          <td><span class="status-tag ${statusArmarioClassePublic(a.status)}">${escapeHtml(a.status)}</span></td>
         </tr>
       `).join('');
       renderPaginacao('paginacaoArmariosPublic', 'armariosPublic', totalPaginas, paginaAtual, totalItens, 'rerenderArmariosPublicPaginaAtual');
@@ -2282,7 +2313,6 @@
       if (targetView) targetView.classList.add('active');
       if (element) element.classList.add('active');
 
-      // mantém os dois menus (desktop e mobile) sincronizados, não importa qual foi clicado
       const idx = { 'inicio': 0, 'produtos': 1, 'associados': 2, 'fale-conosco': 3, 'armarios': 4 }[viewId];
       if (idx !== undefined) {
         const desktopItems = document.querySelectorAll('.nav-item');
@@ -2299,7 +2329,7 @@
       }
     }
 
-    // ===== MEXI AQUI: MENU MOBILE (drawer) =====
+    // ===== MENU MOBILE (drawer) =====
     function toggleMobileMenu() {
       const isOpen = document.getElementById('mobileMenu').classList.contains('active');
       if (isOpen) closeMobileMenu(); else openMobileMenu();
@@ -2429,7 +2459,7 @@
       document.querySelectorAll('.reveal:not(.in-view), .reveal-stagger:not(.in-view)').forEach(el => revealObserver.observe(el));
     }
  
-    // BACKGROUND CANVAS — cena espacial premium (nebulosa + estrelas em profundidade + cadentes)
+    // BACKGROUND CANVAS
     (function initCanvas() {
       const canvas = document.getElementById('bg-canvas');
       if (!canvas) return;
@@ -2445,7 +2475,6 @@
       let nebulae = [];
       let shootingStars = [];
 
-      // ===== ESTRELAS EM 3 CAMADAS (parallax de profundidade) =====
       function generateStars() {
         stars = [];
         const layers = [
@@ -2471,7 +2500,6 @@
         });
       }
 
-      // ===== NEBULOSAS: manchas de luz grandes, suaves, pulsando devagar =====
       function generateNebulae() {
         nebulae = [
           { xR: 0.22, yR: 0.28, radius: Math.max(canvas.width, canvas.height) * 0.42, hue: 344, phase: 0,   speed: 0.0016 },
@@ -2488,7 +2516,6 @@
       resize();
       window.addEventListener('resize', resize);
 
-      // parallax bem sutil seguindo o mouse (dá profundidade real à cena)
       let mouseX = 0, mouseY = 0, parX = 0, parY = 0;
       window.addEventListener('mousemove', (e) => {
         mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
@@ -2498,8 +2525,8 @@
       function maybeSpawnShootingStar() {
         if (Math.random() < 0.012 && shootingStars.length < 5) {
           const startX = Math.random() * canvas.width * 0.8 + canvas.width * 0.1;
-          const big = Math.random() < 0.25; // uma em cada quatro é maior/mais brilhante
-          const tint = Math.random() < 0.2 ? '255, 210, 210' : '255, 255, 255'; // toque rosado ocasional
+          const big = Math.random() < 0.25;
+          const tint = Math.random() < 0.2 ? '255, 210, 210' : '255, 255, 255';
           shootingStars.push({
             x: startX,
             y: -20,
@@ -2519,9 +2546,9 @@
       }
 
       function drawNebulae(time) {
-        if (isLightTheme()) return; // no claro o fundo já tem o gradiente via CSS
+        if (isLightTheme()) return;
         nebulae.forEach((n) => {
-          const pulse = (Math.sin(time * n.speed + n.phase) + 1) / 2; // 0..1
+          const pulse = (Math.sin(time * n.speed + n.phase) + 1) / 2;
           const cx = canvas.width * n.xR + parX * 20;
           const cy = canvas.height * n.yR + parY * 20;
           const r = n.radius * (0.85 + pulse * 0.18);
@@ -2548,7 +2575,6 @@
           const px = star.x + parX * (star.layer + 1) * 6;
           const py = star.y + parY * (star.layer + 1) * 6;
 
-          // no tema claro as estrelinhas viram "confete" nas cores da marca (rosa/dourado)
           const color = light ? (star.color === '255, 255, 255' ? '214, 50, 80' : '255, 157, 108') : star.color;
 
           ctx.beginPath();
@@ -2579,7 +2605,6 @@
           ctx.lineTo(tailX, tailY);
           ctx.stroke();
 
-          // cabeça brilhante
           ctx.beginPath();
           ctx.fillStyle = `rgba(${color}, ${s.life * (light ? 0.55 : 1)})`;
           if (!light) {
@@ -2592,7 +2617,7 @@
 
           s.x += s.vx;
           s.y += s.vy;
-          if (s.y > canvas.height * 0.9 || s.x < -50) s.life -= 1; // sai da tela: remove
+          if (s.y > canvas.height * 0.9 || s.x < -50) s.life -= 1;
         });
         shootingStars = shootingStars.filter((s) => s.life > 0 && s.y < canvas.height + 50);
       }
@@ -2624,4 +2649,4 @@
     };
   </script>
 </body>
-</html> 
+</html>
