@@ -32,7 +32,9 @@
  
       --text-main: #ffffff;
       --text-muted: rgba(255, 255, 255, 0.64);
-      --text-dark: rgba(255, 255, 255, 0.38);
+      /* MEXI AQUI (acessibilidade): 0.38 -> 0.5 de opacidade para atingir
+         contraste mínimo de 4.5:1 (WCAG AA) sobre o fundo escuro */
+      --text-dark: rgba(255, 255, 255, 0.5);
  
       --success: #1fbf82;
       --warning: #f59e0b;
@@ -998,6 +1000,8 @@
   </style>
 </head>
 <body>
+
+  <a href="#mainContent" class="skip-link">Pular para o conteúdo principal</a>
  
   <canvas id="bg-canvas"></canvas>
 
@@ -1121,7 +1125,7 @@
     </div>
   </aside>
  
-  <main class="wrapper">
+  <main class="wrapper" id="mainContent" tabindex="-1">
  
     <!-- 1. INÍCIO -->
     <section id="inicio" class="view-content active">
