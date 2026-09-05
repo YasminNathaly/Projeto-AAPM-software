@@ -51,13 +51,13 @@
     }
  
     html[data-theme="light"] {
-      --bg-main: #f7f3ee;
-      --bg-surface: rgba(255, 255, 255, 0.78);
-      --bg-surface-hover: rgba(9, 9, 15, 0.04);
-      --bg-card: rgba(255, 255, 255, 0.86);
-      --bg-card-2: #fbf7f2;
-      --border-color: rgba(9, 9, 15, 0.08);
-      --border-color-soft: rgba(9, 9, 15, 0.05);
+      --bg-main: #e7e1dc;
+      --bg-surface: rgba(246, 241, 236, 0.9);
+      --bg-surface-hover: rgba(125, 56, 62, 0.06);
+      --bg-card: rgba(241, 235, 230, 0.94);
+      --bg-card-2: #ebe4df;
+      --border-color: rgba(74, 42, 42, 0.14);
+      --border-color-soft: rgba(74, 42, 42, 0.08);
  
       --primary-soft: rgba(214, 50, 80, 0.08);
       --primary-soft-border: rgba(214, 50, 80, 0.22);
@@ -72,9 +72,9 @@
  
     html[data-theme="light"] body {
       background:
-        radial-gradient(90% 60% at 15% 0%, rgba(214, 50, 80, 0.10) 0%, rgba(214, 50, 80, 0) 55%),
-        radial-gradient(70% 50% at 100% 20%, rgba(255, 196, 140, 0.16) 0%, rgba(255, 196, 140, 0) 60%),
-        radial-gradient(120% 90% at 50% 100%, rgba(214, 50, 80, 0.06) 0%, rgba(214, 50, 80, 0) 55%),
+        radial-gradient(90% 60% at 15% 0%, rgba(214, 50, 80, 0.16) 0%, rgba(214, 50, 80, 0) 55%),
+        radial-gradient(70% 50% at 100% 20%, rgba(191, 129, 91, 0.18) 0%, rgba(191, 129, 91, 0) 60%),
+        radial-gradient(120% 90% at 50% 100%, rgba(125, 56, 62, 0.10) 0%, rgba(125, 56, 62, 0) 55%),
         var(--bg-main);
       background-attachment: fixed;
     }
@@ -155,13 +155,13 @@
     }
     .aapm-wordmark-text {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.18rem;
+      font-size: 1.5rem;
       letter-spacing: 0.09em;
-      background: linear-gradient(90deg, #2f8dff 0%, #0a4bb0 100%);
+      background: linear-gradient(90deg, #f3132b 0%, #a90c20 100%);
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
-      color: #2f8dff;
+      color: #d63250;
       position: relative;
       width: fit-content;
     }
@@ -171,7 +171,7 @@
       left: 0; bottom: -3px;
       width: 100%; height: 2px;
       border-radius: 2px;
-      background: linear-gradient(90deg, #2f8dff 0%, #0a4bb0 100%);
+      background: linear-gradient(90deg, #f3132b 0%, #a90c20 100%);
       transform: scaleX(0.35);
       transform-origin: left;
       transition: transform 0.35s var(--ease);
@@ -188,7 +188,7 @@
     }
     @media (max-width: 600px) {
       .aapm-wordmark { padding-left: 10px; }
-      .aapm-wordmark-text { font-size: 1rem; }
+      .aapm-wordmark-text { font-size: 1.2rem; }
       .aapm-wordmark-sub { display: none; }
     }
  
@@ -336,6 +336,87 @@
     }
  
     .btn-auth:hover { background: var(--primary); border-color: var(--primary); color: #fff; transform: translateY(-1px); }
+
+    body.admin-transition::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      pointer-events: none;
+      background: var(--bg-main);
+      animation: adminPageExit 0.55s var(--ease) forwards;
+    }
+    .page-loading {
+      position: fixed;
+      inset: 0;
+      z-index: 10001;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.25rem;
+      background: radial-gradient(circle at center, rgba(214, 50, 80, 0.16), transparent 34%), #09090f;
+      color: #fff;
+    }
+    .page-loading.active { display: flex; animation: loaderReveal 0.35s ease-out both; }
+    .loader-orbit {
+      width: 92px;
+      height: 92px;
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+    .loader-orbit::before,
+    .loader-orbit::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 50%;
+      animation: loaderOrbit 1.6s ease-in-out infinite;
+    }
+    .loader-orbit::after {
+      inset: 10px -8px;
+      border-color: rgba(214, 50, 80, 0.75);
+      transform: rotate(55deg);
+      animation-duration: 1.1s;
+      animation-direction: reverse;
+    }
+    .loader-core {
+      width: 58px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #f3132b, #b8081b);
+      box-shadow: 0 0 28px rgba(214, 50, 80, 0.55);
+      font: 900 0.82rem/1 'Arial Black', Impact, sans-serif;
+      font-style: italic;
+    }
+    .loader-title { font: 600 0.82rem/1 'Poppins', sans-serif; letter-spacing: 0.16em; text-transform: uppercase; }
+    .loader-track { width: 150px; height: 3px; overflow: hidden; border-radius: 99px; background: rgba(255, 255, 255, 0.16); }
+    .loader-track span { display: block; width: 45%; height: 100%; border-radius: inherit; background: #d63250; animation: loaderProgress 0.85s ease-in-out forwards; }
+    @keyframes loaderReveal { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes loaderOrbit { 50% { transform: rotate(180deg) scale(1.08); opacity: 0.55; } }
+    @keyframes loaderProgress { from { width: 0; } to { width: 100%; } }
+    body.admin-transition .main-header,
+    body.admin-transition main.wrapper,
+    body.admin-transition footer.site-footer {
+      animation: adminContentExit 0.55s var(--ease) forwards;
+    }
+    @keyframes adminPageExit {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes adminContentExit {
+      to { opacity: 0; transform: scale(0.985) translateY(-8px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      body.admin-transition::after { animation-duration: 0.1s; }
+      body.admin-transition .main-header,
+      body.admin-transition main.wrapper,
+      body.admin-transition footer.site-footer { animation-duration: 0.1s; }
+    }
  
     main.wrapper {
       margin-top: var(--header-height);
@@ -353,7 +434,16 @@
       gap: 2rem;
     }
  
-    .view-content.active { display: flex; }
+    .view-content.active { display: flex; animation: tourViewIn 0.55s var(--ease); }
+    @keyframes tourViewIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    main.wrapper.swipe-next .view-content.active { animation: sectionEnterFromRight 0.55s var(--ease); }
+    main.wrapper.swipe-prev .view-content.active { animation: sectionEnterFromLeft 0.55s var(--ease); }
+    main.wrapper.swipe-next .view-content.section-leaving-next { animation: sectionLeaveToLeft 0.3s var(--ease) forwards !important; }
+    main.wrapper.swipe-prev .view-content.section-leaving-prev { animation: sectionLeaveToRight 0.3s var(--ease) forwards !important; }
+    @keyframes sectionEnterFromRight { from { opacity: 0; transform: translateX(12vw); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes sectionEnterFromLeft { from { opacity: 0; transform: translateX(-12vw); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes sectionLeaveToLeft { to { opacity: 0; transform: translateX(-12vw); } }
+    @keyframes sectionLeaveToRight { to { opacity: 0; transform: translateX(12vw); } }
     .view-content .section-pad:first-of-type { padding-top: 3rem; }
     .view-content > .section-pad { padding-top: 0; }
     
@@ -985,6 +1075,97 @@
     .product-add-btn:hover { background: var(--primary); color: #fff; }
     .product-add-btn.added { background: var(--success); border-color: var(--success); color: #fff; }
 
+    /* ===== ASSISTENTE AAPM — mesmo visual usado no painel admin ===== */
+    .base-assistant-fab {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 160;
+      width: 54px;
+      height: 54px;
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 18px;
+      background: linear-gradient(145deg, var(--primary), #8d1830);
+      box-shadow: 0 12px 30px rgba(214,50,80,.4);
+      cursor: pointer;
+      transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+    }
+    .base-assistant-fab:hover { transform: translateY(-5px) rotate(3deg); box-shadow: 0 18px 38px rgba(214,50,80,.5); }
+
+    .base-assistant-face {
+      position: absolute; left: 14px; top: 18px;
+      width: 26px; height: 20px;
+      border: 2px solid #fff;
+      border-radius: 8px;
+    }
+    .base-assistant-face i {
+      position: absolute; top: 6px;
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: #fff;
+    }
+    .base-assistant-face i:first-child { left: 6px; }
+    .base-assistant-face i:last-child { right: 6px; }
+
+    .base-assistant-antenna {
+      position: absolute; left: 25px; top: 10px;
+      width: 2px; height: 8px;
+      background: #fff;
+    }
+    .base-assistant-antenna::before {
+      content: '';
+      position: absolute; left: -3px; top: -4px;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #ffd166;
+      box-shadow: 0 0 10px #ffd166;
+    }
+
+    .base-assistant-panel {
+      position: fixed;
+      right: 24px;
+      bottom: 90px;
+      z-index: 159;
+      width: min(360px, calc(100vw - 32px));
+      padding: 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      background: var(--bg-card);
+      box-shadow: 0 22px 60px rgba(0,0,0,.42);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      transform: translateY(12px) scale(.96);
+      opacity: 0;
+      visibility: hidden;
+      transition: transform .25s var(--ease), opacity .25s var(--ease), visibility .25s;
+    }
+    .base-assistant-panel.open { transform: translateY(0) scale(1); opacity: 1; visibility: visible; }
+
+    .base-assistant-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+    .base-assistant-head span { display: block; font-size: .64rem; letter-spacing: .14em; text-transform: uppercase; color: var(--primary); font-weight: 700; }
+    .base-assistant-head strong { display: block; margin-top: 2px; font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 0.02em; }
+    .base-assistant-head button { border: 0; background: transparent; color: var(--text-muted); font-size: 1.4rem; cursor: pointer; line-height: 1; }
+    .base-assistant-head button:hover { color: var(--primary); }
+
+    .base-assistant-messages { display: flex; flex-direction: column; gap: 8px; max-height: 210px; overflow-y: auto; margin: 1rem 0; }
+    .base-assistant-message { max-width: 88%; padding: .65rem .75rem; border-radius: 12px; font-size: .75rem; line-height: 1.35; }
+    .base-assistant-message.bot { background: var(--bg-surface-hover); color: var(--text-main); align-self: flex-start; }
+    .base-assistant-message.user { background: var(--primary-soft); color: var(--text-main); align-self: flex-end; }
+
+    .base-assistant-suggestions { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: .75rem; }
+    .base-assistant-suggestions button { border: 1px solid var(--border-color); background: transparent; color: var(--text-muted); border-radius: 999px; padding: .35rem .55rem; font-size: .64rem; cursor: pointer; transition: all .2s var(--ease); }
+    .base-assistant-suggestions button:hover { border-color: var(--primary); color: var(--text-main); }
+
+    .base-assistant-form { display: flex; gap: 6px; }
+    .base-assistant-form input { min-width: 0; flex: 1; border: 1px solid var(--border-color); border-radius: 10px; padding: .65rem .75rem; background: var(--bg-surface-hover); color: var(--text-main); outline: none; font-size: .8rem; }
+    .base-assistant-form input:focus { border-color: var(--primary); }
+    .base-assistant-form button { width: 36px; border: 0; border-radius: 10px; background: var(--primary); color: #fff; cursor: pointer; font-size: 1.1rem; }
+    .base-assistant-form button:hover { background: var(--primary-hover); }
+
+    @media (max-width: 480px) {
+      .base-assistant-panel { right: 12px; bottom: 84px; }
+      .base-assistant-fab { right: 16px; bottom: 16px; }
+    }
 
     @media (max-width: 600px) {
       :root { --header-height: 64px; }
@@ -1044,16 +1225,32 @@
  
   <canvas id="bg-canvas"></canvas>
 
+  <div class="page-loading" id="pageLoader" role="status" aria-live="polite">
+    <div class="loader-orbit"><div class="loader-core">SENAI</div></div>
+    <div class="loader-title">Abrindo painel</div>
+    <div class="loader-track"><span></span></div>
+  </div>
+
+  <button type="button" class="base-assistant-fab" onclick="toggleBaseAssistant()" aria-label="Abrir assistente AAPM" title="Assistente AAPM">
+    <span class="base-assistant-antenna"></span><span class="base-assistant-face"><i></i><i></i></span>
+  </button>
+  <div class="base-assistant-panel" id="baseAssistantPanel" aria-label="Assistente AAPM">
+    <div class="base-assistant-head"><div><span>ASSISTENTE AAPM</span><strong>Como posso ajudar?</strong></div><button type="button" onclick="toggleBaseAssistant()" aria-label="Fechar">&times;</button></div>
+    <div class="base-assistant-messages" id="baseAssistantMessages"><div class="base-assistant-message bot">Posso explicar os produtos, associados e os formulários da AAPM.</div></div>
+    <div class="base-assistant-suggestions"><button type="button" onclick="usarSugestaoBase('Quero ver os produtos')">Produtos</button><button type="button" onclick="usarSugestaoBase('Como funciona o cadastro de associado?')">Associados</button><button type="button" onclick="usarSugestaoBase('Onde fica o formulário?')">Formulário</button></div>
+    <form class="base-assistant-form" onsubmit="enviarMensagemBase(event)"><input id="baseAssistantInput" autocomplete="off" placeholder="Digite uma dúvida..."><button type="submit" aria-label="Enviar">&rarr;</button></form>
+  </div>
+
   <header class="main-header">
     <a href="#" class="brand-logo" onclick="navigate('inicio', document.querySelectorAll('.nav-item')[0])">
       <svg class="logo-senai-svg" viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <linearGradient id="senaiBlueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#2f8dff"/>
-            <stop offset="100%" stop-color="#0a4bb0"/>
+          <linearGradient id="senaiRedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#f3132b"/>
+            <stop offset="100%" stop-color="#b8081b"/>
           </linearGradient>
         </defs>
-        <rect width="320" height="100" rx="10" fill="url(#senaiBlueGrad)"/>
+        <rect width="320" height="100" rx="10" fill="url(#senaiRedGrad)"/>
         <line x1="0" y1="20" x2="22" y2="20" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
         <line x1="0" y1="35" x2="22" y2="35" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
         <line x1="0" y1="50" x2="22" y2="50" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
@@ -1104,7 +1301,7 @@
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"/></svg>
       </button>
-      <a href="/login" class="btn-auth" id="authBtn">PAINEL ADMIN</a>
+      <a href="/login" class="btn-auth" id="authBtn" onclick="handleAdminAccess(event, this)">PAINEL ADMIN</a>
       <button class="icon-btn mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()" aria-label="Abrir menu" title="Menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
@@ -1808,12 +2005,72 @@
       const googleFormsUrl = `https://docs.google.com/forms/d/e/1FAIpQLSfm7ghOYRckrt8EajO9Hx7Y5KMZEvqQXwj8tJ3V_dX1xfCBzw/viewform?usp=header`;
       window.open(googleFormsUrl, '_blank');
     }
+
+    function handleAdminAccess(event, link) {
+      event.preventDefault();
+      if (document.body.classList.contains('admin-transition')) return;
+
+      document.body.classList.add('admin-transition');
+      document.getElementById('pageLoader')?.classList.add('active');
+      setTimeout(() => {
+        window.location.href = link.href;
+      }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 100 : 850);
+    }
+
+    function toggleBaseAssistant() {
+      const panel = document.getElementById('baseAssistantPanel');
+      if (!panel) return;
+      panel.classList.toggle('open');
+      if (panel.classList.contains('open')) document.getElementById('baseAssistantInput')?.focus();
+    }
+
+    function adicionarMensagemBase(texto, tipo) {
+      const messages = document.getElementById('baseAssistantMessages');
+      if (!messages) return;
+      const item = document.createElement('div');
+      item.className = `base-assistant-message ${tipo}`;
+      item.textContent = texto;
+      messages.appendChild(item);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function responderBase(texto) {
+      const pergunta = texto.toLowerCase();
+      if (pergunta.includes('produto') || pergunta.includes('loja')) {
+        navigate('produtos', document.querySelectorAll('.nav-item')[1]);
+        return 'Na Loja AAPM você pode pesquisar produtos, filtrar por categoria e adicionar itens ao carrinho.';
+      }
+      if (pergunta.includes('associado')) {
+        navigate('associados', document.querySelectorAll('.nav-item')[2]);
+        return 'A seção Associados mostra a lista oficial. Para se cadastrar, use Fale Conosco e continue pelo formulário.';
+      }
+      if (pergunta.includes('formulário') || pergunta.includes('formulario') || pergunta.includes('cadastro') || pergunta.includes('contato')) {
+        navigate('fale-conosco', document.querySelectorAll('.nav-item')[3]);
+        return 'Em Fale Conosco você encontra o formulário de inscrição e o contato rápido pelo WhatsApp.';
+      }
+      if (pergunta.includes('armário') || pergunta.includes('armario')) {
+        navigate('armarios', document.querySelectorAll('.nav-item')[4]);
+        return 'Na seção Armários você pode consultar números, localização e disponibilidade.';
+      }
+      return 'Posso ajudar com Produtos, Associados, Formulário de inscrição, WhatsApp ou Armários.';
+    }
+
+    function usarSugestaoBase(texto) {
+      document.getElementById('baseAssistantInput').value = texto;
+      enviarMensagemBase({ preventDefault() {} });
+    }
+
+    function enviarMensagemBase(event) {
+      event.preventDefault();
+      const input = document.getElementById('baseAssistantInput');
+      const texto = input?.value.trim();
+      if (!texto) return;
+      adicionarMensagemBase(texto, 'user');
+      input.value = '';
+      setTimeout(() => adicionarMensagemBase(responderBase(texto), 'bot'), 180);
+    }
  
     // ===== SEGURANÇA: SANITIZAÇÃO DE DADOS ANTES DE INSERIR NO DOM =====
-    // Qualquer texto vindo da API (nome de produto, categoria, armário, item do
-    // carrinho etc.) passa por aqui antes de entrar em um template usado com
-    // innerHTML. Isso evita que um valor malicioso salvo no banco (ex.:
-    // "<img src=x onerror=alert(1)>") vire HTML/JS executável no navegador.
     function escapeHtml(valor) {
       const texto = valor === null || valor === undefined ? '' : String(valor);
       const div = document.createElement('div');
@@ -1821,16 +2078,12 @@
       return div.innerHTML;
     }
 
-    // Só aceita URLs http/https (ou caminhos relativos) para usar em src="".
-    // Bloqueia esquemas perigosos como javascript: ou data: que poderiam
-    // executar código ao serem inseridos em um atributo src/href.
     function sanitizeUrl(url) {
       if (!url) return '';
       const valor = String(url).trim();
       if (/^(https?:)?\/\//i.test(valor) || valor.startsWith('/') || valor.startsWith('./') || valor.startsWith('../')) {
         return escapeHtml(valor);
       }
-      // fallback: caminho relativo simples (ex.: "app/static/...")
       if (!/^[a-z]+:/i.test(valor)) return escapeHtml(valor);
       console.warn('URL de imagem bloqueada por segurança:', valor);
       return '';
@@ -2048,7 +2301,6 @@
         const produtoNome = escapeHtml(p.nome || p.name || 'Produto');
         const produtoPreco = Number(p.preco || p.price || 0);
         const produtoSku = escapeHtml(p.sku || ('PROD-' + (p.id || 'N/A')));
-        // id sempre tratado como número: evita quebrar o atributo onclick com aspas/JS injetado
         const produtoIdNum = Number(p.id) || 0;
  
         container.innerHTML += `
@@ -2225,8 +2477,6 @@
       });
       linhas.push('', `Total: R$ ${cartTotal().toFixed(2)}`);
 
-      // encodeURIComponent trata corretamente quebras de linha e caracteres
-      // especiais (&, #, %, etc.) que poderiam quebrar ou adulterar a URL
       const msg = encodeURIComponent(linhas.join('\n'));
       window.open(`https://wa.me/5511951611320?text=${msg}`, '_blank');
     }
@@ -2351,6 +2601,78 @@
       if (viewId === 'armarios') {
         carregarArmariosPublic();
       }
+    }
+
+    const dragNavigationViews = ['inicio', 'produtos', 'associados', 'fale-conosco', 'armarios'];
+    let dragStartX = null;
+    let dragMoved = false;
+    let bloquearProximoClique = false;
+    let animandoArraste = false;
+
+    function inicializarNavegacaoPorArraste() {
+      const wrapper = document.querySelector('main.wrapper');
+      if (!wrapper) return;
+
+      wrapper.addEventListener('pointerdown', (event) => {
+        if (animandoArraste || event.button !== 0 || event.target.closest('a, button, input, textarea, select, .cart-drawer')) return;
+        dragStartX = event.clientX;
+        dragMoved = false;
+        wrapper.setPointerCapture?.(event.pointerId);
+      });
+
+      wrapper.addEventListener('pointermove', (event) => {
+        if (dragStartX === null) return;
+        dragMoved = Math.abs(event.clientX - dragStartX) > 10;
+        if (dragMoved) wrapper.classList.add('dragging-section');
+      });
+
+      wrapper.addEventListener('pointerup', (event) => {
+        if (dragStartX === null) return;
+        const deslocamento = event.clientX - dragStartX;
+        const viewAtual = document.querySelector('.view-content.active')?.id;
+        const indiceAtual = dragNavigationViews.indexOf(viewAtual);
+        const arrasteValido = Math.abs(deslocamento) >= 70 && indiceAtual >= 0;
+
+        if (arrasteValido) {
+          const direcao = deslocamento < 0 ? 1 : -1;
+          const proximoIndice = Math.max(0, Math.min(dragNavigationViews.length - 1, indiceAtual + direcao));
+          if (proximoIndice !== indiceAtual) {
+            const itemNav = document.querySelectorAll('.nav-item')[proximoIndice];
+            const viewAtualEl = document.getElementById(viewAtual);
+            const classeDirecao = direcao > 0 ? 'next' : 'prev';
+            animandoArraste = true;
+            wrapper.classList.add(`swipe-${classeDirecao}`);
+            viewAtualEl?.classList.add(`section-leaving-${classeDirecao}`);
+            setTimeout(() => {
+              navigate(dragNavigationViews[proximoIndice], itemNav);
+              viewAtualEl?.classList.remove(`section-leaving-${classeDirecao}`);
+              setTimeout(() => {
+                wrapper.classList.remove(`swipe-${classeDirecao}`);
+                animandoArraste = false;
+              }, 520);
+            }, 300);
+          }
+        }
+
+        bloquearProximoClique = dragMoved;
+        dragStartX = null;
+        dragMoved = false;
+        wrapper.classList.remove('dragging-section');
+        wrapper.releasePointerCapture?.(event.pointerId);
+      });
+
+      wrapper.addEventListener('pointercancel', () => {
+        dragStartX = null;
+        dragMoved = false;
+        wrapper.classList.remove('dragging-section');
+      });
+
+      wrapper.addEventListener('click', (event) => {
+        if (!bloquearProximoClique) return;
+        event.preventDefault();
+        event.stopPropagation();
+        bloquearProximoClique = false;
+      }, true);
     }
 
     // ===== MENU MOBILE (drawer) =====
@@ -2670,6 +2992,7 @@
       loadCart();
       renderCart();
       refreshRevealObserver();
+      inicializarNavegacaoPorArraste();
     };
   </script>
 </body>

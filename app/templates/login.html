@@ -33,12 +33,12 @@
 
     /* ================= VARIÁVEIS GLOBAIS - TEMA CLARO ================= */
     :root[data-theme="light"] {
-      --bg-main: #f7f3ee;
-      --bg-surface: rgba(255, 255, 255, 0.85);
-      --bg-surface-hover: rgba(0, 0, 0, 0.04);
-      --bg-card: rgba(255, 255, 255, 0.86);
-      --bg-backdrop: rgba(240, 242, 248, 0.55);
-      --border-color: rgba(0, 0, 0, 0.08);
+      --bg-main: #e7e1dc;
+      --bg-surface: rgba(246, 241, 236, 0.9);
+      --bg-surface-hover: rgba(125, 56, 62, 0.06);
+      --bg-card: rgba(241, 235, 230, 0.94);
+      --bg-backdrop: rgba(231, 225, 220, 0.72);
+      --border-color: rgba(74, 42, 42, 0.14);
       
       --primary: #d63250;
       --primary-hover: #b82842;
@@ -56,9 +56,9 @@
        igual ao usado na página principal */
     :root[data-theme="light"] body {
       background:
-        radial-gradient(90% 60% at 15% 0%, rgba(214, 50, 80, 0.10) 0%, rgba(214, 50, 80, 0) 55%),
-        radial-gradient(70% 50% at 100% 20%, rgba(255, 196, 140, 0.16) 0%, rgba(255, 196, 140, 0) 60%),
-        radial-gradient(120% 90% at 50% 100%, rgba(214, 50, 80, 0.06) 0%, rgba(214, 50, 80, 0) 55%),
+        radial-gradient(90% 60% at 15% 0%, rgba(214, 50, 80, 0.16) 0%, rgba(214, 50, 80, 0) 55%),
+        radial-gradient(70% 50% at 100% 20%, rgba(191, 129, 91, 0.18) 0%, rgba(191, 129, 91, 0) 60%),
+        radial-gradient(120% 90% at 50% 100%, rgba(125, 56, 62, 0.10) 0%, rgba(125, 56, 62, 0) 55%),
         var(--bg-main);
       background-attachment: fixed;
     }
@@ -139,6 +139,34 @@
       padding-left: 14px;
     }
 
+    .aapm-wordmark {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2px;
+      padding-left: 14px;
+      border-left: 1px solid var(--border-color);
+      line-height: 1;
+    }
+    .aapm-wordmark-text {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: 0.09em;
+      background: linear-gradient(90deg, #f3132b 0%, #a90c20 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: #d63250;
+    }
+    .aapm-wordmark-sub {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-dark);
+      margin-top: 4px;
+    }
+
     .top-nav {
       display: flex;
       align-items: center;
@@ -199,12 +227,15 @@
       border: 1px solid var(--border-color);
       border-radius: var(--radius-lg);
       width: 100%;
-      max-width: 420px;
-      padding: 2.3rem;
+      max-width: 460px;
+      padding: 2.5rem;
       position: relative;
       box-shadow: var(--card-shadow);
       animation: modalEntry 0.4s var(--ease) forwards;
     }
+    body.forgot-only .login-box,
+    body.forgot-only .login-info { display: none; }
+    body.forgot-only main.wrapper { align-items: flex-start; padding-top: 3rem; }
 
     @keyframes modalEntry {
       from { opacity: 0; transform: translateY(14px) scale(0.98); }
@@ -310,6 +341,37 @@
       box-shadow: none;
     }
 
+    .login-lockout-countdown {
+      min-height: 18px;
+      margin-top: 0.65rem;
+      color: var(--danger);
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .login-launch-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 5000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #09090f;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .login-launch-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; animation: launchBaseReveal 0.85s ease-out both; }
+    body.launching .main-header,
+    body.launching main.wrapper { animation: loginScreenClose 0.65s cubic-bezier(.7,0,.84,.2) forwards; }
+    .launch-base-scene { display: flex; flex-direction: column; align-items: center; gap: 1rem; opacity: 0; transform: translateY(30px) scale(.92); animation: launchBaseRise .7s .25s var(--ease) forwards; }
+    .launch-base-logo { width: 132px; height: 42px; border-radius: 7px; background: linear-gradient(135deg, #f3132b, #b8081b); display: grid; place-items: center; color: #fff; font: italic 900 1.5rem/1 'Arial Black', Impact, sans-serif; box-shadow: 0 0 42px rgba(214,50,80,.42); }
+    .launch-base-scene span { color: rgba(255,255,255,.68); font: 600 .72rem/1 'Space Grotesk', sans-serif; letter-spacing: .16em; text-transform: uppercase; }
+    @keyframes loginScreenClose { to { opacity: 0; transform: perspective(900px) rotateX(-13deg) translateY(-55px) scale(.9); filter: blur(5px); } }
+    @keyframes launchBaseReveal { from { background: rgba(9,9,15,0); } to { background: rgba(9,9,15,1); } }
+    @keyframes launchBaseRise { to { opacity: 1; transform: translateY(0) scale(1); } }
+
     .btn-link {
       background: none;
       border: none;
@@ -386,7 +448,7 @@
       font-size: 0.78rem;
       color: var(--text-muted);
       line-height: 1.6;
-      max-width: 420px;
+      max-width: 460px;
       width: 100%;
       box-shadow: var(--card-shadow);
     }
@@ -532,13 +594,41 @@
 
   <canvas id="bg-canvas"></canvas>
 
+  <div class="login-launch-overlay" id="loginLaunchOverlay" aria-live="polite">
+    <div class="launch-base-scene">
+      <div class="launch-base-logo">SENAI</div>
+      <span>Preparando seu painel</span>
+    </div>
+  </div>
+
   <header class="main-header">
     <a href="/" class="brand-logo">
-      <svg class="logo-senai-svg" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
-        <rect width="300" height="100" fill="#FF0000"/>
-        <text x="150" y="73" font-family="'Arial Black', sans-serif" font-size="62" font-weight="900" font-style="italic" fill="#FFFFFF" text-anchor="middle">SENAI</text>
+      <svg class="logo-senai-svg" viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="senaiRedGradLogin" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#f3132b"/>
+            <stop offset="100%" stop-color="#b8081b"/>
+          </linearGradient>
+        </defs>
+        <rect width="320" height="100" rx="10" fill="url(#senaiRedGradLogin)"/>
+        <line x1="0" y1="20" x2="22" y2="20" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+        <line x1="0" y1="35" x2="22" y2="35" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+        <line x1="0" y1="50" x2="22" y2="50" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+        <line x1="0" y1="65" x2="22" y2="65" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+        <line x1="0" y1="80" x2="22" y2="80" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+        <line x1="298" y1="20" x2="320" y2="20" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+        <line x1="298" y1="35" x2="320" y2="35" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+        <line x1="298" y1="50" x2="320" y2="50" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+        <line x1="298" y1="65" x2="320" y2="65" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+        <line x1="298" y1="80" x2="320" y2="80" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+        <rect x="26" y="16" width="268" height="68" rx="4" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.18"/>
+        <text x="160" y="70" font-family="'Arial Black', 'Impact', sans-serif" font-size="52" font-weight="900" font-style="italic" letter-spacing="1" fill="#FFFFFF" text-anchor="middle">SENAI</text>
+        <rect x="34" y="76" width="252" height="3" rx="1.5" fill="#ff9d1f" opacity="0.9"/>
       </svg>
-      <span class="brand-title">AAPM</span>
+      <div class="aapm-wordmark">
+        <span class="aapm-wordmark-text">AAPM</span>
+        <span class="aapm-wordmark-sub">SENAI Brás</span>
+      </div>
     </a>
 
     <nav class="top-nav">
@@ -577,7 +667,8 @@
             <button type="button" class="btn-link" id="openForgotModal">Esqueci minha senha</button>
           </div>
 
-          <button type="submit" class="btn btn-primary">Acessar Painel</button>
+          <button type="submit" class="btn btn-primary" id="loginSubmitBtn">Acessar Painel</button>
+          <div id="loginLockoutCountdown" class="login-lockout-countdown" aria-live="polite"></div>
         </form>
 
         <div class="form-footer">
@@ -675,6 +766,10 @@
 
   <script>
 
+    if (new URLSearchParams(window.location.search).get('forgot') === '1') {
+      document.body.classList.add('forgot-only');
+    }
+
     
     // ===== GERENCIADOR DE TEMA =====
     const themeToggleBtn = document.getElementById('themeToggle');
@@ -698,10 +793,65 @@
 
     applyTheme(initialTheme);
 
-    themeToggleBtn.addEventListener('click', () => {
+    function spawnThemeBurst(x, y, toDark) {
+      const palette = toDark
+        ? ['255, 255, 255', '214, 50, 80', '255, 210, 130']
+        : ['214, 50, 80', '255, 157, 108', '255, 214, 140'];
+      const count = 16;
+
+      for (let i = 0; i < count; i++) {
+        const particle = document.createElement('span');
+        const angle = (Math.PI * 2 * i) / count + (Math.random() * 0.4 - 0.2);
+        const distance = 46 + Math.random() * 70;
+        const size = Math.random() * 4 + 2.5;
+        const color = palette[Math.floor(Math.random() * palette.length)];
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance;
+        particle.style.cssText = `position:fixed;left:${x}px;top:${y}px;width:${size}px;height:${size}px;border-radius:50%;background:rgba(${color},.95);box-shadow:0 0 ${size * 2.5}px rgba(${color},.85);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);opacity:1;transition:transform 1.3s cubic-bezier(.16,1,.3,1),opacity 1.3s cubic-bezier(.16,1,.3,1);`;
+        document.body.appendChild(particle);
+        requestAnimationFrame(() => {
+          particle.style.transform = `translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) scale(.3)`;
+          particle.style.opacity = '0';
+        });
+        setTimeout(() => particle.remove(), 1350);
+      }
+
+      const glow = document.createElement('span');
+      glow.style.cssText = `position:fixed;left:${x}px;top:${y}px;width:10px;height:10px;border-radius:50%;background:rgba(${palette[0]},.9);box-shadow:0 0 40px 14px rgba(${palette[0]},.55);pointer-events:none;z-index:9999;transform:translate(-50%,-50%) scale(0);opacity:1;transition:transform .9s cubic-bezier(.34,1.56,.64,1),opacity 1s ease-out;`;
+      document.body.appendChild(glow);
+      requestAnimationFrame(() => { glow.style.transform = 'translate(-50%,-50%) scale(6)'; glow.style.opacity = '0'; });
+      setTimeout(() => glow.remove(), 1000);
+    }
+
+    function toggleTheme(event) {
       const currentTheme = htmlElement.getAttribute('data-theme');
-      applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
-    });
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      const logo = document.querySelector('.logo-senai-svg');
+      const rect = logo?.getBoundingClientRect();
+      const originX = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
+      const originY = rect ? rect.top + rect.height / 2 : 40;
+      const endRadius = Math.hypot(Math.max(originX, window.innerWidth - originX), Math.max(originY, window.innerHeight - originY));
+      const finishUp = () => spawnThemeBurst(originX, originY, newTheme === 'dark');
+
+      if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        applyTheme(newTheme);
+        finishUp();
+        return;
+      }
+
+      const transition = document.startViewTransition(() => applyTheme(newTheme));
+      transition.ready.then(() => {
+        document.documentElement.animate({ clipPath: [`circle(0px at ${originX}px ${originY}px)`, `circle(${endRadius}px at ${originX}px ${originY}px)`] }, {
+          duration: 1400,
+          easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
+          pseudoElement: '::view-transition-new(root)'
+        });
+        spawnThemeBurst(originX, originY, newTheme === 'dark');
+      }).catch(() => {});
+      transition.finished.then(() => {}).catch(() => {});
+    }
+
+    themeToggleBtn.addEventListener('click', toggleTheme);
 
     // ===== ANIMAÇÃO DE FUNDO: CENA ESPACIAL (nebulosa + estrelas em profundidade + cadentes) =====
     // (igual à usada na página principal da AAPM)
@@ -893,6 +1043,11 @@
     const loginForm = document.getElementById('loginForm');
     const errorMsg = document.getElementById('errorMsg');
     const successMsg = document.getElementById('successMsg');
+    const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+    const loginLockoutCountdown = document.getElementById('loginLockoutCountdown');
+    const LOGIN_ATTEMPTS_KEY = 'aapm_login_failed_attempts';
+    const LOGIN_LOCKOUT_KEY = 'aapm_login_lockout_until';
+    let loginLockoutTimer = null;
 
     function showError(message) {
       errorMsg.textContent = message;
@@ -907,8 +1062,68 @@
       errorMsg.classList.remove('show');
     }
 
+    function iniciarTransicaoAdmin() {
+      document.body.classList.add('launching');
+      document.getElementById('loginLaunchOverlay').classList.add('active');
+      setTimeout(() => { window.location.href = '/admin'; }, 1450);
+    }
+
+    function obterTentativasLogin() {
+      return Number(sessionStorage.getItem(LOGIN_ATTEMPTS_KEY) || 0);
+    }
+
+    function iniciarBloqueioLogin() {
+      const bloqueadoAte = Date.now() + 30000;
+      sessionStorage.setItem(LOGIN_LOCKOUT_KEY, String(bloqueadoAte));
+      clearInterval(loginLockoutTimer);
+
+      const atualizar = () => {
+        const restante = Math.max(0, Number(sessionStorage.getItem(LOGIN_LOCKOUT_KEY) || 0) - Date.now());
+        const segundos = Math.ceil(restante / 1000);
+        if (!segundos) {
+          clearInterval(loginLockoutTimer);
+          sessionStorage.removeItem(LOGIN_LOCKOUT_KEY);
+          sessionStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+          loginSubmitBtn.disabled = false;
+          loginLockoutCountdown.textContent = '';
+          errorMsg.classList.remove('show');
+          return;
+        }
+        loginSubmitBtn.disabled = true;
+        loginLockoutCountdown.textContent = `Muitas tentativas. Aguarde ${segundos}s para tentar novamente.`;
+        errorMsg.textContent = 'Acesso temporariamente bloqueado.';
+        errorMsg.classList.add('show');
+      };
+
+      atualizar();
+      loginLockoutTimer = setInterval(atualizar, 250);
+    }
+
+    function verificarBloqueioLogin() {
+      const bloqueadoAte = Number(sessionStorage.getItem(LOGIN_LOCKOUT_KEY) || 0);
+      if (bloqueadoAte > Date.now()) {
+        iniciarBloqueioLogin();
+        return true;
+      }
+      if (bloqueadoAte) {
+        sessionStorage.removeItem(LOGIN_LOCKOUT_KEY);
+        sessionStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+      }
+      return false;
+    }
+
+    function registrarFalhaLogin() {
+      const tentativas = obterTentativasLogin() + 1;
+      sessionStorage.setItem(LOGIN_ATTEMPTS_KEY, String(tentativas));
+      if (tentativas >= 5) iniciarBloqueioLogin();
+    }
+
+    verificarBloqueioLogin();
+
     loginForm.addEventListener('submit', async function(event) {
       event.preventDefault();
+
+      if (verificarBloqueioLogin()) return;
 
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
@@ -943,19 +1158,17 @@
 
         if (response.ok && (data.access_token || data.token)) {
           const token = data.access_token || data.token;
-          showSuccess('Autenticação bem-sucedida! Redirecionando...');
-          
           localStorage.setItem('access_token', token);
-          
-       
-          setTimeout(() => {
-            window.location.href = '/admin';
-          }, 1000);
+          sessionStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+          sessionStorage.removeItem(LOGIN_LOCKOUT_KEY);
+          showSuccess('Autenticação bem-sucedida!');
+          iniciarTransicaoAdmin();
         } else {
           let msg = 'E-mail ou senha incorretos.';
           if (data.detail) {
             msg = typeof data.detail === 'string' ? data.detail : data.detail[0]?.msg || msg;
           }
+          if (response.status === 401 || response.status === 403) registrarFalhaLogin();
           showError(msg);
         }
       } catch (error) {
@@ -1155,11 +1368,21 @@
       forgotModal.classList.remove('show');
     }
 
-    openForgotModalBtn.addEventListener('click', openModal);
+    function abrirRecuperacaoEmNovaAba() {
+      const url = new URL(window.location.href);
+      url.searchParams.set('forgot', '1');
+      window.open(url.toString(), '_blank', 'noopener,noreferrer');
+    }
+
+    openForgotModalBtn.addEventListener('click', abrirRecuperacaoEmNovaAba);
     closeForgotModalBtn.addEventListener('click', closeModal);
     forgotModal.addEventListener('click', (e) => {
       if (e.target === forgotModal) closeModal();
     });
+
+    if (new URLSearchParams(window.location.search).get('forgot') === '1') {
+      openModal();
+    }
 
     async function requestResetCode(email) {
       requestCodeBtn.disabled = true;

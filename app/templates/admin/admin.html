@@ -7,33 +7,76 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- MEXI AQUI: CSS do Cropper.js para o recorte de foto do produto -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet" integrity="sha384-AMJcAgMUmNt1Zo4ranquGLeT5m7yOrVbtNsNk0oZohvxqKk6RRzXHqlEaS9gFXR7" crossorigin="anonymous">
 
 
   <link rel="stylesheet" href="/static/css/style.css">
 
 <script src="/static/js/script.js" defer></script>
 </head>
-<body>
+<body class="auth-loading">
 
   <canvas id="bg-canvas"></canvas>
+
+  <div class="admin-loading" id="adminLoading" role="status" aria-live="polite">
+    <div class="logout-spinner"></div>
+    <p>Validando sessão...</p>
+  </div>
 
   <!-- MEXI AQUI: container onde os toasts de sucesso/erro de cada CRUD são inseridos -->
   <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
 
+  <div class="command-palette-overlay" id="commandPaletteOverlay" onclick="fecharCommandPalette(event)">
+    <div class="command-palette" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="commandPaletteTitle">
+      <div class="command-palette-head">
+        <div><span class="dashboard-kicker">Navegação rápida</span><h2 id="commandPaletteTitle">O que você quer fazer?</h2></div>
+        <button type="button" class="command-close" onclick="fecharCommandPalette()" aria-label="Fechar">&times;</button>
+      </div>
+      <input id="commandPaletteInput" class="command-palette-input" type="search" placeholder="Buscar módulo ou ação..." autocomplete="off">
+      <div class="command-results" id="commandPaletteResults"></div>
+    </div>
+  </div>
+
+  <button type="button" class="assistant-fab" onclick="toggleAssistant()" aria-label="Abrir assistente" title="Assistente AAPM">
+    <span class="assistant-antenna"></span><span class="assistant-face"><i></i><i></i></span>
+  </button>
+  <div class="assistant-panel" id="assistantPanel" aria-label="Assistente AAPM">
+    <div class="assistant-panel-head"><div><span class="dashboard-kicker">Assistente AAPM</span><strong>Como posso ajudar?</strong></div><button type="button" onclick="toggleAssistant()" aria-label="Fechar">&times;</button></div>
+    <div class="assistant-messages" id="assistantMessages"><div class="assistant-message bot">Olá! Posso levar você direto a qualquer módulo ou explicar um fluxo.</div></div>
+    <div class="assistant-suggestions"><button type="button" onclick="usarSugestaoAssistente('Como cadastrar um produto?')">Cadastrar produto</button><button type="button" onclick="usarSugestaoAssistente('Quero registrar uma venda')">Registrar venda</button><button type="button" onclick="usarSugestaoAssistente('Onde vejo o estoque?')">Ver estoque</button></div>
+    <form class="assistant-form" onsubmit="enviarMensagemAssistente(event)"><input id="assistantInput" autocomplete="off" placeholder="Digite uma dúvida..."><button type="submit" aria-label="Enviar">&rarr;</button></form>
+  </div>
+
 <!-- SIDEBAR DE NAVEGAÇÃO (ícones) -->
 <aside class="sidebar">
   <a href="#" class="brand-logo">
-    <svg class="logo-senai-svg" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
-      <rect width="300" height="100" fill="#FF0000"/>
-      <text x="150" y="73" font-family="'Arial Black', 'Impact', sans-serif" font-size="62" font-weight="900" font-style="italic" fill="#FFFFFF" text-anchor="middle">SENAI</text>
+    <svg class="logo-senai-svg" viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="senaiRedGradAdmin" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#f3132b"/>
+          <stop offset="100%" stop-color="#b8081b"/>
+        </linearGradient>
+      </defs>
+      <rect width="320" height="100" rx="10" fill="url(#senaiRedGradAdmin)"/>
+      <line x1="0" y1="20" x2="22" y2="20" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><line x1="0" y1="35" x2="22" y2="35" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><line x1="0" y1="50" x2="22" y2="50" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><line x1="0" y1="65" x2="22" y2="65" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><line x1="0" y1="80" x2="22" y2="80" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+      <line x1="298" y1="20" x2="320" y2="20" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><line x1="298" y1="35" x2="320" y2="35" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><line x1="298" y1="50" x2="320" y2="50" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><line x1="298" y1="65" x2="320" y2="65" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><line x1="298" y1="80" x2="320" y2="80" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+      <rect x="26" y="16" width="268" height="68" rx="4" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.18"/>
+      <text x="160" y="70" font-family="'Arial Black', 'Impact', sans-serif" font-size="52" font-weight="900" font-style="italic" letter-spacing="1" fill="#FFFFFF" text-anchor="middle">SENAI</text>
+      <rect x="34" y="76" width="252" height="3" rx="1.5" fill="#ff9d1f" opacity="0.9"/>
     </svg>
   </a>
 
   <nav class="sidebar-menu">
-    <a class="menu-item active" onclick="navigate('categoria', this)">
+    <a class="menu-item active" onclick="navigate('dashboard', this)">
+      <div class="menu-item-content">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      </div>
+      <span class="menu-tooltip">Visão geral</span>
+    </a>
+
+    <a class="menu-item" onclick="navigate('categoria', this)">
       <div class="menu-item-content">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10V6a2 2 0 0 0-2-2h-4L3 15l6 6 11-11Z"/><circle cx="8.5" cy="8.5" r="1.2"/></svg>
       </div>
@@ -106,8 +149,8 @@
 
     <header class="top-header">
       <div class="page-header-info">
-        <h2 id="page-title">Gestão de <span>Categorias</span></h2>
-        <p id="page-subtitle">Organização e classificação de produtos.</p>
+        <h2 id="page-title">Gestão de <span>Visão geral</span></h2>
+        <p id="page-subtitle">Resumo da operação e dos indicadores da AAPM.</p>
       </div>
 
       <div class="search-bar">
@@ -116,6 +159,9 @@
       </div>
 
       <div class="top-header-actions">
+        <button class="icon-btn" onclick="abrirCommandPalette()" title="Abrir comandos (Ctrl+K)" aria-label="Abrir comandos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h2M15 9h2M7 13h5M15 13h2"/></svg>
+        </button>
         <button class="icon-btn" id="quickAction" onclick="focusForm()" title="Adicionar novo registro">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
         </button>
@@ -128,8 +174,42 @@
 
     <div class="stats-bar" id="statsBar"></div>
 
-    <!-- 1. CATEGORIA -->
-    <section id="categoria" class="view-content active">
+    <!-- 1. VISÃO GERAL -->
+    <section id="dashboard" class="view-content active">
+      <div class="dashboard-hero reveal">
+        <div>
+          <span class="dashboard-kicker">Painel de controle</span>
+          <h1>Visão geral <span>da operação.</span></h1>
+          <p>Um resumo vivo do estoque, das vendas e dos cadastros da AAPM.</p>
+        </div>
+        <div class="dashboard-hero-mark">AAPM<br><small>SENAI BRÁS</small></div>
+      </div>
+
+      <div class="dashboard-metrics" id="dashboardMetrics"></div>
+
+      <div class="dashboard-layout">
+        <div class="dashboard-panel dashboard-activity reveal">
+          <div class="dashboard-panel-heading"><div><span class="dashboard-kicker">Movimento</span><h3>Atividade recente</h3></div><span class="dashboard-panel-note">últimos registros</span></div>
+          <div class="dashboard-activity-list" id="dashboardActivity"></div>
+        </div>
+        <div class="dashboard-panel dashboard-attention reveal">
+          <div class="dashboard-panel-heading"><div><span class="dashboard-kicker">Atenção</span><h3>Estoque baixo</h3></div><span class="dashboard-panel-note">até 5 itens</span></div>
+          <div class="dashboard-stock-list" id="dashboardStock"></div>
+        </div>
+        <div class="dashboard-panel dashboard-shortcuts reveal">
+          <div class="dashboard-panel-heading"><div><span class="dashboard-kicker">Acesso rápido</span><h3>Atalhos</h3></div></div>
+          <div class="dashboard-shortcut-grid">
+            <button type="button" onclick="abrirAtalho('produto')"><strong>+</strong><span>Novo produto</span></button>
+            <button type="button" onclick="abrirAtalho('venda')"><strong>R$</strong><span>Registrar venda</span></button>
+            <button type="button" onclick="abrirAtalho('associado')"><strong>+</strong><span>Novo associado</span></button>
+            <button type="button" onclick="abrirAtalho('relatorio')"><strong>↗</strong><span>Ver relatório</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. CATEGORIA -->
+    <section id="categoria" class="view-content">
       <div class="card reveal">
         <div class="card-title">Cadastrar Categoria <span id="quickActionLabel" style="font-size:0.68rem;color:var(--text-muted);text-transform:none;letter-spacing:0;">Nova Categoria</span></div>
         <form onsubmit="addCategoria(event)" class="form-grid">
@@ -251,7 +331,7 @@
           </div>
           <div class="form-group full">
             <label>Variações <span style="text-transform:none;font-weight:500;">(opcional — cores, tamanhos, voltagens etc., cada uma com seu próprio estoque)</span></label>
-            <div class="variacoes-list" id="variacoesList"></div>
+            <div class="variacoes-list" id="variacoesList"><span class="variacoes-empty-hint">Nenhuma variação adicionada.</span></div>
             <button type="button" class="btn btn-outline btn-add-variacao" onclick="adicionarVariacaoRow()">+ Adicionar Variação</button>
           </div>
           <input type="hidden" id="prodId">
@@ -270,7 +350,7 @@
         </div>
         <div class="table-responsive">
           <table>
-            <thead><tr><th>Sel.</th><th>Foto</th><th>Nome</th><th>Categoria</th><th>Variações</th><th>Quantidade</th><th>Preço</th><th>Ações</th></tr></thead>
+            <thead><tr><th><input type="checkbox" id="selectAllProdutos" title="Selecionar produtos desta página" onchange="toggleTodosProdutos(this.checked)"></th><th>Foto</th><th>Nome</th><th>Categoria</th><th>Variações</th><th>Quantidade</th><th>Preço</th><th>Ações</th></tr></thead>
             <tbody id="tblProdutos"></tbody>
           </table>
         </div>
@@ -652,7 +732,7 @@
   </div>
 
   <!-- MEXI AQUI: script do Cropper.js, precisa estar carregado antes do script principal -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha384-jzwsV9ieM/KUDMeo+d8dc+jm0GEl7ywPNwg10alB5BodVuC/Kx9RpEnyrl2Om9zH" crossorigin="anonymous"></script>
 
   <script src="script.js" defer></script></body>
 </html>

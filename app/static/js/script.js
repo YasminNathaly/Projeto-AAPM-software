@@ -1,8 +1,8 @@
 // admin.html
   const token = localStorage.getItem('access_token');
+  let sessaoInicialValida = Boolean(token);
   if (!token) {
-    alert('Acesso restrito! Faça o login primeiro.');
-    window.location.href = 'login.html';
+    window.location.href = '/login';
   }
 
     // ROTAS DO BACKEND / API
@@ -16,6 +16,22 @@
       venda: '/api/vendas',
       upload: '/api/upload-imagem'
     };
+
+    async function validarSessaoInicial() {
+      if (!sessaoInicialValida) return false;
+      try {
+        const resposta = await fetch('/api/auth/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!resposta.ok) throw new Error('Sessão inválida');
+        return true;
+      } catch (erro) {
+        localStorage.removeItem('access_token');
+        sessionStorage.clear();
+        window.location.href = '/login';
+        return false;
+      }
+    }
 
     // ================================================================== //
     // MEXI AQUI: ===== CAMADA DE SEGURANÇA (auth + XSS) =====             //
@@ -104,6 +120,7 @@
     let armarios = [];
     let usuarios = [];
     let vendas = [];
+    let imagemProdutoPendente = null;
 
     // MEXI AQUI: paginação client-side — mantém carregarDadosDoBanco() trazendo
     // a lista inteira de cada módulo (pois ela também alimenta stats, selects
@@ -250,6 +267,9 @@
     // MEXI AQUI: todas as chamadas fetch() trocadas por apiFetch(), que já
     // injeta o Bearer token automaticamente.
     async function carregarDadosDoBanco() {
+      const loadingText = document.querySelector('#adminLoading p');
+      if (loadingText) loadingText.innerText = 'Carregando dados...';
+      document.body.classList.add('data-loading');
       try {
         const [resCat, resForn, resProd, resAssoc, resArm, resUsr, resVnd] = await Promise.all([
           apiFetch(API_URLS.categoria),
@@ -279,6 +299,7 @@
         popularSelectsDinamicos();
         renderNotificacoes();
         renderRelatorio(); // MEXI AQUI: atualiza a tabela do relatório junto com o resto
+        renderDashboard();
 
         const active = document.querySelector('.view-content.active');
         const activeId = active ? active.id : 'categoria';
@@ -286,6 +307,9 @@
         renderRecentList(activeId);
       } catch (erro) {
         console.error('Erro ao conectar e buscar dados do Banco de Dados:', erro);
+        mostrarToast('Não foi possível carregar os dados do painel.', 'error', 'Verifique a conexão com o servidor.');
+      } finally {
+        document.body.classList.remove('data-loading');
       }
     }
 
@@ -612,12 +636,15 @@
         const preview = document.getElementById('prodImgPreview');
         preview.src = URL.createObjectURL(arquivoRecortado);
         preview.style.display = 'block';
+        imagemProdutoPendente = arquivoRecortado;
+        document.getElementById('prodImagemUrl').value = '';
+        const fileNameLabel = document.getElementById('prodImagemFileName');
+        if (fileNameLabel) fileNameLabel.innerText = arquivoRecortado.name;
 
         document.getElementById('cropModalOverlay').classList.remove('open');
         cropperInstance.destroy();
         cropperInstance = null;
 
-        enviarImagemProduto(arquivoRecortado);
       }, cropArquivoOriginal ? cropArquivoOriginal.type : 'image/png', 0.92);
     }
 
@@ -625,31 +652,14 @@
     // MEXI AQUI: usa apiFetch() em vez de fetch() para incluir o Bearer token
     // (o upload de imagem também é um endpoint autenticado).
     async function enviarImagemProduto(file) {
-      const fileNameLabel = document.getElementById('prodImagemFileName');
-      if (fileNameLabel) fileNameLabel.innerText = file.name;
-
-      const submitBtn = document.getElementById('prodSubmitBtn');
-      submitBtn.disabled = true;
-      submitBtn.innerText = 'Enviando imagem...';
-
       const formData = new FormData();
       formData.append('arquivo', file);
 
-      try {
-        const resposta = await apiFetch(API_URLS.upload, { method: 'POST', body: formData });
-        if (resposta.ok) {
-          const dados = await resposta.json();
-          document.getElementById('prodImagemUrl').value = dados.url;
-        } else {
-          mostrarToast('Erro ao enviar a imagem do produto.', 'error');
-        }
-      } catch (erro) {
-        console.error('Erro no upload da imagem:', erro);
-        mostrarToast('Erro na comunicação com o servidor ao enviar a imagem.', 'error');
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerText = document.getElementById('prodId').value ? 'Salvar Alterações' : '+ Cadastrar Produto';
-      }
+      const resposta = await apiFetch(API_URLS.upload, { method: 'POST', body: formData });
+      if (!resposta.ok) throw new Error('Falha no upload da imagem');
+      const dados = await resposta.json();
+      document.getElementById('prodImagemUrl').value = dados.url;
+      return dados.url;
     }
 
     // ===== VARIAÇÕES DO PRODUTO (tamanho/cor/etc, cada uma com seu próprio estoque) =====
@@ -666,6 +676,7 @@
       const row = document.createElement('div');
       row.className = 'variacao-row';
       row.id = rowId;
+      wrap.querySelector('.variacoes-empty-hint')?.remove();
       row.innerHTML = `
         <input type="text" class="form-control var-nome" placeholder="Ex: Tamanho M - Azul">
         <input type="number" class="form-control var-estoque" placeholder="Estoque" min="0" step="1">
@@ -689,7 +700,7 @@
 
     function limparVariacoes() {
       const wrap = document.getElementById('variacoesList');
-      if (wrap) wrap.innerHTML = '';
+      if (wrap) wrap.innerHTML = '<span class="variacoes-empty-hint">Nenhuma variação adicionada.</span>';
     }
 
     function toggleArmarioNomeField() {
@@ -707,6 +718,7 @@
 
     // TÍTULOS E RÓTULOS POR MÓDULO
     const titulos = {
+      'dashboard': ['Visão geral', 'Resumo da operação e dos indicadores da AAPM.', ''],
       'categoria': ['Categorias', 'Organização e classificação de produtos.', 'Nova Categoria'],
       'fornecedor': ['Fornecedores', 'Cadastro e histórico de fornecedores.', 'Novo Fornecedor'],
       'produto': ['Produtos', 'Catálogo e controle de itens.', 'Novo Produto'],
@@ -737,6 +749,7 @@
       if (searchInput) searchInput.value = '';
 
       if (viewId === 'relatorio') renderRelatorio(); // MEXI AQUI: garante a tabela atualizada ao entrar na aba
+      if (viewId === 'dashboard') renderDashboard();
 
       renderStatsBar(viewId);
       renderRecentList(viewId);
@@ -750,6 +763,126 @@
       active.querySelector('form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       if (firstInput) setTimeout(() => firstInput.focus(), 350);
     }
+
+    function abrirAtalho(viewId) {
+      const itemNav = [...document.querySelectorAll('.menu-item')]
+        .find(item => item.getAttribute('onclick')?.includes(`'${viewId}'`));
+      navigate(viewId, itemNav);
+      if (viewId !== 'relatorio') focusForm();
+    }
+
+    function toggleAssistant() {
+      const panel = document.getElementById('assistantPanel');
+      if (!panel) return;
+      panel.classList.toggle('open');
+      if (panel.classList.contains('open')) document.getElementById('assistantInput')?.focus();
+    }
+
+    function adicionarMensagemAssistente(texto, tipo) {
+      const messages = document.getElementById('assistantMessages');
+      if (!messages) return;
+      const item = document.createElement('div');
+      item.className = `assistant-message ${tipo}`;
+      item.textContent = texto;
+      messages.appendChild(item);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function executarComandoAssistente(texto) {
+      const comando = texto.toLowerCase();
+      const comandos = [
+        { termos: ['novo produto', 'cadastrar produto', 'abrir produtos', 'ver produtos'], view: 'produto', resposta: 'Abrindo o módulo de Produtos.' },
+        { termos: ['nova venda', 'registrar venda', 'abrir vendas', 'ver vendas'], view: 'venda', resposta: 'Abrindo o módulo de Vendas.' },
+        { termos: ['novo associado', 'cadastrar associado', 'abrir associados'], view: 'associado', resposta: 'Abrindo o módulo de Associados.' },
+        { termos: ['abrir relatório', 'abrir relatorio', 'ver relatório', 'ver relatorio'], view: 'relatorio', resposta: 'Abrindo o Relatório.' },
+        { termos: ['visão geral', 'visao geral', 'dashboard', 'início', 'inicio'], view: 'dashboard', resposta: 'Voltando para a Visão geral.' }
+      ];
+      const acao = comandos.find(item => item.termos.some(termo => comando.includes(termo)));
+      if (!acao) return null;
+      abrirAtalho(acao.view);
+      return acao.resposta;
+    }
+
+    function responderAssistente(texto) {
+      const pergunta = texto.toLowerCase();
+      if (pergunta.includes('produto')) return 'Para cadastrar um produto, abra Produtos no menu ou use o atalho. Preencha os dados, adicione a foto se quiser e salve.';
+      if (pergunta.includes('venda')) return 'Abra Vendas para registrar uma venda. O resumo calcula automaticamente subtotal, desconto de associado e total.';
+      if (pergunta.includes('estoque')) return 'A Visão geral mostra os itens com até 5 unidades. Para editar quantidades, abra Produtos.';
+      if (pergunta.includes('associado')) return 'Em Associados você pode cadastrar, editar e consultar os associados da AAPM.';
+      if (pergunta.includes('relatório') || pergunta.includes('relatorio')) return 'O Relatório guarda as notificações marcadas como lidas e permite limpar o histórico.';
+      return 'Posso ajudar com Produtos, Vendas, Associados, Estoque ou Relatório. Tente uma dessas palavras.';
+    }
+
+    function usarSugestaoAssistente(texto) {
+      document.getElementById('assistantInput').value = texto;
+      enviarMensagemAssistente({ preventDefault() {} });
+    }
+
+    function enviarMensagemAssistente(event) {
+      event.preventDefault();
+      const input = document.getElementById('assistantInput');
+      const texto = input?.value.trim();
+      if (!texto) return;
+      adicionarMensagemAssistente(texto, 'user');
+      input.value = '';
+      const resposta = executarComandoAssistente(texto) || responderAssistente(texto);
+      setTimeout(() => adicionarMensagemAssistente(resposta, 'bot'), 180);
+    }
+
+    const commandModules = [
+      ['dashboard', 'Visão geral'], ['categoria', 'Categorias'], ['fornecedor', 'Fornecedores'],
+      ['produto', 'Produtos'], ['associado', 'Associados'], ['armario', 'Armários'],
+      ['usuario', 'Usuários'], ['venda', 'Vendas'], ['relatorio', 'Relatório']
+    ];
+
+    function renderCommandResults() {
+      const input = document.getElementById('commandPaletteInput');
+      const results = document.getElementById('commandPaletteResults');
+      if (!input || !results) return;
+      const termo = input.value.trim().toLowerCase();
+      const filtrados = commandModules.filter(([, label]) => label.toLowerCase().includes(termo));
+      results.innerHTML = filtrados.length ? filtrados.map(([id, label]) => `
+        <button type="button" class="command-result" onclick="selecionarComando('${id}')">
+          <strong>${escapeHTML(id)}</strong><span>${escapeHTML(label)}</span>
+        </button>
+      `).join('') : '<div class="command-empty">Nenhum módulo encontrado.</div>';
+    }
+
+    function abrirCommandPalette() {
+      const overlay = document.getElementById('commandPaletteOverlay');
+      const input = document.getElementById('commandPaletteInput');
+      if (!overlay || !input) return;
+      overlay.classList.add('open');
+      input.value = '';
+      renderCommandResults();
+      setTimeout(() => input.focus(), 50);
+    }
+
+    function fecharCommandPalette(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('commandPaletteOverlay')?.classList.remove('open');
+    }
+
+    function selecionarComando(viewId) {
+      const itemNav = [...document.querySelectorAll('.menu-item')]
+        .find(item => item.getAttribute('onclick')?.includes(`'${viewId}'`));
+      fecharCommandPalette();
+      navigate(viewId, itemNav);
+    }
+
+    document.getElementById('commandPaletteInput')?.addEventListener('input', renderCommandResults);
+    document.addEventListener('keydown', (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        abrirCommandPalette();
+      }
+      if (event.key === 'Escape') fecharCommandPalette();
+      if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
+        event.preventDefault();
+        document.getElementById('tableSearch')?.focus();
+      }
+      if (event.key.toLowerCase() === 'n' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) focusForm();
+    });
 
     // ===== MEXI AQUI: TEMA CLARO / ESCURO — animação nascendo do logo do SENAI,
     // com pulsada no logo + explosão de partículas + revelação circular suave
@@ -784,7 +917,7 @@
           z-index: 9999;
           transform: translate(-50%, -50%) scale(1);
           opacity: 1;
-          transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: transform 1.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.3s cubic-bezier(0.16, 1, 0.3, 1);
         `;
         document.body.appendChild(el);
 
@@ -793,7 +926,7 @@
           el.style.opacity = '0';
         });
 
-        setTimeout(() => el.remove(), 820);
+        setTimeout(() => el.remove(), 1350);
       }
 
       const glow = document.createElement('span');
@@ -807,14 +940,14 @@
         z-index: 9999;
         transform: translate(-50%, -50%) scale(0);
         opacity: 1;
-        transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease-out;
+        transition: transform 0.9s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 1s ease-out;
       `;
       document.body.appendChild(glow);
       requestAnimationFrame(() => {
         glow.style.transform = 'translate(-50%, -50%) scale(6)';
         glow.style.opacity = '0';
       });
-      setTimeout(() => glow.remove(), 620);
+      setTimeout(() => glow.remove(), 1000);
     }
 
     function toggleTheme(event) {
@@ -874,7 +1007,7 @@
               ]
             },
             {
-              duration: 820,
+              duration: 1400,
               easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
               pseudoElement: '::view-transition-new(root)'
             }
@@ -1103,7 +1236,7 @@
       const pagina = paginarLista(produtos, 'produto');
       tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
         <tr style="--i:${i}; cursor:pointer;" onclick="abrirProdutoModal('${item.id}')" title="Ver detalhes do produto">
-          <td onclick="event.stopPropagation()"><input type="checkbox" name="produtoDeleteCheck" value="${item.id}" style="width: 15px; height: 15px; accent-color: var(--primary);"></td>
+          <td onclick="event.stopPropagation()"><input type="checkbox" name="produtoDeleteCheck" value="${item.id}" onchange="atualizarSelecaoTodosProdutos()" style="width: 15px; height: 15px; accent-color: var(--primary);"></td>
           <td>${item.imagem_url ? `<img class="prod-thumb" src="${escapeHTML(item.imagem_url)}" alt="${escapeHTML(item.nome)}">` : `<div class="prod-thumb"></div>`}</td>
           <td style="font-weight: 700;">${escapeHTML(item.nome)}</td>
           <td>${escapeHTML(nomeCategoriaPorId(item.categoria_id))}</td>
@@ -1113,7 +1246,23 @@
           <td>${renderAcoes('prod', item.id)}</td>
         </tr>
       `).join('') : emptyRow(8, 'Nenhum produto cadastrado.');
+      atualizarSelecaoTodosProdutos();
       renderPaginacaoControles('pagProdutos', 'produto', produtos.length);
+    }
+
+    function toggleTodosProdutos(checked) {
+      document.querySelectorAll('input[name="produtoDeleteCheck"]').forEach(input => {
+        input.checked = checked;
+      });
+      atualizarSelecaoTodosProdutos();
+    }
+
+    function atualizarSelecaoTodosProdutos() {
+      const seletor = document.getElementById('selectAllProdutos');
+      const itens = [...document.querySelectorAll('input[name="produtoDeleteCheck"]')];
+      if (!seletor) return;
+      seletor.checked = itens.length > 0 && itens.every(input => input.checked);
+      seletor.indeterminate = itens.some(input => input.checked) && !seletor.checked;
     }
 
     // MEXI AQUI: troca window.confirm() pelo modal customizado confirmarAcao()
@@ -1236,6 +1385,12 @@
     // MEXI AQUI: valores monetários usam formatarMoeda() em vez de toFixed(2) cru
     function computeStats(viewId) {
       switch (viewId) {
+        case 'dashboard':
+          return [
+            { value: produtos.length, label: 'Produtos no catálogo' },
+            { value: associados.length, label: 'Associados cadastrados' },
+            { value: vendas.length, label: 'Vendas registradas' }
+          ];
         case 'categoria':
           return [
             { value: categorias.length, label: 'Categorias Cadastradas' },
@@ -1315,14 +1470,6 @@
       observeReveals();
     }
 
-    function refreshStats() {
-      const active = document.querySelector('.view-content.active');
-      if (active) {
-        renderStatsBar(active.id);
-        renderRecentList(active.id);
-      }
-    }
-
     const recentIcon = '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>';
 
     function getRecentEntries(viewId) {
@@ -1363,6 +1510,52 @@
           </div>
         </div>
       `).join('') : '<div class="recent-empty">Nenhum registro recente.</div>';
+    }
+
+    function renderDashboard() {
+      const metrics = document.getElementById('dashboardMetrics');
+      const activity = document.getElementById('dashboardActivity');
+      const stock = document.getElementById('dashboardStock');
+      if (!metrics || !activity || !stock) return;
+
+      const faturamento = vendas.reduce((total, venda) => total + Number(venda.preco_total || venda.total || 0), 0);
+      metrics.innerHTML = [
+        { value: produtos.length, label: 'Produtos no catálogo', tone: 'red' },
+        { value: associados.length, label: 'Associados ativos', tone: 'blue' },
+        { value: vendas.length, label: 'Vendas registradas', tone: 'green' },
+        { value: formatarMoeda(faturamento), label: 'Faturamento total', tone: 'gold' }
+      ].map(item => `
+        <div class="dashboard-metric ${item.tone}">
+          <span class="dashboard-metric-label">${escapeHTML(item.label)}</span>
+          <strong>${escapeHTML(item.value)}</strong>
+        </div>
+      `).join('');
+
+      const atividades = [
+        ...vendas.slice(0, 3).map(v => ({ tipo: 'Venda', titulo: v.comprador || v.cliente || 'Cliente não informado', detalhe: `${v.produto_nome || 'Produto'} · ${formatarMoeda(v.preco_total || v.total || 0)}` })),
+        ...produtos.slice(-2).reverse().map(p => ({ tipo: 'Produto', titulo: p.nome, detalhe: `${Number(p.quantidade ?? p.estoque ?? 0)} unidades em estoque` })),
+        ...associados.slice(-1).reverse().map(a => ({ tipo: 'Associado', titulo: a.nome, detalhe: a.email || 'Cadastro recente' }))
+      ].slice(0, 5);
+
+      activity.innerHTML = atividades.length ? atividades.map(item => `
+        <div class="dashboard-activity-item">
+          <span class="dashboard-activity-type">${escapeHTML(item.tipo)}</span>
+          <div><strong>${escapeHTML(item.titulo)}</strong><small>${escapeHTML(item.detalhe)}</small></div>
+        </div>
+      `).join('') : '<div class="dashboard-empty">Ainda não há movimentações recentes.</div>';
+
+      const estoqueBaixo = produtos
+        .map(produto => ({ ...produto, quantidadeDashboard: Number(produto.quantidade ?? produto.estoque ?? 0) }))
+        .filter(produto => produto.quantidadeDashboard <= 5)
+        .sort((a, b) => a.quantidadeDashboard - b.quantidadeDashboard)
+        .slice(0, 5);
+
+      stock.innerHTML = estoqueBaixo.length ? estoqueBaixo.map(produto => `
+        <div class="dashboard-stock-item">
+          <span class="dashboard-stock-count">${escapeHTML(produto.quantidadeDashboard)}</span>
+          <div><strong>${escapeHTML(produto.nome)}</strong><small>unidades disponíveis</small></div>
+        </div>
+      `).join('') : '<div class="dashboard-empty">Nenhum item precisa de reposição.</div>';
     }
 
     function filtrarTabelaAtiva() {
@@ -1552,10 +1745,7 @@
 
         if (resposta.ok) {
           formEvent.target.reset();
-          const prodPreview = document.getElementById('prodImgPreview');
-          if (prodPreview) prodPreview.style.display = 'none';
-          const fileNameLabel = document.getElementById('prodImagemFileName');
-          if (fileNameLabel) fileNameLabel.innerText = 'Escolher imagem do produto';
+          limparImagemProduto();
           limparVariacoes();
           const submitBtn = document.getElementById('prodSubmitBtn');
           if (submitBtn) submitBtn.innerText = '+ Cadastrar Produto';
@@ -1615,9 +1805,25 @@
       delete e.target.dataset.editId;
     }
 
-    function addProduto(e) {
+    function limparImagemProduto() {
+      imagemProdutoPendente = null;
+      const preview = document.getElementById('prodImgPreview');
+      if (preview) {
+        preview.src = '';
+        preview.style.display = 'none';
+      }
+      const input = document.getElementById('prodImagem');
+      if (input) input.value = '';
+      const url = document.getElementById('prodImagemUrl');
+      if (url) url.value = '';
+      const label = document.getElementById('prodImagemFileName');
+      if (label) label.innerText = 'Escolher imagem do produto';
+    }
+
+    async function addProduto(e) {
       e.preventDefault();
       const id = document.getElementById('prodId').value;
+      const submitBtn = document.getElementById('prodSubmitBtn');
       const payload = {
         nome: document.getElementById('prodNome').value,
         categoria_id: document.getElementById('prodCategoria').value || null,
@@ -1628,10 +1834,24 @@
         variacoes: coletarVariacoes(),
         disponivel: 1
       };
+      if (imagemProdutoPendente) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Enviando imagem...';
+        try {
+          payload.imagem_url = await enviarImagemProduto(imagemProdutoPendente);
+        } catch (erro) {
+          console.error('Erro no upload da imagem:', erro);
+          mostrarToast('Não foi possível enviar a imagem do produto.', 'error');
+          submitBtn.disabled = false;
+          submitBtn.innerText = id ? 'Salvar Alterações' : '+ Cadastrar Produto';
+          return;
+        }
+        submitBtn.disabled = false;
+        submitBtn.innerText = id ? 'Salvar Alterações' : '+ Cadastrar Produto';
+      }
       const endpoint = id ? `${API_URLS.produto}/${id}` : API_URLS.produto;
       salvarNoBanco(endpoint, payload, e, id ? 'PUT' : 'POST', 'produto');
       document.getElementById('prodId').value = '';
-      document.getElementById('prodImagemUrl').value = '';
     }
 
     function addAssociado(e) {
@@ -1894,7 +2114,13 @@
       }
 
       let t = 0;
+      let cenaAtiva = !document.hidden;
+      let animationFrameId = null;
       function animate() {
+        if (!cenaAtiva) {
+          animationFrameId = null;
+          return;
+        }
         parX += (mouseX - parX) * 0.03;
         parY += (mouseY - parY) * 0.03;
 
@@ -1905,8 +2131,12 @@
         drawShootingStars();
 
         t += 1;
-        requestAnimationFrame(animate);
+        animationFrameId = requestAnimationFrame(animate);
       }
+      document.addEventListener('visibilitychange', () => {
+        cenaAtiva = !document.hidden;
+        if (cenaAtiva && animationFrameId === null) animate();
+      });
       animate();
     })();
 
@@ -1929,7 +2159,10 @@
     }
 
     // INICIALIZAÇÃO ASSÍNCRONA
-    window.onload = function () {
+    window.onload = async function () {
+      if (!await validarSessaoInicial()) return;
+      document.body.classList.remove('auth-loading');
+      document.body.classList.add('admin-entering');
       carregarDadosDoBanco();
       atualizarDataHora();
       toggleArmarioNomeField();
