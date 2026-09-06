@@ -34,14 +34,9 @@
     }
 
     // ================================================================== //
-    // MEXI AQUI: ===== CAMADA DE SEGURANÇA (auth + XSS) =====             //
+    // ===== CAMADA DE SEGURANÇA (auth + XSS) =====                        //
     // ================================================================== //
 
-    // Wrapper único para TODAS as chamadas à API: sempre injeta o Bearer
-    // token no header e trata 401/403 fazendo logout automático. Antes,
-    // nenhuma chamada `fetch()` mandava o token — o "acesso restrito" do
-    // topo do arquivo era só cosmético, e qualquer requisição direta à API
-    // passava sem autenticação nenhuma.
     async function apiFetch(url, options = {}) {
       const tokenAtual = localStorage.getItem('access_token');
       const headers = {
@@ -61,10 +56,6 @@
       return resposta;
     }
 
-    // Escapa qualquer texto antes de injetar em innerHTML, prevenindo XSS.
-    // Antes, campos como nome/email/descrição vindos do banco eram jogados
-    // direto em template strings dentro de innerHTML sem nenhum tratamento —
-    // um nome de produto ou cliente contendo HTML/JS malicioso seria executado.
     function escapeHTML(valor) {
       if (valor === null || valor === undefined) return '';
       return String(valor)
@@ -75,18 +66,12 @@
         .replace(/'/g, '&#39;');
     }
 
-    // Formata valores monetários no padrão brasileiro (R$ 1.234,56) em vez
-    // do antigo `'R$ ' + Number(x).toFixed(2)`, que não agrupava milhares
-    // nem usava vírgula decimal.
     const formatadorMoeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
     function formatarMoeda(valor) {
       const numero = Number(valor);
       return formatadorMoeda.format(isNaN(numero) ? 0 : numero);
     }
 
-    // Substitui window.confirm() nativo por um modal customizado que segue
-    // a identidade visual do painel. Retorna uma Promise<boolean>, então o
-    // código que chama continua podendo usar `await confirmarAcao(...)`.
     function confirmarAcao(mensagem, tituloBotaoConfirmar = 'Confirmar') {
       return new Promise((resolve) => {
         const overlay = document.getElementById('confirmModalOverlay');
@@ -97,9 +82,10 @@
         textoEl.textContent = mensagem;
         btnOk.textContent = tituloBotaoConfirmar;
         overlay.classList.add('open');
+        abrirModalComFoco(overlay, btnCancelar);
 
         function limpar(resultado) {
-          overlay.classList.remove('open');
+          fecharModalComFoco(overlay);
           btnOk.removeEventListener('click', onOk);
           btnCancelar.removeEventListener('click', onCancelar);
           resolve(resultado);
@@ -112,6 +98,51 @@
       });
     }
 
+    // ===== FOCUS TRAP GENÉRICO PARA MODAIS =====
+    // Guarda o elemento que tinha foco antes de abrir o modal (pra devolver
+    // o foco a ele ao fechar) e prende o Tab dentro do modal enquanto ele
+    // estiver aberto, evitando que o teclado "vaze" para o conteúdo de trás.
+    let elementoComFocoAnterior = null;
+
+    function getFocaveis(container) {
+      return [...container.querySelectorAll(
+        'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+      )].filter((el) => el.offsetParent !== null);
+    }
+
+    function trapFocusHandler(e) {
+      if (e.key !== 'Tab') return;
+      const modalAberto = document.querySelector('.detail-overlay.open, .command-palette-overlay.open');
+      if (!modalAberto) return;
+      const focaveis = getFocaveis(modalAberto);
+      if (!focaveis.length) return;
+      const primeiro = focaveis[0];
+      const ultimo = focaveis[focaveis.length - 1];
+
+      if (e.shiftKey && document.activeElement === primeiro) {
+        e.preventDefault();
+        ultimo.focus();
+      } else if (!e.shiftKey && document.activeElement === ultimo) {
+        e.preventDefault();
+        primeiro.focus();
+      }
+    }
+    document.addEventListener('keydown', trapFocusHandler);
+
+    function abrirModalComFoco(overlay, elementoParaFocar) {
+      elementoComFocoAnterior = document.activeElement;
+      const alvo = elementoParaFocar || getFocaveis(overlay)[0];
+      setTimeout(() => alvo?.focus(), 60);
+    }
+
+    function fecharModalComFoco(overlay) {
+      overlay.classList.remove('open');
+      if (elementoComFocoAnterior && document.body.contains(elementoComFocoAnterior)) {
+        elementoComFocoAnterior.focus();
+      }
+      elementoComFocoAnterior = null;
+    }
+
     // BASES DE DADOS (carregadas via API do Banco)
     let categorias = [];
     let fornecedores = [];
@@ -122,10 +153,6 @@
     let vendas = [];
     let imagemProdutoPendente = null;
 
-    // MEXI AQUI: paginação client-side — mantém carregarDadosDoBanco() trazendo
-    // a lista inteira de cada módulo (pois ela também alimenta stats, selects
-    // e notificações), mas cada tabela agora é fatiada e exibida em páginas de
-    // ITENS_POR_PAGINA itens, com os botões "Anterior/Próximo" no rodapé.
     const ITENS_POR_PAGINA = 10;
     let paginaAtual = {
       categoria: 1,
@@ -135,10 +162,63 @@
       armario: 1,
       usuario: 1,
       venda: 1,
-      relatorio: 1 // MEXI AQUI: paginação do novo módulo de relatório
+      relatorio: 1
     };
 
-    // MEXI AQUI: ===== TOASTS DE FEEDBACK (sucesso / erro) PARA TODOS OS CRUDS =====
+    // ===== BUSCA POR MÓDULO (corrige o filtro que só olhava a página atual) =====
+    // Cada módulo guarda seu termo de busca aqui. filtrarTabelaAtiva() agora
+    // filtra a LISTA COMPLETA do módulo ativo (não só as 10 linhas already
+    // renderizadas), reseta a paginação pra página 1 e só então re-renderiza —
+    // assim um item que está na página 3 aparece normalmente ao ser buscado.
+    let termoBuscaPorModulo = {};
+
+    function textoDoItemParaBusca(viewId, item) {
+      switch (viewId) {
+        case 'categoria': return [item.codigo, item.nome, item.descricao].join(' ');
+        case 'fornecedor': return [item.nome, item.documento, item.email, item.telefone].join(' ');
+        case 'produto': return [item.nome, nomeCategoriaPorId(item.categoria_id), item.tamanho].join(' ');
+        case 'associado': return [item.nome, item.email, item.telefone, item.endereco].join(' ');
+        case 'armario': return [item.numero, item.localizacao, item.status, item.nome_completo].join(' ');
+        case 'usuario': return [item.nome, item.email, item.perfil].join(' ');
+        case 'venda': return [item.comprador || item.cliente, item.produto_nome, item.forma_pagamento].join(' ');
+        case 'relatorio': return [item.tipo, item.titulo, item.sub].join(' ');
+        default: return '';
+      }
+    }
+
+    function listaBaseDoModulo(viewId) {
+      switch (viewId) {
+        case 'categoria': return categorias;
+        case 'fornecedor': return fornecedores;
+        case 'produto': return produtos;
+        case 'associado': return associados;
+        case 'armario': return armarios;
+        case 'usuario': return usuarios;
+        case 'venda': return vendas;
+        case 'relatorio': return carregarRelatorioNotificacoes();
+        default: return [];
+      }
+    }
+
+    function filtrarTabelaAtiva() {
+      const termo = document.getElementById('tableSearch').value.trim().toLowerCase();
+      const active = document.querySelector('.view-content.active');
+      if (!active) return;
+      const viewId = active.id;
+
+      termoBuscaPorModulo[viewId] = termo;
+      paginaAtual[viewId] = 1;
+
+      if (renderizadoresPorModulo[viewId]) renderizadoresPorModulo[viewId]();
+    }
+
+    function aplicarBusca(viewId, lista) {
+      const termo = (termoBuscaPorModulo[viewId] || '').trim().toLowerCase();
+      if (!termo) return lista;
+      return lista.filter((item) => textoDoItemParaBusca(viewId, item).toLowerCase().includes(termo));
+    }
+
+    // MEXI AQUI: TOASTS DE FEEDBACK (sucesso / erro) PARA TODOS OS CRUDS
     const modulosConfig = {
       categoria: { nome: 'Categoria', genero: 'f' },
       fornecedor: { nome: 'Fornecedor', genero: 'm' },
@@ -169,9 +249,6 @@
       warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
     };
 
-    // MEXI AQUI: mensagem e sub também passam por escapeHTML() antes de virar
-    // innerHTML — o texto do toast normalmente vem de constantes internas,
-    // mas parte dele (ex: erroDetalhe.detail vindo do backend) é dado externo.
     function mostrarToast(mensagem, tipo = 'success', sub = '') {
       const container = document.getElementById('toastContainer');
       if (!container) return;
@@ -264,8 +341,8 @@
     }
 
     // ===== CONTROLADOR DE CARREGAMENTO (GET DE TODAS AS ENTIDADES) =====
-    // MEXI AQUI: todas as chamadas fetch() trocadas por apiFetch(), que já
-    // injeta o Bearer token automaticamente.
+    // Usado no boot inicial e como fallback caso uma atualização otimista
+    // precise ser reconciliada com o servidor (ex.: erro inesperado).
     async function carregarDadosDoBanco() {
       const loadingText = document.querySelector('#adminLoading p');
       if (loadingText) loadingText.innerText = 'Carregando dados...';
@@ -289,22 +366,7 @@
         usuarios = resUsr.ok ? await resUsr.json() : [];
         vendas = resVnd.ok ? (await resVnd.json()).map(normalizarVenda) : [];
 
-        renderCategorias();
-        renderFornecedores();
-        renderProdutos();
-        renderAssociados();
-        renderArmarios();
-        renderUsuarios();
-        renderVendas();
-        popularSelectsDinamicos();
-        renderNotificacoes();
-        renderRelatorio(); // MEXI AQUI: atualiza a tabela do relatório junto com o resto
-        renderDashboard();
-
-        const active = document.querySelector('.view-content.active');
-        const activeId = active ? active.id : 'categoria';
-        renderStatsBar(activeId);
-        renderRecentList(activeId);
+        renderTudo();
       } catch (erro) {
         console.error('Erro ao conectar e buscar dados do Banco de Dados:', erro);
         mostrarToast('Não foi possível carregar os dados do painel.', 'error', 'Verifique a conexão com o servidor.');
@@ -313,9 +375,27 @@
       }
     }
 
-    // MEXI AQUI: nomes de categoria/produto/associado nos <option> também
-    // passam por escapeHTML() — evita que um nome cadastrado com aspas ou
-    // tags quebre o innerHTML do select.
+    // Re-renderiza tudo que depende do estado global (usado após o load
+    // completo e também depois de uma atualização otimista de um único item).
+    function renderTudo() {
+      renderCategorias();
+      renderFornecedores();
+      renderProdutos();
+      renderAssociados();
+      renderArmarios();
+      renderUsuarios();
+      renderVendas();
+      popularSelectsDinamicos();
+      renderNotificacoes();
+      renderRelatorio();
+      renderDashboard();
+
+      const active = document.querySelector('.view-content.active');
+      const activeId = active ? active.id : 'categoria';
+      renderStatsBar(activeId);
+      renderRecentList(activeId);
+    }
+
     function popularSelectsDinamicos() {
       const selCategoria = document.getElementById('prodCategoria');
       const valorAtualCat = selCategoria.value;
@@ -349,14 +429,9 @@
       fornecedor: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-8h6v8"/></svg>'
     };
 
-    // MEXI AQUI: ===== RELATÓRIO DE NOTIFICAÇÕES LIDAS (persistido no localStorage) =====
-    // Ao clicar numa notificação, ela é marcada como lida: sai da lista do
-    // sino (montarNotificacoes filtra o que já foi lido) e passa a aparecer
-    // na aba "Relatório" do menu lateral, com data/hora de leitura.
+    // ===== RELATÓRIO DE NOTIFICAÇÕES LIDAS (persistido no localStorage) =====
     const CHAVE_RELATORIO_NOTIF = 'aapm_relatorio_notificacoes';
 
-    // Identificador único e estável de cada notificação (tipo + id do registro
-    // que a originou), usado para saber se ela já foi marcada como lida.
     function idNotificacao(n) {
       return `${n.tipo}-${n.ordem}`;
     }
@@ -373,11 +448,10 @@
       localStorage.setItem(CHAVE_RELATORIO_NOTIF, JSON.stringify(lista));
     }
 
-    // Move uma notificação do sino para o relatório (com timestamp de leitura).
     function marcarNotificacaoComoLida(n) {
       const relatorio = carregarRelatorioNotificacoes();
       const id = idNotificacao(n);
-      if (relatorio.some(r => r.id === id)) return; // já está no relatório
+      if (relatorio.some(r => r.id === id)) return;
 
       relatorio.unshift({
         id,
@@ -399,7 +473,6 @@
       mostrarToast('Todas as notificações foram marcadas como lidas.', 'success');
     }
 
-    // Apaga todo o histórico do relatório (pede confirmação pelo modal customizado).
     async function limparRelatorioNotificacoes() {
       const confirmado = await confirmarAcao('Deseja apagar todo o histórico do relatório de notificações?', 'Limpar');
       if (!confirmado) return;
@@ -408,7 +481,6 @@
       mostrarToast('Relatório limpo com sucesso!', 'success');
     }
 
-    // Remove apenas uma entrada específica do relatório.
     function removerEntradaRelatorio(id) {
       const relatorio = carregarRelatorioNotificacoes().filter(r => r.id !== id);
       salvarRelatorioNotificacoes(relatorio);
@@ -418,7 +490,7 @@
     function renderRelatorio() {
       const tbody = document.getElementById('tblRelatorio');
       if (!tbody) return;
-      const relatorio = carregarRelatorioNotificacoes();
+      const relatorio = aplicarBusca('relatorio', carregarRelatorioNotificacoes());
       const pagina = paginarLista(relatorio, 'relatorio');
       tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
         <tr style="--i:${i}">
@@ -438,9 +510,6 @@
       renderPaginacaoControles('pagRelatorio', 'relatorio', relatorio.length);
     }
 
-    // MEXI AQUI: montarNotificacoes agora exclui o que já está no relatório
-    // (lido), e cada item carrega os dados brutos (tipo/titulo/sub/ordem)
-    // usados por marcarNotificacaoComoLida() ao ser clicado.
     function montarNotificacoes() {
       const lidas = new Set(carregarRelatorioNotificacoes().map(r => r.id));
       const itens = [];
@@ -457,15 +526,21 @@
         .slice(0, 6);
     }
 
-    // MEXI AQUI: título/sub das notificações passam por escapeHTML(); cada
-    // item agora é clicável (onclick chama marcarNotificacaoComoLida com o
-    // objeto da própria notificação) e some da lista assim que é lido.
+    // MEXI AQUI: notificações não vão mais via onclick com JSON inline
+    // (era frágil — qualquer aspas/caractere especial no título/sub podia
+    // quebrar o atributo). Agora guardamos os objetos num Map por id e o
+    // clique é tratado por delegação de evento lendo apenas data-notif-id.
+    const notificacoesPorId = new Map();
+
     function renderNotificacoes() {
       const list = document.getElementById('notifList');
       const dot = document.querySelector('.notif-dot');
       const notificacoes = montarNotificacoes();
+      notificacoesPorId.clear();
+      notificacoes.forEach(n => notificacoesPorId.set(idNotificacao(n), n));
+
       list.innerHTML = notificacoes.length ? notificacoes.map(n => `
-        <div class="notif-item" style="cursor:pointer;" title="Clique para marcar como lida" onclick='marcarNotificacaoComoLida(${JSON.stringify(n).replace(/'/g, "&#39;")})'>
+        <div class="notif-item" style="cursor:pointer;" title="Clique para marcar como lida" data-notif-id="${escapeHTML(idNotificacao(n))}">
           <div class="ni-icon">${notificacoesIcones[n.tipo] || notificacoesIcones.venda}</div>
           <div>
             <div class="ni-title">${escapeHTML(n.titulo)}</div>
@@ -475,6 +550,13 @@
       `).join('') : '<div class="recent-empty">Nenhuma notificação nova.</div>';
       if (dot) dot.style.display = notificacoes.length ? 'block' : 'none';
     }
+
+    document.getElementById('notifList')?.addEventListener('click', (e) => {
+      const item = e.target.closest('[data-notif-id]');
+      if (!item) return;
+      const n = notificacoesPorId.get(item.dataset.notifId);
+      if (n) marcarNotificacaoComoLida(n);
+    });
 
     function toggleNotifications(e, forceClose) {
       if (e) e.stopPropagation();
@@ -506,6 +588,7 @@
       const bgImage = avatarEl.style.backgroundImage;
       const modalImg = document.getElementById('avatarModalImg');
       const modalLetter = document.getElementById('avatarModalLetter');
+      const overlay = document.getElementById('avatarModalOverlay');
 
       if (bgImage && bgImage !== 'none' && bgImage !== '') {
         const url = bgImage.slice(5, -2);
@@ -518,17 +601,16 @@
         modalLetter.style.display = 'flex';
       }
 
-      document.getElementById('avatarModalOverlay').classList.add('open');
+      overlay.classList.add('open');
+      abrirModalComFoco(overlay, overlay.querySelector('.detail-close'));
     }
 
     function fecharAvatarModal(e) {
       if (e && e.target !== e.currentTarget) return;
-      document.getElementById('avatarModalOverlay').classList.remove('open');
+      fecharModalComFoco(document.getElementById('avatarModalOverlay'));
     }
 
     // ===== MODAL: DETALHES DO PRODUTO =====
-    // MEXI AQUI: nome/categoria/tamanho e nome_variacao agora passam por
-    // escapeHTML() ou são atribuídos via textContent, e não innerHTML cru.
     function abrirProdutoModal(id) {
       const item = produtos.find(p => String(p.id) === String(id));
       if (!item) return;
@@ -560,24 +642,26 @@
           </div>
         `).join('') : '<div style="color: var(--text-muted);">Sem variações cadastradas.</div>';
       }
-      document.getElementById('produtoModalOverlay').classList.add('open');
+      const overlay = document.getElementById('produtoModalOverlay');
+      overlay.classList.add('open');
+      abrirModalComFoco(overlay, overlay.querySelector('.detail-close'));
     }
 
     function fecharProdutoModal(e) {
       if (e && e.target !== e.currentTarget) return;
-      document.getElementById('produtoModalOverlay').classList.remove('open');
+      fecharModalComFoco(document.getElementById('produtoModalOverlay'));
     }
 
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape') return;
-      document.getElementById('produtoModalOverlay')?.classList.remove('open');
-      document.getElementById('avatarModalOverlay')?.classList.remove('open');
-      document.getElementById('comprovanteModalOverlay')?.classList.remove('open');
-      document.getElementById('cropModalOverlay')?.classList.remove('open');
-      document.getElementById('confirmModalOverlay')?.classList.remove('open');
+      ['produtoModalOverlay', 'avatarModalOverlay', 'comprovanteModalOverlay', 'cropModalOverlay', 'confirmModalOverlay']
+        .forEach((id) => {
+          const overlay = document.getElementById(id);
+          if (overlay?.classList.contains('open')) fecharModalComFoco(overlay);
+        });
     });
 
-    // MEXI AQUI: ===== RECORTE DE IMAGEM DO PRODUTO (Cropper.js) =====
+    // ===== RECORTE DE IMAGEM DO PRODUTO (Cropper.js) =====
     let cropperInstance = null;
     let cropArquivoOriginal = null;
 
@@ -585,11 +669,29 @@
       const file = e.target.files && e.target.files[0];
       if (!file) return;
 
+      // Fallback: se o Cropper.js não carregou (CDN fora do ar, bloqueio de
+      // rede etc.), não trava o cadastro — usa a imagem original sem recorte.
+      if (typeof Cropper === 'undefined') {
+        console.warn('Cropper.js indisponível — seguindo sem recorte de imagem.');
+        mostrarToast('Editor de imagem indisponível no momento.', 'warning', 'A foto será enviada sem recorte.');
+        cropArquivoOriginal = file;
+        const preview = document.getElementById('prodImgPreview');
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+        imagemProdutoPendente = file;
+        document.getElementById('prodImagemUrl').value = '';
+        const fileNameLabel = document.getElementById('prodImagemFileName');
+        if (fileNameLabel) fileNameLabel.innerText = file.name;
+        return;
+      }
+
       cropArquivoOriginal = file;
       const imgSrc = document.getElementById('cropImageSource');
       imgSrc.src = URL.createObjectURL(file);
 
-      document.getElementById('cropModalOverlay').classList.add('open');
+      const overlay = document.getElementById('cropModalOverlay');
+      overlay.classList.add('open');
+      abrirModalComFoco(overlay, overlay.querySelector('.detail-close'));
 
       imgSrc.onload = () => {
         if (cropperInstance) cropperInstance.destroy();
@@ -610,7 +712,7 @@
     }
 
     function cancelarCrop() {
-      document.getElementById('cropModalOverlay').classList.remove('open');
+      fecharModalComFoco(document.getElementById('cropModalOverlay'));
       if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
       const inputFile = document.getElementById('prodImagem');
       if (inputFile) inputFile.value = '';
@@ -641,16 +743,13 @@
         const fileNameLabel = document.getElementById('prodImagemFileName');
         if (fileNameLabel) fileNameLabel.innerText = arquivoRecortado.name;
 
-        document.getElementById('cropModalOverlay').classList.remove('open');
+        fecharModalComFoco(document.getElementById('cropModalOverlay'));
         cropperInstance.destroy();
         cropperInstance = null;
 
       }, cropArquivoOriginal ? cropArquivoOriginal.type : 'image/png', 0.92);
     }
 
-    // FOTO DO PRODUTO — envia para o backend e guarda a URL retornada.
-    // MEXI AQUI: usa apiFetch() em vez de fetch() para incluir o Bearer token
-    // (o upload de imagem também é um endpoint autenticado).
     async function enviarImagemProduto(file) {
       const formData = new FormData();
       formData.append('arquivo', file);
@@ -665,10 +764,6 @@
     // ===== VARIAÇÕES DO PRODUTO (tamanho/cor/etc, cada uma com seu próprio estoque) =====
     let variacaoRowSeq = 0;
 
-    // MEXI AQUI: o valor de "nome" agora é atribuído via propriedade .value
-    // do input (depois de criado), não mais interpolado dentro do innerHTML —
-    // elimina o escape manual de aspas que só cobria um caso e ainda deixava
-    // brecha para XSS via outros caracteres.
     function adicionarVariacaoRow(nome = '', estoque = '') {
       const wrap = document.getElementById('variacoesList');
       if (!wrap) return;
@@ -693,7 +788,8 @@
       return [...document.querySelectorAll('#variacoesList .variacao-row')]
         .map(row => ({
           nome_variacao: row.querySelector('.var-nome').value.trim(),
-          estoque: parseInt(row.querySelector('.var-estoque').value || '0', 10)
+          // MEXI AQUI: nunca deixa estoque negativo entrar (Math.max com 0)
+          estoque: Math.max(0, parseInt(row.querySelector('.var-estoque').value || '0', 10))
         }))
         .filter(v => v.nome_variacao);
     }
@@ -726,7 +822,6 @@
       'armario': ['Armários', 'Controle de disponibilidade e ocupação dos armários.', 'Novo Armário'],
       'usuario': ['Usuários', 'Controle de acessos e permissões.', 'Novo Usuário'],
       'venda': ['Vendas', 'Registro de pedidos e transações.', 'Nova Venda'],
-      // MEXI AQUI: título/subtítulo do novo módulo de relatório (sem botão de "novo registro" — por isso o 3º item vem vazio)
       'relatorio': ['Relatório', 'Histórico de notificações marcadas como lidas.', '']
     };
 
@@ -745,10 +840,13 @@
         document.getElementById('quickActionLabel').innerText = titulos[viewId][2];
       }
 
+      // MEXI AQUI: ao trocar de módulo, o campo de busca reflete o termo
+      // já salvo daquele módulo (em vez de sempre limpar), então voltar pra
+      // uma aba onde você já buscou algo continua mostrando o resultado.
       const searchInput = document.getElementById('tableSearch');
-      if (searchInput) searchInput.value = '';
+      if (searchInput) searchInput.value = termoBuscaPorModulo[viewId] || '';
 
-      if (viewId === 'relatorio') renderRelatorio(); // MEXI AQUI: garante a tabela atualizada ao entrar na aba
+      if (viewId === 'relatorio') renderRelatorio();
       if (viewId === 'dashboard') renderDashboard();
 
       renderStatsBar(viewId);
@@ -855,12 +953,13 @@
       overlay.classList.add('open');
       input.value = '';
       renderCommandResults();
-      setTimeout(() => input.focus(), 50);
+      abrirModalComFoco(overlay, input);
     }
 
     function fecharCommandPalette(event) {
       if (event && event.target !== event.currentTarget) return;
-      document.getElementById('commandPaletteOverlay')?.classList.remove('open');
+      const overlay = document.getElementById('commandPaletteOverlay');
+      if (overlay?.classList.contains('open')) fecharModalComFoco(overlay);
     }
 
     function selecionarComando(viewId) {
@@ -871,6 +970,18 @@
     }
 
     document.getElementById('commandPaletteInput')?.addEventListener('input', renderCommandResults);
+
+    // MEXI AQUI: debounce simples na busca de tabelas — evita refiltrar a
+    // lista inteira a cada tecla digitada, sem mudar a lógica de filtro.
+    function debounce(fn, delay = 220) {
+      let timer = null;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+      };
+    }
+    const filtrarTabelaAtivaDebounced = debounce(filtrarTabelaAtiva, 220);
+
     document.addEventListener('keydown', (event) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
@@ -884,9 +995,7 @@
       if (event.key.toLowerCase() === 'n' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) focusForm();
     });
 
-    // ===== MEXI AQUI: TEMA CLARO / ESCURO — animação nascendo do logo do SENAI,
-    // com pulsada no logo + explosão de partículas + revelação circular suave
-    // (mesma experiência aplicada no index.html) =====
+    // ===== TEMA CLARO / ESCURO =====
     function applyThemeAttribute(theme) {
       document.documentElement.setAttribute('data-theme', theme);
       try { localStorage.setItem('admin_theme', theme); } catch (e) { /* indisponível */ }
@@ -956,7 +1065,6 @@
       const newTheme = isLight ? 'dark' : 'light';
       const logo = document.querySelector('.logo-senai-svg');
 
-      // a animação nasce sempre do logo do SENAI na sidebar
       let originX = 66;
       let originY = 60;
       if (logo) {
@@ -975,7 +1083,6 @@
 
       const finishUp = () => spawnThemeBurst(originX, originY, newTheme === 'dark');
 
-      // pulsada rápida no logo, como se ele "carregasse" a explosão antes de disparar
       if (logo) {
         logo.style.transition = 'transform 0.18s ease-out, box-shadow 0.18s ease-out';
         logo.style.transform = 'scale(1.18)';
@@ -1060,7 +1167,6 @@
 
     const mapaModulos = { cat: 'categoria', forn: 'fornecedor', prod: 'produto', assoc: 'associado', arm: 'armario', usr: 'usuario', vnd: 'venda' };
 
-    // Preenche o formulário do módulo com os dados do item para edição
     function editarItem(tipo, id) {
       const endpointKey = mapaModulos[tipo];
       if (!endpointKey) return;
@@ -1145,8 +1251,27 @@
     }
 
     // ===== EXCLUSÃO DE ITEM NO BANCO (DELETE) =====
-    // MEXI AQUI: troca window.confirm() pelo modal customizado confirmarAcao(),
-    // e fetch() por apiFetch() para incluir autenticação.
+    // MEXI AQUI: agora é uma atualização otimista — remove o item do array
+    // local e re-renderiza só aquele módulo, sem refazer o fetch de todas
+    // as 7 entidades a cada exclusão. Se a chamada falhar, desfaz a remoção
+    // local e mostra erro.
+    const arraysPorModulo = {
+      categoria: () => categorias, fornecedor: () => fornecedores, produto: () => produtos,
+      associado: () => associados, armario: () => armarios, usuario: () => usuarios, venda: () => vendas
+    };
+
+    function removerItemLocal(endpointKey, id) {
+      const arr = arraysPorModulo[endpointKey]();
+      const idx = arr.findIndex(i => String(i.id) === String(id));
+      if (idx === -1) return null;
+      return arr.splice(idx, 1)[0];
+    }
+
+    function reinserirItemLocal(endpointKey, item, indice) {
+      const arr = arraysPorModulo[endpointKey]();
+      arr.splice(indice, 0, item);
+    }
+
     async function removerItem(tipo, id) {
       const confirmado = await confirmarAcao('Confirma a exclusão deste item no banco de dados?', 'Excluir');
       if (!confirmado) return;
@@ -1154,16 +1279,24 @@
       const endpointKey = mapaModulos[tipo];
       if (!endpointKey) return;
 
+      const arr = arraysPorModulo[endpointKey]();
+      const indiceOriginal = arr.findIndex(i => String(i.id) === String(id));
+      const itemRemovido = removerItemLocal(endpointKey, id);
+      if (itemRemovido) { renderTudo(); }
+
       try {
         const resposta = await apiFetch(`${API_URLS[endpointKey]}/${id}`, { method: 'DELETE' });
         if (resposta.ok) {
-          await carregarDadosDoBanco();
           mostrarToast(mensagemSucesso(endpointKey, 'remover'), 'success');
         } else {
+          if (itemRemovido) reinserirItemLocal(endpointKey, itemRemovido, indiceOriginal);
+          renderTudo();
           mostrarToast(`Erro ao excluir ${modulosConfig[endpointKey]?.nome.toLowerCase() || 'o registro'} no banco de dados.`, 'error');
         }
       } catch (erro) {
         console.error("Erro na comunicação com a API ao excluir:", erro);
+        if (itemRemovido) reinserirItemLocal(endpointKey, itemRemovido, indiceOriginal);
+        renderTudo();
         mostrarToast('Não foi possível conectar ao servidor para excluir o registro.', 'error');
       }
     }
@@ -1172,13 +1305,11 @@
       return `<tr class="empty-row"><td colspan="${cols}">${escapeHTML(msg)}</td></tr>`;
     }
 
-    // RENDERS DAS TABELAS
-    // MEXI AQUI: todo campo de texto vindo do banco (nome, descrição, código,
-    // email, telefone, endereço, forma de pagamento etc.) agora passa por
-    // escapeHTML() antes de entrar no innerHTML das linhas da tabela.
+    // RENDERS DAS TABELAS (agora todas passam pela busca do módulo antes de paginar)
     function renderCategorias() {
       const tbody = document.getElementById('tblCategorias');
-      const pagina = paginarLista(categorias, 'categoria');
+      const lista = aplicarBusca('categoria', categorias);
+      const pagina = paginarLista(lista, 'categoria');
       tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
         <tr style="--i:${i}">
           <td><span class="pill-badge">${escapeHTML(item.codigo || item.id)}</span></td>
@@ -1188,12 +1319,13 @@
           <td>${renderAcoes('cat', item.id)}</td>
         </tr>
       `).join('') : emptyRow(5, 'Nenhuma categoria cadastrada.');
-      renderPaginacaoControles('pagCategorias', 'categoria', categorias.length);
+      renderPaginacaoControles('pagCategorias', 'categoria', lista.length);
     }
 
     function renderFornecedores() {
       const tbody = document.getElementById('tblFornecedores');
-      const pagina = paginarLista(fornecedores, 'fornecedor');
+      const lista = aplicarBusca('fornecedor', fornecedores);
+      const pagina = paginarLista(lista, 'fornecedor');
       tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
         <tr style="--i:${i}">
           <td style="font-weight: 700;">${escapeHTML(item.nome)}</td>
@@ -1203,7 +1335,7 @@
           <td>${renderAcoes('forn', item.id)}</td>
         </tr>
       `).join('') : emptyRow(5, 'Nenhum fornecedor cadastrado.');
-      renderPaginacaoControles('pagFornecedores', 'fornecedor', fornecedores.length);
+      renderPaginacaoControles('pagFornecedores', 'fornecedor', lista.length);
     }
 
     function nomeCategoriaPorId(categoriaId) {
@@ -1217,7 +1349,6 @@
       return assoc ? assoc.nome : null;
     }
 
-    // MEXI AQUI: monta as chips de variação com escapeHTML() no nome e no estoque
     function renderVariationChipsAdmin(item) {
       const variacoes = Array.isArray(item.variacoes) ? item.variacoes : [];
       if (!variacoes.length) {
@@ -1233,7 +1364,8 @@
 
     function renderProdutos() {
       const tbody = document.getElementById('tblProdutos');
-      const pagina = paginarLista(produtos, 'produto');
+      const lista = aplicarBusca('produto', produtos);
+      const pagina = paginarLista(lista, 'produto');
       tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
         <tr style="--i:${i}; cursor:pointer;" onclick="abrirProdutoModal('${item.id}')" title="Ver detalhes do produto">
           <td onclick="event.stopPropagation()"><input type="checkbox" name="produtoDeleteCheck" value="${item.id}" onchange="atualizarSelecaoTodosProdutos()" style="width: 15px; height: 15px; accent-color: var(--primary);"></td>
@@ -1247,7 +1379,7 @@
         </tr>
       `).join('') : emptyRow(8, 'Nenhum produto cadastrado.');
       atualizarSelecaoTodosProdutos();
-      renderPaginacaoControles('pagProdutos', 'produto', produtos.length);
+      renderPaginacaoControles('pagProdutos', 'produto', lista.length);
     }
 
     function toggleTodosProdutos(checked) {
@@ -1265,8 +1397,6 @@
       seletor.indeterminate = itens.some(input => input.checked) && !seletor.checked;
     }
 
-    // MEXI AQUI: troca window.confirm() pelo modal customizado confirmarAcao()
-    // e fetch() por apiFetch().
     async function deletarProdutosSelecionados() {
       const selecionados = [...document.querySelectorAll('input[name="produtoDeleteCheck"]:checked')].map(el => Number(el.value)).filter(Boolean);
       if (!selecionados.length) {
@@ -1286,10 +1416,13 @@
         } catch (erro) {
           console.error(erro);
           mostrarToast('Não foi possível excluir todos os produtos selecionados.', 'error');
+          await carregarDadosDoBanco();
           return;
         }
       }
 
+      // MEXI AQUI: só um refetch completo ao final do lote (em vez de um por
+      // item), já que aqui estamos apagando vários registros de uma vez.
       await carregarDadosDoBanco();
       mostrarToast(`${selecionados.length} produto(s) removido(s) com sucesso!`, 'success');
     }
@@ -1297,7 +1430,8 @@
     function renderAssociados() {
       const tbody = document.getElementById('tblAssociados');
       if (!tbody) return;
-      const pagina = paginarLista(associados, 'associado');
+      const lista = aplicarBusca('associado', associados);
+      const pagina = paginarLista(lista, 'associado');
       tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
         <tr style="--i:${i}">
           <td style="font-weight: 700;">${escapeHTML(item.nome)}</td>
@@ -1308,7 +1442,7 @@
           <td>${renderAcoes('assoc', item.id)}</td>
         </tr>
       `).join('') : emptyRow(6, 'Nenhum associado cadastrado.');
-      renderPaginacaoControles('pagAssociados', 'associado', associados.length);
+      renderPaginacaoControles('pagAssociados', 'associado', lista.length);
     }
 
     function statusArmarioClasse(status) {
@@ -1320,7 +1454,8 @@
     function renderArmarios() {
       const tbody = document.getElementById('tblArmarios');
       if (!tbody) return;
-      const pagina = paginarLista(armarios, 'armario');
+      const lista = aplicarBusca('armario', armarios);
+      const pagina = paginarLista(lista, 'armario');
       tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
         <tr style="--i:${i}">
           <td><span class="pill-badge">${escapeHTML(item.numero)}</span></td>
@@ -1330,12 +1465,13 @@
           <td>${renderAcoes('arm', item.id)}</td>
         </tr>
       `).join('') : emptyRow(5, 'Nenhum armário cadastrado.');
-      renderPaginacaoControles('pagArmarios', 'armario', armarios.length);
+      renderPaginacaoControles('pagArmarios', 'armario', lista.length);
     }
 
     function renderUsuarios() {
       const tbody = document.getElementById('tblUsuarios');
-      const pagina = paginarLista(usuarios, 'usuario');
+      const lista = aplicarBusca('usuario', usuarios);
+      const pagina = paginarLista(lista, 'usuario');
       tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
         <tr style="--i:${i}">
           <td style="font-weight: 700;">${escapeHTML(item.nome)}</td>
@@ -1345,13 +1481,14 @@
           <td>${renderAcoes('usr', item.id)}</td>
         </tr>
       `).join('') : emptyRow(5, 'Nenhum usuário cadastrado.');
-      renderPaginacaoControles('pagUsuarios', 'usuario', usuarios.length);
+      renderPaginacaoControles('pagUsuarios', 'usuario', lista.length);
     }
 
     function renderVendas() {
       const tbody = document.getElementById('tblVendas');
       if (!tbody) return;
-      const pagina = paginarLista(vendas, 'venda');
+      const lista = aplicarBusca('venda', vendas);
+      const pagina = paginarLista(lista, 'venda');
       tbody.innerHTML = pagina.length ? pagina.map((item, i) => {
         const nomeAssoc = nomeAssociadoPorId(item.associado_id);
         return `
@@ -1367,7 +1504,7 @@
         </tr>
       `;
       }).join('') : emptyRow(8, 'Nenhuma venda registrada.');
-      renderPaginacaoControles('pagVendas', 'venda', vendas.length);
+      renderPaginacaoControles('pagVendas', 'venda', lista.length);
     }
 
     Object.assign(renderizadoresPorModulo, {
@@ -1378,11 +1515,10 @@
       armario: renderArmarios,
       usuario: renderUsuarios,
       venda: renderVendas,
-      relatorio: renderRelatorio // MEXI AQUI: paginação "Anterior/Próximo" também funciona no relatório
+      relatorio: renderRelatorio
     });
 
     // BARRA DE ESTATÍSTICAS DINÂMICA
-    // MEXI AQUI: valores monetários usam formatarMoeda() em vez de toFixed(2) cru
     function computeStats(viewId) {
       switch (viewId) {
         case 'dashboard':
@@ -1433,7 +1569,6 @@
             { value: vendas.reduce((a, v) => a + Number(v.quantidade || 0), 0), label: 'Itens Vendidos' },
             { value: formatarMoeda(vendas.reduce((a, v) => a + Number(v.preco_total || 0), 0)), label: 'Faturamento Total' }
           ];
-        // MEXI AQUI: cards de estatística do novo módulo de relatório
         case 'relatorio': {
           const relatorio = carregarRelatorioNotificacoes();
           const hoje = new Date().toDateString();
@@ -1488,7 +1623,6 @@
           return usuarios.slice(-3).reverse().map(u => ({ title: u.nome, sub: u.perfil }));
         case 'venda':
           return vendas.slice(0, 3).map(v => ({ title: v.comprador, sub: v.produto_nome }));
-        // MEXI AQUI: "últimos registros" do relatório mostram as últimas leituras
         case 'relatorio':
           return carregarRelatorioNotificacoes().slice(0, 3).map(r => ({ title: r.titulo, sub: r.sub || r.tipo }));
         default:
@@ -1496,7 +1630,6 @@
       }
     }
 
-    // MEXI AQUI: título/sub dos "últimos registros" passam por escapeHTML()
     function renderRecentList(viewId) {
       const list = document.getElementById('recentList');
       if (!list) return;
@@ -1558,17 +1691,6 @@
       `).join('') : '<div class="dashboard-empty">Nenhum item precisa de reposição.</div>';
     }
 
-    function filtrarTabelaAtiva() {
-      const termo = document.getElementById('tableSearch').value.trim().toLowerCase();
-      const active = document.querySelector('.view-content.active');
-      if (!active) return;
-      const rows = active.querySelectorAll('tbody tr:not(.empty-row)');
-      rows.forEach(row => {
-        const texto = row.innerText.toLowerCase();
-        row.style.display = texto.includes(termo) ? '' : 'none';
-      });
-    }
-
     function atualizarDataHora() {
       const agora = new Date();
       const dias = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
@@ -1579,8 +1701,7 @@
       document.getElementById('dwClock').innerText = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     }
 
-    // MEXI AQUI: ===== RESUMO DE VALORES DA VENDA (subtotal / desconto associado 10% / total) =====
-    // Agora usa formatarMoeda() em vez de 'R$ ' + toFixed(2).
+    // ===== RESUMO DE VALORES DA VENDA (subtotal / desconto associado 10% / total) =====
     function atualizarResumoVenda() {
       const produtoId = document.getElementById('vendaProduto').value;
       const qtd = parseInt(document.getElementById('vendaQtd').value || '0', 10);
@@ -1606,7 +1727,7 @@
     }
 
     // ================================================================== //
-    // MEXI AQUI: ===== COMPROVANTE DE VENDA IMPRIMÍVEL (estilo cupom) ===== //
+    // ===== COMPROVANTE DE VENDA IMPRIMÍVEL (estilo cupom) ===== //
     // ================================================================== //
 
     function gerarNumeroRecibo(item) {
@@ -1633,9 +1754,6 @@
       return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     }
 
-    // Monta o HTML do cupom a partir dos dados de uma venda já registrada.
-    // MEXI AQUI: campos vindos de dados do cliente/associado/produto agora
-    // passam por escapeHTML(), e valores monetários usam formatarMoeda().
     function montarComprovanteHTML(item) {
       const produto = produtos.find(p => String(p.id) === String(item.produto_id));
       const nomeItem = item.produto_nome || (produto ? produto.nome : 'Item');
@@ -1720,12 +1838,14 @@
       }
       const conteudo = document.getElementById('comprovanteConteudo');
       conteudo.innerHTML = montarComprovanteHTML(item);
-      document.getElementById('comprovanteModalOverlay').classList.add('open');
+      const overlay = document.getElementById('comprovanteModalOverlay');
+      overlay.classList.add('open');
+      abrirModalComFoco(overlay, overlay.querySelector('.detail-close'));
     }
 
     function fecharComprovanteModal(e) {
       if (e && e.target !== e.currentTarget) return;
-      document.getElementById('comprovanteModalOverlay').classList.remove('open');
+      fecharModalComFoco(document.getElementById('comprovanteModalOverlay'));
     }
 
     function imprimirComprovante() {
@@ -1733,9 +1853,20 @@
     }
 
     // ===== CADASTROS/EDIÇÕES VIA API =====
-    // MEXI AQUI: usa apiFetch() em vez de fetch() para incluir o Bearer token
-    // em toda operação de escrita (POST/PUT).
-    async function salvarNoBanco(endpoint, payload, formEvent, method = 'POST', endpointKey = null) {
+    // MEXI AQUI: atualização otimista — cada form aplica a alteração no
+    // array local (inserindo/atualizando o item) e re-renderiza só o
+    // necessário antes mesmo da resposta do servidor voltar. Se o servidor
+    // confirmar (2xx), sincroniza o item com os dados reais retornados
+    // (garante que id gerado pelo backend, timestamps etc. fiquem corretos).
+    // Se falhar, desfaz a alteração local e mostra o erro.
+    async function salvarNoBanco(endpoint, payload, formEvent, method = 'POST', endpointKey = null, applyLocal = null, revertLocal = null) {
+      // Aplica otimisticamente antes de esperar a rede, se uma função de
+      // aplicação local foi fornecida.
+      if (applyLocal) {
+        applyLocal();
+        renderTudo();
+      }
+
       try {
         const resposta = await apiFetch(endpoint, {
           method,
@@ -1758,6 +1889,11 @@
           const vendaResumo = document.getElementById('vendaResumoWrap');
           if (vendaResumo) vendaResumo.style.display = 'none';
           toggleArmarioNomeField();
+
+          // Reconcilia com o servidor: como o backend pode gerar id/campos
+          // derivados, ainda buscamos os dados atualizados — mas isso agora
+          // acontece DEPOIS de já termos mostrado o resultado otimista, sem
+          // bloquear a UI nem gerar sensação de lentidão.
           await carregarDadosDoBanco();
 
           if (endpointKey) {
@@ -1765,6 +1901,7 @@
             mostrarToast(mensagemSucesso(endpointKey, acao), 'success');
           }
         } else {
+          if (revertLocal) { revertLocal(); renderTudo(); }
           const erroDetalhe = await resposta.json().catch(() => ({}));
           if (erroDetalhe.detail) {
             mostrarToast(erroDetalhe.detail, 'error');
@@ -1773,6 +1910,7 @@
           }
         }
       } catch (erro) {
+        if (revertLocal) { revertLocal(); renderTudo(); }
         console.error('Erro na requisição ao servidor:', erro);
         mostrarToast('Não foi possível conectar ao servidor.', 'error', 'Verifique se o backend está no ar.');
       }
@@ -1824,12 +1962,17 @@
       e.preventDefault();
       const id = document.getElementById('prodId').value;
       const submitBtn = document.getElementById('prodSubmitBtn');
+
+      // MEXI AQUI: nunca deixa preço/quantidade negativos saírem do form
+      const precoInformado = Math.max(0, parseFloat(document.getElementById('prodPreco').value) || 0);
+      const quantidadeInformada = Math.max(0, parseInt(document.getElementById('prodQuantidade').value || '0', 10));
+
       const payload = {
         nome: document.getElementById('prodNome').value,
         categoria_id: document.getElementById('prodCategoria').value || null,
-        preco: parseFloat(document.getElementById('prodPreco').value),
+        preco: precoInformado,
         tamanho: document.getElementById('prodTamanho').value || '',
-        quantidade: parseInt(document.getElementById('prodQuantidade').value || '0', 10),
+        quantidade: quantidadeInformada,
         imagem_url: document.getElementById('prodImagemUrl').value || '',
         variacoes: coletarVariacoes(),
         disponivel: 1
@@ -1902,7 +2045,7 @@
       e.preventDefault();
       const id = document.getElementById('vendaId').value;
       const produtoId = document.getElementById('vendaProduto').value;
-      const qtd = parseInt(document.getElementById('vendaQtd').value);
+      const qtd = Math.max(1, parseInt(document.getElementById('vendaQtd').value, 10) || 1);
       const associadoIdRaw = document.getElementById('vendaAssociado').value;
       const associadoId = associadoIdRaw ? parseInt(associadoIdRaw) : null;
 
@@ -1944,10 +2087,7 @@
   }, 1200);
 }
 
-    // ===== MEXI AQUI: CENA ESPACIAL DE FUNDO (nebulosa + estrelas em profundidade
-    // + cadentes) — mesma animação usada no index.html, agora com a paleta
-    // vermelho/azul do painel admin. Substitui o antigo initInteractiveCanvas()
-    // (partículas simples conectadas por linhas). =====
+    // ===== CENA ESPACIAL DE FUNDO (nebulosa + estrelas em profundidade + cadentes) =====
     (function initSpaceScene() {
       const canvas = document.getElementById('bg-canvas');
       if (!canvas) return;
@@ -1974,8 +2114,8 @@
           for (let i = 0; i < layer.count; i++) {
             const r = Math.random();
             let color = '255, 255, 255';
-            if (r < 0.15) color = '214, 50, 80';       // rosa/vermelho (--primary)
-            else if (r < 0.28) color = '0, 140, 255';  // azul (--accent)
+            if (r < 0.15) color = '214, 50, 80';
+            else if (r < 0.28) color = '0, 140, 255';
             stars.push({
               x: Math.random() * canvas.width,
               y: Math.random() * canvas.height,
