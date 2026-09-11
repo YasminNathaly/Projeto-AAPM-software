@@ -32,6 +32,7 @@ from app.routers.variacao_router import router as variacao_router
 from app.routers.venda_router import router as venda_router
 from app.routers.associado_router import router as associado_router
 from app.routers.armario_router import router as armario_router
+from app.routers.assistente_router import router as assistente_router
 
 # 2. Importação garantida de todos os modelos do SQLAlchemy (antes de create_all)
 try:
@@ -185,6 +186,7 @@ app.include_router(variacao_router)
 app.include_router(venda_router)
 app.include_router(associado_router)
 app.include_router(armario_router)
+app.include_router(assistente_router)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # EXCEÇÕES PERSONALIZADAS

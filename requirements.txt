@@ -38,3 +38,8 @@ reportlab
 pydantic
  
 bcrypt
+
+# ==========================================
+# ASSISTENTE COM IA
+# ==========================================
+google-genai
