@@ -336,7 +336,8 @@
       return {
         ...v,
         associado_id: v.associado_id ?? null,
-        desconto_percentual: v.desconto_percentual ?? 0
+        desconto_percentual: v.desconto_percentual ?? 0,
+        pagamentos: Array.isArray(v.pagamentos) ? v.pagamentos : []
       };
     }
 
@@ -396,6 +397,8 @@
       renderRecentList(activeId);
     }
 
+    // MEXI AQUI: agora popula também o filtro de categoria da venda e o
+    // datalist de busca de produto (com filtro por categoria aplicado).
     function popularSelectsDinamicos() {
       const selCategoria = document.getElementById('prodCategoria');
       const valorAtualCat = selCategoria.value;
@@ -404,10 +407,43 @@
       if (valorAtualCat) selCategoria.value = valorAtualCat;
 
       const selProduto = document.getElementById('vendaProduto');
-      const valorAtualProd = selProduto.value;
-      selProduto.innerHTML = '<option value="">Selecione...</option>' +
-        produtos.map(p => `<option value="${escapeHTML(p.id)}">${escapeHTML(p.nome)} (${formatarMoeda(p.preco)})</option>`).join('');
-      if (valorAtualProd) selProduto.value = valorAtualProd;
+      const buscaProduto = document.getElementById('vendaProdutoBusca');
+      const listaProduto = document.getElementById('vendaProdutoList');
+      const filtroCategoria = document.getElementById('vendaFiltroCategoria');
+
+      if (filtroCategoria) {
+        const valorAtualFiltro = filtroCategoria.value;
+        filtroCategoria.innerHTML = '<option value="">Todas as categorias</option>' +
+          categorias.map(c => `<option value="${escapeHTML(c.id)}">${escapeHTML(c.nome)}</option>`).join('');
+        if (valorAtualFiltro) filtroCategoria.value = valorAtualFiltro;
+      }
+
+      if (listaProduto && selProduto) {
+        const valorAtualProdId = selProduto.value;
+        const categoriaFiltro = filtroCategoria ? filtroCategoria.value : '';
+        const produtosFiltrados = categoriaFiltro
+          ? produtos.filter(p => String(p.categoria_id) === String(categoriaFiltro))
+          : produtos;
+
+        listaProduto.innerHTML = produtosFiltrados.map(p =>
+          `<option data-id="${escapeHTML(p.id)}" value="${escapeHTML(p.nome)} (${formatarMoeda(p.preco)})"></option>`
+        ).join('');
+
+        // Se o produto atualmente selecionado ficou fora do filtro de
+        // categoria, limpa a seleção pra não deixar um produto "invisível"
+        // escolhido. Se ainda estiver visível, mantém o texto sincronizado
+        // (útil ao editar uma venda, por exemplo).
+        const aindaVisivel = produtosFiltrados.some(p => String(p.id) === String(valorAtualProdId));
+        if (valorAtualProdId && aindaVisivel) {
+          const p = produtos.find(pr => String(pr.id) === String(valorAtualProdId));
+          if (p && buscaProduto) buscaProduto.value = `${p.nome} (${formatarMoeda(p.preco)})`;
+          selProduto.value = valorAtualProdId;
+        } else if (valorAtualProdId && !aindaVisivel) {
+          selProduto.value = '';
+          if (buscaProduto) buscaProduto.value = '';
+          atualizarResumoVenda();
+        }
+      }
 
       const selAssociado = document.getElementById('vendaAssociado');
       if (selAssociado) {
@@ -416,6 +452,20 @@
           associados.map(a => `<option value="${escapeHTML(a.id)}">${escapeHTML(a.nome)}</option>`).join('');
         if (valorAtualAssoc) selAssociado.value = valorAtualAssoc;
       }
+    }
+
+    // ===== BUSCA DE PRODUTO POR TEXTO (datalist) → resolve pro ID real =====
+    function resolverProdutoBusca() {
+      const busca = document.getElementById('vendaProdutoBusca');
+      const hiddenId = document.getElementById('vendaProduto');
+      const listaProduto = document.getElementById('vendaProdutoList');
+      const texto = busca.value.trim();
+
+      const opcoes = listaProduto ? Array.from(listaProduto.options) : [];
+      const match = opcoes.find(o => o.value === texto);
+
+      hiddenId.value = match ? match.dataset.id : '';
+      atualizarResumoVenda();
     }
 
     // ===== NOTIFICAÇÕES DINÂMICAS (sempre a partir dos dados reais) =====
@@ -1239,10 +1289,27 @@
         document.getElementById('vendaId').value = item.id;
         document.getElementById('vendaCliente').value = item.comprador || '';
         document.getElementById('vendaProduto').value = item.produto_id ?? '';
+
+        const produtoEdit = produtos.find(p => String(p.id) === String(item.produto_id));
+        const buscaProdutoEdit = document.getElementById('vendaProdutoBusca');
+        if (buscaProdutoEdit) buscaProdutoEdit.value = produtoEdit ? `${produtoEdit.nome} (${formatarMoeda(produtoEdit.preco)})` : '';
+
         document.getElementById('vendaQtd').value = item.quantidade ?? 1;
-        document.getElementById('vendaPagamento').value = item.forma_pagamento || 'PIX';
         const selAssoc = document.getElementById('vendaAssociado');
         if (selAssoc) selAssoc.value = item.associado_id ?? '';
+
+        // MEXI AQUI: reconstrói as linhas de pagamento dividido a partir do
+        // que veio salvo (várias formas) ou, se for um registro antigo com
+        // só uma forma de pagamento em texto, cria uma única linha com ela.
+        const wrapPagamentos = document.getElementById('pagamentoSplitList');
+        if (wrapPagamentos) wrapPagamentos.innerHTML = '';
+        pagamentoRowSeq = 0;
+        if (Array.isArray(item.pagamentos) && item.pagamentos.length) {
+          item.pagamentos.forEach(p => adicionarPagamentoRow(p.forma_pagamento, p.valor));
+        } else {
+          adicionarPagamentoRow(item.forma_pagamento || 'PIX', item.preco_total ?? item.total ?? null);
+        }
+
         document.getElementById('vendaSubmitBtn').innerText = 'Salvar Alterações';
         atualizarResumoVenda();
       }
@@ -1701,6 +1768,114 @@
       document.getElementById('dwClock').innerText = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     }
 
+    // ===== PAGAMENTO DIVIDIDO DA VENDA (uma ou mais formas + valores) =====
+    let pagamentoRowSeq = 0;
+
+    function adicionarPagamentoRow(forma = 'PIX', valor = null) {
+      const wrap = document.getElementById('pagamentoSplitList');
+      if (!wrap) return;
+      const rowId = 'pgtoRow' + (pagamentoRowSeq++);
+      const row = document.createElement('div');
+      row.className = 'pagamento-row';
+      row.id = rowId;
+      row.innerHTML = `
+        <select class="form-control pgto-forma" onchange="atualizarRestantePagamento()">
+          <option value="PIX">PIX</option>
+          <option value="Cartão de Crédito">Cartão de Crédito</option>
+          <option value="Dinheiro">Dinheiro</option>
+        </select>
+        <input type="number" class="form-control pgto-valor" step="0.01" min="0" placeholder="Valor (R$)" oninput="atualizarRestantePagamento()">
+        <button type="button" class="action-btn danger" title="Remover forma de pagamento" onclick="removerPagamentoRow('${rowId}')">
+          <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      `;
+      row.querySelector('.pgto-forma').value = forma;
+      if (valor !== null && valor !== undefined && valor !== '') {
+        row.querySelector('.pgto-valor').value = Number(valor).toFixed(2);
+      }
+      wrap.appendChild(row);
+      atualizarRestantePagamento();
+    }
+
+    function removerPagamentoRow(rowId) {
+      const wrap = document.getElementById('pagamentoSplitList');
+      const linhas = wrap ? wrap.querySelectorAll('.pagamento-row') : [];
+      if (linhas.length <= 1) {
+        mostrarToast('É preciso manter ao menos uma forma de pagamento.', 'warning');
+        return;
+      }
+      document.getElementById(rowId)?.remove();
+      atualizarRestantePagamento();
+    }
+
+    // Reseta a lista de pagamentos pra uma única linha (usado ao carregar a
+    // página, depois de concluir uma venda e antes de editar outra).
+    function limparPagamentoRows(formaUnica = 'PIX', valorUnico = null) {
+      const wrap = document.getElementById('pagamentoSplitList');
+      if (wrap) wrap.innerHTML = '';
+      pagamentoRowSeq = 0;
+      adicionarPagamentoRow(formaUnica, valorUnico);
+    }
+
+    function coletarPagamentos() {
+      const linhas = [...document.querySelectorAll('#pagamentoSplitList .pagamento-row')];
+      return linhas
+        .map(row => ({
+          forma_pagamento: row.querySelector('.pgto-forma').value,
+          valor: Math.round((parseFloat(row.querySelector('.pgto-valor').value) || 0) * 100) / 100
+        }))
+        .filter(p => p.valor > 0);
+    }
+
+    function calcularTotalVendaAtual() {
+      const produtoId = document.getElementById('vendaProduto').value;
+      const qtd = parseInt(document.getElementById('vendaQtd').value || '0', 10);
+      const associadoId = document.getElementById('vendaAssociado').value;
+      const produto = produtos.find(p => String(p.id) === String(produtoId));
+      if (!produto || !qtd) return 0;
+      const subtotal = Number(produto.preco) * qtd;
+      const desconto = associadoId ? subtotal * 0.10 : 0;
+      return Math.round((subtotal - desconto) * 100) / 100;
+    }
+
+    // Recalcula quanto falta (ou sobra) pra bater com o total da venda.
+    // Se só existir uma forma de pagamento, ela é mantida sincronizada
+    // automaticamente com o total (não precisa digitar nada nesse caso).
+    function atualizarRestantePagamento() {
+      const total = calcularTotalVendaAtual();
+      const linhas = [...document.querySelectorAll('#pagamentoSplitList .pagamento-row')];
+
+      if (linhas.length === 1) {
+        const campoValor = linhas[0].querySelector('.pgto-valor');
+        if (campoValor && document.activeElement !== campoValor) {
+          campoValor.value = total > 0 ? total.toFixed(2) : '';
+        }
+      }
+
+      const pagamentos = coletarPagamentos();
+      const soma = Math.round(pagamentos.reduce((acc, p) => acc + p.valor, 0) * 100) / 100;
+      const restante = Math.round((total - soma) * 100) / 100;
+
+      const label = document.getElementById('pagamentoRestanteLabel');
+      if (!label) return;
+
+      if (total <= 0) {
+        label.textContent = '';
+        label.className = 'pagamento-split-restante';
+        return;
+      }
+      if (Math.abs(restante) < 0.01) {
+        label.textContent = 'Valores batem com o total ✓';
+        label.className = 'pagamento-split-restante ok';
+      } else if (restante > 0) {
+        label.textContent = `Faltam ${formatarMoeda(restante)}`;
+        label.className = 'pagamento-split-restante pendente';
+      } else {
+        label.textContent = `${formatarMoeda(Math.abs(restante))} a mais que o total`;
+        label.className = 'pagamento-split-restante pendente';
+      }
+    }
+
     // ===== RESUMO DE VALORES DA VENDA (subtotal / desconto associado 10% / total) =====
     function atualizarResumoVenda() {
       const produtoId = document.getElementById('vendaProduto').value;
@@ -1711,6 +1886,7 @@
       const produto = produtos.find(p => String(p.id) === String(produtoId));
       if (!produto || !qtd) {
         resumoWrap.style.display = 'none';
+        atualizarRestantePagamento();
         return;
       }
 
@@ -1724,6 +1900,8 @@
       document.getElementById('vendaResumoDescontoWrap').classList.toggle('show', temDesconto);
       document.getElementById('vendaResumoTotal').innerText = formatarMoeda(total);
       resumoWrap.style.display = 'block';
+
+      atualizarRestantePagamento();
     }
 
     // ================================================================== //
@@ -1769,6 +1947,13 @@
       const recibo = gerarNumeroRecibo(item);
       const codigoValidacao = gerarCodigoValidacao(item);
 
+      // MEXI AQUI: se a venda teve mais de uma forma de pagamento, mostra
+      // a divisão completa (forma + valor de cada uma) em vez de só o texto
+      // combinado salvo em forma_pagamento.
+      const pagamentosHTML = Array.isArray(item.pagamentos) && item.pagamentos.length > 1
+        ? item.pagamentos.map(p => `<div class="comp-linha"><span>${escapeHTML(p.forma_pagamento)}</span><span>${formatarMoeda(p.valor)}</span></div>`).join('')
+        : null;
+
       return `
         <div class="comp-header">
           <div class="comp-logo-badge">
@@ -1813,7 +1998,9 @@
           <div class="comp-linha total"><span>Total a Pagar</span><span>${formatarMoeda(totalFinal)}</span></div>
         </div>
 
-        <div class="comp-pagamento">Forma de Pagamento: ${escapeHTML(item.forma_pagamento) || '-'}</div>
+        ${pagamentosHTML
+          ? `<div class="comp-section-label">Formas de Pagamento</div>${pagamentosHTML}`
+          : `<div class="comp-pagamento">Forma de Pagamento: ${escapeHTML(item.forma_pagamento) || '-'}</div>`}
 
         <div class="comp-validacao">
           <div class="comp-codigo">${escapeHTML(codigoValidacao)}</div>
@@ -1889,6 +2076,15 @@
           const vendaResumo = document.getElementById('vendaResumoWrap');
           if (vendaResumo) vendaResumo.style.display = 'none';
           toggleArmarioNomeField();
+
+          // MEXI AQUI: encadeamento rápido de vendas — volta o pagamento pra
+          // uma única linha em PIX e já foca o campo Cliente, pra registrar
+          // a próxima venda sem precisar tocar no mouse.
+          if (endpointKey === 'venda') {
+            limparPagamentoRows('PIX', null);
+            const campoCliente = document.getElementById('vendaCliente');
+            if (campoCliente) campoCliente.focus();
+          }
 
           // Reconcilia com o servidor: como o backend pode gerar id/campos
           // derivados, ainda buscamos os dados atualizados — mas isso agora
@@ -2041,10 +2237,21 @@
       document.getElementById('usrId').value = '';
     }
 
+    // MEXI AQUI: addVenda agora resolve o produto pelo campo de busca (não
+    // mais um <select>), valida que o produto foi resolvido pra um ID real,
+    // e monta o array de pagamentos divididos — bloqueando o envio se a
+    // soma das formas de pagamento não bater com o total da venda.
     function addVenda(e) {
       e.preventDefault();
       const id = document.getElementById('vendaId').value;
       const produtoId = document.getElementById('vendaProduto').value;
+
+      if (!produtoId) {
+        mostrarToast('Selecione um produto válido na lista de sugestões.', 'error');
+        document.getElementById('vendaProdutoBusca').focus();
+        return;
+      }
+
       const qtd = Math.max(1, parseInt(document.getElementById('vendaQtd').value, 10) || 1);
       const associadoIdRaw = document.getElementById('vendaAssociado').value;
       const associadoId = associadoIdRaw ? parseInt(associadoIdRaw) : null;
@@ -2053,13 +2260,28 @@
       const subtotal = produto ? Number(produto.preco) * qtd : 0;
       const percentualDesconto = associadoId ? 10 : 0;
       const desconto = subtotal * (percentualDesconto / 100);
-      const total = subtotal - desconto;
+      const total = Math.round((subtotal - desconto) * 100) / 100;
+
+      const pagamentos = coletarPagamentos();
+      if (!pagamentos.length) {
+        mostrarToast('Informe ao menos uma forma de pagamento com valor.', 'error');
+        return;
+      }
+      const somaPagamentos = Math.round(pagamentos.reduce((acc, p) => acc + p.valor, 0) * 100) / 100;
+      if (Math.abs(somaPagamentos - total) > 0.02) {
+        mostrarToast(
+          `A soma dos pagamentos (${formatarMoeda(somaPagamentos)}) não bate com o total da venda (${formatarMoeda(total)}).`,
+          'error'
+        );
+        return;
+      }
 
       const payload = {
         cliente: document.getElementById('vendaCliente').value,
         produto_id: parseInt(produtoId),
         quantidade: qtd,
-        forma_pagamento: document.getElementById('vendaPagamento').value,
+        forma_pagamento: pagamentos.map(p => p.forma_pagamento).join(' + '),
+        pagamentos,
         associado_id: associadoId,
         desconto_percentual: percentualDesconto,
         preco_total: total
@@ -2303,6 +2525,7 @@
       if (!await validarSessaoInicial()) return;
       document.body.classList.remove('auth-loading');
       document.body.classList.add('admin-entering');
+      limparPagamentoRows('PIX', null);
       carregarDadosDoBanco();
       atualizarDataHora();
       toggleArmarioNomeField();

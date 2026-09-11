@@ -546,6 +546,41 @@
     .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
     select.form-control { background-color: var(--bg-card); appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.4rem; }
 
+    /* MEXI AQUI: pagamento dividido em várias formas (venda) */
+    .pagamento-split-list { display: flex; flex-direction: column; gap: 8px; }
+    .pagamento-row {
+      display: grid;
+      grid-template-columns: 1fr 140px auto;
+      gap: 8px;
+      align-items: center;
+      background: var(--bg-surface-hover);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 0.5rem;
+    }
+    .pagamento-row select.form-control,
+    .pagamento-row input.form-control {
+      padding: 0.55rem 0.85rem;
+      font-size: 0.78rem;
+    }
+    .pagamento-row .action-btn { flex-shrink: 0; }
+    .pagamento-split-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 0.6rem;
+    }
+    .btn-add-pagamento { padding: 0.6rem 1.1rem; font-size: 0.7rem; width: fit-content; }
+    .pagamento-split-restante {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .pagamento-split-restante.ok { color: var(--success); }
+    .pagamento-split-restante.pendente { color: var(--warning); }
+
     .img-upload-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
     .img-preview {
       width: 52px; height: 52px; border-radius: 14px;
@@ -1078,6 +1113,7 @@
       .form-grid { grid-template-columns: 1fr; }
       .form-group.full { grid-column: span 1; }
       .stats-bar { grid-template-columns: 1fr; }
+      .pagamento-row { grid-template-columns: 1fr; }
 
       header.top-header {
         grid-template-columns: 1fr;
@@ -1318,8 +1354,4 @@
       .dashboard-hero { min-height: 160px; padding: 1.35rem; }
       .dashboard-hero-mark { display: none; }
       .dashboard-metrics { grid-template-columns: 1fr 1fr; }
-
-    
-
-
     }

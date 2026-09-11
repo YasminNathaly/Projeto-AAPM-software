@@ -495,30 +495,42 @@
             <label>Cliente / Aluno</label>
             <input type="text" id="vendaCliente" class="form-control" placeholder="Nome do comprador" required>
           </div>
+
+          <div class="form-group">
+            <label>Categoria <span style="text-transform:none;font-weight:500;">(filtra os produtos abaixo)</span></label>
+            <select id="vendaFiltroCategoria" class="form-control" onchange="popularSelectsDinamicos()">
+              <option value="">Todas as categorias</option>
+            </select>
+          </div>
+
           <div class="form-group">
             <label>Produto Selecionado</label>
-            <select id="vendaProduto" class="form-control" required onchange="atualizarResumoVenda()">
-              <option value="">Selecione...</option>
-            </select>
+            <input type="text" id="vendaProdutoBusca" class="form-control" placeholder="Digite pra buscar..." list="vendaProdutoList" autocomplete="off" required oninput="resolverProdutoBusca()">
+            <datalist id="vendaProdutoList"></datalist>
+            <input type="hidden" id="vendaProduto">
           </div>
+
           <div class="form-group">
             <label>Quantidade</label>
-            <input type="number" id="vendaQtd" class="form-control" value="1" min="1" required oninput="atualizarResumoVenda()">
+            <input type="number" id="vendaQtd" class="form-control" value="1" min="1" required oninput="atualizarResumoVenda()" onkeydown="if(event.key==='Enter'){event.preventDefault(); document.getElementById('vendaSubmitBtn').click();}">
           </div>
-          <div class="form-group">
-            <label>Forma de Pagamento</label>
-            <select id="vendaPagamento" class="form-control" required>
-              <option value="PIX">PIX</option>
-              <option value="Cartão de Crédito">Cartão de Crédito</option>
-              <option value="Dinheiro">Dinheiro</option>
-            </select>
-          </div>
+
           <div class="form-group">
             <label>Associado <span style="text-transform:none;font-weight:500;">(opcional — aplica 10% de desconto)</span></label>
             <select id="vendaAssociado" class="form-control" onchange="atualizarResumoVenda()">
               <option value="">Não é associado</option>
             </select>
           </div>
+
+          <div class="form-group full">
+            <label>Forma(s) de Pagamento <span style="text-transform:none;font-weight:500;">(divida entre PIX, cartão e dinheiro se precisar)</span></label>
+            <div class="pagamento-split-list" id="pagamentoSplitList"></div>
+            <div class="pagamento-split-footer">
+              <button type="button" class="btn btn-outline btn-add-pagamento" onclick="adicionarPagamentoRow()">+ Adicionar forma de pagamento</button>
+              <span class="pagamento-split-restante" id="pagamentoRestanteLabel"></span>
+            </div>
+          </div>
+
           <input type="hidden" id="vendaId">
 
           <div class="form-group full" id="vendaResumoWrap" style="display:none;">
