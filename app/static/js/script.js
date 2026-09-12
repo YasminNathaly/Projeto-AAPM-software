@@ -14,8 +14,7 @@
       armario: '/api/armarios',
       usuario: '/api/usuarios',
       venda: '/api/vendas',
-      upload: '/api/upload-imagem',
-      assistente: '/api/assistente'
+      upload: '/api/upload-imagem'
     };
 
     async function validarSessaoInicial() {
@@ -953,40 +952,6 @@
       return acao.resposta;
     }
 
-<<<<<<< HEAD
-    // MEXI AQUI: o assistente agora usa IA (via /api/assistente) para
-    // perguntas livres. Os atalhos de navegação continuam locais e
-    // instantâneos (executarComandoAssistente), pra não gastar uma chamada
-    // de IA só pra abrir um módulo do menu.
-    let historicoAssistenteIA = [];
-
-    async function responderAssistenteIA(texto) {
-      try {
-        const resposta = await apiFetch(API_URLS.assistente, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mensagem: texto, historico: historicoAssistenteIA })
-        });
-
-        if (!resposta.ok) {
-          const erroDetalhe = await resposta.json().catch(() => ({}));
-          throw new Error(erroDetalhe.detail || 'Falha na resposta do assistente.');
-        }
-
-        const dados = await resposta.json();
-
-        historicoAssistenteIA.push({ role: 'user', content: texto });
-        historicoAssistenteIA.push({ role: 'assistant', content: dados.resposta });
-        if (historicoAssistenteIA.length > 12) {
-          historicoAssistenteIA = historicoAssistenteIA.slice(-12);
-        }
-
-        return dados.resposta;
-      } catch (erro) {
-        console.error('Erro no assistente de IA:', erro);
-        return 'Não consegui falar com a IA agora. Tente novamente em instantes.';
-      }
-=======
     function responderAssistente(texto) {
       const pergunta = texto.toLowerCase();
       if (pergunta.includes('produto')) return 'Para cadastrar um produto, abra Produtos no menu ou use o atalho. Preencha os dados, adicione a foto se quiser e salve.';
@@ -995,7 +960,6 @@
       if (pergunta.includes('associado')) return 'Em Associados você pode cadastrar, editar e consultar os associados da AAPM.';
       if (pergunta.includes('relatório') || pergunta.includes('relatorio')) return 'O Relatório mostra faturamento, produtos mais vendidos e formas de pagamento, com filtro por período.';
       return 'Posso ajudar com Produtos, Vendas, Associados, Estoque ou Relatório. Tente uma dessas palavras.';
->>>>>>> 41d3ab30550ed2d38939312a63d27500b6f070a7
     }
 
     function usarSugestaoAssistente(texto) {
@@ -1003,32 +967,15 @@
       enviarMensagemAssistente({ preventDefault() {} });
     }
 
-    async function enviarMensagemAssistente(event) {
+    function enviarMensagemAssistente(event) {
       event.preventDefault();
       const input = document.getElementById('assistantInput');
       const texto = input?.value.trim();
       if (!texto) return;
       adicionarMensagemAssistente(texto, 'user');
       input.value = '';
-
-      // Atalhos de navegação continuam respondendo na hora, sem IA.
-      const comandoRapido = executarComandoAssistente(texto);
-      if (comandoRapido) {
-        setTimeout(() => adicionarMensagemAssistente(comandoRapido, 'bot'), 180);
-        return;
-      }
-
-      const mensagensEl = document.getElementById('assistantMessages');
-      adicionarMensagemAssistente('Pensando...', 'bot');
-      const bolhaPensando = mensagensEl?.lastElementChild;
-
-      const resposta = await responderAssistenteIA(texto);
-
-      if (bolhaPensando && mensagensEl?.contains(bolhaPensando)) {
-        bolhaPensando.textContent = resposta;
-      } else {
-        adicionarMensagemAssistente(resposta, 'bot');
-      }
+      const resposta = executarComandoAssistente(texto) || responderAssistente(texto);
+      setTimeout(() => adicionarMensagemAssistente(resposta, 'bot'), 180);
     }
 
     const commandModules = [
