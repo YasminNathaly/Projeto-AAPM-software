@@ -8,13 +8,16 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from fastapi import HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.usuario import Usuario
+
+router = APIRouter(prefix="/api/auth", tags=["Autenticação"])
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SECRET_KEY = os.getenv("SECRET_KEY", "sua-chave-secreta-muito-segura-aqui-2024")
@@ -33,6 +36,10 @@ SMTP_EMAIL = os.getenv("SMTP_EMAIL")
 SMTP_APP_PASSWORD = os.getenv("SMTP_APP_PASSWORD")
 SMTP_FROM_NAME = os.getenv("SMTP_FROM_NAME", "AAPM SENAI Brás")
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SENHA E TOKEN
+# ─────────────────────────────────────────────────────────────────────────────
 
 def verificar_senha(senha_plana: str, hash_senha: str) -> bool:
     if not hash_senha:
@@ -80,14 +87,8 @@ def verificar_token(token: str) -> dict:
         return {"usuario_id": int(usuario_id)}
     except JWTError as e:
         if "expired" in str(e).lower():
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token expirado",
-            )
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token inválido",
-        )
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expirado")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
 
 
 def get_usuario_atual(request: Request, db: Session = None) -> Usuario:
@@ -105,48 +106,47 @@ def get_usuario_atual(request: Request, db: Session = None) -> Usuario:
     try:
         scheme, token = auth_header.split()
         if scheme.lower() != "bearer":
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Esquema de autenticação inválido",
-            )
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Esquema de autenticação inválido")
     except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Formato de autorização inválido",
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Formato de autorização inválido")
 
     payload = verificar_token(token)
     usuario_id = payload.get("usuario_id")
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
     if not usuario:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Usuário não encontrado",
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuário não encontrado")
 
     return usuario
 
 
-def autenticar_usuario(db: Session, credenciais):
+# ─────────────────────────────────────────────────────────────────────────────
+# LOGIN / CADASTRO
+# ─────────────────────────────────────────────────────────────────────────────
+
+class _Credenciais:
+    def __init__(self, email: str, senha: str):
+        self.email = email
+        self.senha = senha
+
+
+class RegistroRequest(BaseModel):
+    nome: str
+    email: EmailStr
+    senha: str = Field(min_length=8)
+    role: Optional[str] = "FUNCIONARIO"
+
+
+def autenticar_usuario(db: Session, credenciais) -> dict:
     usuario = db.query(Usuario).filter(Usuario.email == credenciais.email).first()
 
     if not usuario:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="E-mail não encontrado no sistema",
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="E-mail não encontrado no sistema")
 
     if not verificar_senha(credenciais.senha, usuario.senha):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Senha incorreta",
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Senha incorreta")
 
     if not usuario.ativo:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Usuário inativo. Contacte a administração.",
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuário inativo. Contacte a administração.")
 
     access_token = criar_access_token(usuario_id=usuario.id)
 
@@ -158,19 +158,16 @@ def autenticar_usuario(db: Session, credenciais):
     }
 
 
-def registrar_usuario(db: Session, dados):
+def registrar_usuario(db: Session, dados: RegistroRequest) -> dict:
     usuario_existente = db.query(Usuario).filter(Usuario.email == dados.email).first()
     if usuario_existente:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="E-mail já cadastrado no sistema",
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="E-mail já cadastrado no sistema")
 
     novo_usuario = Usuario(
         nome=dados.nome,
         email=dados.email,
         senha=gerar_hash_senha(dados.senha),
-        role=getattr(dados, "role", "FUNCIONARIO"),
+        role=dados.role or "FUNCIONARIO",
         ativo=True,
     )
 
@@ -192,6 +189,16 @@ def registrar_usuario(db: Session, dados):
 # RECUPERAÇÃO DE SENHA ("Esqueci minha senha")
 # ─────────────────────────────────────────────────────────────────────────────
 
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+    code: str = Field(min_length=6, max_length=6)
+    new_password: str = Field(min_length=8)
+
+
 def gerar_codigo_numerico(tamanho: int = CODE_LENGTH) -> str:
     """Gera um código numérico criptograficamente seguro, ex: '048213'."""
     return "".join(secrets.choice("0123456789") for _ in range(tamanho))
@@ -205,71 +212,169 @@ def codigos_conferem(codigo_informado: str, hash_salvo: str) -> bool:
     return hmac.compare_digest(hash_codigo(codigo_informado), hash_salvo)
 
 
-def enviar_email_codigo(destinatario: str, codigo: str) -> None:
-    """Envia o código de verificação por e-mail via Gmail SMTP, em HTML formatado."""
+# Campo de estrelas fixo, usado como background-image do e-mail: pontos
+# pequenos via radial-gradient + duas "nebulosas" nos tons de vermelho/roxo
+# do site. Não é uma imagem de verdade, então não depende de anexo nem sofre
+# bloqueio de imagem externa. Em clientes que ignoram gradients (Outlook
+# desktop / Word engine), cai pra cor sólida #09090f — a mesma do site.
+_ESTRELAS = [
+    (6, 12), (14, 38), (9, 64), (22, 8), (30, 52), (18, 82), (38, 24),
+    (44, 68), (52, 12), (60, 44), (68, 78), (74, 20), (80, 58), (88, 10),
+    (92, 40), (96, 72), (4, 90), (34, 92), (58, 88), (48, 30), (26, 66),
+    (70, 92), (86, 86), (12, 50), (54, 60),
+]
+_ESTRELAS_ROSA = [(20, 30), (66, 14), (84, 62)]
+
+
+def _gerar_fundo_estrelado() -> str:
+    camadas = []
+    for x, y in _ESTRELAS:
+        camadas.append(f"radial-gradient(1px 1px at {x}% {y}%, rgba(255,255,255,0.85), transparent 100%)")
+    for x, y in _ESTRELAS_ROSA:
+        camadas.append(f"radial-gradient(1.4px 1.4px at {x}% {y}%, rgba(214,50,80,0.9), transparent 100%)")
+    camadas.append("radial-gradient(600px circle at 18% 12%, rgba(214,50,80,0.20), transparent 60%)")
+    camadas.append("radial-gradient(520px circle at 85% 30%, rgba(125,56,62,0.16), transparent 60%)")
+    camadas.append("radial-gradient(560px circle at 55% 92%, rgba(80,60,140,0.14), transparent 60%)")
+    return ",\n            ".join(camadas)
+
+
+FUNDO_ESTRELADO_CSS = _gerar_fundo_estrelado()
+
+
+def _gerar_caixinhas_codigo(codigo: str) -> str:
+    """Gera 6 células de tabela, uma por dígito, no mesmo visual dos
+    .code-box do login.html (borda vermelha, monoespaçado, cantos arredondados)."""
+    digitos = list(codigo.ljust(CODE_LENGTH, " "))
+    celulas = []
+    for digito in digitos:
+        celulas.append(f"""
+          <td width="46" align="center" valign="middle" class="aapm-codigo-caixa"
+              style="background-color:#1a1a24; border:1px solid rgba(214,50,80,0.35);
+                     border-radius:10px; height:56px; width:46px;">
+            <span style="font-family:'Courier New', monospace; font-size:26px; font-weight:700; color:#ffffff;">{digito}</span>
+          </td>
+          <td width="8" style="font-size:0; line-height:0;">&nbsp;</td>""")
+    # remove o último espaçador
+    return "".join(celulas)[:-len('<td width="8" style="font-size:0; line-height:0;">&nbsp;</td>')]
+
+
+def enviar_email_codigo(destinatario: str, codigo: str, nome: Optional[str] = None) -> None:
+    """Envia o código de verificação por e-mail via Gmail SMTP, no mesmo
+    tema escuro/estrelado usado na tela de login."""
     if not SMTP_EMAIL or not SMTP_APP_PASSWORD:
         print(f"[AVISO] SMTP não configurado. Código gerado para {destinatario}: {codigo}")
         return
 
+    primeiro_nome = (nome or "").strip().split(" ")[0] if nome else ""
+    saudacao = f"Olá, {primeiro_nome}," if primeiro_nome else "Olá,"
+
     texto_simples = (
-        f"Olá,\n\n"
+        f"{saudacao}\n\n"
         f"Recebemos uma solicitação para redefinir sua senha na AAPM.\n"
         f"Seu código de verificação é: {codigo}\n\n"
         f"Este código expira em {CODE_EXPIRATION_MINUTES} minutos.\n"
         f"Se você não solicitou isso, ignore este e-mail."
     )
 
+    caixinhas_codigo_html = _gerar_caixinhas_codigo(codigo)
+
     html = f"""\
 <!DOCTYPE html>
 <html lang="pt-BR">
-<body style="margin:0; padding:0; background-color:#f4f5f9; font-family: 'Segoe UI', Arial, sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f5f9; padding: 32px 0;">
+<head>
+<meta charset="utf-8" />
+<style>
+  /* Animações CSS puras — funcionam em Apple Mail, Outlook.com e Yahoo Mail.
+     Clientes que não suportam @keyframes (ex.: Gmail app em alguns casos)
+     simplesmente ignoram e mostram o estado final, sem quebrar o layout. */
+  @keyframes aapmPulso {{
+    0%, 100% {{ box-shadow: 0 0 0 0 rgba(214,50,80,0.38); }}
+    50%      {{ box-shadow: 0 0 0 7px rgba(214,50,80,0.10); }}
+  }}
+  @keyframes aapmFadeUp {{
+    from {{ opacity: 0; transform: translateY(8px); }}
+    to   {{ opacity: 1; transform: translateY(0); }}
+  }}
+  @keyframes aapmBrilho {{
+    0%, 100% {{ opacity: 1; }}
+    50%      {{ opacity: 0.55; }}
+  }}
+  .aapm-codigo-caixa {{ animation: aapmPulso 2.4s ease-in-out infinite; }}
+  .aapm-corpo {{ animation: aapmFadeUp 0.7s ease-out both; }}
+  .aapm-selo-tempo {{ animation: aapmBrilho 2.8s ease-in-out infinite; }}
+</style>
+</head>
+<body style="margin:0; padding:0; background-color:#09090f; font-family: 'Segoe UI', Arial, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+         style="background-color:#09090f;
+            background-image:
+            {FUNDO_ESTRELADO_CSS};
+            padding: 48px 0;">
     <tr>
       <td align="center">
-        <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background-color:#101018; border-radius:16px; overflow:hidden;">
+        <table role="presentation" width="480" cellpadding="0" cellspacing="0"
+               style="background-color:#101018; border:1px solid rgba(255,255,255,0.09);
+                      border-radius:18px; overflow:hidden; box-shadow:0 25px 70px rgba(0,0,0,0.55);">
 
           <!-- Cabeçalho -->
           <tr>
-            <td style="background-color:#FF0000; padding:20px 32px;">
+            <td style="background: linear-gradient(135deg, #f3132b, #b8081b); padding:22px 32px;">
               <span style="font-family: Arial, sans-serif; font-weight:900; font-style:italic; font-size:22px; color:#ffffff; letter-spacing:1px;">SENAI</span>
               <span style="font-family: Arial, sans-serif; font-size:16px; color:#ffffff; letter-spacing:2px; margin-left:10px; border-left:1px solid rgba(255,255,255,0.5); padding-left:10px;">AAPM</span>
+            </td>
+          </tr>
+          <!-- Filete laranja, igual ao detalhe da logo do site -->
+          <tr>
+            <td style="background-color:#101018; padding:0;">
+              <div style="height:3px; background-color:#ff9d1f; opacity:0.9; margin:0 32px;"></div>
             </td>
           </tr>
 
           <!-- Corpo -->
           <tr>
-            <td style="padding:32px;">
-              <span style="display:inline-block; background:rgba(214,50,80,0.12); border:1px solid rgba(214,50,80,0.3); color:#d63250; padding:4px 10px; border-radius:999px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:16px;">
+            <td class="aapm-corpo" style="padding:36px 32px 28px 32px;">
+              <span style="display:inline-block; background:rgba(214,50,80,0.12); border:1px solid rgba(214,50,80,0.3); color:#d63250; padding:5px 12px; border-radius:999px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:18px;">
                 Recuperação de senha
               </span>
 
-              <h1 style="color:#ffffff; font-size:22px; margin:16px 0 8px 0;">Seu código de verificação</h1>
-              <p style="color:rgba(255,255,255,0.64); font-size:14px; line-height:1.6; margin:0 0 24px 0;">
+              <h1 style="color:#ffffff; font-size:23px; margin:16px 0 6px 0; font-weight:700;">{saudacao}</h1>
+              <p style="color:rgba(255,255,255,0.64); font-size:14px; line-height:1.65; margin:0 0 26px 0;">
                 Recebemos uma solicitação para redefinir a senha da sua conta no Painel Administrativo AAPM SENAI Brás.
                 Use o código abaixo para continuar:
               </p>
 
-              <!-- Código em destaque -->
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <!-- Código em caixinhas individuais -->
+              <table role="presentation" cellpadding="0" cellspacing="0" align="center" style="margin:0 auto 18px auto;">
                 <tr>
-                  <td align="center" style="background-color:#1a1a24; border:1px solid rgba(255,255,255,0.09); border-radius:12px; padding:20px;">
-                    <span style="font-family: 'Courier New', monospace; font-size:32px; font-weight:700; letter-spacing:8px; color:#ffffff;">{codigo}</span>
+                  {caixinhas_codigo_html}
+                </tr>
+              </table>
+
+              <!-- Selo de expiração -->
+              <table role="presentation" cellpadding="0" cellspacing="0" align="center" style="margin:0 auto 26px auto;">
+                <tr>
+                  <td class="aapm-selo-tempo" style="background-color:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.09);
+                             border-radius:999px; padding:6px 14px;">
+                    <span style="color:rgba(255,255,255,0.55); font-size:12px; font-weight:600;">
+                      ⏱ Expira em {CODE_EXPIRATION_MINUTES} minutos
+                    </span>
                   </td>
                 </tr>
               </table>
 
-              <p style="color:rgba(255,255,255,0.38); font-size:12px; margin:20px 0 0 0;">
-                Este código expira em {CODE_EXPIRATION_MINUTES} minutos. Se você não solicitou essa redefinição,
-                pode ignorar este e-mail com segurança — sua senha continuará a mesma.
+              <!-- Aviso final -->
+              <p style="color:rgba(255,255,255,0.38); font-size:12px; line-height:1.6; margin:10px 0 0 0; text-align:center;">
+                Se você não solicitou essa redefinição, pode ignorar este e-mail com segurança —
+                sua senha continuará a mesma.
               </p>
             </td>
           </tr>
 
           <!-- Rodapé -->
           <tr>
-            <td style="padding:20px 32px; border-top:1px solid rgba(255,255,255,0.09);">
-              <p style="color:rgba(255,255,255,0.38); font-size:11px; margin:0;">
-                Este é um e-mail automático do Painel Administrativo AAPM — SENAI Brás. Não responda a esta mensagem.
+            <td style="padding:18px 32px; border-top:1px solid rgba(255,255,255,0.09);">
+              <p style="color:rgba(255,255,255,0.38); font-size:11px; margin:0; text-align:center;">
+                Painel Administrativo AAPM — SENAI Brás · e-mail automático, não responda.
               </p>
             </td>
           </tr>
@@ -301,11 +406,6 @@ def enviar_email_codigo(destinatario: str, codigo: str) -> None:
 
 
 def solicitar_reset_senha(db: Session, email: str) -> None:
-    """
-    Gera e envia o código de reset. Levanta HTTPException 404 se o e-mail
-    não estiver cadastrado, e 429 se o último código foi gerado há menos
-    de RESEND_COOLDOWN_SECONDS segundos (evita spam de e-mail).
-    """
     usuario = db.query(Usuario).filter(Usuario.email == email).first()
     if not usuario:
         raise HTTPException(status_code=404, detail="E-mail não cadastrado no sistema.")
@@ -333,7 +433,7 @@ def solicitar_reset_senha(db: Session, email: str) -> None:
     db.add(usuario)
     db.commit()
 
-    enviar_email_codigo(usuario.email, codigo)
+    enviar_email_codigo(usuario.email, codigo, nome=usuario.nome)
 
 
 def redefinir_senha(db: Session, email: str, codigo: str, nova_senha: str) -> None:
@@ -365,3 +465,52 @@ def redefinir_senha(db: Session, email: str, codigo: str, nova_senha: str) -> No
 
     db.add(usuario)
     db.commit()
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ROTAS
+# ─────────────────────────────────────────────────────────────────────────────
+
+@router.post("/login")
+async def login(request: Request, db: Session = Depends(get_db)):
+    """
+    Aceita JSON ou x-www-form-urlencoded, porque o login.html manda JSON
+    primeiro ({email, senha, password}) e cai pra form-urlencoded
+    ({username, password}) se receber 422.
+    """
+    content_type = request.headers.get("content-type", "")
+
+    if "application/x-www-form-urlencoded" in content_type or "multipart/form-data" in content_type:
+        form = await request.form()
+        email = form.get("username") or form.get("email")
+        senha = form.get("password") or form.get("senha")
+    else:
+        try:
+            body = await request.json()
+        except Exception:
+            raise HTTPException(status_code=422, detail="Corpo da requisição inválido.")
+        email = body.get("email")
+        senha = body.get("senha") or body.get("password")
+
+    if not email or not senha:
+        raise HTTPException(status_code=422, detail="E-mail e senha são obrigatórios.")
+
+    credenciais = _Credenciais(email=email, senha=senha)
+    return autenticar_usuario(db, credenciais)
+
+
+@router.post("/register", status_code=status.HTTP_201_CREATED)
+async def register(dados: RegistroRequest, db: Session = Depends(get_db)):
+    return registrar_usuario(db, dados)
+
+
+@router.post("/forgot-password")
+async def forgot_password(dados: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    solicitar_reset_senha(db, dados.email)
+    return {"message": "Código enviado com sucesso. Verifique seu e-mail."}
+
+
+@router.post("/reset-password")
+async def reset_password(dados: ResetPasswordRequest, db: Session = Depends(get_db)):
+    redefinir_senha(db, dados.email, dados.code, dados.new_password)
+    return {"message": "Senha redefinida com sucesso."}

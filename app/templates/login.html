@@ -52,8 +52,6 @@
       --card-shadow: 0 20px 40px rgba(214, 50, 80, 0.1);
     }
 
-    /* fundo do tema claro: degradê suave saindo de um creme quente para um toque rosado da marca,
-       igual ao usado na página principal */
     :root[data-theme="light"] body {
       background:
         radial-gradient(90% 60% at 15% 0%, rgba(214, 50, 80, 0.16) 0%, rgba(214, 50, 80, 0) 55%),
@@ -63,7 +61,6 @@
       background-attachment: fixed;
     }
 
-    /* VARIÁVEIS ESTRUTURAIS */
     :root {
       --header-height: 76px;
       --radius-sm: 10px;
@@ -93,7 +90,6 @@
       position: relative;
     }
 
-    /* fundo animado: cena espacial (nebulosa + estrelas + estrelas cadentes), igual à página principal */
     #bg-canvas {
       position: fixed;
       top: 0; left: 0;
@@ -407,7 +403,6 @@
       margin-bottom: 1rem;
     }
 
-    /* MENSAGENS DE ERRO E SUCESSO */
     .error-message, .success-message {
       border-radius: var(--radius-sm);
       padding: 0.75rem 1rem;
@@ -460,7 +455,6 @@
       font-weight: 600;
     }
 
-    /* ================= MODAL ESQUECI SENHA ================= */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -511,7 +505,6 @@
       color: var(--text-muted);
     }
 
-    /* ===== CÓDIGO EM CAIXINHAS ===== */
     .code-input-row {
       display: flex;
       gap: 8px;
@@ -533,7 +526,6 @@
       75% { transform: translateX(4px); }
     }
 
-    /* ===== MOSTRAR/OCULTAR SENHA ===== */
     .password-field-wrap { position: relative; }
     .password-field-wrap .form-control { padding-right: 42px; }
     .password-toggle-btn {
@@ -551,7 +543,6 @@
     }
     .password-toggle-btn:hover { color: var(--text-muted); }
 
-    /* ===== FORÇA DA SENHA ===== */
     .password-strength-bar {
       height: 4px;
       background: var(--border-color);
@@ -570,7 +561,6 @@
     .password-strength-bar.medium span { width: 66%; background: #f59e0b; }
     .password-strength-bar.strong span { width: 100%; background: var(--success); }
 
-    /* ===== CORRESPONDÊNCIA DE SENHA ===== */
     .password-match-hint {
       font-size: 0.74rem;
       margin-top: 6px;
@@ -853,8 +843,6 @@
 
     themeToggleBtn.addEventListener('click', toggleTheme);
 
-    // ===== ANIMAÇÃO DE FUNDO: CENA ESPACIAL (nebulosa + estrelas em profundidade + cadentes) =====
-    // (igual à usada na página principal da AAPM)
     (function initCanvas() {
       const canvas = document.getElementById('bg-canvas');
       if (!canvas) return;
@@ -870,7 +858,6 @@
       let nebulae = [];
       let shootingStars = [];
 
-      // ===== ESTRELAS EM 3 CAMADAS (parallax de profundidade) =====
       function generateStars() {
         stars = [];
         const layers = [
@@ -896,7 +883,6 @@
         });
       }
 
-      // ===== NEBULOSAS: manchas de luz grandes, suaves, pulsando devagar =====
       function generateNebulae() {
         nebulae = [
           { xR: 0.22, yR: 0.28, radius: Math.max(canvas.width, canvas.height) * 0.42, hue: 344, phase: 0,   speed: 0.0016 },
@@ -913,7 +899,6 @@
       resize();
       window.addEventListener('resize', resize);
 
-      // parallax bem sutil seguindo o mouse (dá profundidade real à cena)
       let mouseX = 0, mouseY = 0, parX = 0, parY = 0;
       window.addEventListener('mousemove', (e) => {
         mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
@@ -923,8 +908,8 @@
       function maybeSpawnShootingStar() {
         if (Math.random() < 0.012 && shootingStars.length < 5) {
           const startX = Math.random() * canvas.width * 0.8 + canvas.width * 0.1;
-          const big = Math.random() < 0.25; // uma em cada quatro é maior/mais brilhante
-          const tint = Math.random() < 0.2 ? '255, 210, 210' : '255, 255, 255'; // toque rosado ocasional
+          const big = Math.random() < 0.25;
+          const tint = Math.random() < 0.2 ? '255, 210, 210' : '255, 255, 255';
           shootingStars.push({
             x: startX,
             y: -20,
@@ -944,9 +929,9 @@
       }
 
       function drawNebulae(time) {
-        if (isLightTheme()) return; // no claro o fundo já tem o gradiente via CSS
+        if (isLightTheme()) return;
         nebulae.forEach((n) => {
-          const pulse = (Math.sin(time * n.speed + n.phase) + 1) / 2; // 0..1
+          const pulse = (Math.sin(time * n.speed + n.phase) + 1) / 2;
           const cx = canvas.width * n.xR + parX * 20;
           const cy = canvas.height * n.yR + parY * 20;
           const r = n.radius * (0.85 + pulse * 0.18);
@@ -973,7 +958,6 @@
           const px = star.x + parX * (star.layer + 1) * 6;
           const py = star.y + parY * (star.layer + 1) * 6;
 
-          // no tema claro as estrelinhas viram "confete" nas cores da marca (rosa/dourado)
           const color = light ? (star.color === '255, 255, 255' ? '214, 50, 80' : '255, 157, 108') : star.color;
 
           ctx.beginPath();
@@ -1004,7 +988,6 @@
           ctx.lineTo(tailX, tailY);
           ctx.stroke();
 
-          // cabeça brilhante
           ctx.beginPath();
           ctx.fillStyle = `rgba(${color}, ${s.life * (light ? 0.55 : 1)})`;
           if (!light) {
@@ -1017,7 +1000,7 @@
 
           s.x += s.vx;
           s.y += s.vy;
-          if (s.y > canvas.height * 0.9 || s.x < -50) s.life -= 1; // sai da tela: remove
+          if (s.y > canvas.height * 0.9 || s.x < -50) s.life -= 1;
         });
         shootingStars = shootingStars.filter((s) => s.life > 0 && s.y < canvas.height + 50);
       }
@@ -1134,14 +1117,12 @@
       }
 
       try {
-        // Tentativa 1: Envio em JSON puro (padrão customizado)
         let response = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: email, senha: password, password: password })
         });
 
-        // Tentativa 2: Se o backend requerer URL-Encoded (FastAPI OAuth2 standard)
         if (response.status === 422) {
           const formData = new URLSearchParams();
           formData.append('username', email);
@@ -1177,7 +1158,6 @@
       }
     });
 
-    // ===== CÓDIGO EM CAIXINHAS: auto-avanço, backspace, colar =====
     const codeBoxes = Array.from(document.querySelectorAll('.code-box'));
 
     function getCodeValue() {
@@ -1219,7 +1199,6 @@
       });
     });
 
-    // ===== MOSTRAR/OCULTAR SENHA =====
     document.querySelectorAll('.password-toggle-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         const targetInput = document.getElementById(btn.dataset.target);
@@ -1233,7 +1212,6 @@
       });
     });
 
-    // ===== FORÇA DA SENHA =====
     const newPasswordInput = document.getElementById('newPassword');
     const strengthBar = document.getElementById('passwordStrengthBar');
 
@@ -1257,7 +1235,6 @@
       atualizarCorrespondenciaSenha();
     });
 
-    // ===== CORRESPONDÊNCIA DE SENHAS EM TEMPO REAL =====
     const confirmPasswordInput = document.getElementById('confirmPassword');
     const matchHint = document.getElementById('passwordMatchHint');
 
@@ -1359,12 +1336,25 @@
     function openModal() {
       resetModalState();
       forgotModal.classList.add('show');
-      // Pré-preenche com o e-mail já digitado no login, se houver
       const currentEmail = document.getElementById('email').value.trim();
       if (currentEmail) document.getElementById('forgotEmail').value = currentEmail;
     }
 
+    // MEXI AQUI: fecha o modal — mas se essa aba foi aberta SÓ pra
+    // recuperação de senha (?forgot=1), não existe mais nada por trás pra
+    // mostrar depois que o modal some. Nesse caso a gente fecha a própria
+    // aba/janela. Se o navegador não deixar fechar (janela não foi aberta
+    // via script — ex: acesso direto ou URL colada), o window.close() é
+    // ignorado silenciosamente; como plano B mandamos a pessoa de volta
+    // para a tela de login normal em vez de deixar a tela em branco.
     function closeModal() {
+      if (document.body.classList.contains('forgot-only')) {
+        window.close();
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 150);
+        return;
+      }
       forgotModal.classList.remove('show');
     }
 
@@ -1443,8 +1433,6 @@
       const originalText = resendCodeBtn.textContent;
       resendCodeBtn.textContent = 'Reenviando...';
       await requestResetCode(lastRequestedEmail);
-      // Não reabilita aqui: startResendCooldown() (chamado dentro de
-      // requestResetCode) já controla o estado do botão pelos próximos 60s.
       resendCodeBtn.textContent = originalText;
     });
 

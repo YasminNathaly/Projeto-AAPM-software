@@ -28,3 +28,5 @@ venv\Scripts\activate
 pip install -r requirements.txt
 
 git checkout . - caso não esteja atualizando as branchs
+
+pip install fastapi uvicorn python-dotenv passlib[bcrypt] pydantic[email]
