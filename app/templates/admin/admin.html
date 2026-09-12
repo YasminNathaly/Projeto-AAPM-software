@@ -342,18 +342,25 @@
       </div>
 
       <div class="card reveal">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap: 12px; flex-wrap: wrap; margin-bottom: 1rem;">
+        <!-- MEXI AQUI: toolbar dos produtos — filtro por categoria, selecionar
+             todos e excluir selecionados. A busca por nome usa a barra de
+             busca geral do topo (já filtra por nome/categoria/tamanho). -->
+        <div class="produtos-toolbar">
           <div class="card-title" style="margin: 0;">Produtos Cadastrados</div>
-          <button type="button" class="btn btn-outline" onclick="deletarProdutosSelecionados()" style="padding: 0.65rem 0.9rem; font-size: 0.72rem;">
-            Excluir selecionados
-          </button>
+          <div class="produtos-toolbar-controls">
+            <select id="produtoFiltroCategoriaGrid" class="form-control" onchange="filtrarProdutosPorCategoria()">
+              <option value="">Todas as categorias</option>
+            </select>
+            <label class="produtos-select-all">
+              <input type="checkbox" id="selectAllProdutos" title="Selecionar produtos desta página" onchange="toggleTodosProdutos(this.checked)">
+              <span>Selecionar todos</span>
+            </label>
+            <button type="button" class="btn btn-outline" onclick="deletarProdutosSelecionados()" style="padding: 0.65rem 0.9rem; font-size: 0.72rem;">
+              Excluir selecionados
+            </button>
+          </div>
         </div>
-        <div class="table-responsive">
-          <table>
-            <thead><tr><th><input type="checkbox" id="selectAllProdutos" title="Selecionar produtos desta página" onchange="toggleTodosProdutos(this.checked)"></th><th>Foto</th><th>Nome</th><th>Categoria</th><th>Variações</th><th>Quantidade</th><th>Preço</th><th>Ações</th></tr></thead>
-            <tbody id="tblProdutos"></tbody>
-          </table>
-        </div>
+        <div class="produtos-grid" id="produtosGrid"></div>
         <div class="paginacao-container" id="pagProdutos"></div>
       </div>
     </section>

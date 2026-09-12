@@ -165,6 +165,17 @@
       relatorio: 1
     };
 
+    // MEXI AQUI: filtro de categoria do grid de Produtos (independente da
+    // busca de texto geral, que continua atuando via termoBuscaPorModulo).
+    let produtoFiltroCategoriaAtiva = '';
+
+    function filtrarProdutosPorCategoria() {
+      const sel = document.getElementById('produtoFiltroCategoriaGrid');
+      produtoFiltroCategoriaAtiva = sel ? sel.value : '';
+      paginaAtual.produto = 1;
+      renderProdutos();
+    }
+
     // ===== BUSCA POR MÓDULO (corrige o filtro que só olhava a página atual) =====
     // Cada módulo guarda seu termo de busca aqui. filtrarTabelaAtiva() agora
     // filtra a LISTA COMPLETA do módulo ativo (não só as 10 linhas already
@@ -398,14 +409,25 @@
       renderRecentList(activeId);
     }
 
-    // MEXI AQUI: agora popula também o filtro de categoria da venda e o
-    // datalist de busca de produto (com filtro por categoria aplicado).
+    // MEXI AQUI: agora popula também o filtro de categoria da venda, o filtro
+    // de categoria do grid de produtos e o datalist de busca de produto (com
+    // filtro por categoria aplicado).
     function popularSelectsDinamicos() {
       const selCategoria = document.getElementById('prodCategoria');
       const valorAtualCat = selCategoria.value;
       selCategoria.innerHTML = '<option value="">Selecione...</option>' +
         categorias.map(c => `<option value="${escapeHTML(c.id)}">${escapeHTML(c.nome)}</option>`).join('');
       if (valorAtualCat) selCategoria.value = valorAtualCat;
+
+      // MEXI AQUI: filtro de categoria acima do grid de produtos cadastrados
+      const selFiltroProdutoCategoria = document.getElementById('produtoFiltroCategoriaGrid');
+      if (selFiltroProdutoCategoria) {
+        const valorAtualFiltroProduto = selFiltroProdutoCategoria.value;
+        selFiltroProdutoCategoria.innerHTML = '<option value="">Todas as categorias</option>' +
+          categorias.map(c => `<option value="${escapeHTML(c.id)}">${escapeHTML(c.nome)}</option>`).join('');
+        if (valorAtualFiltroProduto) selFiltroProdutoCategoria.value = valorAtualFiltroProduto;
+        else if (produtoFiltroCategoriaAtiva) selFiltroProdutoCategoria.value = produtoFiltroCategoriaAtiva;
+      }
 
       const selProduto = document.getElementById('vendaProduto');
       const buscaProduto = document.getElementById('vendaProdutoBusca');
@@ -662,6 +684,10 @@
     }
 
     // ===== MODAL: DETALHES DO PRODUTO =====
+    // MEXI AQUI: nome/estoque de cada variação agora lêem os mesmos
+    // fallbacks usados na lista (nome_variacao/nome/name e estoque/quantidade).
+    // Era esse descompasso que fazia as variações não aparecerem no modal
+    // mesmo estando corretas na tabela/grid.
     function abrirProdutoModal(id) {
       const item = produtos.find(p => String(p.id) === String(id));
       if (!item) return;
@@ -680,18 +706,22 @@
 
       document.getElementById('produtoModalNome').textContent = item.nome;
       document.getElementById('produtoModalCategoria').textContent = nomeCategoriaPorId(item.categoria_id);
-      document.getElementById('produtoModalTamanho').textContent = item.tamanho || (item.variacoes && item.variacoes.length ? item.variacoes.map(v => v.nome_variacao).join(', ') : '-');
+      document.getElementById('produtoModalTamanho').textContent = item.tamanho || (item.variacoes && item.variacoes.length ? item.variacoes.map(v => v.nome_variacao || v.nome || v.name || '').join(', ') : '-');
       document.getElementById('produtoModalQtd').textContent = item.quantidade ?? item.estoque ?? 0;
       document.getElementById('produtoModalPreco').textContent = formatarMoeda(item.preco);
       const variacaoWrap = document.getElementById('produtoModalVariacoes');
       if (variacaoWrap) {
         const variacoes = Array.isArray(item.variacoes) && item.variacoes.length ? item.variacoes : [];
-        variacaoWrap.innerHTML = variacoes.length ? variacoes.map(v => `
+        variacaoWrap.innerHTML = variacoes.length ? variacoes.map(v => {
+          const nome = v.nome_variacao || v.nome || v.name || '';
+          const estoque = v.estoque ?? v.quantidade ?? 0;
+          return `
           <div style="display:flex; justify-content:space-between; gap:12px; padding: 0.55rem 0.75rem; border:1px solid var(--border-color); border-radius:12px; background: var(--bg-surface-hover);">
-            <span>${escapeHTML(v.nome_variacao)}</span>
-            <strong style="color: var(--primary);">${escapeHTML(v.estoque ?? 0)} und.</strong>
+            <span>${escapeHTML(nome)}</span>
+            <strong style="color: var(--primary);">${escapeHTML(estoque)} und.</strong>
           </div>
-        `).join('') : '<div style="color: var(--text-muted);">Sem variações cadastradas.</div>';
+        `;
+        }).join('') : '<div style="color: var(--text-muted);">Sem variações cadastradas.</div>';
       }
       const overlay = document.getElementById('produtoModalOverlay');
       overlay.classList.add('open');
@@ -1204,7 +1234,7 @@
       return `
         <div class="action-btn-group" onclick="event.stopPropagation()">
           <button class="action-btn info" title="Gerar comprovante" onclick="abrirComprovanteModal('${id}')">
-            <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/></svg>
           </button>
           <button class="action-btn" title="Editar" onclick="editarItem('vnd', '${id}')">
             <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -1430,22 +1460,71 @@
       return `<div class="table-variations">${chips}</div>`;
     }
 
+    // MEXI AQUI: PRODUTOS agora são renderizados como um grid de cards
+    // (estilo loja), em vez de uma tabela. Mantém foto grande, categoria,
+    // nome, preço, estoque, variações e os mesmos botões de editar/excluir
+    // de sempre — clicando no card (fora do checkbox/ações) abre o mesmo
+    // modal de detalhes de antes.
+    function renderProdutoCard(item, i) {
+      const imgHtml = item.imagem_url
+        ? `<img src="${escapeHTML(item.imagem_url)}" alt="${escapeHTML(item.nome)}" loading="lazy">`
+        : `<div class="produto-card-img-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>`;
+
+      const variacoes = Array.isArray(item.variacoes) ? item.variacoes : [];
+      let extraInfoHtml = '';
+      if (variacoes.length) {
+        const visiveis = variacoes.slice(0, 3);
+        const chips = visiveis.map(v => {
+          const nome = v.nome_variacao || v.nome || v.name || '';
+          const estoque = v.estoque ?? v.quantidade ?? 0;
+          return `<span class="table-variation-chip">${escapeHTML(nome)}<strong>${escapeHTML(estoque)}</strong></span>`;
+        }).join('');
+        const resto = variacoes.length > visiveis.length
+          ? `<span class="table-variation-chip produto-card-variacoes-mais">+${variacoes.length - visiveis.length}</span>`
+          : '';
+        extraInfoHtml = `<div class="produto-card-variacoes">${chips}${resto}</div>`;
+      } else if (item.tamanho) {
+        extraInfoHtml = `<div class="produto-card-tamanho">Tamanho: ${escapeHTML(item.tamanho)}</div>`;
+      }
+
+      return `
+        <div class="produto-card reveal in-view" style="--i:${i}" data-id="${escapeHTML(item.id)}" onclick="abrirProdutoModal('${item.id}')" title="Ver detalhes do produto">
+          <label class="produto-card-checkbox" onclick="event.stopPropagation()">
+            <input type="checkbox" name="produtoDeleteCheck" value="${item.id}" onchange="atualizarSelecaoTodosProdutos()">
+          </label>
+          <div class="produto-card-img">
+            ${imgHtml}
+            <span class="produto-card-categoria">${escapeHTML(nomeCategoriaPorId(item.categoria_id))}</span>
+          </div>
+          <div class="produto-card-body">
+            <h4 class="produto-card-nome">${escapeHTML(item.nome)}</h4>
+            <div class="produto-card-price">${formatarMoeda(item.preco)}</div>
+            <div class="produto-card-meta">
+              <span class="pill-badge">${escapeHTML(item.quantidade ?? 0)} em estoque</span>
+            </div>
+            ${extraInfoHtml}
+            <div class="produto-card-actions">
+              ${renderAcoes('prod', item.id)}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     function renderProdutos() {
-      const tbody = document.getElementById('tblProdutos');
-      const lista = aplicarBusca('produto', produtos);
+      const grid = document.getElementById('produtosGrid');
+      if (!grid) return;
+
+      let lista = aplicarBusca('produto', produtos);
+      if (produtoFiltroCategoriaAtiva) {
+        lista = lista.filter(p => String(p.categoria_id) === String(produtoFiltroCategoriaAtiva));
+      }
+
       const pagina = paginarLista(lista, 'produto');
-      tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
-        <tr style="--i:${i}; cursor:pointer;" onclick="abrirProdutoModal('${item.id}')" title="Ver detalhes do produto">
-          <td onclick="event.stopPropagation()"><input type="checkbox" name="produtoDeleteCheck" value="${item.id}" onchange="atualizarSelecaoTodosProdutos()" style="width: 15px; height: 15px; accent-color: var(--primary);"></td>
-          <td>${item.imagem_url ? `<img class="prod-thumb" src="${escapeHTML(item.imagem_url)}" alt="${escapeHTML(item.nome)}">` : `<div class="prod-thumb"></div>`}</td>
-          <td style="font-weight: 700;">${escapeHTML(item.nome)}</td>
-          <td>${escapeHTML(nomeCategoriaPorId(item.categoria_id))}</td>
-          <td>${renderVariationChipsAdmin(item)}</td>
-          <td><span class="pill-badge">${escapeHTML(item.quantidade ?? 0)}</span></td>
-          <td style="font-weight: 700; color: var(--success);">${formatarMoeda(item.preco)}</td>
-          <td>${renderAcoes('prod', item.id)}</td>
-        </tr>
-      `).join('') : emptyRow(8, 'Nenhum produto cadastrado.');
+      grid.innerHTML = pagina.length
+        ? pagina.map((item, i) => renderProdutoCard(item, i)).join('')
+        : `<div class="produtos-grid-empty">Nenhum produto encontrado.</div>`;
+
       atualizarSelecaoTodosProdutos();
       renderPaginacaoControles('pagProdutos', 'produto', lista.length);
     }

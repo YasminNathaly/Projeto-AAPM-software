@@ -1555,31 +1555,17 @@
             <table>
               <thead>
                 <tr>
-                  <th>Nome Completo</th>
-                  <th>RM / Matrícula</th>
                   <th>Curso / Departamento</th>
                   <th>Status</th>
                   <th>Ação</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td style="font-weight: 600;">Carlos Eduardo Silva</td>
-                  <td><span class="badge-rm">RM 94821</span></td>
-                  <td>Técnico em Mecatrônica</td>
-                  <td><span class="status-tag active">Ativo</span></td>
-                  <td><button class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.7rem;" onclick="openViewModal('Carlos Eduardo Silva', 'RM 94821', 'Técnico em Mecatrônica', 'Ativo')">Ver</button></td>
-                </tr>
-                <tr>
-                  <td style="font-weight: 600;">Mariana Oliveira Souza</td>
-                  <td><span class="badge-rm">RM 88310</span></td>
-                  <td>Técnico em Desenvolvimento de Sistemas</td>
-                  <td><span class="status-tag active">Ativo</span></td>
-                  <td><button class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.7rem;" onclick="openViewModal('Mariana Oliveira Souza', 'RM 88310', 'Técnico em Desenvolvimento de Sistemas', 'Ativo')">Ver</button></td>
-                </tr>
+              <tbody id="tblAssociadosPublic">
+                <tr><td colspan="3" style="text-align:center; color: var(--text-muted); font-style: italic;">Carregando associados...</td></tr>
               </tbody>
             </table>
           </div>
+          <div class="paginacao-container" id="paginacaoAssociadosPublic"></div>
         </div>
       </div>
     </section>
@@ -1670,7 +1656,6 @@
       </div>
     </section>
  
-
   <!-- MODAL DE VISUALIZAÇÃO DE ASSOCIADO -->
   <div class="modal-backdrop" id="viewModal" onclick="if(event.target === this) closeViewModal()">
     <div class="modal-box">
@@ -1679,8 +1664,6 @@
         <h3 class="modal-title">Detalhes do Associado</h3>
       </div>
       <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.9rem;">
-        <div><strong>Nome:</strong> <span id="v-name" style="color: var(--text-muted);"></span></div>
-        <div><strong>RM:</strong> <span id="v-rm" style="color: var(--text-muted);"></span></div>
         <div><strong>Curso:</strong> <span id="v-curso" style="color: var(--text-muted);"></span></div>
         <div><strong>Status:</strong> <span id="v-status" style="color: var(--success);"></span></div>
       </div>
@@ -1688,6 +1671,7 @@
     </div>
   </div>
 
+  </main>
  
   <script>
    
@@ -2042,7 +2026,7 @@
       }
       if (pergunta.includes('associado')) {
         navigate('associados', document.querySelectorAll('.nav-item')[2]);
-        return 'A seção Associados mostra a lista oficial. Para se cadastrar, use Fale Conosco e continue pelo formulário.';
+        return 'A seção Associados mostra a lista oficial por curso/status. Para se cadastrar, use Fale Conosco e continue pelo formulário.';
       }
       if (pergunta.includes('formulário') || pergunta.includes('formulario') || pergunta.includes('cadastro') || pergunta.includes('contato')) {
         navigate('fale-conosco', document.querySelectorAll('.nav-item')[3]);
@@ -2103,6 +2087,8 @@
 
     let armariosPublic = [];
     let selectedArmarioStatus = 'all';
+
+    let associadosPublic = [];
  
     let selectedCategoryId = 'all';
 
@@ -2207,7 +2193,70 @@
       renderArmarioStatusPills();
       filterArmariosPublic();
     }
- 
+
+    // ===== ASSOCIADOS (ABA PÚBLICA) =====
+    // Por privacidade, esta lista pública nunca exibe nome ou matrícula do
+    // associado — apenas curso/departamento e status. Os dados vêm do
+    // mesmo backend usado pelo painel admin (admin.html), via /api/associados.
+    async function carregarAssociadosPublic() {
+      const tbody = document.getElementById('tblAssociadosPublic');
+      try {
+        const resposta = await fetch('/api/associados');
+        if (resposta.ok) {
+          const dados = await resposta.json();
+          if (Array.isArray(dados)) {
+            associadosPublic = dados.map((a) => ({
+              id: a.id,
+              curso: a.curso || a.curso_departamento || a.departamento || 'Curso não informado',
+              status: a.status || (a.ativo ? 'Ativo' : 'Inativo')
+            }));
+          }
+        } else {
+          console.warn('Falha ao buscar /api/associados:', resposta.status);
+        }
+      } catch (erro) {
+        console.warn('Não foi possível carregar os associados do backend.', erro);
+      }
+
+      if (!associadosPublic.length && tbody) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted); font-style: italic;">Nenhum associado cadastrado no momento.</td></tr>';
+        renderPaginacao('paginacaoAssociadosPublic', 'associadosPublic', 1, 1, 0, 'renderAssociadosPublic');
+        return;
+      }
+
+      getEstadoPaginacao('associadosPublic').pagina = 1;
+      renderAssociadosPublic();
+    }
+
+    function statusAssociadoClassePublic(status) {
+      const s = (status || '').toLowerCase();
+      if (s === 'ativo') return 'active';
+      if (s === 'inativo') return 'inactive';
+      return 'warning';
+    }
+
+    function renderAssociadosPublic() {
+      const tbody = document.getElementById('tblAssociadosPublic');
+      if (!tbody) return;
+
+      const { pageItens, paginaAtual, totalPaginas, totalItens } = paginar(associadosPublic, 'associadosPublic', 10);
+
+      if (!totalItens) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted); font-style: italic;">Nenhum associado cadastrado no momento.</td></tr>';
+        renderPaginacao('paginacaoAssociadosPublic', 'associadosPublic', totalPaginas, paginaAtual, totalItens, 'renderAssociadosPublic');
+        return;
+      }
+
+      tbody.innerHTML = pageItens.map((a) => `
+        <tr>
+          <td>${escapeHtml(a.curso)}</td>
+          <td><span class="status-tag ${statusAssociadoClassePublic(a.status)}">${escapeHtml(a.status)}</span></td>
+          <td><button class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.7rem;" onclick="openViewModal('${escapeHtml(a.curso).replace(/'/g, "&#39;")}', '${escapeHtml(a.status).replace(/'/g, "&#39;")}')">Ver</button></td>
+        </tr>
+      `).join('');
+      renderPaginacao('paginacaoAssociadosPublic', 'associadosPublic', totalPaginas, paginaAtual, totalItens, 'renderAssociadosPublic');
+    }
+
     // ===== CATEGORIAS: LABEL / PILLS / SELECT / GERENCIAMENTO =====
     function getCategoryNameById(categoriaId) {
       const found = categories.find((c) => String(c.id) === String(categoriaId));
@@ -2601,6 +2650,9 @@
       if (viewId === 'armarios') {
         carregarArmariosPublic();
       }
+      if (viewId === 'associados') {
+        carregarAssociadosPublic();
+      }
     }
 
     const dragNavigationViews = ['inicio', 'produtos', 'associados', 'fale-conosco', 'armarios'];
@@ -2695,9 +2747,7 @@
       closeMobileMenu();
     }
  
-    function openViewModal(name, rm, curso, status) {
-      document.getElementById('v-name').innerText = name;
-      document.getElementById('v-rm').innerText = rm;
+    function openViewModal(curso, status) {
       document.getElementById('v-curso').innerText = curso;
       document.getElementById('v-status').innerText = status;
       document.getElementById('viewModal').classList.add('active');
@@ -2989,6 +3039,7 @@
       carregarCategorias();
       carregarProdutos();
       carregarArmariosPublic();
+      carregarAssociadosPublic();
       loadCart();
       renderCart();
       refreshRevealObserver();
