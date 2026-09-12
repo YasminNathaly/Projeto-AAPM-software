@@ -389,6 +389,7 @@
       popularSelectsDinamicos();
       renderNotificacoes();
       renderRelatorio();
+      renderRelatorioVendas();
       renderDashboard();
 
       const active = document.querySelector('.view-content.active');
@@ -872,7 +873,7 @@
       'armario': ['Armários', 'Controle de disponibilidade e ocupação dos armários.', 'Novo Armário'],
       'usuario': ['Usuários', 'Controle de acessos e permissões.', 'Novo Usuário'],
       'venda': ['Vendas', 'Registro de pedidos e transações.', 'Nova Venda'],
-      'relatorio': ['Relatório', 'Histórico de notificações marcadas como lidas.', '']
+      'relatorio': ['Relatório de Vendas', 'Faturamento, produtos mais vendidos e formas de pagamento.', '']
     };
 
     // MOTOR DE NAVEGAÇÃO
@@ -896,7 +897,7 @@
       const searchInput = document.getElementById('tableSearch');
       if (searchInput) searchInput.value = termoBuscaPorModulo[viewId] || '';
 
-      if (viewId === 'relatorio') renderRelatorio();
+      if (viewId === 'relatorio') { renderRelatorio(); renderRelatorioVendas(); }
       if (viewId === 'dashboard') renderDashboard();
 
       renderStatsBar(viewId);
@@ -957,7 +958,7 @@
       if (pergunta.includes('venda')) return 'Abra Vendas para registrar uma venda. O resumo calcula automaticamente subtotal, desconto de associado e total.';
       if (pergunta.includes('estoque')) return 'A Visão geral mostra os itens com até 5 unidades. Para editar quantidades, abra Produtos.';
       if (pergunta.includes('associado')) return 'Em Associados você pode cadastrar, editar e consultar os associados da AAPM.';
-      if (pergunta.includes('relatório') || pergunta.includes('relatorio')) return 'O Relatório guarda as notificações marcadas como lidas e permite limpar o histórico.';
+      if (pergunta.includes('relatório') || pergunta.includes('relatorio')) return 'O Relatório mostra faturamento, produtos mais vendidos e formas de pagamento, com filtro por período.';
       return 'Posso ajudar com Produtos, Vendas, Associados, Estoque ou Relatório. Tente uma dessas palavras.';
     }
 
@@ -1710,6 +1711,123 @@
           </div>
         </div>
       `).join('') : '<div class="recent-empty">Nenhum registro recente.</div>';
+    }
+
+    // ===== RELATÓRIO DE VENDAS (faturamento, top produtos, formas de pagamento) =====
+    let relatorioFiltroAtual = 'hoje';
+
+    function selecionarFiltroRelatorio(periodo) {
+      relatorioFiltroAtual = periodo;
+      document.querySelectorAll('#relatorioFiltroChips .filter-chip').forEach(chip => {
+        chip.classList.toggle('active', chip.dataset.periodo === periodo);
+      });
+      renderRelatorioVendas();
+    }
+
+    function vendasNoPeriodoRelatorio() {
+      if (relatorioFiltroAtual === 'tudo') return vendas;
+      const agora = new Date();
+      const limite = new Date(agora);
+      if (relatorioFiltroAtual === 'hoje') {
+        limite.setHours(0, 0, 0, 0);
+      } else if (relatorioFiltroAtual === '7d') {
+        limite.setDate(limite.getDate() - 7);
+      } else if (relatorioFiltroAtual === '30d') {
+        limite.setDate(limite.getDate() - 30);
+      }
+      return vendas.filter(v => {
+        const data = v.data_venda ? new Date(v.data_venda) : null;
+        if (!data || isNaN(data)) return relatorioFiltroAtual === 'tudo';
+        return data >= limite;
+      });
+    }
+
+    // Quebra cada venda em suas formas de pagamento reais (pagamentos[])
+    // quando existir, ou usa o texto único de forma_pagamento como fallback
+    // pra vendas antigas que não tinham divisão.
+    function formasPagamentoDaVenda(item) {
+      if (Array.isArray(item.pagamentos) && item.pagamentos.length) return item.pagamentos;
+      return [{ forma_pagamento: item.forma_pagamento || 'Não informado', valor: Number(item.preco_total ?? item.total ?? 0) }];
+    }
+
+    function renderRelatorioVendas() {
+      const kpisWrap = document.getElementById('relatorioKpis');
+      const topWrap = document.getElementById('relatorioTopProdutos');
+      const pagamentosWrap = document.getElementById('relatorioPagamentos');
+      if (!kpisWrap || !topWrap || !pagamentosWrap) return;
+
+      const periodo = vendasNoPeriodoRelatorio();
+      const faturamento = periodo.reduce((acc, v) => acc + Number(v.preco_total || v.total || 0), 0);
+      const qtdVendas = periodo.length;
+      const ticketMedio = qtdVendas ? faturamento / qtdVendas : 0;
+      const itensVendidos = periodo.reduce((acc, v) => acc + Number(v.quantidade || 0), 0);
+
+      kpisWrap.innerHTML = `
+        <div class="report-kpi">
+          <span class="report-kpi-label">Faturamento no período</span>
+          <strong>${formatarMoeda(faturamento)}</strong>
+        </div>
+        <div class="report-kpi blue">
+          <span class="report-kpi-label">Vendas no período</span>
+          <strong>${qtdVendas}</strong>
+        </div>
+        <div class="report-kpi green">
+          <span class="report-kpi-label">Ticket médio</span>
+          <strong>${formatarMoeda(ticketMedio)}</strong>
+        </div>
+        <div class="report-kpi gold">
+          <span class="report-kpi-label">Itens vendidos</span>
+          <strong>${itensVendidos}</strong>
+        </div>
+      `;
+
+      // Top produtos por faturamento no período
+      const porProduto = new Map();
+      periodo.forEach(v => {
+        const nome = v.produto_nome || 'Produto não informado';
+        const atual = porProduto.get(nome) || { qtd: 0, valor: 0 };
+        atual.qtd += Number(v.quantidade || 0);
+        atual.valor += Number(v.preco_total || v.total || 0);
+        porProduto.set(nome, atual);
+      });
+      const topProdutos = [...porProduto.entries()]
+        .sort((a, b) => b[1].valor - a[1].valor)
+        .slice(0, 5);
+
+      topWrap.innerHTML = topProdutos.length ? topProdutos.map(([nome, dados], i) => `
+        <div class="report-ranking-item">
+          <div class="report-ranking-pos">${i + 1}</div>
+          <div>
+            <strong>${escapeHTML(nome)}</strong>
+            <small>${escapeHTML(dados.qtd)} unidade(s) vendida(s)</small>
+          </div>
+          <div class="report-ranking-valor">${formatarMoeda(dados.valor)}</div>
+        </div>
+      `).join('') : '<div class="report-empty">Nenhuma venda nesse período ainda.</div>';
+
+      // Formas de pagamento por participação no faturamento
+      const porPagamento = new Map();
+      periodo.forEach(v => {
+        formasPagamentoDaVenda(v).forEach(p => {
+          const atual = porPagamento.get(p.forma_pagamento) || 0;
+          porPagamento.set(p.forma_pagamento, atual + Number(p.valor || 0));
+        });
+      });
+      const totalPagamentos = [...porPagamento.values()].reduce((a, b) => a + b, 0);
+      const pagamentosOrdenados = [...porPagamento.entries()].sort((a, b) => b[1] - a[1]);
+
+      pagamentosWrap.innerHTML = pagamentosOrdenados.length ? pagamentosOrdenados.map(([forma, valor]) => {
+        const percentual = totalPagamentos ? (valor / totalPagamentos) * 100 : 0;
+        return `
+          <div class="report-bar-row">
+            <div class="report-bar-head">
+              <span>${escapeHTML(forma)}</span>
+              <span>${formatarMoeda(valor)} · ${percentual.toFixed(0)}%</span>
+            </div>
+            <div class="report-bar-track"><div class="report-bar-fill" style="width:${percentual}%;"></div></div>
+          </div>
+        `;
+      }).join('') : '<div class="report-empty">Nenhum pagamento registrado nesse período.</div>';
     }
 
     function renderDashboard() {

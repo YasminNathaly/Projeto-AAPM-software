@@ -559,13 +559,42 @@
       </div>
     </section>
 
-    <!-- MEXI AQUI: 8. RELATÓRIO — notificações marcadas como lidas -->
+    <!-- 8. RELATÓRIO DE VENDAS -->
     <section id="relatorio" class="view-content">
-      <div class="card reveal">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap: 12px; flex-wrap: wrap; margin-bottom: 1rem;">
-          <div class="card-title" style="margin: 0;">Notificações Lidas</div>
+      <div class="report-hero reveal">
+        <div>
+          <span class="dashboard-kicker">Relatório</span>
+          <h1>Como a AAPM <span>está vendendo.</span></h1>
+          <p>Faturamento, produtos mais vendidos e formas de pagamento — filtre pelo período que quiser.</p>
+        </div>
+        <div class="report-filter-chips" id="relatorioFiltroChips">
+          <button type="button" class="filter-chip active" data-periodo="hoje" onclick="selecionarFiltroRelatorio('hoje')">Hoje</button>
+          <button type="button" class="filter-chip" data-periodo="7d" onclick="selecionarFiltroRelatorio('7d')">7 dias</button>
+          <button type="button" class="filter-chip" data-periodo="30d" onclick="selecionarFiltroRelatorio('30d')">30 dias</button>
+          <button type="button" class="filter-chip" data-periodo="tudo" onclick="selecionarFiltroRelatorio('tudo')">Tudo</button>
+        </div>
+      </div>
+
+      <div class="report-kpis" id="relatorioKpis"></div>
+
+      <div class="report-layout">
+        <div class="card reveal">
+          <div class="card-title">Produtos mais vendidos <span class="card-title-note">no período</span></div>
+          <div class="report-ranking" id="relatorioTopProdutos"></div>
+        </div>
+        <div class="card reveal">
+          <div class="card-title">Formas de pagamento <span class="card-title-note">participação no faturamento</span></div>
+          <div class="report-bars" id="relatorioPagamentos"></div>
+        </div>
+      </div>
+
+      <details class="card reveal report-notif-details">
+        <summary>
+          <span class="card-title" style="margin:0; display:inline-flex;">Notificações lidas <span class="card-title-note">histórico de alertas já vistos — não é o relatório de vendas</span></span>
+        </summary>
+        <div style="display:flex; justify-content:flex-end; margin: 0.8rem 0;">
           <button type="button" class="btn btn-outline" onclick="limparRelatorioNotificacoes()" style="padding: 0.65rem 0.9rem; font-size: 0.72rem;">
-            Limpar relatório
+            Limpar histórico
           </button>
         </div>
         <div class="table-responsive">
@@ -575,7 +604,7 @@
           </table>
         </div>
         <div class="paginacao-container" id="pagRelatorio"></div>
-      </div>
+      </details>
     </section>
 
   </main>
