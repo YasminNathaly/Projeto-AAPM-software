@@ -397,8 +397,7 @@ def enviar_email_codigo(destinatario: str, codigo: str, nome: Optional[str] = No
 
     print(f"[DEBUG EMAIL] Tentando enviar de '{SMTP_EMAIL}' para '{destinatario}' | código: {codigo}")
 
-    with smtplib.SMTP("smtp.gmail.com", 587) as servidor:
-        servidor.starttls()
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30) as servidor:
         servidor.login(SMTP_EMAIL, SMTP_APP_PASSWORD)
         servidor.sendmail(SMTP_EMAIL, [destinatario], msg.as_string())
 
