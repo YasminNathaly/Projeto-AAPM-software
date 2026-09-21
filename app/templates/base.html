@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AAPM – SENAI Brás | Sistema de Gestão</title>
+  <title>Joalheria | Sistema de Gestão</title>
  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
  
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
  
@@ -22,18 +22,17 @@
       --border-color: rgba(255, 255, 255, 0.09);
       --border-color-soft: rgba(255, 255, 255, 0.05);
  
-      --primary: #d63250;
-      --primary-hover: #b82842;
-      --primary-soft: rgba(214, 50, 80, 0.12);
-      --primary-soft-border: rgba(214, 50, 80, 0.3);
-      --accent: #d63250;
+      /* Paleta dourada (joalheria) */
+      --primary: #c9a24b;
+      --primary-hover: #a8842f;
+      --primary-soft: rgba(201, 162, 75, 0.12);
+      --primary-soft-border: rgba(201, 162, 75, 0.3);
+      --accent: #c9a24b;
       --whatsapp-color: #25D366;
       --whatsapp-hover: #1ebd5b;
  
       --text-main: #ffffff;
       --text-muted: rgba(255, 255, 255, 0.64);
-      /* MEXI AQUI (acessibilidade): 0.38 -> 0.5 de opacidade para atingir
-         contraste mínimo de 4.5:1 (WCAG AA) sobre o fundo escuro */
       --text-dark: rgba(255, 255, 255, 0.5);
  
       --success: #1fbf82;
@@ -51,30 +50,32 @@
     }
  
     html[data-theme="light"] {
-      --bg-main: #e7e1dc;
-      --bg-surface: rgba(246, 241, 236, 0.9);
-      --bg-surface-hover: rgba(125, 56, 62, 0.06);
-      --bg-card: rgba(241, 235, 230, 0.94);
-      --bg-card-2: #ebe4df;
-      --border-color: rgba(74, 42, 42, 0.14);
-      --border-color-soft: rgba(74, 42, 42, 0.08);
+      --bg-main: #f1ebe0;
+      --bg-surface: rgba(248, 243, 234, 0.9);
+      --bg-surface-hover: rgba(122, 92, 24, 0.06);
+      --bg-card: rgba(246, 240, 230, 0.94);
+      --bg-card-2: #ede5d6;
+      --border-color: rgba(74, 58, 20, 0.14);
+      --border-color-soft: rgba(74, 58, 20, 0.08);
  
-      --primary-soft: rgba(214, 50, 80, 0.08);
-      --primary-soft-border: rgba(214, 50, 80, 0.22);
+      --primary: #a8842f;
+      --primary-hover: #86671f;
+      --primary-soft: rgba(168, 132, 47, 0.1);
+      --primary-soft-border: rgba(168, 132, 47, 0.28);
  
       --text-main: #14141a;
       --text-muted: rgba(20, 20, 26, 0.62);
       --text-dark: rgba(20, 20, 26, 0.4);
  
-      --shadow: 0 24px 55px rgba(214, 50, 80, 0.1);
-      --shadow-soft: 0 10px 26px rgba(214, 50, 80, 0.08);
+      --shadow: 0 24px 55px rgba(168, 132, 47, 0.14);
+      --shadow-soft: 0 10px 26px rgba(168, 132, 47, 0.1);
     }
  
     html[data-theme="light"] body {
       background:
-        radial-gradient(90% 60% at 15% 0%, rgba(214, 50, 80, 0.16) 0%, rgba(214, 50, 80, 0) 55%),
-        radial-gradient(70% 50% at 100% 20%, rgba(191, 129, 91, 0.18) 0%, rgba(191, 129, 91, 0) 60%),
-        radial-gradient(120% 90% at 50% 100%, rgba(125, 56, 62, 0.10) 0%, rgba(125, 56, 62, 0) 55%),
+        radial-gradient(90% 60% at 15% 0%, rgba(201, 162, 75, 0.20) 0%, rgba(201, 162, 75, 0) 55%),
+        radial-gradient(70% 50% at 100% 20%, rgba(232, 200, 130, 0.22) 0%, rgba(232, 200, 130, 0) 60%),
+        radial-gradient(120% 90% at 50% 100%, rgba(122, 92, 24, 0.10) 0%, rgba(122, 92, 24, 0) 55%),
         var(--bg-main);
       background-attachment: fixed;
     }
@@ -132,19 +133,18 @@
       color: var(--text-main);
     }
  
-    .logo-senai-svg {
+    .logo-brand-svg {
       height: 42px;
       width: auto;
       display: block;
       border-radius: 8px;
-      box-shadow: 0 4px 14px rgba(216, 10, 10, 0.4);
+      box-shadow: 0 4px 14px rgba(201, 162, 75, 0.4);
       transition: box-shadow 0.3s var(--ease), transform 0.3s var(--ease);
     }
-    .brand-logo:hover .logo-senai-svg { box-shadow: 0 6px 18px rgba(199, 7, 7, 0.55); transform: translateY(-1px); }
+    .brand-logo:hover .logo-brand-svg { box-shadow: 0 6px 18px rgba(201, 162, 75, 0.55); transform: translateY(-1px); }
 
-    /* Assinatura AAPM: texto abaixo do logo do SENAI, na mesma paleta azul,
-       sem "bolota" separada. Fica como uma legenda/selo textual. */
-    .aapm-wordmark {
+    /* Assinatura ao lado do logo */
+    .brand-wordmark {
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -153,32 +153,32 @@
       border-left: 1px solid var(--border-color);
       line-height: 1;
     }
-    .aapm-wordmark-text {
+    .brand-wordmark-text {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 1.5rem;
       letter-spacing: 0.09em;
-      background: linear-gradient(90deg, #f3132b 0%, #a90c20 100%);
+      background: linear-gradient(90deg, #f0d58a 0%, #b58a2c 100%);
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
-      color: #d63250;
+      color: #c9a24b;
       position: relative;
       width: fit-content;
     }
-    .aapm-wordmark-text::after {
+    .brand-wordmark-text::after {
       content: '';
       position: absolute;
       left: 0; bottom: -3px;
       width: 100%; height: 2px;
       border-radius: 2px;
-      background: linear-gradient(90deg, #f3132b 0%, #a90c20 100%);
+      background: linear-gradient(90deg, #f0d58a 0%, #b58a2c 100%);
       transform: scaleX(0.35);
       transform-origin: left;
       transition: transform 0.35s var(--ease);
       opacity: 0.85;
     }
-    .brand-logo:hover .aapm-wordmark-text::after { transform: scaleX(1); }
-    .aapm-wordmark-sub {
+    .brand-logo:hover .brand-wordmark-text::after { transform: scaleX(1); }
+    .brand-wordmark-sub {
       font-size: 0.6rem;
       font-weight: 600;
       letter-spacing: 0.18em;
@@ -187,9 +187,9 @@
       margin-top: 4px;
     }
     @media (max-width: 600px) {
-      .aapm-wordmark { padding-left: 10px; }
-      .aapm-wordmark-text { font-size: 1.2rem; }
-      .aapm-wordmark-sub { display: none; }
+      .brand-wordmark { padding-left: 10px; }
+      .brand-wordmark-text { font-size: 1.2rem; }
+      .brand-wordmark-sub { display: none; }
     }
  
     .header-location {
@@ -275,12 +275,12 @@
     }
  
     .nav-item:hover { color: var(--text-main); background: var(--bg-surface-hover); transform: translateY(-1px); }
-    .nav-item.active { background-color: var(--primary); color: #fff; }
+    .nav-item.active { background-color: var(--primary); color: #14110a; }
  
     .header-user-area { display: flex; align-items: center; gap: 0.85rem; }
  
     .user-box { display: flex; align-items: center; gap: 8px; }
-    .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 700; }
+    .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--primary); color: #14110a; display: flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 700; }
     .user-name { font-size: 0.75rem; font-weight: 600; }
  
     .icon-btn {
@@ -314,11 +314,11 @@
     }
 
     @keyframes logoTogglePulse {
-      0%   { transform: scale(1);    box-shadow: 0 4px 14px rgba(194, 12, 12, 0.4) }
-      40%  { transform: scale(1.22); box-shadow: 0 0 0 10px rgba(255, 5, 5, 0.32), 0 4px 14px rgba(20, 100, 220, 0.55); }
-      100% { transform: scale(1);    box-shadow: 0 4px 14px rgba(226, 12, 12, 0.4)4; }
+      0%   { transform: scale(1);    box-shadow: 0 4px 14px rgba(201, 162, 75, 0.4); }
+      40%  { transform: scale(1.22); box-shadow: 0 0 0 10px rgba(201, 162, 75, 0.32), 0 4px 14px rgba(201, 162, 75, 0.55); }
+      100% { transform: scale(1);    box-shadow: 0 4px 14px rgba(201, 162, 75, 0.4); }
     }
-    .logo-senai-svg.pulse { animation: logoTogglePulse 0.9s var(--ease); }
+    .logo-brand-svg.pulse { animation: logoTogglePulse 0.9s var(--ease); }
  
     .btn-auth {
       padding: 9px 20px;
@@ -335,7 +335,7 @@
       white-space: nowrap;
     }
  
-    .btn-auth:hover { background: var(--primary); border-color: var(--primary); color: #fff; transform: translateY(-1px); }
+    .btn-auth:hover { background: var(--primary); border-color: var(--primary); color: #14110a; transform: translateY(-1px); }
 
     body.admin-transition::after {
       content: '';
@@ -355,7 +355,7 @@
       align-items: center;
       justify-content: center;
       gap: 1.25rem;
-      background: radial-gradient(circle at center, rgba(214, 50, 80, 0.16), transparent 34%), #09090f;
+      background: radial-gradient(circle at center, rgba(201, 162, 75, 0.16), transparent 34%), #09090f;
       color: #fff;
     }
     .page-loading.active { display: flex; animation: loaderReveal 0.35s ease-out both; }
@@ -377,25 +377,25 @@
     }
     .loader-orbit::after {
       inset: 10px -8px;
-      border-color: rgba(214, 50, 80, 0.75);
+      border-color: rgba(201, 162, 75, 0.75);
       transform: rotate(55deg);
       animation-duration: 1.1s;
       animation-direction: reverse;
     }
     .loader-core {
-      width: 58px;
-      height: 38px;
+      width: 46px;
+      height: 46px;
       display: grid;
       place-items: center;
-      border-radius: 6px;
-      background: linear-gradient(135deg, #f3132b, #b8081b);
-      box-shadow: 0 0 28px rgba(214, 50, 80, 0.55);
-      font: 900 0.82rem/1 'Arial Black', Impact, sans-serif;
-      font-style: italic;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #f0d58a, #a8842f);
+      box-shadow: 0 0 28px rgba(201, 162, 75, 0.55);
+      color: #14110a;
+      font: 700 1.3rem/1 'Cinzel', serif;
     }
     .loader-title { font: 600 0.82rem/1 'Poppins', sans-serif; letter-spacing: 0.16em; text-transform: uppercase; }
     .loader-track { width: 150px; height: 3px; overflow: hidden; border-radius: 99px; background: rgba(255, 255, 255, 0.16); }
-    .loader-track span { display: block; width: 45%; height: 100%; border-radius: inherit; background: #d63250; animation: loaderProgress 0.85s ease-in-out forwards; }
+    .loader-track span { display: block; width: 45%; height: 100%; border-radius: inherit; background: #c9a24b; animation: loaderProgress 0.85s ease-in-out forwards; }
     @keyframes loaderReveal { from { opacity: 0; } to { opacity: 1; } }
     @keyframes loaderOrbit { 50% { transform: rotate(180deg) scale(1.08); opacity: 0.55; } }
     @keyframes loaderProgress { from { width: 0; } to { width: 100%; } }
@@ -506,7 +506,7 @@
       position: absolute;
       top: 0; left: 0; right: 0;
       height: 3px;
-      background: linear-gradient(90deg, var(--primary) 0%, #ff9d6c 55%, transparent 100%);
+      background: linear-gradient(90deg, var(--primary) 0%, #f0d58a 55%, transparent 100%);
       opacity: 0.85;
     }
     html[data-theme="light"] .card,
@@ -528,8 +528,8 @@
       text-decoration: none;
     }
  
-    .btn-primary { background: var(--primary); color: #fff; }
-    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 10px 24px rgba(214, 50, 80, 0.35); }
+    .btn-primary { background: var(--primary); color: #14110a; }
+    .btn-primary:hover { background: var(--primary-hover); color: #fff; transform: translateY(-2px); box-shadow: 0 10px 24px rgba(201, 162, 75, 0.35); }
  
     .btn-ghost {
       background: transparent;
@@ -654,7 +654,7 @@
       font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; color: rgba(255,255,255,0.85);
       text-transform: uppercase; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
     }
-    .badge-accent { background: rgba(214, 50, 80, 0.22); border: 1px solid rgba(214, 50, 80, 0.5); padding: 4px 10px; border-radius: var(--radius-pill); color: #ff90a3; font-size: 0.66rem; }
+    .badge-accent { background: rgba(201, 162, 75, 0.22); border: 1px solid rgba(201, 162, 75, 0.5); padding: 4px 10px; border-radius: var(--radius-pill); color: #f0d58a; font-size: 0.66rem; }
     .hero-title {
       font-family: 'Bebas Neue', sans-serif;
       font-size: clamp(2.6rem, 6vw, 4.6rem);
@@ -672,7 +672,7 @@
       text-decoration: none; font-size: 0.85rem; transition: all 0.3s var(--ease);
     }
     .btn-hero-primary .circle-arrow {
-      width: 26px; height: 26px; border-radius: 50%; background: var(--primary); color: #fff;
+      width: 26px; height: 26px; border-radius: 50%; background: var(--primary); color: #14110a;
       display: flex; align-items: center; justify-content: center; transition: transform 0.3s var(--ease);
     }
     .btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,0.35); }
@@ -706,7 +706,7 @@
     .content-stack { padding-top: 0.5rem; display: flex; flex-direction: column; gap: 2rem; padding-bottom: 3rem; }
     .content-stack > * { scroll-snap-align: start; scroll-margin-top: var(--header-height); }
  
-    .senai-info-card { display: flex; flex-direction: column; gap: 1.1rem; }
+    .brand-info-card { display: flex; flex-direction: column; gap: 1.1rem; }
     .info-header .info-badge { font-size: 0.64rem; font-weight: 700; color: var(--primary); letter-spacing: 0.16em; text-transform: uppercase; }
     .info-header h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.7rem; color: var(--text-main); letter-spacing: 0.02em; margin-top: 4px; }
     .info-text { font-size: 0.88rem; color: var(--text-muted); line-height: 1.65; }
@@ -765,7 +765,7 @@
       white-space: nowrap;
     }
     .category-pill:hover { color: var(--text-main); border-color: var(--primary); }
-    .category-pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .category-pill.active { background: var(--primary); color: #14110a; border-color: var(--primary); }
     .product-empty-state {
       grid-column: 1 / -1;
       text-align: center;
@@ -909,7 +909,7 @@
     .btn-paginacao {
       padding: 8px 16px;
       background-color: var(--primary);
-      color: #fff;
+      color: #14110a;
       text-decoration: none;
       border-radius: var(--radius-pill);
       font-size: 0.78rem;
@@ -918,7 +918,7 @@
       cursor: pointer;
       transition: all 0.25s var(--ease);
     }
-    .btn-paginacao:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+    .btn-paginacao:hover { background-color: var(--primary-hover); color: #fff; transform: translateY(-1px); }
     .btn-paginacao.desativado {
       background-color: var(--bg-surface-hover);
       color: var(--text-dark);
@@ -991,7 +991,7 @@
       cursor: pointer;
       transition: background 0.2s var(--ease), color 0.2s var(--ease);
     }
-    .mobile-nav-item:hover, .mobile-nav-item.active { background: var(--primary); color: #fff; }
+    .mobile-nav-item:hover, .mobile-nav-item.active { background: var(--primary); color: #14110a; }
     .mobile-nav-item + .mobile-nav-item { margin-top: 4px; }
 
     .cart-btn { position: relative; }
@@ -1002,7 +1002,7 @@
       padding: 0 4px;
       border-radius: var(--radius-pill);
       background: var(--primary);
-      color: #fff;
+      color: #14110a;
       font-size: 0.62rem;
       font-weight: 700;
       display: flex; align-items: center; justify-content: center;
@@ -1049,7 +1049,7 @@
       font-size: 0.85rem; cursor: pointer; line-height: 1;
       transition: background 0.2s var(--ease);
     }
-    .cart-qty-btn:hover { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .cart-qty-btn:hover { background: var(--primary); border-color: var(--primary); color: #14110a; }
     .cart-qty-value { font-size: 0.8rem; font-weight: 600; min-width: 16px; text-align: center; }
     .cart-item-remove { margin-left: auto; background: transparent; border: none; color: var(--danger); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; }
 
@@ -1072,10 +1072,10 @@
       display: flex; align-items: center; justify-content: center; gap: 6px;
       transition: background 0.25s var(--ease), color 0.25s var(--ease);
     }
-    .product-add-btn:hover { background: var(--primary); color: #fff; }
+    .product-add-btn:hover { background: var(--primary); color: #14110a; }
     .product-add-btn.added { background: var(--success); border-color: var(--success); color: #fff; }
 
-    /* ===== ASSISTENTE AAPM — mesmo visual usado no painel admin ===== */
+    /* ===== ASSISTENTE DA JOALHERIA ===== */
     .base-assistant-fab {
       position: fixed;
       right: 24px;
@@ -1085,12 +1085,12 @@
       height: 54px;
       border: 1px solid rgba(255,255,255,.2);
       border-radius: 18px;
-      background: linear-gradient(145deg, var(--primary), #8d1830);
-      box-shadow: 0 12px 30px rgba(214,50,80,.4);
+      background: linear-gradient(145deg, var(--primary), #7a5c18);
+      box-shadow: 0 12px 30px rgba(201,162,75,.4);
       cursor: pointer;
       transition: transform .25s var(--ease), box-shadow .25s var(--ease);
     }
-    .base-assistant-fab:hover { transform: translateY(-5px) rotate(3deg); box-shadow: 0 18px 38px rgba(214,50,80,.5); }
+    .base-assistant-fab:hover { transform: translateY(-5px) rotate(3deg); box-shadow: 0 18px 38px rgba(201,162,75,.5); }
 
     .base-assistant-face {
       position: absolute; left: 14px; top: 18px;
@@ -1159,8 +1159,8 @@
     .base-assistant-form { display: flex; gap: 6px; }
     .base-assistant-form input { min-width: 0; flex: 1; border: 1px solid var(--border-color); border-radius: 10px; padding: .65rem .75rem; background: var(--bg-surface-hover); color: var(--text-main); outline: none; font-size: .8rem; }
     .base-assistant-form input:focus { border-color: var(--primary); }
-    .base-assistant-form button { width: 36px; border: 0; border-radius: 10px; background: var(--primary); color: #fff; cursor: pointer; font-size: 1.1rem; }
-    .base-assistant-form button:hover { background: var(--primary-hover); }
+    .base-assistant-form button { width: 36px; border: 0; border-radius: 10px; background: var(--primary); color: #14110a; cursor: pointer; font-size: 1.1rem; }
+    .base-assistant-form button:hover { background: var(--primary-hover); color: #fff; }
 
     @media (max-width: 480px) {
       .base-assistant-panel { right: 12px; bottom: 84px; }
@@ -1172,7 +1172,7 @@
 
       header.main-header { padding: 0 4vw; }
       .brand-logo { gap: 12px; }
-      .logo-senai-svg { height: 32px; }
+      .logo-brand-svg { height: 32px; }
 
       .header-user-area { gap: 0.4rem; }
       .icon-btn { width: 34px; height: 34px; }
@@ -1226,48 +1226,47 @@
   <canvas id="bg-canvas"></canvas>
 
   <div class="page-loading" id="pageLoader" role="status" aria-live="polite">
-    <div class="loader-orbit"><div class="loader-core">SENAI</div></div>
+    <div class="loader-orbit"><div class="loader-core">J</div></div>
     <div class="loader-title">Abrindo painel</div>
     <div class="loader-track"><span></span></div>
   </div>
 
-  <button type="button" class="base-assistant-fab" onclick="toggleBaseAssistant()" aria-label="Abrir assistente AAPM" title="Assistente AAPM">
+  <button type="button" class="base-assistant-fab" onclick="toggleBaseAssistant()" aria-label="Abrir assistente da Joalheria" title="Assistente da Joalheria">
     <span class="base-assistant-antenna"></span><span class="base-assistant-face"><i></i><i></i></span>
   </button>
-  <div class="base-assistant-panel" id="baseAssistantPanel" aria-label="Assistente AAPM">
-    <div class="base-assistant-head"><div><span>ASSISTENTE AAPM</span><strong>Como posso ajudar?</strong></div><button type="button" onclick="toggleBaseAssistant()" aria-label="Fechar">&times;</button></div>
-    <div class="base-assistant-messages" id="baseAssistantMessages"><div class="base-assistant-message bot">Posso explicar os produtos, associados e os formulários da AAPM.</div></div>
-    <div class="base-assistant-suggestions"><button type="button" onclick="usarSugestaoBase('Quero ver os produtos')">Produtos</button><button type="button" onclick="usarSugestaoBase('Como funciona o cadastro de associado?')">Associados</button><button type="button" onclick="usarSugestaoBase('Onde fica o formulário?')">Formulário</button></div>
+  <div class="base-assistant-panel" id="baseAssistantPanel" aria-label="Assistente da Joalheria">
+    <div class="base-assistant-head"><div><span>ASSISTENTE DA JOALHERIA</span><strong>Como posso ajudar?</strong></div><button type="button" onclick="toggleBaseAssistant()" aria-label="Fechar">&times;</button></div>
+    <div class="base-assistant-messages" id="baseAssistantMessages"><div class="base-assistant-message bot">Posso explicar as joias, os clientes e os formulários da loja.</div></div>
+    <div class="base-assistant-suggestions"><button type="button" onclick="usarSugestaoBase('Quero ver as joias')">Joias</button><button type="button" onclick="usarSugestaoBase('Como funciona o cadastro de cliente?')">Clientes</button><button type="button" onclick="usarSugestaoBase('Onde fica o formulário?')">Formulário</button></div>
     <form class="base-assistant-form" onsubmit="enviarMensagemBase(event)"><input id="baseAssistantInput" autocomplete="off" placeholder="Digite uma dúvida..."><button type="submit" aria-label="Enviar">&rarr;</button></form>
   </div>
 
   <header class="main-header">
     <a href="#" class="brand-logo" onclick="navigate('inicio', document.querySelectorAll('.nav-item')[0])">
-      <svg class="logo-senai-svg" viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg">
+      <svg class="logo-brand-svg" viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <linearGradient id="senaiRedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#f3132b"/>
-            <stop offset="100%" stop-color="#b8081b"/>
+          <linearGradient id="jewelBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#2a2110"/>
+            <stop offset="100%" stop-color="#0d0a04"/>
+          </linearGradient>
+          <linearGradient id="jewelGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#f6e2a0"/>
+            <stop offset="100%" stop-color="#b58a2c"/>
           </linearGradient>
         </defs>
-        <rect width="320" height="100" rx="10" fill="url(#senaiRedGrad)"/>
-        <line x1="0" y1="20" x2="22" y2="20" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
-        <line x1="0" y1="35" x2="22" y2="35" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
-        <line x1="0" y1="50" x2="22" y2="50" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
-        <line x1="0" y1="65" x2="22" y2="65" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
-        <line x1="0" y1="80" x2="22" y2="80" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
-        <line x1="298" y1="20" x2="320" y2="20" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
-        <line x1="298" y1="35" x2="320" y2="35" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
-        <line x1="298" y1="50" x2="320" y2="50" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
-        <line x1="298" y1="65" x2="320" y2="65" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
-        <line x1="298" y1="80" x2="320" y2="80" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
-        <rect x="26" y="16" width="268" height="68" rx="4" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.18"/>
-        <text x="160" y="70" font-family="'Arial Black', 'Impact', sans-serif" font-size="52" font-weight="900" font-style="italic" letter-spacing="1" fill="#FFFFFF" text-anchor="middle">SENAI</text>
-        <rect x="34" y="76" width="252" height="3" rx="1.5" fill="#ff9d1f" opacity="0.9"/>
+        <rect width="320" height="100" rx="10" fill="url(#jewelBgGrad)"/>
+        <rect x="4" y="4" width="312" height="92" rx="7" fill="none" stroke="url(#jewelGoldGrad)" stroke-width="1.5" opacity="0.7"/>
+        <!-- diamante -->
+        <g transform="translate(34 26)">
+          <polygon points="12,0 36,0 48,16 24,48 0,16" fill="url(#jewelGoldGrad)"/>
+          <polyline points="0,16 48,16" stroke="#0d0a04" stroke-width="1.6" fill="none" opacity="0.55"/>
+          <polyline points="12,0 18,16 24,48 30,16 36,0" stroke="#0d0a04" stroke-width="1.6" fill="none" opacity="0.55"/>
+        </g>
+        <text x="100" y="62" font-family="'Cinzel', 'Times New Roman', serif" font-size="34" font-weight="700" letter-spacing="3" fill="url(#jewelGoldGrad)">JOALHERIA</text>
       </svg>
-      <div class="aapm-wordmark">
-        <span class="aapm-wordmark-text">AAPM</span>
-        <span class="aapm-wordmark-sub">SENAI Brás</span>
+      <div class="brand-wordmark">
+        <span class="brand-wordmark-text">JOIAS</span>
+        <span class="brand-wordmark-sub">Alta Joalheria</span>
       </div>
     </a>
  
@@ -1277,10 +1276,10 @@
       </div>
       <nav class="top-nav" id="topNav">
         <a class="nav-item active" onclick="navigate('inicio', this)">Início</a>
-        <a class="nav-item" onclick="navigate('produtos', this)">Produtos</a>
-        <a class="nav-item" onclick="navigate('associados', this)">Associados</a>
+        <a class="nav-item" onclick="navigate('produtos', this)">Joias</a>
+        <a class="nav-item" onclick="navigate('associados', this)">Clientes</a>
         <a class="nav-item" onclick="navigate('fale-conosco', this)">Fale Conosco</a>
-        <a class="nav-item" onclick="navigate('armarios', this)">Armários</a>
+        <a class="nav-item" onclick="navigate('armarios', this)">Vitrines</a>
       </nav>
       <div class="nav-fade right" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
@@ -1292,7 +1291,7 @@
         <div class="avatar" id="avatarText">AD</div>
         <span class="user-name" id="userNameLabel">Admin</span>
       </div>
-      <span class="header-location">SENAI BRÁS &mdash; SP</span>
+      <span class="header-location">JOALHERIA &mdash; SP</span>
       <button class="icon-btn cart-btn" id="cartBtn" onclick="openCart()" aria-label="Abrir carrinho" title="Carrinho">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1.4"/><circle cx="19" cy="21" r="1.4"/><path d="M1 1h3.6l2.6 13.2a2 2 0 0 0 2 1.6h9.2a2 2 0 0 0 2-1.6L22.4 6H5.2"/></svg>
         <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
@@ -1305,6 +1304,7 @@
       <button class="icon-btn mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()" aria-label="Abrir menu" title="Menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
+    </div>
   </header>
 
   <div class="mobile-menu-backdrop" id="mobileMenuBackdrop" onclick="closeMobileMenu()"></div>
@@ -1314,10 +1314,10 @@
       <button class="modal-close" onclick="closeMobileMenu()" aria-label="Fechar menu">&times;</button>
     </div>
     <a class="mobile-nav-item active" onclick="navigateMobile('inicio', this)">Início</a>
-    <a class="mobile-nav-item" onclick="navigateMobile('produtos', this)">Produtos</a>
-    <a class="mobile-nav-item" onclick="navigateMobile('associados', this)">Associados</a>
+    <a class="mobile-nav-item" onclick="navigateMobile('produtos', this)">Joias</a>
+    <a class="mobile-nav-item" onclick="navigateMobile('associados', this)">Clientes</a>
     <a class="mobile-nav-item" onclick="navigateMobile('fale-conosco', this)">Fale Conosco</a>
-    <a class="mobile-nav-item" onclick="navigateMobile('armarios', this)">Armários</a>
+    <a class="mobile-nav-item" onclick="navigateMobile('armarios', this)">Vitrines</a>
   </nav>
 
   <div class="mobile-menu-backdrop" id="cartBackdrop" onclick="closeCart()"></div>
@@ -1348,9 +1348,9 @@
     <section id="inicio" class="view-content active">
       <div class="hero-container">
         <div class="hero-bg-wrapper">
-          <div class="hero-bg active" style="background-image: url('https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=1600&auto=format&fit=crop');"></div>
-          <div class="hero-bg" style="background-image: url('https://images.unsplash.com/photo-1581092335397-9583fe92d232?q=80&w=1600&auto=format&fit=crop');"></div>
-          <div class="hero-bg" style="background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1600&auto=format&fit=crop');"></div>
+          <div class="hero-bg active" style="background-image: url('https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=1600&auto=format&fit=crop');"></div>
+          <div class="hero-bg" style="background-image: url('https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=1600&auto=format&fit=crop');"></div>
+          <div class="hero-bg" style="background-image: url('https://images.unsplash.com/photo-1573408301185-9146fe634ad0?q=80&w=1600&auto=format&fit=crop');"></div>
         </div>
  
         <div class="hero-overlay"></div>
@@ -1358,12 +1358,12 @@
         <div class="hero-inner">
           <div class="hero-content">
             <div class="hero-tag">
-              <span class="badge-accent">INDÚSTRIA 4.0</span>
-              ESCOLA SENAI "FRANCISCO MATARAZZO" &mdash; BRÁS
+              <span class="badge-accent">ALTA JOALHERIA</span>
+              JOALHERIA &mdash; SÃO PAULO
             </div>
-            <h1 class="hero-title">Liderança em Formação Técnica e Inovação Industrial</h1>
+            <h1 class="hero-title">Joias Exclusivas para Momentos Inesquecíveis</h1>
             <p class="hero-description">
-              Referência nacional no desenvolvimento de talentos e soluções para a indústria. Tecnologia de ponta, infraestrutura laboratorial avançada e ecossistema integrado de aprendizagem.
+              Peças em ouro e pedras selecionadas, com design refinado, acabamento impecável e atendimento personalizado para cada ocasião especial.
             </p>
  
             <div class="hero-cta-row">
@@ -1373,20 +1373,20 @@
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                 </span>
               </a>
-              <span class="link-learn-more" onclick="navigate('produtos', document.querySelectorAll('.nav-item')[1])">Conheça a Loja</span>
+              <span class="link-learn-more" onclick="navigate('produtos', document.querySelectorAll('.nav-item')[1])">Conheça as Joias</span>
             </div>
  
             <div class="hero-indicators">
               <button class="hero-tab active" onclick="setHeroSlide(0)">
-                <span class="tab-text">Excelência Técnica</span>
+                <span class="tab-text">Design Exclusivo</span>
                 <div class="tab-progress"></div>
               </button>
               <button class="hero-tab" onclick="setHeroSlide(1)">
-                <span class="tab-text">Tecnologia Avançada</span>
+                <span class="tab-text">Ouro &amp; Pedras</span>
                 <div class="tab-progress"></div>
               </button>
               <button class="hero-tab" onclick="setHeroSlide(2)">
-                <span class="tab-text">Comunidade &amp; AAPM</span>
+                <span class="tab-text">Atendimento Personalizado</span>
                 <div class="tab-progress"></div>
               </button>
             </div>
@@ -1395,33 +1395,33 @@
  
         <div class="hero-stats">
           <div class="hero-stat">
-            <div class="hero-stat-number">+80</div>
-            <div class="hero-stat-label">Anos Formando a Indústria</div>
+            <div class="hero-stat-number">+30</div>
+            <div class="hero-stat-label">Anos de Tradição</div>
           </div>
           <div class="hero-stat">
-            <div class="hero-stat-number">35+</div>
-            <div class="hero-stat-label">Laboratórios Avançados</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-number">90%+</div>
-            <div class="hero-stat-label">Empregabilidade</div>
+            <div class="hero-stat-number">500+</div>
+            <div class="hero-stat-label">Peças Exclusivas</div>
           </div>
           <div class="hero-stat">
             <div class="hero-stat-number">100%</div>
-            <div class="hero-stat-label">Infraestrutura Industrial</div>
+            <div class="hero-stat-label">Ouro Certificado</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-number">5★</div>
+            <div class="hero-stat-label">Satisfação dos Clientes</div>
           </div>
         </div>
       </div>
  
       <div class="content-stack">
         <div class="grid-2 reveal">
-          <div class="card senai-info-card">
+          <div class="card brand-info-card">
             <div class="info-header">
-              <span class="info-badge">Unidade Brás</span>
-              <h3>Escola SENAI FRANCISCO MATARAZZO</h3>
+              <span class="info-badge">Nossa Loja</span>
+              <h3>Joalheria</h3>
             </div>
             <p class="info-text">
-              Projetada para atender aos mais altos padrões exigidos pelo setor produtivo, a unidade Francisco M  atarazzo une a tradição do ensino técnico SENAI com os avanços da Indústria 4.0.
+              Unimos a tradição da ourivesaria ao design contemporâneo, oferecendo joias e semijoias que atravessam gerações. Cada peça é selecionada com cuidado e acompanha garantia e certificado de autenticidade.
             </p>
             <div class="location-box">
               <div class="location-header">
@@ -1429,26 +1429,26 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 </span>
                 <div>
-                  <strong>Localização Estratégica</strong>
-                  <p>Rua Correia de Andrade, 232 — Brás, São Paulo - SP</p>
+                  <strong>Localização</strong>
+                  <p>Rua Exemplo, 000 — Centro, São Paulo - SP</p>
                 </div>
               </div>
               <div class="location-info-grid">
                 <div class="info-chip">
                   <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="16" height="14" rx="2"/><path d="M8 3v6M16 3v6M4 11h16"/></svg></span>
-                  <span>Metrô/CPTM:</span> <strong>Estação Brás</strong>
+                  <span>Acesso:</span> <strong>Próximo ao metrô</strong>
                 </div>
                 <div class="info-chip">
                   <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg></span>
-                  <span>Horário:</span> <strong>Seg a Sex: 07h às 22h · Sáb: 08h às 17h</strong>
+                  <span>Horário:</span> <strong>Seg a Sex: 10h às 19h · Sáb: 10h às 16h</strong>
                 </div>
                 <div class="info-chip">
                   <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-7.53 7.53-2.02.7a1.9 1.9 0 0 1-2.02-.42l-2.9-2.9a1.9 1.9 0 0 1-.42-2.02l.7-2.02a1.9 1.9 0 0 0-.44-1.98L4.1 3.46A1.9 1.9 0 0 0 1.4 3.4l-.7.7a2 2 0 0 0-.5 2c1.4 4.4 4.7 9.7 9.6 12.4a2 2 0 0 0 2.2-.4l.7-.7a1.9 1.9 0 0 0-.06-2.7z"/></svg></span>
-                  <span>Telefone:</span> <strong>(11) 2227-8000</strong>
+                  <span>Telefone:</span> <strong>(11) 0000-0000</strong>
                 </div>
               </div>
             </div>
-            <a href="https://maps.google.com/?q=Rua+Correia+de+Andrade+232+Bras+Sao+Paulo" target="_blank" class="btn btn-primary">
+            <a href="https://maps.google.com/?q=Sao+Paulo" target="_blank" class="btn btn-primary">
               <span class="icon-circle" style="width:16px;height:16px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span>
               Ver no Google Maps
             </a>
@@ -1456,36 +1456,36 @@
  
           <div class="card">
             <div class="info-header" style="margin-bottom: 1.1rem;">
-              <span class="info-badge">Polos Tecnológicos</span>
-              <h3>Áreas de Atuação</h3>
+              <span class="info-badge">Nossas Linhas</span>
+              <h3>Coleções</h3>
             </div>
             <div class="tech-areas-grid">
               <div class="tech-area-item">
-                <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2"/><circle cx="9" cy="14" r="1.4"/><circle cx="15" cy="14" r="1.4"/><path d="M12 8V4M9 4h6"/></svg></span>
+                <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="15" r="6"/><path d="M9 4h6l2 4H7z"/></svg></span>
                 <div>
-                  <h4>Mecatrônica &amp; Automação</h4>
-                  <p>Robótica industrial e manufatura conectada.</p>
+                  <h4>Alianças &amp; Noivado</h4>
+                  <p>Peças que eternizam a data mais importante.</p>
                 </div>
               </div>
               <div class="tech-area-item">
-                <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 11 14 11 22 21 10 13 10 13 2"/></svg></span>
+                <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 18 3 22 9 12 21 2 9 6 3"/><path d="M2 9h20"/></svg></span>
                 <div>
-                  <h4>Eletroeletrônica</h4>
-                  <p>Instalações industriais e acionamentos elétricos.</p>
+                  <h4>Anéis &amp; Solitários</h4>
+                  <p>Diamantes e pedras preciosas em ouro 18k.</p>
                 </div>
               </div>
               <div class="tech-area-item">
-                <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+                <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4c0 9 4 13 8 13s8-4 8-13"/><circle cx="12" cy="20" r="2"/></svg></span>
                 <div>
-                  <h4>Metalmecânica</h4>
-                  <p>Usinagem CNC, metrologia e fabricação mecânica.</p>
+                  <h4>Colares &amp; Pingentes</h4>
+                  <p>Correntes, gargantilhas e pingentes delicados.</p>
                 </div>
               </div>
               <div class="tech-area-item">
-                <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+                <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="6"/><path d="M12 9v3l2 1M9 2h6M9 22h6"/></svg></span>
                 <div>
-                  <h4>Tecnologia da Informação</h4>
-                  <p>Desenvolvimento de sistemas e redes industriais.</p>
+                  <h4>Relógios &amp; Acessórios</h4>
+                  <p>Relógios, pulseiras e brincos de alto padrão.</p>
                 </div>
               </div>
             </div>
@@ -1495,24 +1495,24 @@
         <div class="section-pad reveal">
           <div class="card">
             <div class="info-header" style="margin-bottom: 1.1rem;">
-              <span class="info-badge">Suporte e Comunidade</span>
-              <h3>O Papel da AAPM</h3>
+              <span class="info-badge">Nossos Diferenciais</span>
+              <h3>Por que escolher a Joalheria</h3>
             </div>
             <div class="benefits-grid" style="padding: 0;">
               <div class="benefit-item">
-                <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg></span>
-                <h4>Projetos Científicos</h4>
-                <p>Apoio na aquisição de insumos para protótipos e TCCs.</p>
+                <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 18 3 22 9 12 21 2 9 6 3"/><path d="M2 9h20"/></svg></span>
+                <h4>Peças Certificadas</h4>
+                <p>Ouro e pedras com certificado de autenticidade.</p>
               </div>
               <div class="benefit-item">
                 <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.7 8 11 4.6-2.3 8-6 8-11V5l-8-3z"/></svg></span>
-                <h4>Equipamentos e Materiais</h4>
-                <p>Apoio na logística de uniformes e EPIs para estudantes.</p>
+                <h4>Garantia e Manutenção</h4>
+                <p>Limpeza, ajustes e reparos para suas joias durarem para sempre.</p>
               </div>
               <div class="benefit-item">
                 <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6"/></svg></span>
-                <h4>Representatividade</h4>
-                <p>Intermediação transparente entre pais, alunos e diretoria.</p>
+                <h4>Peças Sob Medida</h4>
+                <p>Criação personalizada, do desenho à finalização.</p>
               </div>
             </div>
           </div>
@@ -1523,14 +1523,14 @@
     <!-- 2. PRODUTOS -->
     <section id="produtos" class="view-content">
       <div class="page-title-box reveal">
-        <h2>Loja AAPM</h2>
-        <p>Produtos oficiais, materiais didáticos e vestuário da Escola SENAI Brás.</p>
+        <h2>Nossas Joias</h2>
+        <p>Joias, semijoias e acessórios selecionados da nossa coleção.</p>
       </div>
  
       <div class="product-filters reveal">
         <div class="product-search-box">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-          <input type="text" id="productSearchInput" class="form-control" placeholder="Pesquisar produto..." oninput="filterProducts()">
+          <input type="text" id="productSearchInput" class="form-control" placeholder="Pesquisar joia..." oninput="filterProducts()">
         </div>
         <div class="category-pills" id="categoryPills"></div>
       </div>
@@ -1542,11 +1542,11 @@
       </div>
     </section>
  
-    <!-- 3. ASSOCIADOS -->
+    <!-- 3. CLIENTES (rota /api/associados mantida) -->
     <section id="associados" class="view-content">
       <div class="page-title-box reveal">
-        <h2>Consulta de Associados</h2>
-        <p>Lista oficial de associados cadastrados na AAPM SENAI Brás.</p>
+        <h2>Consulta de Clientes</h2>
+        <p>Lista de clientes cadastrados na Joalheria.</p>
       </div>
  
       <div class="associados-wrap reveal">
@@ -1555,13 +1555,13 @@
             <table>
               <thead>
                 <tr>
-                  <th>Curso / Departamento</th>
+                  <th>Grupo / Categoria</th>
                   <th>Status</th>
                   <th>Ação</th>
                 </tr>
               </thead>
               <tbody id="tblAssociadosPublic">
-                <tr><td colspan="3" style="text-align:center; color: var(--text-muted); font-style: italic;">Carregando associados...</td></tr>
+                <tr><td colspan="3" style="text-align:center; color: var(--text-muted); font-style: italic;">Carregando clientes...</td></tr>
               </tbody>
             </table>
           </div>
@@ -1570,17 +1570,17 @@
       </div>
     </section>
  
-    <!-- 4. FALE CONOSCO / INSCRIÇÃO ASSOCIADO -->
+    <!-- 4. FALE CONOSCO / CADASTRO -->
     <section id="fale-conosco" class="view-content">
       <div class="page-title-box reveal">
-        <h2>Seja um Associado / Fale Conosco</h2>
+        <h2>Cadastre-se / Fale Conosco</h2>
         <p>Preencha os dados abaixo. Ao clicar em enviar, você será redirecionado para finalizar seu cadastro no Google Forms.</p>
       </div>
  
       <div class="contact-wrap">
         <div class="grid-2 reveal" style="padding: 0;">
           <div class="card">
-            <h3 style="font-size: 1.05rem; color: var(--primary); font-weight: 600; margin-bottom: 1.1rem;">Formulário de Inscrição</h3>
+            <h3 style="font-size: 1.05rem; color: var(--primary); font-weight: 600; margin-bottom: 1.1rem;">Formulário de Cadastro</h3>
  
             <form onsubmit="redirectToGoogleForms(event)">
               <div class="form-group" style="margin-bottom: 1rem;">
@@ -1608,7 +1608,7 @@
           <div class="card" style="display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 1.25rem;">
             <h3 style="font-size: 1.05rem; color: var(--primary); font-weight: 600;">Atendimento Rápido via WhatsApp</h3>
             <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
-              Precisa de um suporte imediato? Fale diretamente com nossa equipe de atendimento via WhatsApp.
+              Quer tirar dúvidas sobre uma peça ou encomendar uma joia sob medida? Fale diretamente com nossa equipe via WhatsApp.
             </p>
             <a href="https://wa.me/5511951611320" target="_blank" class="btn btn-whatsapp">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.762.459 3.48 1.333 5.005l-1.417 5.18 5.301-1.39a9.92 9.92 0 0 0 4.77 1.218h.004c5.505 0 9.988-4.478 9.989-9.985 0-2.667-1.037-5.176-2.923-7.062A9.925 9.925 0 0 0 12.012 2z"/></svg>
@@ -1619,11 +1619,11 @@
       </div>
     </section>
 
-    <!-- 5. ARMÁRIOS -->
+    <!-- 5. VITRINES (rota /api/armarios mantida) -->
     <section id="armarios" class="view-content">
       <div class="page-title-box reveal">
-        <h2>Consulta de Armários</h2>
-        <p>Situação atual dos armários disponíveis, ocupados e em manutenção na unidade SENAI Brás.</p>
+        <h2>Consulta de Vitrines</h2>
+        <p>Situação atual das vitrines disponíveis, ocupadas e em manutenção na loja.</p>
       </div>
 
       <div class="armarios-summary reveal" id="armariosSummary"></div>
@@ -1656,15 +1656,15 @@
       </div>
     </section>
  
-  <!-- MODAL DE VISUALIZAÇÃO DE ASSOCIADO -->
+  <!-- MODAL DE VISUALIZAÇÃO DE CLIENTE -->
   <div class="modal-backdrop" id="viewModal" onclick="if(event.target === this) closeViewModal()">
     <div class="modal-box">
       <button type="button" class="modal-close" onclick="closeViewModal()">&times;</button>
       <div class="modal-header">
-        <h3 class="modal-title">Detalhes do Associado</h3>
+        <h3 class="modal-title">Detalhes do Cliente</h3>
       </div>
       <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.9rem;">
-        <div><strong>Curso:</strong> <span id="v-curso" style="color: var(--text-muted);"></span></div>
+        <div><strong>Grupo:</strong> <span id="v-curso" style="color: var(--text-muted);"></span></div>
         <div><strong>Status:</strong> <span id="v-status" style="color: var(--success);"></span></div>
       </div>
       <button class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;" onclick="closeViewModal()">Fechar</button>
@@ -1691,8 +1691,8 @@
 
     function spawnThemeBurst(x, y, toDark) {
       const palette = toDark
-        ? ['255, 255, 255', '214, 50, 80', '255, 210, 130']
-        : ['214, 50, 80', '255, 157, 108', '255, 214, 140'];
+        ? ['255, 255, 255', '201, 162, 75', '255, 226, 150']
+        : ['201, 162, 75', '240, 213, 138', '255, 226, 150'];
 
       const count = 16;
       for (let i = 0; i < count; i++) {
@@ -1763,7 +1763,7 @@
       const isLight = html.getAttribute('data-theme') === 'light';
       const newTheme = isLight ? 'dark' : 'light';
       const btn = document.getElementById('themeToggleBtn');
-      const logo = document.querySelector('.logo-senai-svg');
+      const logo = document.querySelector('.logo-brand-svg');
 
       if (btn) {
         btn.classList.add('spin');
@@ -2020,23 +2020,23 @@
 
     function responderBase(texto) {
       const pergunta = texto.toLowerCase();
-      if (pergunta.includes('produto') || pergunta.includes('loja')) {
+      if (pergunta.includes('produto') || pergunta.includes('loja') || pergunta.includes('joia')) {
         navigate('produtos', document.querySelectorAll('.nav-item')[1]);
-        return 'Na Loja AAPM você pode pesquisar produtos, filtrar por categoria e adicionar itens ao carrinho.';
+        return 'Em Joias você pode pesquisar peças, filtrar por categoria e adicionar itens ao carrinho.';
       }
-      if (pergunta.includes('associado')) {
+      if (pergunta.includes('associado') || pergunta.includes('cliente')) {
         navigate('associados', document.querySelectorAll('.nav-item')[2]);
-        return 'A seção Associados mostra a lista oficial por curso/status. Para se cadastrar, use Fale Conosco e continue pelo formulário.';
+        return 'A seção Clientes mostra a lista por grupo/status. Para se cadastrar, use Fale Conosco e continue pelo formulário.';
       }
       if (pergunta.includes('formulário') || pergunta.includes('formulario') || pergunta.includes('cadastro') || pergunta.includes('contato')) {
         navigate('fale-conosco', document.querySelectorAll('.nav-item')[3]);
-        return 'Em Fale Conosco você encontra o formulário de inscrição e o contato rápido pelo WhatsApp.';
+        return 'Em Fale Conosco você encontra o formulário de cadastro e o contato rápido pelo WhatsApp.';
       }
-      if (pergunta.includes('armário') || pergunta.includes('armario')) {
+      if (pergunta.includes('armário') || pergunta.includes('armario') || pergunta.includes('vitrine')) {
         navigate('armarios', document.querySelectorAll('.nav-item')[4]);
-        return 'Na seção Armários você pode consultar números, localização e disponibilidade.';
+        return 'Na seção Vitrines você pode consultar números, localização e disponibilidade.';
       }
-      return 'Posso ajudar com Produtos, Associados, Formulário de inscrição, WhatsApp ou Armários.';
+      return 'Posso ajudar com Joias, Clientes, Formulário de cadastro, WhatsApp ou Vitrines.';
     }
 
     function usarSugestaoBase(texto) {
@@ -2076,9 +2076,9 @@
     // ===== ESTADO GLOBAL =====
 
     let categories = [
-      { id: 1, nome: 'Uniformes' },
-      { id: 2, nome: 'Ferramentas' },
-      { id: 3, nome: 'Material Didático' }
+      { id: 1, nome: 'Anéis' },
+      { id: 2, nome: 'Colares' },
+      { id: 3, nome: 'Brincos' }
     ];
  
     let products = [
@@ -2188,15 +2188,15 @@
           }
         }
       } catch (erro) {
-        console.warn('Não foi possível carregar os armários do backend.', erro);
+        console.warn('Não foi possível carregar as vitrines do backend.', erro);
       }
       renderArmarioStatusPills();
       filterArmariosPublic();
     }
 
-    // ===== ASSOCIADOS (ABA PÚBLICA) =====
+    // ===== CLIENTES (ABA PÚBLICA) =====
     // Por privacidade, esta lista pública nunca exibe nome ou matrícula do
-    // associado — apenas curso/departamento e status. Os dados vêm do
+    // cliente — apenas grupo/categoria e status. Os dados vêm do
     // mesmo backend usado pelo painel admin (admin.html), via /api/associados.
     async function carregarAssociadosPublic() {
       const tbody = document.getElementById('tblAssociadosPublic');
@@ -2207,7 +2207,7 @@
           if (Array.isArray(dados)) {
             associadosPublic = dados.map((a) => ({
               id: a.id,
-              curso: a.curso || a.curso_departamento || a.departamento || 'Curso não informado',
+              curso: a.curso || a.curso_departamento || a.departamento || 'Não informado',
               status: a.status || (a.ativo ? 'Ativo' : 'Inativo')
             }));
           }
@@ -2215,11 +2215,11 @@
           console.warn('Falha ao buscar /api/associados:', resposta.status);
         }
       } catch (erro) {
-        console.warn('Não foi possível carregar os associados do backend.', erro);
+        console.warn('Não foi possível carregar os clientes do backend.', erro);
       }
 
       if (!associadosPublic.length && tbody) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted); font-style: italic;">Nenhum associado cadastrado no momento.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted); font-style: italic;">Nenhum cliente cadastrado no momento.</td></tr>';
         renderPaginacao('paginacaoAssociadosPublic', 'associadosPublic', 1, 1, 0, 'renderAssociadosPublic');
         return;
       }
@@ -2242,7 +2242,7 @@
       const { pageItens, paginaAtual, totalPaginas, totalItens } = paginar(associadosPublic, 'associadosPublic', 10);
 
       if (!totalItens) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted); font-style: italic;">Nenhum associado cadastrado no momento.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted); font-style: italic;">Nenhum cliente cadastrado no momento.</td></tr>';
         renderPaginacao('paginacaoAssociadosPublic', 'associadosPublic', totalPaginas, paginaAtual, totalItens, 'renderAssociadosPublic');
         return;
       }
@@ -2265,7 +2265,7 @@
  
     function getProductCategoryLabel(produto) {
       if (produto && produto.categoria_id != null) return getCategoryNameById(produto.categoria_id);
-      return 'Produto oficial';
+      return 'Joia exclusiva';
     }
  
     function renderCategoryPills() {
@@ -2338,16 +2338,16 @@
       const { pageItens, paginaAtual, totalPaginas, totalItens } = paginar(produtos, 'produtosPublic', 12);
  
       if (!produtos.length) {
-        container.innerHTML = '<div class="product-empty-state">Nenhum produto encontrado para essa busca.</div>';
+        container.innerHTML = '<div class="product-empty-state">Nenhuma joia encontrada para essa busca.</div>';
         renderPaginacao('paginacaoProdutosPublic', 'produtosPublic', totalPaginas, paginaAtual, totalItens, 'renderProducts');
         return;
       }
  
       container.innerHTML = "";
       pageItens.forEach((p) => {
-        const produtoImgBruto = p.imagem_url || p.img || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=400&auto=format&fit=crop';
+        const produtoImgBruto = p.imagem_url || p.img || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=400&auto=format&fit=crop';
         const produtoImg = sanitizeUrl(produtoImgBruto);
-        const produtoNome = escapeHtml(p.nome || p.name || 'Produto');
+        const produtoNome = escapeHtml(p.nome || p.name || 'Joia');
         const produtoPreco = Number(p.preco || p.price || 0);
         const produtoSku = escapeHtml(p.sku || ('PROD-' + (p.id || 'N/A')));
         const produtoIdNum = Number(p.id) || 0;
@@ -2378,7 +2378,7 @@
 
     function loadCart() {
       try {
-        const saved = localStorage.getItem('aapm_cart');
+        const saved = localStorage.getItem('joalheria_cart');
         cart = saved ? JSON.parse(saved) : [];
       } catch (e) {
         cart = [];
@@ -2386,7 +2386,7 @@
     }
 
     function saveCart() {
-      try { localStorage.setItem('aapm_cart', JSON.stringify(cart)); } catch (e) { /* indisponível */ }
+      try { localStorage.setItem('joalheria_cart', JSON.stringify(cart)); } catch (e) { /* indisponível */ }
     }
 
     function findProductById(id) {
@@ -2416,7 +2416,7 @@
       } else {
         cart.push({
           id: produto.id,
-          nome: produto.nome || 'Produto',
+          nome: produto.nome || 'Joia',
           preco: Number(produto.preco || 0),
           imagem_url: produto.imagem_url || '',
           qty: qty
@@ -2480,12 +2480,12 @@
       totalEl.textContent = `R$ ${cartTotal().toFixed(2)}`;
 
       if (!cart.length) {
-        list.innerHTML = '<div class="cart-empty">Seu carrinho está vazio.<br>Adicione produtos na Loja AAPM.</div>';
+        list.innerHTML = '<div class="cart-empty">Seu carrinho está vazio.<br>Adicione joias da nossa coleção.</div>';
         return;
       }
 
       list.innerHTML = cart.map((item) => {
-        const itemImg = sanitizeUrl(item.imagem_url) || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=200&auto=format&fit=crop';
+        const itemImg = sanitizeUrl(item.imagem_url) || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=200&auto=format&fit=crop';
         const itemNome = escapeHtml(item.nome);
         const itemIdNum = Number(item.id) || 0;
         return `
@@ -2520,7 +2520,7 @@
     function checkoutCartWhatsapp() {
       if (!cart.length) { alert('Seu carrinho está vazio.'); return; }
 
-      const linhas = ['Olá! Gostaria de fazer o seguinte pedido na Loja AAPM:', ''];
+      const linhas = ['Olá! Gostaria de fazer o seguinte pedido na Joalheria:', ''];
       cart.forEach((item) => {
         linhas.push(`• ${item.qty}x ${item.nome} — R$ ${(item.preco * item.qty).toFixed(2)}`);
       });
@@ -2530,7 +2530,7 @@
       window.open(`https://wa.me/5511951611320?text=${msg}`, '_blank');
     }
 
-    // ===== ARMÁRIOS (ABA PÚBLICA) =====
+    // ===== VITRINES (ABA PÚBLICA) =====
     function statusArmarioClassePublic(status) {
       if (status === 'Disponível') return 'active';
       if (status === 'Ocupado') return 'inactive';
@@ -2563,7 +2563,7 @@
       container.innerHTML = `
         <div class="armario-summary-tile">
           <div class="ast-value">${total}</div>
-          <div class="ast-label">Armários Cadastrados</div>
+          <div class="ast-label">Vitrines Cadastradas</div>
         </div>
         <div class="armario-summary-tile">
           <div class="ast-value">${disponiveis}</div>
@@ -2571,7 +2571,7 @@
         </div>
         <div class="armario-summary-tile">
           <div class="ast-value">${ocupados}</div>
-          <div class="ast-label">Ocupados</div>
+          <div class="ast-label">Ocupadas</div>
         </div>
       `;
     }
@@ -2608,7 +2608,7 @@
       const { pageItens, paginaAtual, totalPaginas, totalItens } = paginar(listaBase, 'armariosPublic', 10);
 
       if (!listaBase.length) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted); font-style: italic;">Nenhum armário encontrado.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted); font-style: italic;">Nenhuma vitrine encontrada.</td></tr>';
         renderPaginacao('paginacaoArmariosPublic', 'armariosPublic', totalPaginas, paginaAtual, totalItens, 'rerenderArmariosPublicPaginaAtual');
         return;
       }
@@ -2789,7 +2789,7 @@
         .then(async () => {
           await carregarProdutos();
           e.target.reset();
-          alert('Produto adicionado com sucesso!');
+          alert('Joia adicionada com sucesso!');
         })
         .catch((erro) => {
           console.warn('Backend indisponível, salvando produto localmente.', erro);
@@ -2802,9 +2802,9 @@
  
     // SLIDER HERO
     const heroData = [
-      { title: "Liderança em Formação Técnica e Inovação Industrial", desc: "Referência nacional no desenvolvimento de talentos e soluções para a indústria. Tecnologia de ponta, infraestrutura laboratorial avançada e ecossistema integrado de aprendizagem." },
-      { title: "Infraestrutura Industrial 4.0 e Manufatura Avançada", desc: "Laboratórios equipados com tecnologia real de mercado: Robótica, Células Flexíveis de Manufatura, Redes Industriais e Automação de Processos." },
-      { title: "Parceria Estratégica Entre Escola, Família e Indústria", desc: "Atuação constante da AAPM e do SENAI para assegurar a melhor jornada acadêmica, desenvolvimento humano e inserção no mercado de trabalho." }
+      { title: "Joias Exclusivas para Momentos Inesquecíveis", desc: "Peças em ouro e pedras selecionadas, com design refinado, acabamento impecável e atendimento personalizado para cada ocasião especial." },
+      { title: "Ouro 18k, Diamantes e Pedras Preciosas", desc: "Materiais de origem certificada, lapidação primorosa e a garantia de que cada peça foi feita para durar por gerações." },
+      { title: "Atendimento Personalizado, do Desenho à Entrega", desc: "Nossa equipe acompanha você na escolha, na criação sob medida e no pós-venda, com manutenção e garantia em todas as peças." }
     ];
  
     let heroIndex = 0;
@@ -2855,7 +2855,7 @@
       document.querySelectorAll('.reveal:not(.in-view), .reveal-stagger:not(.in-view)').forEach(el => revealObserver.observe(el));
     }
  
-    // BACKGROUND CANVAS
+    // BACKGROUND CANVAS (estrelas/brilhos dourados)
     (function initCanvas() {
       const canvas = document.getElementById('bg-canvas');
       if (!canvas) return;
@@ -2880,7 +2880,7 @@
         ];
         layers.forEach((layer, layerIndex) => {
           for (let i = 0; i < layer.count; i++) {
-            const isRed = Math.random() < 0.15;
+            const isGold = Math.random() < 0.25;
             stars.push({
               x: Math.random() * canvas.width,
               y: Math.random() * canvas.height,
@@ -2890,7 +2890,7 @@
               twinklePhase: Math.random() * Math.PI * 2,
               drift: (Math.random() - 0.5) * layer.drift,
               layer: layerIndex,
-              color: isRed ? '214, 50, 80' : '255, 255, 255'
+              color: isGold ? '201, 162, 75' : '255, 255, 255'
             });
           }
         });
@@ -2898,9 +2898,9 @@
 
       function generateNebulae() {
         nebulae = [
-          { xR: 0.22, yR: 0.28, radius: Math.max(canvas.width, canvas.height) * 0.42, hue: 344, phase: 0,   speed: 0.0016 },
-          { xR: 0.80, yR: 0.62, radius: Math.max(canvas.width, canvas.height) * 0.38, hue: 260, phase: 2.1, speed: 0.0012 },
-          { xR: 0.55, yR: 0.85, radius: Math.max(canvas.width, canvas.height) * 0.34, hue: 200, phase: 4.4, speed: 0.0019 }
+          { xR: 0.22, yR: 0.28, radius: Math.max(canvas.width, canvas.height) * 0.42, hue: 42,  phase: 0,   speed: 0.0016 },
+          { xR: 0.80, yR: 0.62, radius: Math.max(canvas.width, canvas.height) * 0.38, hue: 30,  phase: 2.1, speed: 0.0012 },
+          { xR: 0.55, yR: 0.85, radius: Math.max(canvas.width, canvas.height) * 0.34, hue: 50,  phase: 4.4, speed: 0.0019 }
         ];
       }
 
@@ -2922,7 +2922,7 @@
         if (Math.random() < 0.012 && shootingStars.length < 5) {
           const startX = Math.random() * canvas.width * 0.8 + canvas.width * 0.1;
           const big = Math.random() < 0.25;
-          const tint = Math.random() < 0.2 ? '255, 210, 210' : '255, 255, 255';
+          const tint = Math.random() < 0.3 ? '255, 226, 150' : '255, 255, 255';
           shootingStars.push({
             x: startX,
             y: -20,
@@ -2949,9 +2949,9 @@
           const cy = canvas.height * n.yR + parY * 20;
           const r = n.radius * (0.85 + pulse * 0.18);
           const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-          grad.addColorStop(0, `hsla(${n.hue}, 75%, 48%, ${0.14 + pulse * 0.07})`);
-          grad.addColorStop(0.5, `hsla(${n.hue}, 75%, 42%, ${0.07 + pulse * 0.04})`);
-          grad.addColorStop(1, `hsla(${n.hue}, 75%, 32%, 0)`);
+          grad.addColorStop(0, `hsla(${n.hue}, 65%, 48%, ${0.12 + pulse * 0.06})`);
+          grad.addColorStop(0.5, `hsla(${n.hue}, 65%, 42%, ${0.06 + pulse * 0.03})`);
+          grad.addColorStop(1, `hsla(${n.hue}, 65%, 32%, 0)`);
           ctx.fillStyle = grad;
           ctx.fillRect(0, 0, canvas.width, canvas.height);
         });
@@ -2971,7 +2971,7 @@
           const px = star.x + parX * (star.layer + 1) * 6;
           const py = star.y + parY * (star.layer + 1) * 6;
 
-          const color = light ? (star.color === '255, 255, 255' ? '214, 50, 80' : '255, 157, 108') : star.color;
+          const color = light ? (star.color === '255, 255, 255' ? '168, 132, 47' : '201, 162, 75') : star.color;
 
           ctx.beginPath();
           ctx.fillStyle = `rgba(${color}, ${alpha})`;
@@ -2988,7 +2988,7 @@
       function drawShootingStars() {
         const light = isLightTheme();
         shootingStars.forEach((s) => {
-          const color = light ? '214, 50, 80' : s.color;
+          const color = light ? '168, 132, 47' : s.color;
           const tailX = s.x - s.vx * (s.length / 10);
           const tailY = s.y - s.vy * (s.length / 10);
           const grad = ctx.createLinearGradient(s.x, s.y, tailX, tailY);
