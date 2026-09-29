@@ -2550,7 +2550,7 @@
 
       // Enviar mensagem de parcelamento via WhatsApp
       function enviarWhatsAppParcelamento(cliente, produto, qtd, total, parcelamento, valorParcela, callback) {
-        const whatsappNumber = '5511999999999'; // Altere para o número de WhatsApp da loja/suporte
+        const whatsappNumber = '5511951611320'; // Número oficial AAPM
         const mensagem = encodeURIComponent(
           `Olá! Confirmamos a venda de ${qtd}x ${produto} no valor de ${formatarMoeda(total)}.\n\n` +
           `Parcelamento: ${parcelamento}x de ${formatarMoeda(valorParcela)}\n` +
