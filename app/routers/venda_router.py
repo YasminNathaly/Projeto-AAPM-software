@@ -13,6 +13,8 @@ class ItemVendaInput(BaseModel):
     produto_id: int
     quantidade: int = 1
     preco_unitario: Optional[float] = 0.0
+    tamanho: Optional[str] = ""
+    variacao: Optional[str] = ""
 
 
 class VendaCreate(BaseModel):

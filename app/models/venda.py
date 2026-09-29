@@ -44,6 +44,8 @@ class ItemVenda(Base):
     variacao_id = Column(Integer, ForeignKey("variacoes_produto.id"), nullable=True)
     quantidade = Column(Integer, nullable=False, default=1)
     preco_unitario = Column(Float, nullable=False) # Guarda o preço do produto no momento exato da compra
+    tamanho = Column(String(50), nullable=True)  # Tamanho selecionado (ex: "M", "G", "GG")
+    nome_variacao = Column(String(255), nullable=True)  # Nome da variação selecionada
 
     # Relacionamentos
     venda = relationship("Venda", back_populates="itens")

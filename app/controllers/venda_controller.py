@@ -56,6 +56,8 @@ def _normalizar_itens(dados):
         "variacao_id": payload.get("variacao_id"),
         "quantidade": quantidade,
         "preco_unitario": payload.get("preco_unitario") or 0.0,
+        "tamanho": payload.get("tamanho") or "",
+        "nome_variacao": payload.get("nome_variacao") or "",
     }]
 
 
@@ -82,6 +84,8 @@ def listar_vendas(db: Session):
                     "produto_id": item.produto_id,
                     "variacao_id": item.variacao_id,
                     "variacao_nome": nome_variacao,
+                    "tamanho": getattr(item, "tamanho", "") or "",
+                    "nome_variacao": getattr(item, "nome_variacao", "") or "",
                     "produto_nome": nome_produto,
                     "quantidade": item.quantidade,
                     "preco_unitario": item.preco_unitario,
@@ -227,6 +231,8 @@ def registrar_venda(db: Session, dados):
                 variacao_id=item_variacao_id,
                 quantidade=item.get("quantidade") or 1,
                 preco_unitario=float(item.get("preco_unitario") or produto.preco or 0.0),
+                tamanho=item.get("tamanho") or "",
+                nome_variacao=item.get("nome_variacao") or "",
             )
             db.add(novo_item)
 

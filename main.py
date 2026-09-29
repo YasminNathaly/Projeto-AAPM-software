@@ -132,6 +132,10 @@ def garantir_colunas_itens_venda():
         colunas = {coluna["name"] for coluna in inspector.get_columns("itens_venda")}
         if "variacao_id" not in colunas:
             conn.execute(text("ALTER TABLE itens_venda ADD COLUMN variacao_id INTEGER"))
+        if "tamanho" not in colunas:
+            conn.execute(text("ALTER TABLE itens_venda ADD COLUMN tamanho VARCHAR(50)"))
+        if "nome_variacao" not in colunas:
+            conn.execute(text("ALTER TABLE itens_venda ADD COLUMN nome_variacao VARCHAR(255)"))
 
 garantir_colunas_itens_venda()
 

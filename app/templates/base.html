@@ -2487,21 +2487,45 @@
       const titulo = modal.querySelector('.modal-title');
       const conteudo = modal.querySelector('.variacao-modal-content');
       
-      titulo.textContent = `Escolha a variação para ${escapeHtml(produto.nome)}`;
+      titulo.textContent = `Escolha tamanho e variação para ${escapeHtml(produto.nome)}`;
       
-      conteudo.innerHTML = (produto.variacoes || []).map(v => {
-        const nome = v.nome_variacao || v.nome || v.name || '';
-        const estoque = Number(v.estoque ?? v.quantidade ?? 0) || 0;
-        const semEstoque = estoque <= 0;
-        return `
-          <button type="button" class="variacao-option ${semEstoque ? 'disabled' : ''}" 
-                  onclick="confirmarVariacaoCarrinho(${produto.id}, '${nome}',${estoque})" 
-                  ${semEstoque ? 'disabled' : ''}>
-            <span class="variacao-nome">${escapeHtml(nome)}</span>
-            <span class="variacao-estoque">Est: ${estoque}</span>
-          </button>
-        `;
-      }).join('');
+      // Preparar opções de tamanho
+      const tamanho = produto.tamanho || '';
+      const tamanhoSelect = tamanho ? 
+        `<div style="margin-bottom: 1.5rem;">
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Tamanho:</label>
+          <select id="seletorTamanho" class="form-control" style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+            <option value="">Selecione um tamanho</option>
+            ${tamanho.split(',').map(t => {
+              const trim = t.trim();
+              return `<option value="${trim}">${escapeHtml(trim)}</option>`;
+            }).join('')}
+          </select>
+        </div>` : '';
+      
+      // Preparar opções de variação
+      const variacoes = (produto.variacoes || []);
+      const variacaoSelect = variacoes.length ? 
+        `<div style="margin-bottom: 1.5rem;">
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Variação:</label>
+          <select id="seletorVariacao" class="form-control" style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+            <option value="">Selecione uma variação</option>
+            ${variacoes.map(v => {
+              const nome = v.nome_variacao || v.nome || v.name || '';
+              const estoque = Number(v.estoque ?? v.quantidade ?? 0) || 0;
+              const disabled = estoque <= 0 ? 'disabled' : '';
+              return `<option value="${nome}" ${disabled}>${escapeHtml(nome)} (Est: ${estoque})</option>`;
+            }).join('')}
+          </select>
+        </div>` : '';
+      
+      conteudo.innerHTML = `
+        ${tamanhoSelect}
+        ${variacaoSelect}
+        <button type="button" class="btn btn-primary" style="width: 100%; padding: 0.75rem; background: #1976d2; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem;" onclick="confirmarSelecaoCarrinho(${produto.id})">
+          Adicionar ao Carrinho
+        </button>
+      `;
       
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
@@ -2513,12 +2537,24 @@
       document.body.style.overflow = '';
     }
     
-    function confirmarVariacaoCarrinho(produtoId, variacao, estoque) {
-      if (estoque <= 0) {
-        alert('Esta variação está sem estoque.');
+    function confirmarSelecaoCarrinho(produtoId) {
+      const tamanho = (document.getElementById('seletorTamanho')?.value || '').trim();
+      const variacao = (document.getElementById('seletorVariacao')?.value || '').trim();
+      
+      // Validar se tem campos obrigatórios vazios
+      const temSeletorTamanho = document.getElementById('seletorTamanho');
+      const temSeletorVariacao = document.getElementById('seletorVariacao');
+      
+      if (temSeletorTamanho && !tamanho) {
+        alert('Selecione um tamanho.');
         return;
       }
-      addToCartComVariacao(produtoId, 1, variacao);
+      if (temSeletorVariacao && !variacao) {
+        alert('Selecione uma variação.');
+        return;
+      }
+      
+      addToCartComEscolhas(produtoId, 1, tamanho, variacao);
       fecharModalVariacoes();
     }
 
@@ -2544,11 +2580,15 @@
       bumpCartBadge();
     }
     
-    function addToCartComVariacao(productId, qty, variacao) {
+    function addToCartComEscolhas(productId, qty, tamanho = '', variacao = '') {
       const produto = findProductById(productId);
       if (!produto) return;
 
-      const existing = cart.find((item) => String(item.id) === String(productId) && item.variacao === variacao);
+      const existing = cart.find(
+        (item) => String(item.id) === String(productId) && 
+                  (item.tamanho || '') === (tamanho || '') && 
+                  (item.variacao || '') === (variacao || '')
+      );
       if (existing) {
         existing.qty += qty;
       } else {
@@ -2558,7 +2598,8 @@
           preco: Number(produto.preco || 0),
           imagem_url: produto.imagem_url || '',
           qty: qty,
-          variacao: variacao
+          tamanho: tamanho || '',
+          variacao: variacao || ''
         });
       }
       saveCart();
@@ -2566,19 +2607,36 @@
       bumpCartBadge();
     }
 
-    function updateCartQty(productId, delta, variacao = null) {
-      const item = cart.find((i) => String(i.id) === String(productId) && (i.variacao === variacao || (variacao === '' && !i.variacao)));
+    function addToCartComVariacao(productId, qty, variacao) {
+      // Retrocompatibilidade: forward para nova função sem tamanho
+      addToCartComEscolhas(productId, qty, '', variacao);
+    }
+
+    function updateCartQty(productId, delta, tamanho = '', variacao = '') {
+      const item = cart.find((i) => 
+        String(i.id) === String(productId) && 
+        (i.tamanho || '') === (tamanho || '') && 
+        (i.variacao || '') === (variacao || '')
+      );
       if (!item) return;
       item.qty += delta;
       if (item.qty <= 0) {
-        cart = cart.filter((i) => !(String(i.id) === String(productId) && (i.variacao === variacao || (variacao === '' && !i.variacao))));
+        cart = cart.filter((i) => !(
+          String(i.id) === String(productId) && 
+          (i.tamanho || '') === (tamanho || '') && 
+          (i.variacao || '') === (variacao || '')
+        ));
       }
       saveCart();
       renderCart();
     }
 
-    function removeCartItem(productId, variacao = null) {
-      cart = cart.filter((i) => !(String(i.id) === String(productId) && (i.variacao === variacao || (variacao === '' && !i.variacao))));
+    function removeCartItem(productId, tamanho = '', variacao = '') {
+      cart = cart.filter((i) => !(
+        String(i.id) === String(productId) && 
+        (i.tamanho || '') === (tamanho || '') && 
+        (i.variacao || '') === (variacao || '')
+      ));
       saveCart();
       renderCart();
     }
@@ -2626,20 +2684,31 @@
       list.innerHTML = cart.map((item) => {
         const itemImg = sanitizeUrl(item.imagem_url) || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=200&auto=format&fit=crop';
         const itemNome = escapeHtml(item.nome);
-        const variacaoTexto = item.variacao ? ` <span style="color:#999;font-size:0.9em;">(${escapeHtml(item.variacao)})</span>` : '';
+        
+        // Monta label com tamanho e variação
+        let tamanhoVariacaoTexto = '';
+        if (item.tamanho || item.variacao) {
+          const partes = [];
+          if (item.tamanho) partes.push(`Tamanho: ${escapeHtml(item.tamanho)}`);
+          if (item.variacao) partes.push(`${escapeHtml(item.variacao)}`);
+          tamanhoVariacaoTexto = ` <span style="color:#999;font-size:0.9em;">(\n${partes.join(' • ')})</span>`;
+        }
+        
         const itemIdNum = Number(item.id) || 0;
+        const tamanhoParam = item.tamanho ? `'${item.tamanho}'` : "''";
         const variacaoParam = item.variacao ? `'${item.variacao}'` : "''";
+        
         return `
         <div class="cart-item">
           <img src="${itemImg}" class="cart-item-thumb" alt="${itemNome}">
           <div class="cart-item-info">
-            <div class="cart-item-name">${itemNome}${variacaoTexto}</div>
+            <div class="cart-item-name">${itemNome}${tamanhoVariacaoTexto}</div>
             <div class="cart-item-price">R$ ${item.preco.toFixed(2)} un.</div>
             <div class="cart-item-controls">
-              <button type="button" class="cart-qty-btn" onclick="updateCartQty('${itemIdNum}', -1, ${variacaoParam})">&minus;</button>
+              <button type="button" class="cart-qty-btn" onclick="updateCartQty('${itemIdNum}', -1, ${tamanhoParam}, ${variacaoParam})">&minus;</button>
               <span class="cart-qty-value">${item.qty}</span>
-              <button type="button" class="cart-qty-btn" onclick="updateCartQty('${itemIdNum}', 1, ${variacaoParam})">+</button>
-              <button type="button" class="cart-item-remove" onclick="removeCartItem('${itemIdNum}', ${variacaoParam})">Remover</button>
+              <button type="button" class="cart-qty-btn" onclick="updateCartQty('${itemIdNum}', 1, ${tamanhoParam}, ${variacaoParam})">+</button>
+              <button type="button" class="cart-item-remove" onclick="removeCartItem('${itemIdNum}', ${tamanhoParam}, ${variacaoParam})">Remover</button>
             </div>
           </div>
         </div>
