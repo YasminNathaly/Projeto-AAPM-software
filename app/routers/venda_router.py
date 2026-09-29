@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 
@@ -53,3 +53,10 @@ def listar_vendas(db: Session = Depends(get_db)):
 @router.post("", response_model=VendaResponse, status_code=status.HTTP_201_CREATED)  # tirei a "/"
 def registrar_venda(dados: VendaCreate, db: Session = Depends(get_db)):
     return venda_controller.registrar_venda(db, dados)
+
+@router.delete("/{venda_id}", status_code=status.HTTP_204_NO_CONTENT)
+def deletar_venda(venda_id: int, db: Session = Depends(get_db)):
+    sucesso = venda_controller.deletar_venda(db, venda_id)
+    if not sucesso:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Venda não encontrada.")
+    return None

@@ -221,3 +221,16 @@ def registrar_venda(db: Session, dados):
         "cliente": cliente,
         "comprador": cliente,
     }
+
+
+def deletar_venda(db: Session, venda_id: int):
+    venda = db.query(Venda).filter(Venda.id == venda_id).first()
+    if not venda:
+        return False
+
+    for item in venda.itens:
+        db.delete(item)
+
+    db.delete(venda)
+    db.commit()
+    return True

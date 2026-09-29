@@ -1,6 +1,6 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from sqlalchemy.orm import Session
 
 from app.controllers import associado_controller
@@ -16,6 +16,25 @@ class AssociadoBase(BaseModel):
     email: str
     telefone: Optional[str] = None
     endereco: Optional[str] = None
+    status: Optional[str] = "Ativo"
+    ativo: Optional[bool] = True
+
+    @field_validator("status", mode="before")
+    def normalizar_status(cls, valor):
+        if valor is None or valor == "":
+            return "Ativo"
+        valor_str = str(valor).strip().title()
+        return valor_str if valor_str in {"Ativo", "Inativo"} else "Ativo"
+
+    @field_validator("ativo", mode="before")
+    def normalizar_ativo(cls, valor):
+        if valor is None:
+            return True
+        if isinstance(valor, bool):
+            return valor
+        if isinstance(valor, str):
+            return valor.strip().lower() in {"true", "1", "ativo", "yes", "on"}
+        return bool(valor)
 
 
 class AssociadoCreate(AssociadoBase):
@@ -27,6 +46,25 @@ class AssociadoUpdate(BaseModel):
     email: Optional[str] = None
     telefone: Optional[str] = None
     endereco: Optional[str] = None
+    status: Optional[str] = None
+    ativo: Optional[bool] = None
+
+    @field_validator("status", mode="before")
+    def normalizar_status(cls, valor):
+        if valor is None or valor == "":
+            return None
+        valor_str = str(valor).strip().title()
+        return valor_str if valor_str in {"Ativo", "Inativo"} else None
+
+    @field_validator("ativo", mode="before")
+    def normalizar_ativo(cls, valor):
+        if valor is None:
+            return None
+        if isinstance(valor, bool):
+            return valor
+        if isinstance(valor, str):
+            return valor.strip().lower() in {"true", "1", "ativo", "yes", "on"}
+        return bool(valor)
 
 
 class AssociadoResponse(AssociadoBase):

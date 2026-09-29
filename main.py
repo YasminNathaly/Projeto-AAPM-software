@@ -163,6 +163,19 @@ def garantir_colunas_usuarios():
                 conn.execute(text(f"ALTER TABLE usuarios ADD COLUMN {nome} {tipo}"))
 
 garantir_colunas_usuarios()
+
+def garantir_colunas_associados():
+    with engine.begin() as conn:
+        inspector = inspect(conn)
+        colunas = {coluna["name"] for coluna in inspector.get_columns("associados")}
+        if "status" not in colunas:
+            conn.execute(text("ALTER TABLE associados ADD COLUMN status TEXT DEFAULT 'Ativo'"))
+        if "ativo" not in colunas:
+            conn.execute(text("ALTER TABLE associados ADD COLUMN ativo BOOLEAN DEFAULT 1"))
+        conn.execute(text("UPDATE associados SET status = 'Ativo' WHERE status IS NULL OR status = ''"))
+        conn.execute(text("UPDATE associados SET ativo = 1 WHERE ativo IS NULL"))
+
+garantir_colunas_associados()
 # ─────────────────────────────────────────────────────────────────────────────
 # CAMINHOS E ARQUIVOS ESTÁTICOS
 # ─────────────────────────────────────────────────────────────────────────────

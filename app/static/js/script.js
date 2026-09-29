@@ -1,4 +1,4 @@
-  // admin.html
+// admin.html
     const token = localStorage.getItem('access_token');
     let sessaoInicialValida = Boolean(token);
     if (!token) {
@@ -335,6 +335,22 @@
         };
       }
 
+      function normalizarAssociado(a) {
+        const statusNormalizado = (() => {
+          const valor = String(a?.status ?? '').trim();
+          const texto = valor.toLowerCase();
+          if (texto === 'inativo') return 'Inativo';
+          if (texto === 'ativo') return 'Ativo';
+          return a?.ativo === false ? 'Inativo' : 'Ativo';
+        })();
+
+        return {
+          ...a,
+          status: statusNormalizado,
+          ativo: a?.ativo ?? (statusNormalizado === 'Ativo')
+        };
+      }
+
       function normalizarArmario(a) {
         return {
           ...a,
@@ -373,7 +389,7 @@
           categorias = resCat.ok ? await resCat.json() : [];
           fornecedores = resForn.ok ? await resForn.json() : [];
           produtos = resProd.ok ? (await resProd.json()).map(normalizarProduto) : [];
-          associados = resAssoc.ok ? await resAssoc.json() : [];
+          associados = resAssoc.ok ? (await resAssoc.json()).map(normalizarAssociado) : [];
           armarios = resArm.ok ? (await resArm.json()).map(normalizarArmario) : [];
           usuarios = resUsr.ok ? await resUsr.json() : [];
           vendas = resVnd.ok ? (await resVnd.json()).map(normalizarVenda) : [];
@@ -2398,7 +2414,8 @@
           email: document.getElementById('assocEmail').value,
           telefone: document.getElementById('assocTelefone').value || '',
           endereco: document.getElementById('assocEndereco').value || '',
-          status: 'Ativo'
+          status: 'Ativo',
+          ativo: true
         };
         const endpoint = id ? `${API_URLS.associado}/${id}` : API_URLS.associado;
         salvarNoBanco(endpoint, payload, e, id ? 'PUT' : 'POST', 'associado');
