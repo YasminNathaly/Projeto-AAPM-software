@@ -115,7 +115,9 @@ def garantir_colunas_vendas():
             "preco_total": "REAL",
             "associado_id": "INTEGER",
             "desconto_percentual": "REAL",
-            "valor_desconto": "REAL"
+            "valor_desconto": "REAL",
+            "parcelamento_ativo": "INTEGER DEFAULT 0",
+            "valor_parcela": "REAL DEFAULT 0.0"
         }
 
         for nome, tipo in colunas_para_adicionar.items():

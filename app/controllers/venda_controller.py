@@ -101,6 +101,8 @@ def listar_vendas(db: Session):
                 "preco_total": getattr(venda, "preco_total", getattr(venda, "valor_total", 0.0)),
                 "status": getattr(venda, "status", "Concluída"),
                 "forma_pagamento": getattr(venda, "forma_pagamento", "PIX"),
+                "parcelamento_ativo": getattr(venda, "parcelamento_ativo", 0),
+                "valor_parcela": getattr(venda, "valor_parcela", 0.0),
                 "data_venda": _formatar_data_venda(getattr(venda, "data_venda", None)),
                 "itens": itens,
             }
@@ -117,6 +119,20 @@ def registrar_venda(db: Session, dados):
     quantidade = 1
     preco_total = payload.get("preco_total") or payload.get("valor_total") or 0.0
     forma_pagamento = payload.get("forma_pagamento") or "PIX"
+    
+    # Parcelamento (0=não parcelado, 1-5=número de parcelas)
+    parcelamento_ativo = int(payload.get("parcelamento_ativo") or 0)
+    if parcelamento_ativo < 0 or parcelamento_ativo > 5:
+        parcelamento_ativo = 0
+    valor_parcela = 0.0
+    if parcelamento_ativo > 0:
+        valor_parcela = float(preco_total or 0.0) / parcelamento_ativo
+        # Validar: parcelamento só com cartão de crédito
+        if "Cartão de Crédito" not in forma_pagamento:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Parcelamento só é permitido com Cartão de Crédito.",
+            )
 
     if itens and isinstance(itens, list):
         primeiro_item = itens[0]
@@ -166,6 +182,8 @@ def registrar_venda(db: Session, dados):
         preco_total=float(preco_total or 0.0),
         forma_pagamento=forma_pagamento,
         status=payload.get("status") or "Concluída",
+        parcelamento_ativo=parcelamento_ativo,
+        valor_parcela=valor_parcela,
     )
 
     db.add(nova_venda)

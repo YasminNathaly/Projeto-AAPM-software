@@ -1654,6 +1654,7 @@
         const pagina = paginarLista(lista, 'venda');
         tbody.innerHTML = pagina.length ? pagina.map((item, i) => {
           const nomeAssoc = nomeAssociadoPorId(item.associado_id);
+          const parcelamentoTexto = item.parcelamento_ativo > 0 ? `${item.parcelamento_ativo}x` : 'À vista';
           return `
           <tr style="--i:${i}">
             <td>${escapeHTML(item.data_venda) || '-'}</td>
@@ -1663,10 +1664,11 @@
             <td>${nomeAssoc ? `<span class="status-tag active">${escapeHTML(nomeAssoc)} · -10%</span>` : '-'}</td>
             <td style="font-weight: 700; color: var(--success);">${formatarMoeda(item.preco_total ?? item.total ?? 0)}</td>
             <td>${escapeHTML(item.forma_pagamento) || '-'}</td>
+            <td>${parcelamentoTexto}</td>
             <td>${renderAcoesVenda(item.id)}</td>
           </tr>
         `;
-        }).join('') : emptyRow(8, 'Nenhuma venda registrada.');
+        }).join('') : emptyRow(9, 'Nenhuma venda registrada.');
         renderPaginacaoControles('pagVendas', 'venda', lista.length);
       }
 
@@ -1991,18 +1993,21 @@
         const row = document.createElement('div');
         row.className = 'pagamento-row';
         row.id = rowId;
+        const parcelamento = parseInt(document.getElementById('vendaParcelamento').value || '0', 10);
+        const apenasCartao = parcelamento > 0;
+        
         row.innerHTML = `
-          <select class="form-control pgto-forma" onchange="atualizarRestantePagamento()">
-            <option value="PIX">PIX</option>
+          <select class="form-control pgto-forma" onchange="atualizarRestantePagamento()" ${apenasCartao ? 'disabled' : ''}>
+            ${!apenasCartao ? '<option value="PIX">PIX</option>' : ''}
             <option value="Cartão de Crédito">Cartão de Crédito</option>
-            <option value="Dinheiro">Dinheiro</option>
+            ${!apenasCartao ? '<option value="Dinheiro">Dinheiro</option>' : ''}
           </select>
           <input type="number" class="form-control pgto-valor" step="0.01" min="0" placeholder="Valor (R$)" oninput="atualizarRestantePagamento()">
           <button type="button" class="action-btn danger" title="Remover forma de pagamento" onclick="removerPagamentoRow('${rowId}')">
             <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
           </button>
         `;
-        row.querySelector('.pgto-forma').value = forma;
+        row.querySelector('.pgto-forma').value = apenasCartao ? 'Cartão de Crédito' : forma;
         if (valor !== null && valor !== undefined && valor !== '') {
           row.querySelector('.pgto-valor').value = Number(valor).toFixed(2);
         }
@@ -2094,6 +2099,8 @@
         const produtoId = document.getElementById('vendaProduto').value;
         const qtd = parseInt(document.getElementById('vendaQtd').value || '0', 10);
         const associadoId = document.getElementById('vendaAssociado').value;
+        const parcelamentoSelect = document.getElementById('vendaParcelamento');
+        const parcelamento = parcelamentoSelect ? parseInt(parcelamentoSelect.value || '0', 10) : 0;
         const resumoWrap = document.getElementById('vendaResumoWrap');
 
         const produto = produtos.find(p => String(p.id) === String(produtoId));
@@ -2113,6 +2120,17 @@
         document.getElementById('vendaResumoDescontoWrap').classList.toggle('show', temDesconto);
         document.getElementById('vendaResumoTotal').innerText = formatarMoeda(total);
         resumoWrap.style.display = 'block';
+
+        // Atualizar exibição de parcela
+        const vendaParcelaInfo = document.getElementById('vendaParcelaInfo');
+        const vendaParcelaValor = document.getElementById('vendaParcelaValor');
+        if (parcelamento > 0) {
+          const valorParcela = total / parcelamento;
+          vendaParcelaValor.innerText = formatarMoeda(valorParcela);
+          vendaParcelaInfo.style.display = 'block';
+        } else {
+          vendaParcelaInfo.style.display = 'none';
+        }
 
         atualizarRestantePagamento();
       }
@@ -2469,18 +2487,31 @@
         const qtd = Math.max(1, parseInt(document.getElementById('vendaQtd').value, 10) || 1);
         const associadoIdRaw = document.getElementById('vendaAssociado').value;
         const associadoId = associadoIdRaw ? parseInt(associadoIdRaw) : null;
+        const parcelamento = parseInt(document.getElementById('vendaParcelamento').value || '0', 10);
 
         const produto = produtos.find(p => String(p.id) === String(produtoId));
         const subtotal = produto ? Number(produto.preco) * qtd : 0;
         const percentualDesconto = associadoId ? 10 : 0;
         const desconto = subtotal * (percentualDesconto / 100);
         const total = Math.round((subtotal - desconto) * 100) / 100;
+        const valorParcela = parcelamento > 0 ? Math.round((total / parcelamento) * 100) / 100 : 0;
+        const cliente = document.getElementById('vendaCliente').value;
 
         const pagamentos = coletarPagamentos();
         if (!pagamentos.length) {
           mostrarToast('Informe ao menos uma forma de pagamento com valor.', 'error');
           return;
         }
+
+        // Validar: se parcelar, apenas cartão de crédito é permitido
+        if (parcelamento > 0) {
+          const todasCartao = pagamentos.every(p => p.forma_pagamento === 'Cartão de Crédito');
+          if (!todasCartao) {
+            mostrarToast('Parcelamento só é permitido com Cartão de Crédito.', 'error');
+            return;
+          }
+        }
+
         const somaPagamentos = Math.round(pagamentos.reduce((acc, p) => acc + p.valor, 0) * 100) / 100;
         if (Math.abs(somaPagamentos - total) > 0.02) {
           mostrarToast(
@@ -2491,18 +2522,49 @@
         }
 
         const payload = {
-          cliente: document.getElementById('vendaCliente').value,
+          cliente: cliente,
           produto_id: parseInt(produtoId),
           quantidade: qtd,
           forma_pagamento: pagamentos.map(p => p.forma_pagamento).join(' + '),
           pagamentos,
           associado_id: associadoId,
           desconto_percentual: percentualDesconto,
-          preco_total: total
+          preco_total: total,
+          parcelamento_ativo: parcelamento,
+          valor_parcela: valorParcela
         };
+        
         const endpoint = id ? `${API_URLS.venda}/${id}` : API_URLS.venda;
-        salvarNoBanco(endpoint, payload, e, id ? 'PUT' : 'POST', 'venda');
-        document.getElementById('vendaId').value = '';
+        
+        // Se parcelar, enviar mensagem WhatsApp antes de salvar
+        if (parcelamento > 0) {
+          enviarWhatsAppParcelamento(cliente, produto.nome, qtd, total, parcelamento, valorParcela, () => {
+            salvarNoBanco(endpoint, payload, e, id ? 'PUT' : 'POST', 'venda');
+            document.getElementById('vendaId').value = '';
+          });
+        } else {
+          salvarNoBanco(endpoint, payload, e, id ? 'PUT' : 'POST', 'venda');
+          document.getElementById('vendaId').value = '';
+        }
+      }
+
+      // Enviar mensagem de parcelamento via WhatsApp
+      function enviarWhatsAppParcelamento(cliente, produto, qtd, total, parcelamento, valorParcela, callback) {
+        const whatsappNumber = '5511999999999'; // Altere para o número de WhatsApp da loja/suporte
+        const mensagem = encodeURIComponent(
+          `Olá! Confirmamos a venda de ${qtd}x ${produto} no valor de ${formatarMoeda(total)}.\n\n` +
+          `Parcelamento: ${parcelamento}x de ${formatarMoeda(valorParcela)}\n` +
+          `Próximo passo: confirmar dados do cartão.\n\n` +
+          `Cliente: ${cliente}`
+        );
+        
+        const urlWhatsApp = `https://wa.me/${whatsappNumber}?text=${mensagem}`;
+        
+        // Abrir WhatsApp em nova aba
+        window.open(urlWhatsApp, '_blank');
+        
+        // Continuar com o salvamento após 1 segundo
+        setTimeout(callback, 1000);
       }
 
     function logout() {

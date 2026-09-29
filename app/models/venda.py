@@ -20,6 +20,11 @@ class Venda(Base):
     valor_desconto = Column(Float, nullable=True, default=0.0)
     # ----------------------------------
 
+    # --- CAMPOS DE PARCELAMENTO ---
+    parcelamento_ativo = Column(Integer, nullable=True, default=0)  # 0=não parcelado, 1-5=número de parcelas
+    valor_parcela = Column(Float, nullable=True, default=0.0)
+    # --------------------------------
+
     valor_total = Column(Float, nullable=False, default=0.0)
     preco_total = Column(Float, nullable=True, default=0.0)
     status = Column(String(30), default="Concluída") # ex: "Pendente", "Concluída", "Cancelada"

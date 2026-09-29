@@ -1341,6 +1341,55 @@
       <button class="btn btn-ghost" style="width: 100%; margin-top: 8px;" onclick="clearCart()">Esvaziar carrinho</button>
     </div>
   </aside>
+
+  <!-- Modal de Seleção de Variações -->
+  <div class="modal-overlay" id="variacaoModalPublic" onclick="if(event.target.id === 'variacaoModalPublic') fecharModalVariacoes()" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000;">
+    <div class="modal-content" style="background: white; border-radius: 12px; padding: 2rem; max-width: 400px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h3 class="modal-title" style="margin: 0; font-size: 1.2rem; color: #1a1a1a;"></h3>
+        <button onclick="fecharModalVariacoes()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+      </div>
+      <div class="variacao-modal-content" style="display: grid; gap: 0.75rem;"></div>
+    </div>
+  </div>
+
+  <style>
+    #variacaoModalPublic.active {
+      display: flex !important;
+    }
+    .variacao-option {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: #f5f5f5;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+    }
+    .variacao-option:hover:not(.disabled) {
+      background: #e3f2fd;
+      border-color: #1976d2;
+    }
+    .variacao-option.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: #f0f0f0;
+    }
+    .variacao-nome {
+      font-weight: 600;
+      color: #333;
+    }
+    .variacao-estoque {
+      font-size: 0.85rem;
+      color: #666;
+      background: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+    }
+  </style>
  
   <main class="wrapper" id="mainContent" tabindex="-1">
  
@@ -2007,10 +2056,13 @@
       if (document.body.classList.contains('admin-transition')) return;
 
       document.body.classList.add('admin-transition');
-      document.getElementById('pageLoader')?.classList.add('active');
+      const pageLoader = document.getElementById('pageLoader');
+      if (pageLoader) pageLoader.classList.add('active');
+      
+      const delay = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 100 : 850;
       setTimeout(() => {
         window.location.href = link.href;
-      }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 100 : 850);
+      }, delay);
     }
 
     function toggleBaseAssistant() {
@@ -2406,6 +2458,16 @@
     }
 
     function addToCartFromButton(btnEl, productId) {
+      const produto = findProductById(productId);
+      if (!produto) return;
+      
+      // Se tem variações, abrir modal para seleção
+      if (Array.isArray(produto.variacoes) && produto.variacoes.length > 0) {
+        abrirModalVariacoes(produto);
+        return;
+      }
+      
+      // Sem variações, adicionar direto
       addToCart(productId, 1);
       if (btnEl) {
         btnEl.classList.add('added');
@@ -2417,12 +2479,54 @@
         }, 1100);
       }
     }
+    
+    function abrirModalVariacoes(produto) {
+      const modal = document.getElementById('variacaoModalPublic');
+      if (!modal) return;
+      
+      const titulo = modal.querySelector('.modal-title');
+      const conteudo = modal.querySelector('.variacao-modal-content');
+      
+      titulo.textContent = `Escolha a variação para ${escapeHtml(produto.nome)}`;
+      
+      conteudo.innerHTML = (produto.variacoes || []).map(v => {
+        const nome = v.nome_variacao || v.nome || v.name || '';
+        const estoque = Number(v.estoque ?? v.quantidade ?? 0) || 0;
+        const semEstoque = estoque <= 0;
+        return `
+          <button type="button" class="variacao-option ${semEstoque ? 'disabled' : ''}" 
+                  onclick="confirmarVariacaoCarrinho(${produto.id}, '${nome}',${estoque})" 
+                  ${semEstoque ? 'disabled' : ''}>
+            <span class="variacao-nome">${escapeHtml(nome)}</span>
+            <span class="variacao-estoque">Est: ${estoque}</span>
+          </button>
+        `;
+      }).join('');
+      
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function fecharModalVariacoes() {
+      const modal = document.getElementById('variacaoModalPublic');
+      if (modal) modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    
+    function confirmarVariacaoCarrinho(produtoId, variacao, estoque) {
+      if (estoque <= 0) {
+        alert('Esta variação está sem estoque.');
+        return;
+      }
+      addToCartComVariacao(produtoId, 1, variacao);
+      fecharModalVariacoes();
+    }
 
     function addToCart(productId, qty) {
       const produto = findProductById(productId);
       if (!produto) return;
 
-      const existing = cart.find((item) => String(item.id) === String(productId));
+      const existing = cart.find((item) => String(item.id) === String(productId) && !item.variacao);
       if (existing) {
         existing.qty += qty;
       } else {
@@ -2431,7 +2535,30 @@
           nome: produto.nome || 'Produto',
           preco: Number(produto.preco || 0),
           imagem_url: produto.imagem_url || '',
-          qty: qty
+          qty: qty,
+          variacao: null
+        });
+      }
+      saveCart();
+      renderCart();
+      bumpCartBadge();
+    }
+    
+    function addToCartComVariacao(productId, qty, variacao) {
+      const produto = findProductById(productId);
+      if (!produto) return;
+
+      const existing = cart.find((item) => String(item.id) === String(productId) && item.variacao === variacao);
+      if (existing) {
+        existing.qty += qty;
+      } else {
+        cart.push({
+          id: produto.id,
+          nome: produto.nome || 'Produto',
+          preco: Number(produto.preco || 0),
+          imagem_url: produto.imagem_url || '',
+          qty: qty,
+          variacao: variacao
         });
       }
       saveCart();
@@ -2439,19 +2566,19 @@
       bumpCartBadge();
     }
 
-    function updateCartQty(productId, delta) {
-      const item = cart.find((i) => String(i.id) === String(productId));
+    function updateCartQty(productId, delta, variacao = null) {
+      const item = cart.find((i) => String(i.id) === String(productId) && (i.variacao === variacao || (variacao === '' && !i.variacao)));
       if (!item) return;
       item.qty += delta;
       if (item.qty <= 0) {
-        cart = cart.filter((i) => String(i.id) !== String(productId));
+        cart = cart.filter((i) => !(String(i.id) === String(productId) && (i.variacao === variacao || (variacao === '' && !i.variacao))));
       }
       saveCart();
       renderCart();
     }
 
-    function removeCartItem(productId) {
-      cart = cart.filter((i) => String(i.id) !== String(productId));
+    function removeCartItem(productId, variacao = null) {
+      cart = cart.filter((i) => !(String(i.id) === String(productId) && (i.variacao === variacao || (variacao === '' && !i.variacao))));
       saveCart();
       renderCart();
     }
@@ -2499,18 +2626,20 @@
       list.innerHTML = cart.map((item) => {
         const itemImg = sanitizeUrl(item.imagem_url) || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=200&auto=format&fit=crop';
         const itemNome = escapeHtml(item.nome);
+        const variacaoTexto = item.variacao ? ` <span style="color:#999;font-size:0.9em;">(${escapeHtml(item.variacao)})</span>` : '';
         const itemIdNum = Number(item.id) || 0;
+        const variacaoParam = item.variacao ? `'${item.variacao}'` : "''";
         return `
         <div class="cart-item">
           <img src="${itemImg}" class="cart-item-thumb" alt="${itemNome}">
           <div class="cart-item-info">
-            <div class="cart-item-name">${itemNome}</div>
+            <div class="cart-item-name">${itemNome}${variacaoTexto}</div>
             <div class="cart-item-price">R$ ${item.preco.toFixed(2)} un.</div>
             <div class="cart-item-controls">
-              <button type="button" class="cart-qty-btn" onclick="updateCartQty('${itemIdNum}', -1)">&minus;</button>
+              <button type="button" class="cart-qty-btn" onclick="updateCartQty('${itemIdNum}', -1, ${variacaoParam})">&minus;</button>
               <span class="cart-qty-value">${item.qty}</span>
-              <button type="button" class="cart-qty-btn" onclick="updateCartQty('${itemIdNum}', 1)">+</button>
-              <button type="button" class="cart-item-remove" onclick="removeCartItem('${itemIdNum}')">Remover</button>
+              <button type="button" class="cart-qty-btn" onclick="updateCartQty('${itemIdNum}', 1, ${variacaoParam})">+</button>
+              <button type="button" class="cart-item-remove" onclick="removeCartItem('${itemIdNum}', ${variacaoParam})">Remover</button>
             </div>
           </div>
         </div>

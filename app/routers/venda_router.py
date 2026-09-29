@@ -24,6 +24,8 @@ class VendaCreate(BaseModel):
     valor_total: Optional[float] = None
     forma_pagamento: str = "PIX"
     status: str = "Concluída"
+    parcelamento_ativo: Optional[int] = 0  # 0=não parcelado, 1-5=número de parcelas
+    valor_parcela: Optional[float] = 0.0
     itens: Optional[List[ItemVendaInput]] = None
 
 
@@ -37,6 +39,8 @@ class VendaResponse(BaseModel):
     valor_total: Optional[float] = 0.0
     forma_pagamento: str = "PIX"
     status: str = "Concluída"
+    parcelamento_ativo: Optional[int] = 0
+    valor_parcela: Optional[float] = 0.0
     data_venda: Optional[str] = None
     itens: List[dict] = []
 
