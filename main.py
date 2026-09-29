@@ -205,6 +205,27 @@ async def custom_404_handler(request: Request, exc: Exception):
 # SCHEMAS PYDANTIC
 # ─────────────────────────────────────────────────────────────────────────────
 
+class VariacaoProdutoSchema(BaseModel):
+    nome_variacao: str
+    sku: Optional[str] = None
+    estoque: Optional[int] = 0
+    preco_adicional: Optional[float] = 0.0
+
+    @field_validator("estoque", mode="before")
+    def tratar_estoque_variacao(cls, v):
+        try:
+            return int(v or 0)
+        except (TypeError, ValueError):
+            return 0
+
+    @field_validator("preco_adicional", mode="before")
+    def tratar_preco_adicional(cls, v):
+        try:
+            return float(v or 0.0)
+        except (TypeError, ValueError):
+            return 0.0
+
+
 class ProdutoSchema(BaseModel):
     nome: str
     preco: Union[float, str]
@@ -214,6 +235,7 @@ class ProdutoSchema(BaseModel):
     disponivel: Optional[Union[int, bool, str]] = 1
     categoria_id: Optional[Union[int, str]] = None
     imagem_url: Optional[str] = ""
+    variacoes: Optional[list[VariacaoProdutoSchema]] = []
 
     @field_validator("preco", mode="before")
     def tratar_preco(cls, v):
@@ -257,6 +279,56 @@ class ProdutoSchema(BaseModel):
             return 0
 
 
+def _extrair_variacao(item):
+    if isinstance(item, dict):
+        nome = item.get("nome_variacao") or item.get("nome") or item.get("name") or ""
+        return {
+            "nome_variacao": str(nome).strip(),
+            "sku": item.get("sku"),
+            "estoque": item.get("estoque") if item.get("estoque") is not None else item.get("quantidade", 0),
+            "preco_adicional": item.get("preco_adicional", 0.0)
+        }
+
+    nome = getattr(item, "nome_variacao", None) or getattr(item, "nome", None) or getattr(item, "name", None) or ""
+    return {
+        "nome_variacao": str(nome).strip(),
+        "sku": getattr(item, "sku", None),
+        "estoque": getattr(item, "estoque", getattr(item, "quantidade", 0)) or 0,
+        "preco_adicional": getattr(item, "preco_adicional", 0.0) or 0.0
+    }
+
+
+def _sincronizar_variacoes_produto(db: Session, produto, variacoes_payload):
+    if not VariacaoProduto:
+        return
+
+    for variacao_atual in list(getattr(produto, "variacoes", []) or []):
+        db.delete(variacao_atual)
+
+    db.flush()
+
+    for item in variacoes_payload or []:
+        dados_variacao = _extrair_variacao(item)
+        if not dados_variacao["nome_variacao"]:
+            continue
+
+        db.add(VariacaoProduto(
+            produto_id=produto.id,
+            nome_variacao=dados_variacao["nome_variacao"],
+            sku=dados_variacao["sku"],
+            estoque=int(dados_variacao["estoque"] or 0),
+            preco_adicional=float(dados_variacao["preco_adicional"] or 0.0),
+        ))
+
+    if variacoes_payload:
+        total_estoque_variacoes = sum(int(_extrair_variacao(item).get("estoque") or 0) for item in variacoes_payload)
+        produto.quantidade = total_estoque_variacoes
+        produto.estoque = total_estoque_variacoes
+
+    db.commit()
+    db.refresh(produto)
+
+
 class CategoriaSchema(BaseModel):
     nome: str
     codigo: Optional[str] = ""
@@ -284,6 +356,7 @@ class VendaSchema(BaseModel):
     produto_id: int
     quantidade: Optional[int] = 1
     forma_pagamento: Optional[str] = "PIX"
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # AUXILIARES
@@ -736,6 +809,8 @@ async def criar_produto(dados: ProdutoSchema, db: Session = Depends(get_db)):
     db.add(novo)
     db.commit()
     db.refresh(novo)
+
+    _sincronizar_variacoes_produto(db, novo, getattr(dados, "variacoes", []) or [])
     return {"status": "criado", "id": novo.id}
 
 @app.put("/api/produtos/{produto_id}")
@@ -760,6 +835,8 @@ async def atualizar_produto(produto_id: int, dados: ProdutoSchema, db: Session =
     produto.imagem_url = dados.imagem_url
 
     db.commit()
+    db.refresh(produto)
+    _sincronizar_variacoes_produto(db, produto, getattr(dados, "variacoes", []) or [])
     return {"status": "atualizado"}
 
 @app.delete("/api/produtos/{produto_id}")
