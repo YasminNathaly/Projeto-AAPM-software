@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Painel Administrativo Executivo | AAPM SENAI Brás</title>
+  <title>Painel Administrativo Executivo | Joalheria</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,11 +39,11 @@
     </div>
   </div>
 
-  <button type="button" class="assistant-fab" onclick="toggleAssistant()" aria-label="Abrir assistente" title="Assistente AAPM">
+  <button type="button" class="assistant-fab" onclick="toggleAssistant()" aria-label="Abrir assistente" title="Assistente Joalheria">
     <span class="assistant-antenna"></span><span class="assistant-face"><i></i><i></i></span>
   </button>
-  <div class="assistant-panel" id="assistantPanel" aria-label="Assistente AAPM">
-    <div class="assistant-panel-head"><div><span class="dashboard-kicker">Assistente AAPM</span><strong>Como posso ajudar?</strong></div><button type="button" onclick="toggleAssistant()" aria-label="Fechar">&times;</button></div>
+  <div class="assistant-panel" id="assistantPanel" aria-label="Assistente Joalheria">
+    <div class="assistant-panel-head"><div><span class="dashboard-kicker">Assistente Joalheria</span><strong>Como posso ajudar?</strong></div><button type="button" onclick="toggleAssistant()" aria-label="Fechar">&times;</button></div>
     <div class="assistant-messages" id="assistantMessages"><div class="assistant-message bot">Olá! Posso levar você direto a qualquer módulo ou explicar um fluxo.</div></div>
     <div class="assistant-suggestions"><button type="button" onclick="usarSugestaoAssistente('Como cadastrar um produto?')">Cadastrar produto</button><button type="button" onclick="usarSugestaoAssistente('Quero registrar uma venda')">Registrar venda</button><button type="button" onclick="usarSugestaoAssistente('Onde vejo o estoque?')">Ver estoque</button></div>
     <form class="assistant-form" onsubmit="enviarMensagemAssistente(event)"><input id="assistantInput" autocomplete="off" placeholder="Digite uma dúvida..."><button type="submit" aria-label="Enviar">&rarr;</button></form>
@@ -52,19 +52,18 @@
 <!-- SIDEBAR DE NAVEGAÇÃO (ícones) -->
 <aside class="sidebar">
   <a href="#" class="brand-logo">
-    <svg class="logo-senai-svg" viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg">
+    <svg class="logo-joalheria-svg" viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="senaiRedGradAdmin" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#f3132b"/>
-          <stop offset="100%" stop-color="#b8081b"/>
+        <linearGradient id="joalheriaGoldGradAdmin" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#f6d88a"/>
+          <stop offset="45%" stop-color="#d4a64f"/>
+          <stop offset="100%" stop-color="#8a6323"/>
         </linearGradient>
       </defs>
-      <rect width="320" height="100" rx="10" fill="url(#senaiRedGradAdmin)"/>
-      <line x1="0" y1="20" x2="22" y2="20" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><line x1="0" y1="35" x2="22" y2="35" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><line x1="0" y1="50" x2="22" y2="50" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><line x1="0" y1="65" x2="22" y2="65" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><line x1="0" y1="80" x2="22" y2="80" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
-      <line x1="298" y1="20" x2="320" y2="20" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><line x1="298" y1="35" x2="320" y2="35" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><line x1="298" y1="50" x2="320" y2="50" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><line x1="298" y1="65" x2="320" y2="65" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><line x1="298" y1="80" x2="320" y2="80" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
-      <rect x="26" y="16" width="268" height="68" rx="4" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.18"/>
-      <text x="160" y="70" font-family="'Arial Black', 'Impact', sans-serif" font-size="52" font-weight="900" font-style="italic" letter-spacing="1" fill="#FFFFFF" text-anchor="middle">SENAI</text>
-      <rect x="34" y="76" width="252" height="3" rx="1.5" fill="#ff9d1f" opacity="0.9"/>
+      <rect width="320" height="100" rx="10" fill="#120f0c"/>
+      <rect x="12" y="12" width="296" height="76" rx="8" fill="none" stroke="url(#joalheriaGoldGradAdmin)" stroke-width="2"/>
+      <text x="160" y="60" font-family="'Georgia', 'Times New Roman', serif" font-size="34" font-weight="700" letter-spacing="2" fill="#f5d67f" text-anchor="middle">JOALHERIA</text>
+      <text x="160" y="77" font-family="'Arial', sans-serif" font-size="10" font-weight="600" letter-spacing="4" fill="#d9c595" text-anchor="middle">ATELIÊ</text>
     </svg>
   </a>
 
@@ -150,7 +149,7 @@
     <header class="top-header">
       <div class="page-header-info">
         <h2 id="page-title">Gestão de <span>Visão geral</span></h2>
-        <p id="page-subtitle">Resumo da operação e dos indicadores da AAPM.</p>
+        <p id="page-subtitle">Resumo da operação e dos indicadores da Joalheria.</p>
       </div>
 
       <div class="search-bar">
@@ -180,9 +179,9 @@
         <div>
           <span class="dashboard-kicker">Painel de controle</span>
           <h1>Visão geral <span>da operação.</span></h1>
-          <p>Um resumo vivo do estoque, das vendas e dos cadastros da AAPM.</p>
+          <p>Um resumo vivo do estoque, das vendas e dos cadastros da Joalheria.</p>
         </div>
-        <div class="dashboard-hero-mark">AAPM<br><small>SENAI BRÁS</small></div>
+        <div class="dashboard-hero-mark">JOALHERIA<br><small>ALTA JOIAS</small></div>
       </div>
 
       <div class="dashboard-metrics" id="dashboardMetrics"></div>
@@ -292,7 +291,7 @@
         <form onsubmit="addProduto(event)" class="form-grid">
           <div class="form-group">
             <label>Nome do Produto</label>
-            <input type="text" id="prodNome" class="form-control" placeholder="Ex: Camiseta SENAI M" required>
+            <input type="text" id="prodNome" class="form-control" placeholder="Ex: Anel Ouro 18k" required>
           </div>
           <div class="form-group">
             <label>Categoria</label>
@@ -376,7 +375,7 @@
           </div>
           <div class="form-group">
             <label>E-mail</label>
-            <input type="email" id="assocEmail" class="form-control" placeholder="aapm@sp.senai.br" required>
+            <input type="email" id="assocEmail" class="form-control" placeholder="contato@joalheria.com.br" required>
           </div>
           <div class="form-group">
             <label>Telefone</label>
@@ -460,7 +459,7 @@
           </div>
           <div class="form-group">
             <label>E-mail</label>
-            <input type="email" id="usrEmail" class="form-control" placeholder="joao@senai.br" required>
+            <input type="email" id="usrEmail" class="form-control" placeholder="joao@joalheria.com.br" required>
           </div>
           <div class="form-group">
             <label>Perfil de Acesso</label>
@@ -571,7 +570,7 @@
       <div class="report-hero reveal">
         <div>
           <span class="dashboard-kicker">Relatório</span>
-          <h1>Como a AAPM <span>está vendendo.</span></h1>
+          <h1>Como a Joalheria <span>está vendendo.</span></h1>
           <p>Faturamento, produtos mais vendidos e formas de pagamento — filtre pelo período que quiser.</p>
         </div>
         <div class="report-filter-chips" id="relatorioFiltroChips">

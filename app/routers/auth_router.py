@@ -1,5 +1,5 @@
 """
-Router de Autenticação da AAPM
+Router de Autenticação da Joalheria
 Responsável por login, logout e gerenciamento de sessões
 """
 

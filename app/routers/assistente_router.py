@@ -1,5 +1,5 @@
 """
-Router do Assistente com IA da AAPM
+Router do Assistente com IA da Joalheria
 Recebe a mensagem do usuário (vinda do widget de chat do admin.html/script.js)
 e repassa para a API do Gemini (Google), mantendo a chave da API somente no
 backend — nunca exposta no front-end.
@@ -193,8 +193,7 @@ FERRAMENTAS = [
 ]
 
 
-SYSTEM_INSTRUCTION = """Você é o assistente virtual do Painel Administrativo da AAPM (Associação
-de Pais e Mestres) do SENAI Brás. Seu papel é ajudar administradores e operadores a
+SYSTEM_INSTRUCTION = """Você é o assistente virtual do Painel Administrativo da Joalheria. Seu papel é ajudar administradores e operadores a
 usar o sistema: Categorias, Fornecedores, Produtos, Associados, Armários, Usuários,
 Vendas e Relatório.
 

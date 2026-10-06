@@ -31,10 +31,10 @@ RESEND_COOLDOWN_SECONDS = 60
 # Config do e-mail (Gmail SMTP). Defina essas 3 variáveis de ambiente no seu .env:
 #   SMTP_EMAIL=seuemail@gmail.com
 #   SMTP_APP_PASSWORD=xxxxxxxxxxxxxxxx   <- App Password do Gmail, não a senha normal
-#   SMTP_FROM_NAME=AAPM SENAI Brás
+#   SMTP_FROM_NAME=Joalheria
 SMTP_EMAIL = os.getenv("SMTP_EMAIL")
 SMTP_APP_PASSWORD = os.getenv("SMTP_APP_PASSWORD")
-SMTP_FROM_NAME = os.getenv("SMTP_FROM_NAME", "AAPM SENAI Brás")
+SMTP_FROM_NAME = os.getenv("SMTP_FROM_NAME", "Joalheria")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -270,7 +270,7 @@ def enviar_email_codigo(destinatario: str, codigo: str, nome: Optional[str] = No
 
     texto_simples = (
         f"{saudacao}\n\n"
-        f"Recebemos uma solicitação para redefinir sua senha na AAPM.\n"
+        f"Recebemos uma solicitação para redefinir sua senha na Joalheria.\n"
         f"Seu código de verificação é: {codigo}\n\n"
         f"Este código expira em {CODE_EXPIRATION_MINUTES} minutos.\n"
         f"Se você não solicitou isso, ignore este e-mail."
@@ -339,7 +339,7 @@ def enviar_email_codigo(destinatario: str, codigo: str, nome: Optional[str] = No
 
               <h1 style="color:#ffffff; font-size:23px; margin:16px 0 6px 0; font-weight:700;">{saudacao}</h1>
               <p style="color:rgba(255,255,255,0.64); font-size:14px; line-height:1.65; margin:0 0 26px 0;">
-                Recebemos uma solicitação para redefinir a senha da sua conta no Painel Administrativo AAPM SENAI Brás.
+                Recebemos uma solicitação para redefinir a senha da sua conta no Painel Administrativo da Joalheria.
                 Use o código abaixo para continuar:
               </p>
 
@@ -374,7 +374,7 @@ def enviar_email_codigo(destinatario: str, codigo: str, nome: Optional[str] = No
           <tr>
             <td style="padding:18px 32px; border-top:1px solid rgba(255,255,255,0.09);">
               <p style="color:rgba(255,255,255,0.38); font-size:11px; margin:0; text-align:center;">
-                Painel Administrativo AAPM — SENAI Brás · e-mail automático, não responda.
+                Painel Administrativo Joalheria · e-mail automático, não responda.
               </p>
             </td>
           </tr>
@@ -388,7 +388,7 @@ def enviar_email_codigo(destinatario: str, codigo: str, nome: Optional[str] = No
 """
 
     msg = MIMEMultipart("alternative")
-    msg["Subject"] = "Código de redefinição de senha - AAPM SENAI Brás"
+    msg["Subject"] = "Código de redefinição de senha - Joalheria"
     msg["From"] = f"{SMTP_FROM_NAME} <{SMTP_EMAIL}>"
     msg["To"] = destinatario
 

@@ -503,7 +503,7 @@
     };
 
     // ===== RELATÓRIO DE NOTIFICAÇÕES LIDAS (persistido no localStorage) =====
-    const CHAVE_RELATORIO_NOTIF = 'aapm_relatorio_notificacoes';
+    const CHAVE_RELATORIO_NOTIF = 'joalheria_relatorio_notificacoes';
 
     function idNotificacao(n) {
       return `${n.tipo}-${n.ordem}`;
@@ -895,11 +895,11 @@
 
     // TÍTULOS E RÓTULOS POR MÓDULO
     const titulos = {
-      'dashboard': ['Visão geral', 'Resumo da operação e dos indicadores da AAPM.', ''],
+      'dashboard': ['Visão geral', 'Resumo da operação e dos indicadores da Joalheria.', ''],
       'categoria': ['Categorias', 'Organização e classificação de produtos.', 'Nova Categoria'],
       'fornecedor': ['Fornecedores', 'Cadastro e histórico de fornecedores.', 'Novo Fornecedor'],
       'produto': ['Produtos', 'Catálogo e controle de itens.', 'Novo Produto'],
-      'associado': ['Associados', 'Consulta e cadastro dos associados da AAPM.', 'Novo Associado'],
+      'associado': ['Associados', 'Consulta e cadastro dos associados da Joalheria.', 'Novo Associado'],
       'armario': ['Armários', 'Controle de disponibilidade e ocupação dos armários.', 'Novo Armário'],
       'usuario': ['Usuários', 'Controle de acessos e permissões.', 'Novo Usuário'],
       'venda': ['Vendas', 'Registro de pedidos e transações.', 'Nova Venda'],
@@ -987,7 +987,7 @@
       if (pergunta.includes('produto')) return 'Para cadastrar um produto, abra Produtos no menu ou use o atalho. Preencha os dados, adicione a foto se quiser e salve.';
       if (pergunta.includes('venda')) return 'Abra Vendas para registrar uma venda. O resumo calcula automaticamente subtotal, desconto de associado e total.';
       if (pergunta.includes('estoque')) return 'A Visão geral mostra os itens com até 5 unidades. Para editar quantidades, abra Produtos.';
-      if (pergunta.includes('associado')) return 'Em Associados você pode cadastrar, editar e consultar os associados da AAPM.';
+      if (pergunta.includes('associado')) return 'Em Associados você pode cadastrar, editar e consultar os associados da Joalheria.';
       if (pergunta.includes('relatório') || pergunta.includes('relatorio')) return 'O Relatório mostra faturamento, produtos mais vendidos e formas de pagamento, com filtro por período.';
       return 'Posso ajudar com Produtos, Vendas, Associados, Estoque ou Relatório. Tente uma dessas palavras.';
     }
@@ -1144,7 +1144,7 @@
       const html = document.documentElement;
       const isLight = html.getAttribute('data-theme') === 'light';
       const newTheme = isLight ? 'dark' : 'light';
-      const logo = document.querySelector('.logo-senai-svg');
+      const logo = document.querySelector('.logo-joalheria-svg');
 
       let originX = 66;
       let originY = 60;
@@ -2155,12 +2155,12 @@
         <div class="comp-header">
           <div class="comp-logo-badge">
             <svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
-              <rect width="300" height="100" fill="#FF0000"/>
-              <text x="150" y="73" font-family="'Arial Black', 'Impact', sans-serif" font-size="62" font-weight="900" font-style="italic" fill="#FFFFFF" text-anchor="middle">SENAI</text>
+              <rect width="300" height="100" fill="#C9A24B"/>
+              <text x="150" y="73" font-family="'Georgia', 'Times New Roman', serif" font-size="54" font-weight="700" fill="#111111" text-anchor="middle">JOALHERIA</text>
             </svg>
           </div>
-          <h4>SENAI — Serviço AAPM<br>Unidade São Paulo — Senai Brás</h4>
-          <p>AAPM — Associação de Pais e mestres</p>
+          <h4>Joalheria Premium<br>São Paulo — Brasil</h4>
+          <p>Loja de joias e acessórios</p>
         </div>
 
         <div class="comp-title">COMPROVANTE DE VENDA</div>
@@ -2209,7 +2209,7 @@
 
         <div class="comp-footer">
           Transação Autorizada com Sucesso<br>
-          Agradecemos a preferência! <strong>SENAI — Formando Profissionais.</strong>
+          Agradecemos a preferência! <strong>Joalheria — Joias finas.</strong>
         </div>
       `;
     }
