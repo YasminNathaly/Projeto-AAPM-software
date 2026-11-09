@@ -8,13 +8,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- MEXI AQUI: CSS do Cropper.js para o recorte de foto do produto -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet" integrity="sha384-AMJcAgMUmNt1Zo4ranquGLeT5m7yOrVbtNsNk0oZohvxqKk6RRzXHqlEaS9gFXR7" crossorigin="anonymous">
 
-
   <link rel="stylesheet" href="/static/css/style.css">
-
-<script src="/static/js/script.js" defer></script>
+  <script src="/static/js/script.js" defer></script>
 </head>
 <body class="auth-loading">
 
@@ -25,7 +22,6 @@
     <p>Validando sessão...</p>
   </div>
 
-  <!-- MEXI AQUI: container onde os toasts de sucesso/erro de cada CRUD são inseridos -->
   <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
 
   <div class="command-palette-overlay" id="commandPaletteOverlay" onclick="fecharCommandPalette(event)">
@@ -49,7 +45,7 @@
     <form class="assistant-form" onsubmit="enviarMensagemAssistente(event)"><input id="assistantInput" autocomplete="off" placeholder="Digite uma dúvida..."><button type="submit" aria-label="Enviar">&rarr;</button></form>
   </div>
 
-<!-- SIDEBAR DE NAVEGAÇÃO (ícones) -->
+<!-- SIDEBAR DE NAVEGAÇÃO -->
 <aside class="sidebar">
   <a href="#" class="brand-logo">
     <svg class="logo-senai-svg" viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg">
@@ -125,7 +121,6 @@
       <span class="menu-tooltip">Venda</span>
     </a>
 
-    <!-- MEXI AQUI: novo item de menu — Relatório de notificações lidas -->
     <a class="menu-item" onclick="navigate('relatorio', this)">
       <div class="menu-item-content">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/><path d="M9 17h6M9 13h6M9 9h1"/></svg>
@@ -342,9 +337,6 @@
       </div>
 
       <div class="card reveal">
-        <!-- MEXI AQUI: toolbar dos produtos — filtro por categoria, selecionar
-             todos e excluir selecionados. A busca por nome usa a barra de
-             busca geral do topo (já filtra por nome/categoria/tamanho). -->
         <div class="produtos-toolbar">
           <div class="card-title" style="margin: 0;">Produtos Cadastrados</div>
           <div class="produtos-toolbar-controls">
@@ -493,7 +485,7 @@
       </div>
     </section>
 
-    <!-- 7. VENDA -->
+    <!-- 7. VENDA (COM DESCONTO MANUAL INCLUSO) -->
     <section id="venda" class="view-content">
       <div class="card reveal">
         <div class="card-title">Registrar Nova Venda</div>
@@ -529,6 +521,20 @@
             </select>
           </div>
 
+          <!-- NOVO: CAMPOS DE DESCONTO MANUAL -->
+          <div class="form-group">
+            <label>Tipo de Desconto Manual</label>
+            <select id="tipo_desconto" class="form-control" onchange="atualizarResumoVenda()">
+              <option value="valor">Dinheiro (R$)</option>
+              <option value="porcentagem">Porcentagem (%)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Valor do Desconto Manual</label>
+            <input type="number" id="desconto_manual" class="form-control" step="0.01" min="0" value="0.00" placeholder="0.00" oninput="atualizarResumoVenda()">
+          </div>
+
           <div class="form-group full">
             <label>Forma(s) de Pagamento <span style="text-transform:none;font-weight:500;">(divida entre PIX, cartão e dinheiro se precisar)</span></label>
             <div class="pagamento-split-list" id="pagamentoSplitList"></div>
@@ -544,6 +550,7 @@
             <div class="venda-resumo-box">
               <span>Subtotal: <strong id="vendaResumoSubtotal">R$ 0,00</strong></span>
               <span class="venda-resumo-desconto" id="vendaResumoDescontoWrap">Desconto associado (10%): <strong id="vendaResumoDesconto">- R$ 0,00</strong></span>
+              <span class="venda-resumo-desconto" id="vendaResumoDescontoManualWrap" style="display:none;">Desconto manual: <strong id="vendaResumoDescontoManual">- R$ 0,00</strong></span>
               <span class="venda-resumo-total">Total: <strong id="vendaResumoTotal">R$ 0,00</strong></span>
             </div>
           </div>
@@ -641,7 +648,6 @@
         <div class="notif-panel" id="notifPanel">
           <div class="notif-panel-header">
             <span>Notificações</span>
-            <!-- MEXI AQUI: botão "marcar todas" ao lado de "Fechar" -->
             <div style="display:flex; gap:10px; align-items:center;">
               <span class="notif-close" style="color:var(--accent);" onclick="marcarTodasNotificacoesComoLidas(event)">Marcar todas</span>
               <span class="notif-close" onclick="toggleNotifications(event, true)">Fechar</span>
@@ -720,7 +726,7 @@
     </div>
   </div>
 
-  <!-- MEXI AQUI: MODAL DE RECORTE DE IMAGEM DO PRODUTO (Cropper.js) -->
+  <!-- MODAL DE RECORTE DE IMAGEM DO PRODUTO (Cropper.js) -->
   <div class="detail-overlay" id="cropModalOverlay">
     <div class="detail-modal" style="max-width: 520px;" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Ajustar foto do produto">
       <button class="detail-close" onclick="cancelarCrop()" title="Cancelar" aria-label="Cancelar">&times;</button>
@@ -746,14 +752,12 @@
     </div>
   </div>
 
-  <!-- MEXI AQUI: MODAL DE COMPROVANTE DE VENDA IMPRIMÍVEL -->
+  <!-- MODAL DE COMPROVANTE DE VENDA IMPRIMÍVEL -->
   <div class="detail-overlay" id="comprovanteModalOverlay" onclick="fecharComprovanteModal(event)">
     <div class="comprovante-modal" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Comprovante de venda">
       <button class="detail-close" onclick="fecharComprovanteModal()" title="Fechar" aria-label="Fechar">&times;</button>
 
-      <div class="comprovante-paper" id="comprovanteConteudo">
-        <!-- preenchido dinamicamente por montarComprovanteHTML() -->
-      </div>
+      <div class="comprovante-paper" id="comprovanteConteudo"></div>
 
       <div class="comp-actions">
         <button type="button" class="btn btn-outline" onclick="fecharComprovanteModal()">Fechar</button>
@@ -765,7 +769,7 @@
     </div>
   </div>
 
-  <!-- MEXI AQUI: MODAL DE CONFIRMAÇÃO GENÉRICO (substitui window.confirm nativo) -->
+  <!-- MODAL DE CONFIRMAÇÃO GENÉRICO -->
   <div class="detail-overlay" id="confirmModalOverlay">
     <div class="detail-modal" style="max-width: 400px;" onclick="event.stopPropagation()" role="alertdialog" aria-modal="true" aria-labelledby="confirmModalTitulo">
       <div class="detail-modal-body">
@@ -779,8 +783,7 @@
     </div>
   </div>
 
-  <!-- MEXI AQUI: script do Cropper.js, precisa estar carregado antes do script principal -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha384-jzwsV9ieM/KUDMeo+d8dc+jm0GEl7ywPNwg10alB5BodVuC/Kx9RpEnyrl2Om9zH" crossorigin="anonymous"></script>
-
-  <script src="script.js" defer></script></body>
+  <script src="/static/js/script.js" defer></script>
+</body>
 </html>
