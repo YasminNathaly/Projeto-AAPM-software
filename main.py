@@ -214,6 +214,7 @@ class ProdutoSchema(BaseModel):
     disponivel: Optional[Union[int, bool, str]] = 1
     categoria_id: Optional[Union[int, str]] = None
     imagem_url: Optional[str] = ""
+    variacoes: Optional[list[dict]] = None
 
     @field_validator("preco", mode="before")
     def tratar_preco(cls, v):
@@ -255,6 +256,14 @@ class ProdutoSchema(BaseModel):
             return int(v or 0)
         except (TypeError, ValueError):
             return 0
+
+    @field_validator("variacoes", mode="before")
+    def tratar_variacoes(cls, v):
+        if v is None:
+            return []
+        if isinstance(v, list):
+            return v
+        return []
 
 
 class CategoriaSchema(BaseModel):
@@ -329,6 +338,62 @@ def obter_nome_produto_venda(venda_obj, db: Session):
 
 def obter_perfil_usuario(usuario_obj):
     return getattr(usuario_obj, "perfil", getattr(usuario_obj, "cargo", getattr(usuario_obj, "funcao", getattr(usuario_obj, "tipo", "Operador"))))
+
+
+def normalizar_variacao_dict(item):
+    if not isinstance(item, dict):
+        return None
+
+    nome_variacao = (item.get("nome_variacao") or item.get("nome") or item.get("name") or "").strip()
+    if not nome_variacao:
+        return None
+
+    estoque = item.get("estoque")
+    if estoque is None:
+        estoque = item.get("quantidade")
+    if estoque is None:
+        estoque = 0
+
+    preco_adicional = item.get("preco_adicional")
+    if preco_adicional is None:
+        preco_adicional = 0.0
+
+    return {
+        "nome_variacao": nome_variacao,
+        "sku": item.get("sku") or None,
+        "estoque": int(estoque or 0),
+        "preco_adicional": float(preco_adicional or 0.0),
+    }
+
+
+def salvar_variacoes_do_produto(db: Session, produto: Produto, variacoes_payload):
+    if VariacaoProduto is None:
+        return
+    if variacoes_payload is None:
+        return
+
+    variacoes = [
+        normalizar_variacao_dict(v)
+        for v in variacoes_payload
+        if isinstance(v, dict)
+    ]
+    variacoes = [v for v in variacoes if v is not None]
+
+    for variacao_existente in list(getattr(produto, "variacoes", []) or []):
+        db.delete(variacao_existente)
+    db.flush()
+
+    for variacao in variacoes:
+        db.add(VariacaoProduto(
+            produto_id=produto.id,
+            nome_variacao=variacao["nome_variacao"],
+            sku=variacao["sku"],
+            estoque=variacao["estoque"],
+            preco_adicional=variacao["preco_adicional"],
+        ))
+
+    db.flush()
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # ROTAS PÚBLICAS E HTML
@@ -734,6 +799,9 @@ async def criar_produto(dados: ProdutoSchema, db: Session = Depends(get_db)):
         imagem_url=dados.imagem_url
     )
     db.add(novo)
+    db.flush()
+
+    salvar_variacoes_do_produto(db, novo, getattr(dados, "variacoes", None))
     db.commit()
     db.refresh(novo)
     return {"status": "criado", "id": novo.id}
@@ -758,6 +826,9 @@ async def atualizar_produto(produto_id: int, dados: ProdutoSchema, db: Session =
     produto.disponivel = bool(dados.disponivel)
     produto.categoria_id = dados.categoria_id
     produto.imagem_url = dados.imagem_url
+
+    if getattr(dados, "variacoes", None) is not None:
+        salvar_variacoes_do_produto(db, produto, dados.variacoes)
 
     db.commit()
     return {"status": "atualizado"}
@@ -790,3 +861,14 @@ async def limpar_vendas_temp(db: Session = Depends(get_db)):
             db.rollback()
             return {"status": "erro", "mensagem": str(e)}
     return {"status": "erro", "mensagem": "Modelo Venda não encontrado."}
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(
+        "main:app",
+        host=os.getenv("HOST", "0.0.0.0"),
+        port=int(os.getenv("PORT", "8000")),
+        reload=bool(os.getenv("DEBUG", "1") == "1")
+    )

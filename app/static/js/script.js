@@ -717,8 +717,7 @@ function handleProdutoImagem(e) {
   const file = e.target.files && e.target.files[0];
   if (!file) return;
 
-  if (typeof Cropper === 'undefined') {
-    mostrarToast('Editor de imagem indisponível no momento.', 'warning', 'A foto será enviada sem recorte.');
+  if (file.name.toLowerCase().endsWith('.svg') || file.type === 'image/svg+xml' || typeof Cropper === 'undefined') {
     cropArquivoOriginal = file;
     const preview = document.getElementById('prodImgPreview');
     preview.src = URL.createObjectURL(file);
@@ -729,6 +728,8 @@ function handleProdutoImagem(e) {
     if (fileNameLabel) fileNameLabel.innerText = file.name;
     return;
   }
+
+  // (o restante do código original da função continua normalmente aqui embaixo)
 
   cropArquivoOriginal = file;
   const imgSrc = document.getElementById('cropImageSource');
