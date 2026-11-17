@@ -91,6 +91,8 @@
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
+      max-width: 100vw;
+      overscroll-behavior-x: none;
       position: relative;
       transition: background-color 0.4s var(--ease), color 0.4s var(--ease);
     }
@@ -2100,6 +2102,7 @@
     })();
 
     (function enableHeroDragParallax() {
+      if ('ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth <= 900) return;
       const hero = document.querySelector('.hero-container');
       const wrapper = document.querySelector('.hero-bg-wrapper');
       if (!hero || !wrapper) return;
@@ -3279,6 +3282,7 @@
 
       let mouseX = 0, mouseY = 0, parX = 0, parY = 0;
       window.addEventListener('mousemove', (e) => {
+        if ('ontouchstart' in window || window.innerWidth <= 900) return;
         mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
         mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
       });

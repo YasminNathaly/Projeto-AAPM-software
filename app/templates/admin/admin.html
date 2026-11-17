@@ -806,5 +806,60 @@
   </div>
 
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha384-jzwsV9ieM/KUDMeo+d8dc+jm0GEl7ywPNwg10alB5BodVuC/Kx9RpEnyrl2Om9zH" crossorigin="anonymous"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.getElementById('tableSearch');
+  const quickBtn = document.getElementById('quickAction');
+
+  function abaAtualEhVisaoGeral() {
+    const secDash = document.getElementById('sec-dashboard') || document.querySelector('[data-section="dashboard"].active');
+    const outraVisivel = Array.from(document.querySelectorAll('.admin-section, section[id^="sec-"]'))
+      .find(el => el.id !== 'sec-dashboard' && el.offsetParent !== null);
+    return !outraVisivel;
+  }
+
+  function abrirAbaProdutos() {
+    const navProd = document.querySelector('[data-target="produtos"], [data-section="produtos"], [onclick*="produtos"]');
+    if (navProd) navProd.click();
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      const termo = searchInput.value.trim().toLowerCase();
+      if (termo && abaAtualEhVisaoGeral()) {
+        abrirAbaProdutos();
+      }
+      setTimeout(() => {
+        if (typeof filtrarTabelaAtiva === 'function') filtrarTabelaAtiva();
+        document.querySelectorAll('table tbody tr').forEach(tr => {
+          if (tr.offsetParent === null) return;
+          const texto = tr.innerText.toLowerCase();
+          tr.style.display = (!termo || texto.includes(termo)) ? '' : 'none';
+        });
+      }, 60);
+    });
+  }
+
+  if (quickBtn) {
+    quickBtn.addEventListener('click', (e) => {
+      if (abaAtualEhVisaoGeral()) {
+        e.preventDefault();
+        abrirAbaProdutos();
+      }
+      setTimeout(() => {
+        if (typeof focusForm === 'function') focusForm();
+        const formVisivel = Array.from(document.querySelectorAll('form'))
+          .find(f => f.offsetParent !== null && !f.closest('.search-bar'));
+        if (formVisivel) {
+          formVisivel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const primeiroCampo = formVisivel.querySelector('input:not([type="hidden"]), select, textarea');
+          if (primeiroCampo) primeiroCampo.focus();
+        }
+      }, 100);
+    }, true);
+  }
+});
+</script>
 </body>
 </html>
