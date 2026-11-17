@@ -16,6 +16,7 @@ class AssociadoBase(BaseModel):
     email: str
     telefone: Optional[str] = None
     endereco: Optional[str] = None
+    status: Optional[str] = "Ativo"
 
 
 class AssociadoCreate(AssociadoBase):
@@ -27,6 +28,7 @@ class AssociadoUpdate(BaseModel):
     email: Optional[str] = None
     telefone: Optional[str] = None
     endereco: Optional[str] = None
+    status: Optional[str] = None
 
 
 class AssociadoResponse(AssociadoBase):

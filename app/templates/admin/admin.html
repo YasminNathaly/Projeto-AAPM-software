@@ -3,15 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Painel Administrativo Executivo da AAPM SENAI Brás para gestão de produtos, associados, armários, fornecedores e vendas." />
   <title>Painel Administrativo Executivo | AAPM SENAI Brás</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet" integrity="sha384-AMJcAgMUmNt1Zo4ranquGLeT5m7yOrVbtNsNk0oZohvxqKk6RRzXHqlEaS9gFXR7" crossorigin="anonymous">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel=\'stylesheet\'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"></noscript>
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" integrity="sha384-AMJcAgMUmNt1Zo4ranquGLeT5m7yOrVbtNsNk0oZohvxqKk6RRzXHqlEaS9gFXR7" crossorigin="anonymous" onload="this.onload=null;this.rel=\'stylesheet\'">
 
-  <link rel="stylesheet" href="/static/css/style.css">
-  <script src="/static/js/script.js" defer></script>
+  <link rel="stylesheet" href="/static/css/style.css?v=2">
+  <script src="/static/js/script.js?v=2" defer></script>
 </head>
 <body class="auth-loading">
 
@@ -228,7 +230,7 @@
       </div>
 
       <div class="card reveal">
-        <div class="card-title">Categorias Cadastradas</div>
+        <div class="card-title" style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem;"><span>Categorias Cadastradas</span><select id="ordem_categoria" class="form-control" onchange="alterarOrdenacao('categoria', this.value)" style="width:auto; min-width:155px; padding:0.42rem 0.75rem; font-size:0.78rem; margin-left:auto;" title="Ordenar listagem"><option value="padrao">Ordem: Padrão</option><option value="recentes">Mais recentes</option><option value="antigos">Mais antigos</option></select></div>
         <div class="table-responsive">
           <table>
             <thead>
@@ -269,7 +271,7 @@
       </div>
 
       <div class="card reveal">
-        <div class="card-title">Lista de Fornecedores</div>
+        <div class="card-title" style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem;"><span>Lista de Fornecedores</span><select id="ordem_fornecedor" class="form-control" onchange="alterarOrdenacao('fornecedor', this.value)" style="width:auto; min-width:155px; padding:0.42rem 0.75rem; font-size:0.78rem; margin-left:auto;" title="Ordenar listagem"><option value="padrao">Ordem: Padrão</option><option value="recentes">Mais recentes</option><option value="antigos">Mais antigos</option></select></div>
         <div class="table-responsive">
           <table>
             <thead><tr><th>Razão Social</th><th>CNPJ / CPF</th><th>E-mail</th><th>Telefone</th><th>Ações</th></tr></thead>
@@ -352,6 +354,7 @@
             </button>
           </div>
         </div>
+        <div style="display:flex; justify-content:flex-end; margin-bottom:0.85rem;"><select id="ordem_produto" class="form-control" onchange="alterarOrdenacao('produto', this.value)" style="width:auto; min-width:155px; padding:0.42rem 0.75rem; font-size:0.78rem; margin-left:auto;" title="Ordenar listagem"><option value="padrao">Ordem: Padrão</option><option value="recentes">Mais recentes</option><option value="antigos">Mais antigos</option></select></div>
         <div class="produtos-grid" id="produtosGrid"></div>
         <div class="paginacao-container" id="pagProdutos"></div>
       </div>
@@ -378,6 +381,13 @@
             <label>Endereço</label>
             <input type="text" id="assocEndereco" class="form-control" placeholder="Rua / Avenida, nº">
           </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="assocStatus" class="form-control" required>
+              <option value="Ativo">Ativo</option>
+              <option value="Inativo">Inativo</option>
+            </select>
+          </div>
           <input type="hidden" id="assocId">
           <div class="form-group full">
             <button type="submit" class="btn btn-primary" id="assocSubmitBtn" style="width: fit-content;">+ Cadastrar Associado</button>
@@ -390,6 +400,7 @@
           <span>Associados do Sistema <small id="assocFiltroContador" style="font-weight:500; color:var(--text-muted); margin-left:0.4rem;"></small></span>
           <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem;">
             <input type="search" id="assocFiltroBusca" class="form-control" placeholder="Filtrar por nome, e-mail, telefone ou endereço..." style="width:260px; padding:0.45rem 0.75rem; font-size:0.8rem;" oninput="filtrarAssociadosLocal()">
+            <select id="ordem_associado" class="form-control" onchange="alterarOrdenacao('associado', this.value)" style="width:auto; min-width:155px; padding:0.42rem 0.75rem; font-size:0.78rem; margin-left:auto;" title="Ordenar listagem"><option value="padrao">Ordem: Padrão</option><option value="recentes">Mais recentes</option><option value="antigos">Mais antigos</option></select>
             <div class="report-filter-chips" id="assocFiltroStatusChips" style="margin:0;">
               <button type="button" class="filter-chip active" data-status="todos" onclick="selecionarStatusAssociado('todos', this)">Todos</button>
               <button type="button" class="filter-chip" data-status="Ativo" onclick="selecionarStatusAssociado('Ativo', this)">Ativos</button>
@@ -440,7 +451,7 @@
   </div>
 
   <div class="card reveal">
-    <div class="card-title">Armários Cadastrados</div>
+    <div class="card-title" style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem;"><span>Armários Cadastrados</span><select id="ordem_armario" class="form-control" onchange="alterarOrdenacao('armario', this.value)" style="width:auto; min-width:155px; padding:0.42rem 0.75rem; font-size:0.78rem; margin-left:auto;" title="Ordenar listagem"><option value="padrao">Ordem: Padrão</option><option value="recentes">Mais recentes</option><option value="antigos">Mais antigos</option></select></div>
     <div class="table-responsive">
       <table>
         <thead><tr><th>Número</th><th>Localização</th><th>Status</th><th>Nome Completo</th><th>Ações</th></tr></thead>
@@ -484,7 +495,7 @@
       </div>
 
       <div class="card reveal">
-        <div class="card-title">Usuários do Sistema</div>
+        <div class="card-title" style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem;"><span>Usuários do Sistema</span><select id="ordem_usuario" class="form-control" onchange="alterarOrdenacao('usuario', this.value)" style="width:auto; min-width:155px; padding:0.42rem 0.75rem; font-size:0.78rem; margin-left:auto;" title="Ordenar listagem"><option value="padrao">Ordem: Padrão</option><option value="recentes">Mais recentes</option><option value="antigos">Mais antigos</option></select></div>
         <div class="table-responsive">
           <table>
             <thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Ações</th></tr></thead>
@@ -572,7 +583,7 @@
       </div>
 
       <div class="card reveal">
-        <div class="card-title">Histórico de Vendas</div>
+        <div class="card-title" style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem;"><span>Histórico de Vendas</span><select id="ordem_venda" class="form-control" onchange="alterarOrdenacao('venda', this.value)" style="width:auto; min-width:155px; padding:0.42rem 0.75rem; font-size:0.78rem; margin-left:auto;" title="Ordenar listagem"><option value="padrao">Ordem: Padrão</option><option value="recentes">Mais recentes</option><option value="antigos">Mais antigos</option></select></div>
         <div class="table-responsive">
           <table>
             <thead><tr><th>Data/Hora</th><th>Cliente</th><th>Item</th><th>Qtd</th><th>Associado</th><th>Total</th><th>Pagamento</th><th>Ações</th></tr></thead>
@@ -621,6 +632,7 @@
             Limpar histórico
           </button>
         </div>
+        <div style="display:flex; justify-content:flex-end; margin-bottom:0.75rem;"><select id="ordem_relatorio" class="form-control" onchange="alterarOrdenacao('relatorio', this.value)" style="width:auto; min-width:155px; padding:0.42rem 0.75rem; font-size:0.78rem; margin-left:auto;" title="Ordenar listagem"><option value="padrao">Ordem: Padrão</option><option value="recentes">Mais recentes</option><option value="antigos">Mais antigos</option></select></div>
         <div class="table-responsive">
           <table>
             <thead><tr><th>Tipo</th><th>Evento</th><th>Detalhe</th><th>Lido em</th><th>Ações</th></tr></thead>
@@ -793,6 +805,6 @@
     </div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha384-jzwsV9ieM/KUDMeo+d8dc+jm0GEl7ywPNwg10alB5BodVuC/Kx9RpEnyrl2Om9zH" crossorigin="anonymous"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha384-jzwsV9ieM/KUDMeo+d8dc+jm0GEl7ywPNwg10alB5BodVuC/Kx9RpEnyrl2Om9zH" crossorigin="anonymous"></script>
 </body>
 </html>

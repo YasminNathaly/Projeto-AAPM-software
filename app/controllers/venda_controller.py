@@ -221,3 +221,71 @@ def registrar_venda(db: Session, dados):
         "cliente": cliente,
         "comprador": cliente,
     }
+
+
+def atualizar_venda(db: Session, venda_id: int, dados):
+    venda = db.query(Venda).filter(Venda.id == venda_id).first()
+    if not venda:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Venda não encontrada.",
+        )
+
+    payload = dados.model_dump(exclude_unset=True) if hasattr(dados, "model_dump") else dict(dados)
+    cliente = payload.get("cliente") or payload.get("comprador")
+    if cliente is not None:
+        venda.cliente = str(cliente).strip() or "Cliente Não Informado"
+        if hasattr(venda, "comprador"):
+            venda.comprador = venda.cliente
+
+    if "forma_pagamento" in payload and payload["forma_pagamento"]:
+        venda.forma_pagamento = payload["forma_pagamento"]
+    if "status" in payload and payload["status"]:
+        venda.status = payload["status"]
+    if "quantidade" in payload and payload["quantidade"] is not None:
+        venda.quantidade = int(payload["quantidade"])
+    if "preco_total" in payload and payload["preco_total"] is not None:
+        venda.preco_total = float(payload["preco_total"])
+        if hasattr(venda, "valor_total"):
+            venda.valor_total = float(payload["preco_total"])
+    if "valor_total" in payload and payload["valor_total"] is not None:
+        if hasattr(venda, "valor_total"):
+            venda.valor_total = float(payload["valor_total"])
+        venda.preco_total = float(payload["valor_total"])
+
+    db.commit()
+    db.refresh(venda)
+    return {
+        "id": venda.id,
+        "cliente": venda.cliente,
+        "comprador": getattr(venda, "comprador", venda.cliente),
+        "produto_id": getattr(venda, "produto_id", None),
+        "quantidade": getattr(venda, "quantidade", 1),
+        "preco_total": getattr(venda, "preco_total", 0.0),
+        "valor_total": getattr(venda, "valor_total", getattr(venda, "preco_total", 0.0)),
+        "forma_pagamento": getattr(venda, "forma_pagamento", "PIX"),
+        "status": getattr(venda, "status", "Concluída"),
+        "data_venda": _formatar_data_venda(getattr(venda, "data_venda", None)),
+        "itens": [],
+    }
+
+
+def deletar_venda(db: Session, venda_id: int):
+    venda = db.query(Venda).filter(Venda.id == venda_id).first()
+    if not venda:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Venda não encontrada.",
+        )
+
+    itens_vinculados = db.query(ItemVenda).filter(ItemVenda.venda_id == venda_id).all()
+    for item in itens_vinculados:
+        if getattr(item, "variacao_id", None):
+            variacao = db.query(VariacaoProduto).filter(VariacaoProduto.id == item.variacao_id).first()
+            if variacao:
+                variacao.estoque = (variacao.estoque or 0) + (item.quantidade or 0)
+        db.delete(item)
+
+    db.delete(venda)
+    db.commit()
+    return None

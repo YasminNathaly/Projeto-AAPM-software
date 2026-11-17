@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 
 from pydantic import BaseModel, field_validator
 from sqlalchemy import inspect, text
@@ -90,6 +91,8 @@ app = FastAPI(
     title="Sistema AAPM - Gestão de Estoque e Vendas",
     version="1.1.0"
 )
+
+app.add_middleware(GZipMiddleware, minimum_size=500)
 
 app.add_middleware(
     CORSMiddleware,
@@ -171,6 +174,14 @@ garantir_colunas_usuarios()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "app", "templates"))
 caminho_static_correto = os.path.join(BASE_DIR, "app", "static")
+
+
+@app.middleware("http")
+async def cache_static_middleware(request: Request, call_next):
+    response = await call_next(request)
+    if request.url.path.startswith("/static/"):
+        response.headers["Cache-Control"] = "public, max-age=86400"
+    return response
 
 app.mount("/static", StaticFiles(directory=caminho_static_correto), name="static")
 

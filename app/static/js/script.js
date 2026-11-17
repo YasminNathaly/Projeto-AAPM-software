@@ -1,4 +1,4 @@
-// admin.html
+﻿// admin.html
 const token = localStorage.getItem('access_token');
 let sessaoInicialValida = Boolean(token);
 if (!token) {
@@ -34,7 +34,7 @@ async function validarSessaoInicial() {
 }
 
 // ================================================================== //
-// ===== CAMADA DE SEGURANÇA (auth + XSS) =====                        //
+// ===== CAMADA DE SEGURANÃ‡A (auth + XSS) =====                        //
 // ================================================================== //
 
 async function apiFetch(url, options = {}) {
@@ -98,7 +98,7 @@ function confirmarAcao(mensagem, tituloBotaoConfirmar = 'Confirmar') {
   });
 }
 
-// ===== FOCUS TRAP GENÉRICO PARA MODAIS =====
+// ===== FOCUS TRAP GENÃ‰RICO PARA MODAIS =====
 let elementoComFocoAnterior = null;
 
 function getFocaveis(container) {
@@ -307,12 +307,36 @@ function mudarPagina(chave, novaPagina) {
   if (renderizadoresPorModulo[chave]) renderizadoresPorModulo[chave]();
 }
 
+let ordenacaoAtual = {
+  categoria: 'padrao',
+  fornecedor: 'padrao',
+  produto: 'padrao',
+  associado: 'padrao',
+  armario: 'padrao',
+  usuario: 'padrao',
+  venda: 'padrao',
+  relatorio: 'padrao'
+};
+
+function alterarOrdenacao(chave, modo) {
+  ordenacaoAtual[chave] = modo || 'padrao';
+  paginaAtual[chave] = 1;
+  if (renderizadoresPorModulo[chave]) renderizadoresPorModulo[chave]();
+}
+
 function paginarLista(lista, chave) {
-  const totalPaginas = Math.max(1, Math.ceil(lista.length / ITENS_POR_PAGINA));
+  const modo = ordenacaoAtual[chave] || 'padrao';
+  let ordenada = [...lista];
+  if (modo === 'recentes') {
+    ordenada.sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
+  } else if (modo === 'antigos') {
+    ordenada.sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));
+  }
+  const totalPaginas = Math.max(1, Math.ceil(ordenada.length / ITENS_POR_PAGINA));
   if (paginaAtual[chave] > totalPaginas) paginaAtual[chave] = totalPaginas;
   if (paginaAtual[chave] < 1) paginaAtual[chave] = 1;
   const inicio = (paginaAtual[chave] - 1) * ITENS_POR_PAGINA;
-  return lista.slice(inicio, inicio + ITENS_POR_PAGINA);
+  return ordenada.slice(inicio, inicio + ITENS_POR_PAGINA);
 }
 
 function normalizarProduto(p) {
@@ -345,7 +369,7 @@ function normalizarVenda(v) {
 async function carregarDadosDoBanco() {
   const loadingText = document.querySelector('#adminLoading p');
   if (loadingText) loadingText.innerText = 'Carregando dados...';
-  document.body.classList.add('data-loading');
+  // carregamento silencioso para nao bloquear LCP
   try {
     const [resCat, resForn, resProd, resAssoc, resArm, resUsr, resVnd] = await Promise.all([
       apiFetch(API_URLS.categoria),
@@ -848,7 +872,7 @@ function toggleArmarioNomeField() {
   const wrap = document.getElementById('armNomeWrap');
   const input = document.getElementById('armNomeCompleto');
   if (!statusEl || !wrap || !input) return;
-  if (statusEl.value === 'Ocupado') {
+  if (true) {
     wrap.style.display = '';
   } else {
     wrap.style.display = 'none';
@@ -1250,6 +1274,7 @@ function editarItem(tipo, id) {
     document.getElementById('assocEmail').value = item.email || '';
     document.getElementById('assocTelefone').value = item.telefone || '';
     document.getElementById('assocEndereco').value = item.endereco || '';
+    if (document.getElementById('assocStatus')) document.getElementById('assocStatus').value = item.status || 'Ativo';
     document.getElementById('assocSubmitBtn').innerText = 'Salvar Alterações';
   } else if (tipo === 'arm') {
     const item = armarios.find(a => String(a.id) === String(id));
@@ -1646,7 +1671,7 @@ function computeStats(viewId) {
     case 'fornecedor':
       return [
         { value: fornecedores.length, label: 'Fornecedores Cadastrados' },
-        { value: new Set(fornecedores.map(f => f.documento)).size, label: 'Documentos Únicos' },
+        { value: new Set(fornecedores.map(f => f.documento)).size, label: 'Documentos Ãšnicos' },
         { value: fornecedores.filter(f => f.telefone).length, label: 'Com Telefone' }
       ];
     case 'produto':
@@ -1958,7 +1983,7 @@ function removerPagamentoRow(rowId) {
   const wrap = document.getElementById('pagamentoSplitList');
   const linhas = wrap ? wrap.querySelectorAll('.pagamento-row') : [];
   if (linhas.length <= 1) {
-    mostrarToast('É preciso manter ao menos uma forma de pagamento.', 'warning');
+    mostrarToast('Ã‰ preciso manter ao menos uma forma de pagamento.', 'warning');
     return;
   }
   document.getElementById(rowId)?.remove();
@@ -2035,7 +2060,7 @@ function atualizarRestantePagamento() {
     return;
   }
   if (Math.abs(restante) < 0.01) {
-    label.textContent = 'Valores batem com o total ✓';
+    label.textContent = 'Valores batem com o total âœ“';
     label.className = 'pagamento-split-restante ok';
   } else if (restante > 0) {
     label.textContent = `Faltam ${formatarMoeda(restante)}`;
@@ -2180,9 +2205,9 @@ function montarComprovanteHTML(item) {
       </thead>
       <tbody>
         <tr>
-          <td class="comp-item-desc">${escapeHTML(nomeItem)}</td>
-          <td>${escapeHTML(qtd)}</td>
-          <td>${subtotalItem.toFixed(2)}</td>
+          <td class="comp-item-desc" style="color:#111827 !important;font-weight:700;background:#f3f4f6;">${escapeHTML(nomeItem)}</td>
+          <td style="color:#111827 !important;font-weight:700;background:#f3f4f6;">${escapeHTML(qtd)}</td>
+          <td style="color:#111827 !important;font-weight:700;background:#f3f4f6;">${formatarMoeda(subtotalItem)}</td>
         </tr>
       </tbody>
     </table>
@@ -2206,7 +2231,7 @@ function montarComprovanteHTML(item) {
     </div>
 
     <div class="comp-footer">
-      Transação Autorizada com Sucesso<br>
+      <span style="display:inline-block;padding:3px 10px;border-radius:999px;background:#dcfce7;color:#15803d;font-weight:700;font-size:0.72rem;margin-bottom:6px;">✓ Transação Autorizada com Sucesso</span><br>
       Agradecemos a preferência! <strong>SENAI — Formando Profissionais.</strong>
     </div>
   `;
@@ -2379,7 +2404,7 @@ function addAssociado(e) {
     email: document.getElementById('assocEmail').value,
     telefone: document.getElementById('assocTelefone').value || '',
     endereco: document.getElementById('assocEndereco').value || '',
-    status: 'Ativo'
+    status: (document.getElementById('assocStatus')?.value || 'Ativo')
   };
   const endpoint = id ? `${API_URLS.associado}/${id}` : API_URLS.associado;
   salvarNoBanco(endpoint, payload, e, id ? 'PUT' : 'POST', 'associado');
@@ -2408,7 +2433,7 @@ function addUsuario(e) {
     email: document.getElementById('usrEmail').value,
     perfil: document.getElementById('usrPerfil').value,
     senha: document.getElementById('usrSenha').value || null,
-    status: 'Ativo'
+    status: (document.getElementById('assocStatus')?.value || 'Ativo')
   };
   const endpoint = id ? `${API_URLS.usuario}/${id}` : API_URLS.usuario;
   salvarNoBanco(endpoint, payload, e, id ? 'PUT' : 'POST', 'usuario');
@@ -2503,7 +2528,7 @@ function logout() {
 }
 
 // ===== CENA ESPACIAL DE FUNDO =====
-(function initSpaceScene() {
+setTimeout(function initSpaceScene() {
   const canvas = document.getElementById('bg-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
@@ -2693,7 +2718,7 @@ function logout() {
     if (cenaAtiva && animationFrameId === null) animate();
   });
   animate();
-})();
+}, 1200);
 
 function observeReveals() {
   const els = document.querySelectorAll('.reveal:not(.in-view)');
@@ -2712,14 +2737,17 @@ function observeReveals() {
   els.forEach(el => observer.observe(el));
 }
 
-window.onload = async function () {
-  if (!await validarSessaoInicial()) return;
+document.addEventListener('DOMContentLoaded', async function () {
+  if (!sessaoInicialValida) return;
   document.body.classList.remove('auth-loading');
   document.body.classList.add('admin-entering');
   limparPagamentoRows('PIX', null);
-  carregarDadosDoBanco();
   atualizarDataHora();
   toggleArmarioNomeField();
-  setInterval(atualizarDataHora, 30000);
   observeReveals();
-};
+
+  const ok = await validarSessaoInicial();
+  if (!ok) return;
+  carregarDadosDoBanco();
+  setInterval(atualizarDataHora, 30000);
+});

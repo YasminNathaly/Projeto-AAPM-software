@@ -1,45 +1,11 @@
-# ==========================================
-# BASE DA API E SERVIDOR WEB
-# ==========================================
-fastapi
-uvicorn[standard]
-jinja2
-python-multipart
-
-# ==========================================
-# BANCO DE DADOS E MIGRAÇÕES
-# ==========================================
-sqlalchemy
-pymysql
-python-dotenv
-alembic
-
-# ==========================================
-# SEGURANÇA E AUTENTICAÇÃO
-# ==========================================
-python-jose[cryptography]
-
-# ==========================================
-# MANIPULAÇÃO DE IMAGENS (UPLOADS)
-# ==========================================
-Pillow
-
-# ==========================================
-# GRÁFICOS, RELATÓRIOS E TABELAS (EXCEL/PDF)
-# ==========================================
-matplotlib
-pandas
-openpyxl
-reportlab
-
-# ==========================================
-# VALIDAÇÃO E ESTRUTURAÇÃO DE DADOS
-# ==========================================
-pydantic
- 
-bcrypt
-
-# ==========================================
-# ASSISTENTE COM IA
-# ==========================================
-google-genai
+﻿bcrypt==3.2.2
+email-validator==2.4.0
+fastapi==0.163.1
+Jinja2==3.1.6
+passlib==1.7.4
+pydantic==2.14.3
+pydantic_core==2.50.4
+python-jose==3.5.0
+python-multipart==0.0.34
+SQLAlchemy==2.1.8
+uvicorn==0.54.0

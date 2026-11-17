@@ -9,6 +9,7 @@ class Associado(Base):
     nome = Column(String(100), nullable=False)
     email = Column(String(100), unique=True, nullable=False)
     telefone = Column(String(20), nullable=True)
+    status = Column(String, default="Ativo")
     endereco = Column(String(200), nullable=True)
 
     # Relacionamento para o FastAPI conseguir buscar as vendas do associado
