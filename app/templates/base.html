@@ -1465,11 +1465,19 @@
         <div style="margin-bottom:0.75rem;">
           <input type="text" id="pixCopiaColaInput" class="form-control" readonly style="font-size:0.72rem; text-align:center;">
         </div>
+        <div style="text-align:left; background:var(--bg-surface-hover); padding:0.75rem; border-radius:10px; margin-bottom:0.75rem;">
+          <label for="pixTxIdInput" style="display:block; font-size:0.76rem; font-weight:600; margin-bottom:0.35rem;">ID da Transação / Comprovante PIX *</label>
+          <input type="text" id="pixTxIdInput" class="form-control" placeholder="Ex.: E1823612020261117..." oninput="validarComprovantePix()" style="font-size:0.8rem; margin-bottom:0.5rem;">
+          <label style="display:flex; align-items:center; gap:6px; font-size:0.76rem; color:var(--text-muted); cursor:pointer;">
+            <input type="checkbox" id="pixDeclaracaoCheck" onchange="validarComprovantePix()">
+            Confirmo que efetuei a transferência PIX para a AAPM
+          </label>
+        </div>
         <div style="display:flex; gap:8px; margin-bottom:0.75rem;">
           <button type="button" class="btn btn-ghost" id="btnCopiarPix" style="flex:1; justify-content:center;" onclick="copiarCodigoPix()">
             Copiar código PIX
           </button>
-          <button type="button" class="btn btn-primary" id="btnSimularConfirmacaoPix" style="flex:1; justify-content:center;" onclick="confirmarPagamentoPixDemo()">
+          <button type="button" class="btn btn-primary" id="btnSimularConfirmacaoPix" style="flex:1; justify-content:center;" onclick="confirmarPagamentoPixDemo()" disabled>
             Confirmar Pagamento
           </button>
         </div>
@@ -2168,14 +2176,8 @@
     }
 
     function handleAdminAccess(event, link) {
-      event.preventDefault();
-      if (document.body.classList.contains('admin-transition')) return;
-
       document.body.classList.add('admin-transition');
       document.getElementById('pageLoader')?.classList.add('active');
-      setTimeout(() => {
-        window.location.href = link.href;
-      }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 100 : 850);
     }
 
     function toggleBaseAssistant() {
@@ -2833,23 +2835,34 @@
       }, 2500);
     }
 
+    function validarComprovantePix() {
+      const txId = (document.getElementById('pixTxIdInput')?.value || '').trim();
+      const checked = !!document.getElementById('pixDeclaracaoCheck')?.checked;
+      const btn = document.getElementById('btnSimularConfirmacaoPix');
+      if (btn) btn.disabled = !(txId.length >= 6 && checked);
+    }
+
     async function confirmarPagamentoPixDemo() {
       if (!pixVendaAtualId) return;
+      const txId = (document.getElementById('pixTxIdInput')?.value || '').trim();
+      const checked = !!document.getElementById('pixDeclaracaoCheck')?.checked;
+      if (txId.length < 6 || !checked) return;
       const btn = document.getElementById('btnSimularConfirmacaoPix');
       if (btn) {
         btn.disabled = true;
-        btn.textContent = 'Confirmando...';
+        btn.textContent = 'Validando comprovante...';
       }
       try {
         const resp = await fetch(`/api/checkout/pix/webhook/${pixVendaAtualId}`, { method: 'POST' });
         const data = await resp.json();
         if (resp.ok) {
+          data.txId = txId;
           finalizarTelaPixAprovado(data);
         }
       } finally {
         if (btn) {
-          btn.disabled = false;
           btn.textContent = 'Confirmar Pagamento';
+          validarComprovantePix();
         }
       }
     }
