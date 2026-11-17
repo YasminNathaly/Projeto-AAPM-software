@@ -33,6 +33,7 @@ from app.routers.venda_router import router as venda_router
 from app.routers.associado_router import router as associado_router
 from app.routers.armario_router import router as armario_router
 from app.routers.assistente_router import router as assistente_router
+from app.routers.checkout_pix_router import router as checkout_pix_router
 
 # 2. Importação garantida de todos os modelos do SQLAlchemy (antes de create_all)
 try:
@@ -187,6 +188,7 @@ app.include_router(venda_router)
 app.include_router(associado_router)
 app.include_router(armario_router)
 app.include_router(assistente_router)
+app.include_router(checkout_pix_router)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # EXCEÇÕES PERSONALIZADAS
@@ -366,7 +368,7 @@ def normalizar_variacao_dict(item):
     }
 
 
-def salvar_variacoes_do_produto(db: Session, produto: Produto, variacoes_payload):
+def salvar_variacoes_do_produto(db: Session, produto, variacoes_payload):
     if VariacaoProduto is None:
         return
     if variacoes_payload is None:

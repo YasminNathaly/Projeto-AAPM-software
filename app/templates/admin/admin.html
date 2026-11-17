@@ -35,11 +35,11 @@
     </div>
   </div>
 
-  <button type="button" class="assistant-fab" onclick="toggleAssistant()" aria-label="Abrir assistente" title="Assistente AAPM">
+  <button type="button" class="assistant-fab" onclick="toggleAssistant()" aria-label="Abrir assistente" title="Assistente SENAI">
     <span class="assistant-antenna"></span><span class="assistant-face"><i></i><i></i></span>
   </button>
-  <div class="assistant-panel" id="assistantPanel" aria-label="Assistente AAPM">
-    <div class="assistant-panel-head"><div><span class="dashboard-kicker">Assistente AAPM</span><strong>Como posso ajudar?</strong></div><button type="button" onclick="toggleAssistant()" aria-label="Fechar">&times;</button></div>
+  <div class="assistant-panel" id="assistantPanel" aria-label="Assistente SENAI">
+    <div class="assistant-panel-head"><div><span class="dashboard-kicker">Assistente SENAI</span><strong>Como posso ajudar?</strong></div><button type="button" onclick="toggleAssistant()" aria-label="Fechar">&times;</button></div>
     <div class="assistant-messages" id="assistantMessages"><div class="assistant-message bot">Olá! Posso levar você direto a qualquer módulo ou explicar um fluxo.</div></div>
     <div class="assistant-suggestions"><button type="button" onclick="usarSugestaoAssistente('Como cadastrar um produto?')">Cadastrar produto</button><button type="button" onclick="usarSugestaoAssistente('Quero registrar uma venda')">Registrar venda</button><button type="button" onclick="usarSugestaoAssistente('Onde vejo o estoque?')">Ver estoque</button></div>
     <form class="assistant-form" onsubmit="enviarMensagemAssistente(event)"><input id="assistantInput" autocomplete="off" placeholder="Digite uma dúvida..."><button type="submit" aria-label="Enviar">&rarr;</button></form>
@@ -145,7 +145,7 @@
     <header class="top-header">
       <div class="page-header-info">
         <h2 id="page-title">Gestão de <span>Visão geral</span></h2>
-        <p id="page-subtitle">Resumo da operação e dos indicadores da AAPM.</p>
+        <p id="page-subtitle">Resumo da operação e dos indicadores do SENAI Brás.</p>
       </div>
 
       <div class="search-bar">
@@ -175,7 +175,7 @@
         <div>
           <span class="dashboard-kicker">Painel de controle</span>
           <h1>Visão geral <span>da operação.</span></h1>
-          <p>Um resumo vivo do estoque, das vendas e dos cadastros da AAPM.</p>
+          <p>Um resumo vivo do estoque, das vendas e dos cadastros do SENAI Brás.</p>
         </div>
         <div class="dashboard-hero-mark">AAPM<br><small>SENAI BRÁS</small></div>
       </div>
@@ -368,7 +368,7 @@
           </div>
           <div class="form-group">
             <label>E-mail</label>
-            <input type="email" id="assocEmail" class="form-control" placeholder="aapm@sp.senai.br" required>
+            <input type="email" id="assocEmail" class="form-control" placeholder="contato@sp.senai.br" required>
           </div>
           <div class="form-group">
             <label>Telefone</label>
@@ -386,7 +386,17 @@
       </div>
 
       <div class="card reveal">
-        <div class="card-title">Associados do Sistema</div>
+        <div class="card-title" style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem;">
+          <span>Associados do Sistema <small id="assocFiltroContador" style="font-weight:500; color:var(--text-muted); margin-left:0.4rem;"></small></span>
+          <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem;">
+            <input type="search" id="assocFiltroBusca" class="form-control" placeholder="Filtrar por nome, e-mail, telefone ou endereço..." style="width:260px; padding:0.45rem 0.75rem; font-size:0.8rem;" oninput="filtrarAssociadosLocal()">
+            <div class="report-filter-chips" id="assocFiltroStatusChips" style="margin:0;">
+              <button type="button" class="filter-chip active" data-status="todos" onclick="selecionarStatusAssociado('todos', this)">Todos</button>
+              <button type="button" class="filter-chip" data-status="Ativo" onclick="selecionarStatusAssociado('Ativo', this)">Ativos</button>
+              <button type="button" class="filter-chip" data-status="Inativo" onclick="selecionarStatusAssociado('Inativo', this)">Inativos</button>
+            </div>
+          </div>
+        </div>
         <div class="table-responsive">
           <table>
             <thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Endereço</th><th>Status</th><th>Ações</th></tr></thead>
@@ -784,6 +794,5 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha384-jzwsV9ieM/KUDMeo+d8dc+jm0GEl7ywPNwg10alB5BodVuC/Kx9RpEnyrl2Om9zH" crossorigin="anonymous"></script>
-  <script src="/static/js/script.js" defer></script>
 </body>
 </html>

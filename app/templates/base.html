@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AAPM – SENAI Brás | Sistema de Gestão</title>
+  <meta name="description" content="Portal oficial da AAPM – Escola SENAI Francisco Matarazzo (Brás): loja online, gestão de armários, associados e atendimento." />
  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -604,8 +605,9 @@
     .hero-container {
       position: relative;
       width: 100%;
-      height: min(88vh, 760px);
-      min-height: 560px;
+      min-height: min(88vh, 760px);
+      height: auto;
+      padding-top: 2rem;
       overflow: hidden;
       display: flex;
       align-items: center;
@@ -630,13 +632,37 @@
     }
  
     .hero-bg.active { opacity: 1; transform: scale(1); }
+    .hero-bg {
+      filter: saturate(1.05) contrast(1.04);
+      transition: opacity 1.4s var(--ease), transform 8s ease-out, filter 0.45s var(--ease);
+    }
+    html[data-theme="light"] .hero-bg {
+      filter: brightness(1.04) saturate(1.1) contrast(1.04);
+    }
+
     .hero-overlay {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(180deg, rgba(80, 64, 64, 0.55) 0%, rgba(6, 6, 10, 0.72) 45%, rgba(6, 6, 10, 0.96) 100%),
-                  linear-gradient(90deg, rgba(6, 6, 10, 0.65) 0%, rgba(6, 6, 10, 0.15) 55%);
+      background: linear-gradient(180deg, rgba(18, 12, 16, 0.45) 0%, rgba(8, 8, 12, 0.65) 55%, rgba(8, 8, 12, 0.96) 100%),
+                  linear-gradient(90deg, rgba(8, 8, 12, 0.78) 0%, rgba(8, 8, 12, 0.30) 55%, rgba(8, 8, 12, 0.18) 100%);
+      transition: background 0.45s var(--ease);
       z-index: 2;
     }
- 
+
+    html[data-theme="light"] .hero-overlay {
+      background: linear-gradient(180deg, rgba(24, 18, 22, 0.25) 0%, rgba(20, 16, 20, 0.42) 65%, rgba(231, 225, 220, 0.98) 100%),
+                  linear-gradient(90deg, rgba(20, 14, 18, 0.68) 0%, rgba(20, 14, 18, 0.28) 52%, rgba(20, 14, 18, 0.10) 100%);
+    }
+    html[data-theme="light"] .hero-title,
+    html[data-theme="light"] .hero-stat-number {
+      color: #ffffff;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
+    }
+    html[data-theme="light"] .hero-description,
+    html[data-theme="light"] .hero-stat-label {
+      color: rgba(255, 255, 255, 0.92);
+      text-shadow: 0 1px 10px rgba(0, 0, 0, 0.6);
+    }
+
     .hero-inner {
       position: relative; z-index: 3;
       width: 100%;
@@ -1216,6 +1242,67 @@
       .hero-stats { grid-template-columns: repeat(2, auto); }
       .benefit-item, .tech-area-item { padding: 0.9rem; }
     }
+
+    /* ===== ACESSIBILIDADE (WCAG) ===== */
+    .skip-link {
+      position: fixed; top: -100px; left: 16px; z-index: 9999;
+      background: var(--primary); color: #ffffff;
+      padding: 0.75rem 1.25rem; border-radius: var(--radius-pill);
+      font-weight: 700; font-size: 0.85rem; text-decoration: none;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      transition: top 0.25s var(--ease);
+    }
+    .skip-link:focus { top: 16px; outline: 3px solid #ffffff; }
+
+    :focus-visible {
+      outline: 3px solid var(--primary) !important;
+      outline-offset: 3px !important;
+    }
+
+    html.a11y-high-contrast {
+      filter: contrast(1.28) !important;
+    }
+    html.a11y-high-contrast body {
+      background: #000000 !important;
+      color: #ffffff !important;
+    }
+    html.a11y-high-contrast[data-theme="light"] body {
+      background: #ffffff !important;
+      color: #000000 !important;
+    }
+
+    .a11y-widget {
+      position: fixed; bottom: 20px; left: 20px; z-index: 9990;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+    }
+    .a11y-toggle-btn {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: var(--primary); color: #ffffff;
+      border: 2px solid rgba(255,255,255,0.25);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: transform 0.25s var(--ease);
+    }
+    .a11y-toggle-btn:hover { transform: scale(1.08); }
+    .a11y-panel {
+      display: none; flex-direction: column; gap: 6px;
+      background: var(--bg-surface); backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color); border-radius: 16px;
+      padding: 12px; min-width: 210px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+    }
+    .a11y-panel.open { display: flex; }
+    .a11y-panel-title {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; opacity: 0.75; margin-bottom: 4px;
+    }
+    .a11y-opt-btn {
+      background: var(--bg-card); color: inherit;
+      border: 1px solid var(--border-color); border-radius: 10px;
+      padding: 8px 12px; font-size: 0.8rem; font-weight: 600;
+      cursor: pointer; text-align: left; display: flex; align-items: center; justify-content: space-between;
+    }
+    .a11y-opt-btn:hover { border-color: var(--primary); }
   </style>
 </head>
 <body>
@@ -1230,11 +1317,11 @@
     <div class="loader-track"><span></span></div>
   </div>
 
-  <button type="button" class="base-assistant-fab" onclick="toggleBaseAssistant()" aria-label="Abrir assistente AAPM" title="Assistente AAPM">
+  <button type="button" class="base-assistant-fab" onclick="toggleBaseAssistant()" aria-label="Abrir assistente SENAI" title="Assistente SENAI">
     <span class="base-assistant-antenna"></span><span class="base-assistant-face"><i></i><i></i></span>
   </button>
-  <div class="base-assistant-panel" id="baseAssistantPanel" aria-label="Assistente AAPM">
-    <div class="base-assistant-head"><div><span>ASSISTENTE AAPM</span><strong>Como posso ajudar?</strong></div><button type="button" onclick="toggleBaseAssistant()" aria-label="Fechar">&times;</button></div>
+  <div class="base-assistant-panel" id="baseAssistantPanel" aria-label="Assistente SENAI">
+    <div class="base-assistant-head"><div><span>ASSISTENTE SENAI</span><strong>Como posso ajudar?</strong></div><button type="button" onclick="toggleBaseAssistant()" aria-label="Fechar">&times;</button></div>
     <div class="base-assistant-messages" id="baseAssistantMessages"><div class="base-assistant-message bot">Posso explicar os produtos, associados e os formulários da AAPM.</div></div>
     <div class="base-assistant-suggestions"><button type="button" onclick="usarSugestaoBase('Quero ver os produtos')">Produtos</button><button type="button" onclick="usarSugestaoBase('Como funciona o cadastro de associado?')">Associados</button><button type="button" onclick="usarSugestaoBase('Onde fica o formulário?')">Formulário</button></div>
     <form class="base-assistant-form" onsubmit="enviarMensagemBase(event)"><input id="baseAssistantInput" autocomplete="off" placeholder="Digite uma dúvida..."><button type="submit" aria-label="Enviar">&rarr;</button></form>
@@ -1265,8 +1352,8 @@
         <rect x="34" y="76" width="252" height="3" rx="1.5" fill="#ff9d1f" opacity="0.9"/>
       </svg>
       <div class="aapm-wordmark">
-        <span class="aapm-wordmark-text">AAPM</span>
-        <span class="aapm-wordmark-sub">SENAI Brás</span>
+        <span class="aapm-wordmark-text">BRÁS</span>
+        <span class="aapm-wordmark-sub">Loja &amp; Gestão</span>
       </div>
     </a>
  
@@ -1333,6 +1420,9 @@
         <span>Total</span>
         <strong id="cartTotalValue">R$ 0,00</strong>
       </div>
+      <button type="button" class="btn btn-primary" id="btnCheckoutPix" style="width: 100%; margin-bottom: 8px; justify-content: center;" onclick="abrirCheckoutPixModal()">
+        Pagar com PIX Automático
+      </button>
       <button class="btn btn-whatsapp" style="width: 100%;" onclick="checkoutCartWhatsapp()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.762.459 3.48 1.333 5.005l-1.417 5.18 5.301-1.39a9.92 9.92 0 0 0 4.77 1.218h.004c5.505 0 9.988-4.478 9.989-9.985 0-2.667-1.037-5.176-2.923-7.062A9.925 9.925 0 0 0 12.012 2z"/></svg>
         Finalizar pelo WhatsApp
@@ -1340,6 +1430,82 @@
       <button class="btn btn-ghost" style="width: 100%; margin-top: 8px;" onclick="clearCart()">Esvaziar carrinho</button>
     </div>
   </aside>
+
+  <!-- MODAL DE PAGAMENTO PIX AUTOMÁTICO -->
+  <div class="modal-backdrop" id="pixCheckoutModal" onclick="if(event.target === this) fecharCheckoutPixModal()">
+    <div class="modal-box" style="max-width: 440px;">
+      <button type="button" class="modal-close" onclick="fecharCheckoutPixModal()" aria-label="Fechar">&times;</button>
+      <div class="modal-header" style="margin-bottom: 1rem;">
+        <span class="login-badge">Pagamento Instantâneo</span>
+        <h3 class="modal-title">Checkout PIX SENAI Brás</h3>
+      </div>
+
+      <div id="pixStepForm">
+        <div class="form-group" style="margin-bottom: 0.85rem;">
+          <label for="pixClienteNome">Nome do Comprador *</label>
+          <input type="text" id="pixClienteNome" class="form-control" placeholder="Digite seu nome completo">
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem; border-radius:10px; background:var(--bg-surface-hover); margin-bottom:1rem;">
+          <span style="color:var(--text-muted); font-size:0.85rem;">Total a pagar via PIX</span>
+          <strong id="pixModalValor" style="font-size:1.15rem; color:var(--primary);">R$ 0,00</strong>
+        </div>
+        <div id="pixErroMsg" style="display:none; color:var(--danger); font-size:0.8rem; margin-bottom:0.75rem;"></div>
+        <button type="button" class="btn btn-primary" id="btnGerarCobrancaPix" style="width:100%; justify-content:center;" onclick="gerarCobrancaPix()">
+          Gerar QR Code PIX
+        </button>
+      </div>
+
+      <div id="pixStepQr" style="display:none; text-align:center;">
+        <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:0.75rem;">
+          Escaneie o QR Code no app do seu banco ou copie o código PIX abaixo:
+        </p>
+        <div style="background:#fff; padding:12px; border-radius:12px; display:inline-block; margin-bottom:0.75rem;">
+          <img id="pixQrImg" src="" alt="QR Code PIX" style="width:190px; height:190px; display:block;">
+        </div>
+        <div style="margin-bottom:0.75rem;">
+          <input type="text" id="pixCopiaColaInput" class="form-control" readonly style="font-size:0.72rem; text-align:center;">
+        </div>
+        <div style="display:flex; gap:8px; margin-bottom:0.75rem;">
+          <button type="button" class="btn btn-ghost" id="btnCopiarPix" style="flex:1; justify-content:center;" onclick="copiarCodigoPix()">
+            Copiar código PIX
+          </button>
+          <button type="button" class="btn btn-primary" id="btnSimularConfirmacaoPix" style="flex:1; justify-content:center;" onclick="confirmarPagamentoPixDemo()">
+            Confirmar Pagamento
+          </button>
+        </div>
+        <div id="pixStatusPolling" style="font-size:0.78rem; color:var(--warning);">
+          Aguardando confirmação automática do banco...
+        </div>
+      </div>
+
+      <div id="pixStepSuccess" style="display:none; text-align:center; padding:1rem 0;">
+        <div style="width:52px; height:52px; border-radius:50%; background:rgba(31,191,130,0.18); color:var(--success); display:inline-flex; align-items:center; justify-content:center; font-size:1.6rem; margin-bottom:0.75rem;">✓</div>
+        <h4 style="font-size:1.1rem; margin-bottom:0.4rem;">Pagamento PIX Aprovado!</h4>
+        <p id="pixComprovanteTexto" style="font-size:0.83rem; color:var(--text-muted); line-height:1.5; margin-bottom:1rem;"></p>
+        <button type="button" class="btn btn-primary" style="width:100%; justify-content:center;" onclick="fecharCheckoutPixModal()">
+          Concluir
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONFIRMAÇÃO DO CARRINHO -->
+  <div class="modal-backdrop" id="clearCartModal" onclick="if(event.target === this) closeClearCartModal()">
+    <div class="modal-box" style="max-width: 380px; text-align: center;">
+      <button type="button" class="modal-close" onclick="closeClearCartModal()" aria-label="Fechar">&times;</button>
+      <div class="modal-header" style="text-align: center; margin-bottom: 0.8rem;">
+        <span class="login-badge">Carrinho SENAI Brás</span>
+        <h3 class="modal-title">Esvaziar o carrinho?</h3>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+        Todos os itens adicionados serão removidos. Deseja continuar?
+      </p>
+      <div style="display: flex; gap: 10px;">
+        <button type="button" class="btn btn-ghost" style="flex: 1;" onclick="closeClearCartModal()">Cancelar</button>
+        <button type="button" class="btn btn-primary" style="flex: 1;" onclick="confirmClearCart()">Esvaziar</button>
+      </div>
+    </div>
+  </div>
  
   <main class="wrapper" id="mainContent" tabindex="-1">
  
@@ -1350,19 +1516,19 @@
 <!-- Imagem 1: Fachada do SENAI -->
 <div
   class="hero-bg active"
-  style="background-image: url('/static/assets/senaifachada.svg');">
+  style="background-image: url('/static/assets/fachada-senai.jpg'), url('/static/assets/SEnai.jpg');">
 </div>
 
 <!-- Imagem 2: Fachada do SENAI -->
 <div
   class="hero-bg"
-  style="background-image: url('/static/assets/senaifachada.svg');">
+  style="background-image: url('/static/assets/fachada-senai.jpg'), url('/static/assets/SEnai.jpg');">
 </div>
 
 <!-- Imagem 3: Fachada do SENAI -->
 <div
   class="hero-bg"
-  style="background-image: url('/static/assets/senaifachada.svg');">
+  style="background-image: url('/static/assets/fachada-senai.jpg'), url('/static/assets/SEnai.jpg');">
 </div>
         <div class="hero-overlay"></div>
  
@@ -1384,7 +1550,7 @@
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                 </span>
               </a>
-              <span class="link-learn-more" onclick="navigate('produtos', document.querySelectorAll('.nav-item')[1])">Conheça a Loja</span>
+              <a href="#produtos" class="link-learn-more" onclick="event.preventDefault(); navigate('produtos', document.querySelectorAll('.nav-item')[1])">Conheça a Loja</a>
             </div>
  
             <div class="hero-indicators">
@@ -1397,7 +1563,7 @@
                 <div class="tab-progress"></div>
               </button>
               <button class="hero-tab" onclick="setHeroSlide(2)">
-                <span class="tab-text">Comunidade &amp; AAPM</span>
+                <span class="tab-text">Comunidade &amp; Escola</span>
                 <div class="tab-progress"></div>
               </button>
             </div>
@@ -1507,7 +1673,7 @@
           <div class="card">
             <div class="info-header" style="margin-bottom: 1.1rem;">
               <span class="info-badge">Suporte e Comunidade</span>
-              <h3>O Papel da AAPM</h3>
+              <h3>Suporte ao Estudante SENAI</h3>
             </div>
             <div class="benefits-grid" style="padding: 0;">
               <div class="benefit-item">
@@ -1534,7 +1700,7 @@
     <!-- 2. PRODUTOS -->
     <section id="produtos" class="view-content">
       <div class="page-title-box reveal">
-        <h2>Loja AAPM</h2>
+        <h2>Loja SENAI</h2>
         <p>Produtos oficiais, materiais didáticos e vestuário da Escola SENAI Brás.</p>
       </div>
  
@@ -2403,44 +2569,78 @@
       return products.find((p) => String(p.id) === String(id));
     }
 
+    function getMaxStockForProduct(produto) {
+      if (!produto) return 0;
+      if (Array.isArray(produto.variacoes) && produto.variacoes.length > 0) {
+        const totalVar = produto.variacoes.reduce((acc, v) => acc + Number(v.estoque || 0), 0);
+        if (totalVar > 0) return totalVar;
+      }
+      const qtd = Number(produto.quantidade);
+      return Number.isFinite(qtd) && qtd >= 0 ? qtd : 99;
+    }
+
     function addToCartFromButton(btnEl, productId) {
-      addToCart(productId, 1);
+      if (btnEl && btnEl.dataset.adding === '1') return;
+      const adicionado = addToCart(productId, 1);
       if (btnEl) {
-        btnEl.classList.add('added');
-        const original = btnEl.innerHTML;
-        btnEl.innerHTML = '✓ Adicionado';
+        btnEl.dataset.adding = '1';
+        btnEl.disabled = true;
+        const original = btnEl.dataset.originalLabel || btnEl.innerHTML;
+        btnEl.dataset.originalLabel = original;
+        if (adicionado) {
+          btnEl.classList.add('added');
+          btnEl.innerHTML = '✓ Adicionado';
+        } else {
+          btnEl.innerHTML = 'Limite atingido';
+        }
         setTimeout(() => {
           btnEl.classList.remove('added');
           btnEl.innerHTML = original;
-        }, 1100);
+          btnEl.disabled = false;
+          delete btnEl.dataset.adding;
+        }, 950);
       }
     }
 
     function addToCart(productId, qty) {
       const produto = findProductById(productId);
-      if (!produto) return;
+      if (!produto) return false;
+      const maxStock = getMaxStockForProduct(produto);
+      const step = 1; // Sempre adiciona 1 unidade por vez
 
       const existing = cart.find((item) => String(item.id) === String(productId));
+      const atual = existing ? existing.qty : 0;
+      if (maxStock <= 0 || atual + step > maxStock) {
+        return false;
+      }
+
       if (existing) {
-        existing.qty += qty;
+        existing.qty += step;
       } else {
         cart.push({
           id: produto.id,
           nome: produto.nome || 'Produto',
           preco: Number(produto.preco || 0),
           imagem_url: produto.imagem_url || '',
-          qty: qty
+          qty: step
         });
       }
       saveCart();
       renderCart();
       bumpCartBadge();
+      return true;
     }
 
     function updateCartQty(productId, delta) {
       const item = cart.find((i) => String(i.id) === String(productId));
       if (!item) return;
-      item.qty += delta;
+      const step = delta > 0 ? 1 : -1;
+      if (step > 0) {
+        const produto = findProductById(productId);
+        const maxStock = getMaxStockForProduct(produto);
+        if (item.qty + 1 > maxStock) return;
+      }
+      item.qty += step;
       if (item.qty <= 0) {
         cart = cart.filter((i) => String(i.id) !== String(productId));
       }
@@ -2455,10 +2655,19 @@
     }
 
     function clearCart() {
-      if (cart.length && !confirm('Esvaziar o carrinho?')) return;
+      if (!cart.length) return;
+      document.getElementById('clearCartModal')?.classList.add('active');
+    }
+
+    function closeClearCartModal() {
+      document.getElementById('clearCartModal')?.classList.remove('active');
+    }
+
+    function confirmClearCart() {
       cart = [];
       saveCart();
       renderCart();
+      closeClearCartModal();
     }
 
     function cartTotal() {
@@ -2490,7 +2699,7 @@
       totalEl.textContent = `R$ ${cartTotal().toFixed(2)}`;
 
       if (!cart.length) {
-        list.innerHTML = '<div class="cart-empty">Seu carrinho está vazio.<br>Adicione produtos na Loja AAPM.</div>';
+        list.innerHTML = '<div class="cart-empty">Seu carrinho está vazio.<br>Adicione produtos na Loja SENAI.</div>';
         return;
       }
 
@@ -2527,10 +2736,143 @@
       document.body.style.overflow = '';
     }
 
+    let pixVendaAtualId = null;
+    let pixPollingTimer = null;
+
+    function abrirCheckoutPixModal() {
+      if (!cart.length) return;
+      if (typeof closeCartDrawer === 'function') closeCartDrawer();
+      document.getElementById('pixStepForm').style.display = 'block';
+      document.getElementById('pixStepQr').style.display = 'none';
+      document.getElementById('pixStepSuccess').style.display = 'none';
+      document.getElementById('pixErroMsg').style.display = 'none';
+      document.getElementById('pixModalValor').textContent = `R$ ${cartTotal().toFixed(2)}`;
+      document.getElementById('pixCheckoutModal').classList.add('active');
+    }
+
+    function fecharCheckoutPixModal() {
+      if (pixPollingTimer) {
+        clearInterval(pixPollingTimer);
+        pixPollingTimer = null;
+      }
+      document.getElementById('pixCheckoutModal')?.classList.remove('active');
+    }
+
+    async function gerarCobrancaPix() {
+      const erroEl = document.getElementById('pixErroMsg');
+      const btn = document.getElementById('btnGerarCobrancaPix');
+      const cliente = (document.getElementById('pixClienteNome').value || '').trim();
+      if (!cliente) {
+        erroEl.textContent = 'Informe o nome do comprador para gerar o PIX.';
+        erroEl.style.display = 'block';
+        return;
+      }
+      erroEl.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Gerando PIX...';
+
+      try {
+        const resp = await fetch('/api/checkout/pix', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cliente,
+            itens: cart.map((i) => ({
+              produto_id: Number(i.id),
+              variacao_id: i.variacao_id ? Number(i.variacao_id) : null,
+              quantidade: Number(i.qty || 1),
+            })),
+          }),
+        });
+        const data = await resp.json();
+        if (!resp.ok) {
+          throw new Error(data.detail || 'Erro ao gerar cobrança PIX.');
+        }
+
+        pixVendaAtualId = data.venda_id;
+        document.getElementById('pixCopiaColaInput').value = data.pix_copia_cola;
+        document.getElementById('pixQrImg').src =
+          `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.pix_copia_cola)}`;
+
+        document.getElementById('pixStepForm').style.display = 'none';
+        document.getElementById('pixStepQr').style.display = 'block';
+
+        iniciarMonitoramentoPix(data.venda_id);
+      } catch (err) {
+        erroEl.textContent = err.message;
+        erroEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Gerar QR Code PIX';
+      }
+    }
+
+    function copiarCodigoPix() {
+      const input = document.getElementById('pixCopiaColaInput');
+      if (!input) return;
+      input.select();
+      navigator.clipboard?.writeText(input.value);
+      const btn = document.getElementById('btnCopiarPix');
+      if (btn) {
+        btn.textContent = '✓ Copiado!';
+        setTimeout(() => { btn.textContent = 'Copiar código PIX'; }, 1500);
+      }
+    }
+
+    function iniciarMonitoramentoPix(vendaId) {
+      if (pixPollingTimer) clearInterval(pixPollingTimer);
+      pixPollingTimer = setInterval(async () => {
+        try {
+          const resp = await fetch(`/api/checkout/pix/${vendaId}`);
+          if (!resp.ok) return;
+          const data = await resp.json();
+          if ((data.status || '').toLowerCase().includes('conclu')) {
+            finalizarTelaPixAprovado(data);
+          }
+        } catch (_) {}
+      }, 2500);
+    }
+
+    async function confirmarPagamentoPixDemo() {
+      if (!pixVendaAtualId) return;
+      const btn = document.getElementById('btnSimularConfirmacaoPix');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Confirmando...';
+      }
+      try {
+        const resp = await fetch(`/api/checkout/pix/webhook/${pixVendaAtualId}`, { method: 'POST' });
+        const data = await resp.json();
+        if (resp.ok) {
+          finalizarTelaPixAprovado(data);
+        }
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Confirmar Pagamento';
+        }
+      }
+    }
+
+    function finalizarTelaPixAprovado(data) {
+      if (pixPollingTimer) {
+        clearInterval(pixPollingTimer);
+        pixPollingTimer = null;
+      }
+      cart = [];
+      saveCart();
+      renderCart();
+      if (typeof loadProdutosPublicos === 'function') loadProdutosPublicos();
+      document.getElementById('pixStepQr').style.display = 'none';
+      document.getElementById('pixStepSuccess').style.display = 'block';
+      document.getElementById('pixComprovanteTexto').textContent =
+        `Pedido #${data.venda_id || pixVendaAtualId} confirmado com sucesso! O estoque já foi atualizado automaticamente.`;
+    }
+
     function checkoutCartWhatsapp() {
       if (!cart.length) { alert('Seu carrinho está vazio.'); return; }
 
-      const linhas = ['Olá! Gostaria de fazer o seguinte pedido na Loja AAPM:', ''];
+      const linhas = ['Olá! Gostaria de fazer o seguinte pedido na Loja SENAI Brás:', ''];
       cart.forEach((item) => {
         linhas.push(`• ${item.qty}x ${item.nome} — R$ ${(item.preco * item.qty).toFixed(2)}`);
       });
@@ -3055,6 +3397,97 @@
       refreshRevealObserver();
       inicializarNavegacaoPorArraste();
     };
+  </script>
+
+  <!-- WIDGET DE ACESSIBILIDADE -->
+  <div class="a11y-widget" role="region" aria-label="Menu de acessibilidade">
+    <div class="a11y-panel" id="a11yPanel" role="dialog" aria-label="Opções de acessibilidade">
+      <div class="a11y-panel-title">Acessibilidade</div>
+      <button type="button" class="a11y-opt-btn" onclick="changeA11yFont(1)"><span>Aumentar texto</span><strong>A+</strong></button>
+      <button type="button" class="a11y-opt-btn" onclick="changeA11yFont(-1)"><span>Diminuir texto</span><strong>A-</strong></button>
+      <button type="button" class="a11y-opt-btn" onclick="toggleA11yContrast()"><span>Alto contraste</span><strong>◐</strong></button>
+      <button type="button" class="a11y-opt-btn" onclick="resetA11y()"><span>Restaurar padrão</span><strong>↺</strong></button>
+    </div>
+    <button type="button" class="a11y-toggle-btn" id="a11yToggleBtn" onclick="toggleA11yPanel()" aria-expanded="false" aria-controls="a11yPanel" aria-label="Abrir opções de acessibilidade" title="Acessibilidade">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="5" r="2"/>
+        <path d="M5 9h14"/>
+        <path d="M12 9v6"/>
+        <path d="M9 21l3-6 3 6"/>
+      </svg>
+    </button>
+  </div>
+
+  <script>
+    (function initA11yFeatures() {
+      // 1. Garante tabindex e role="button" nos links que agem como botões sem href
+      document.querySelectorAll('a[onclick]:not([href])').forEach(el => {
+        el.setAttribute('href', '#');
+        el.setAttribute('role', 'button');
+        el.addEventListener('click', e => e.preventDefault());
+      });
+
+      // 2. Adiciona aria-label nos botões de ícone do cabeçalho caso não tenham
+      const themeBtn = document.getElementById('themeToggleBtn');
+      if (themeBtn && !themeBtn.getAttribute('aria-label')) {
+        themeBtn.setAttribute('aria-label', 'Alternar tema claro e escuro');
+      }
+      document.querySelectorAll('button').forEach(btn => {
+        if (!btn.innerText.trim() && !btn.getAttribute('aria-label')) {
+          const title = btn.getAttribute('title') || 'Botão de ação';
+          btn.setAttribute('aria-label', title);
+        }
+      });
+
+      // 3. Fecha modais, carrinho ou menu de acessibilidade com a tecla ESC
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          const panel = document.getElementById('a11yPanel');
+          if (panel && panel.classList.contains('open')) {
+            panel.classList.remove('open');
+            document.getElementById('a11yToggleBtn')?.setAttribute('aria-expanded', 'false');
+          }
+          if (typeof closeCart === 'function') closeCart();
+          if (typeof fecharCheckoutPixModal === 'function') fecharCheckoutPixModal();
+          if (typeof closeClearCartModal === 'function') closeClearCartModal();
+          if (typeof closeViewModal === 'function') closeViewModal();
+        }
+      });
+
+      // 4. Restaura preferências salvas de tamanho de fonte e alto contraste
+      const savedScale = parseFloat(localStorage.getItem('a11y_font_scale') || '1');
+      if (savedScale !== 1) document.documentElement.style.fontSize = (savedScale * 100) + '%';
+      if (localStorage.getItem('a11y_contrast') === '1') {
+        document.documentElement.classList.add('a11y-high-contrast');
+      }
+    })();
+
+    function toggleA11yPanel() {
+      const panel = document.getElementById('a11yPanel');
+      const btn = document.getElementById('a11yToggleBtn');
+      if (!panel) return;
+      const isOpen = panel.classList.toggle('open');
+      if (btn) btn.setAttribute('aria-expanded', String(isOpen));
+    }
+
+    function changeA11yFont(delta) {
+      let scale = parseFloat(localStorage.getItem('a11y_font_scale') || '1');
+      scale = Math.max(0.85, Math.min(1.3, +(scale + delta * 0.08).toFixed(2)));
+      localStorage.setItem('a11y_font_scale', String(scale));
+      document.documentElement.style.fontSize = (scale * 100) + '%';
+    }
+
+    function toggleA11yContrast() {
+      const active = document.documentElement.classList.toggle('a11y-high-contrast');
+      localStorage.setItem('a11y_contrast', active ? '1' : '0');
+    }
+
+    function resetA11y() {
+      localStorage.removeItem('a11y_font_scale');
+      localStorage.removeItem('a11y_contrast');
+      document.documentElement.style.fontSize = '';
+      document.documentElement.classList.remove('a11y-high-contrast');
+    }
   </script>
 </body>
 </html>

@@ -270,7 +270,7 @@ def enviar_email_codigo(destinatario: str, codigo: str, nome: Optional[str] = No
 
     texto_simples = (
         f"{saudacao}\n\n"
-        f"Recebemos uma solicitação para redefinir sua senha na AAPM.\n"
+        f"Recebemos uma solicitação para redefinir sua senha no SENAI Br?s.\n"
         f"Seu código de verificação é: {codigo}\n\n"
         f"Este código expira em {CODE_EXPIRATION_MINUTES} minutos.\n"
         f"Se você não solicitou isso, ignore este e-mail."
@@ -320,7 +320,7 @@ def enviar_email_codigo(destinatario: str, codigo: str, nome: Optional[str] = No
           <tr>
             <td style="background: linear-gradient(135deg, #f3132b, #b8081b); padding:22px 32px;">
               <span style="font-family: Arial, sans-serif; font-weight:900; font-style:italic; font-size:22px; color:#ffffff; letter-spacing:1px;">SENAI</span>
-              <span style="font-family: Arial, sans-serif; font-size:16px; color:#ffffff; letter-spacing:2px; margin-left:10px; border-left:1px solid rgba(255,255,255,0.5); padding-left:10px;">AAPM</span>
+              <span style="font-family: Arial, sans-serif; font-size:16px; color:#ffffff; letter-spacing:2px; margin-left:10px; border-left:1px solid rgba(255,255,255,0.5); padding-left:10px;">BR?S</span>
             </td>
           </tr>
           <!-- Filete laranja, igual ao detalhe da logo do site -->

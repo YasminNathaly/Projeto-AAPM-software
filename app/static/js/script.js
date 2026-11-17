@@ -1504,10 +1504,43 @@ async function deletarProdutosSelecionados() {
   mostrarToast(`${selecionados.length} produto(s) removido(s) com sucesso!`, 'success');
 }
 
+let filtroStatusAssociadoAtual = 'todos';
+
+function selecionarStatusAssociado(status, btnEl) {
+  filtroStatusAssociadoAtual = status;
+  document.querySelectorAll('#assocFiltroStatusChips .filter-chip').forEach(b => b.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+  if (typeof paginacao !== 'undefined' && paginacao.associado) paginacao.associado = 1;
+  renderAssociados();
+}
+
+function filtrarAssociadosLocal() {
+  if (typeof paginacao !== 'undefined' && paginacao.associado) paginacao.associado = 1;
+  renderAssociados();
+}
+
 function renderAssociados() {
   const tbody = document.getElementById('tblAssociados');
   if (!tbody) return;
-  const lista = aplicarBusca('associado', associados);
+  let lista = aplicarBusca('associado', associados);
+
+  const termoLocal = (document.getElementById('assocFiltroBusca')?.value || '').trim().toLowerCase();
+  if (termoLocal) {
+    lista = lista.filter(item =>
+      [item.nome, item.email, item.telefone, item.endereco]
+        .some(campo => String(campo || '').toLowerCase().includes(termoLocal))
+    );
+  }
+
+  if (filtroStatusAssociadoAtual !== 'todos') {
+    lista = lista.filter(item => (item.status || 'Ativo') === filtroStatusAssociadoAtual);
+  }
+
+  const contadorEl = document.getElementById('assocFiltroContador');
+  if (contadorEl) {
+    contadorEl.textContent = `(${lista.length} de ${associados.length})`;
+  }
+
   const pagina = paginarLista(lista, 'associado');
   tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
     <tr style="--i:${i}">
@@ -1518,7 +1551,7 @@ function renderAssociados() {
       <td><span class="status-tag ${(item.status || 'Ativo') === 'Ativo' ? 'active' : 'inactive'}">${escapeHTML(item.status || 'Ativo')}</span></td>
       <td>${renderAcoes('assoc', item.id)}</td>
     </tr>
-  `).join('') : emptyRow(6, 'Nenhum associado cadastrado.');
+  `).join('') : emptyRow(6, 'Nenhum associado encontrado para o filtro aplicado.');
   renderPaginacaoControles('pagAssociados', 'associado', lista.length);
 }
 
