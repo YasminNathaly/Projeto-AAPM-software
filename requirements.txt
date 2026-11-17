@@ -1,4 +1,4 @@
-﻿fastapi
+fastapi
 uvicorn
 sqlalchemy
 pydantic
@@ -9,3 +9,4 @@ python-jose
 jinja2
 aiofiles
 email-validator
+python-dotenv
