@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AAPM – SENAI Brás | Sistema de Gestão</title>
-  <meta name="description" content="Portal oficial da AAPM – Escola SENAI Francisco Matarazzo (Brás): loja online, gestão de armários, associados e atendimento." />
+  <meta name="description" content="Portal oficial do Portal SENAI Br?s – Escola SENAI Francisco Matarazzo (Brás): loja online, gestão de armários, associados e atendimento." />
  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -143,7 +143,7 @@
     }
     .brand-logo:hover .logo-senai-svg { box-shadow: 0 6px 18px rgba(199, 7, 7, 0.55); transform: translateY(-1px); }
 
-    /* Assinatura AAPM: texto abaixo do logo do SENAI, na mesma paleta azul,
+    /* Assinaturo Portal SENAI Br?s: texto abaixo do logo do SENAI, na mesma paleta azul,
        sem "bolota" separada. Fica como uma legenda/selo textual. */
     .aapm-wordmark {
       display: flex;
@@ -1322,7 +1322,7 @@
   </button>
   <div class="base-assistant-panel" id="baseAssistantPanel" aria-label="Assistente SENAI">
     <div class="base-assistant-head"><div><span>ASSISTENTE SENAI</span><strong>Como posso ajudar?</strong></div><button type="button" onclick="toggleBaseAssistant()" aria-label="Fechar">&times;</button></div>
-    <div class="base-assistant-messages" id="baseAssistantMessages"><div class="base-assistant-message bot">Posso explicar os produtos, associados e os formulários da AAPM.</div></div>
+    <div class="base-assistant-messages" id="baseAssistantMessages"><div class="base-assistant-message bot">Posso explicar os produtos, associados e os formulários do Portal SENAI Br?s.</div></div>
     <div class="base-assistant-suggestions"><button type="button" onclick="usarSugestaoBase('Quero ver os produtos')">Produtos</button><button type="button" onclick="usarSugestaoBase('Como funciona o cadastro de associado?')">Associados</button><button type="button" onclick="usarSugestaoBase('Onde fica o formulário?')">Formulário</button></div>
     <form class="base-assistant-form" onsubmit="enviarMensagemBase(event)"><input id="baseAssistantInput" autocomplete="off" placeholder="Digite uma dúvida..."><button type="submit" aria-label="Enviar">&rarr;</button></form>
   </div>
@@ -1470,7 +1470,7 @@
           <input type="text" id="pixTxIdInput" class="form-control" placeholder="Ex.: E1823612020261117..." oninput="validarComprovantePix()" style="font-size:0.8rem; margin-bottom:0.5rem;">
           <label style="display:flex; align-items:center; gap:6px; font-size:0.76rem; color:var(--text-muted); cursor:pointer;">
             <input type="checkbox" id="pixDeclaracaoCheck" onchange="validarComprovantePix()">
-            Confirmo que efetuei a transferência PIX para a AAPM
+            Confirmo que efetuei a transferência PIX para o Portal SENAI Br?s
           </label>
         </div>
         <div style="display:flex; gap:8px; margin-bottom:0.75rem;">
@@ -1731,7 +1731,7 @@
     <section id="associados" class="view-content">
       <div class="page-title-box reveal">
         <h2>Consulta de Associados</h2>
-        <p>Lista oficial de associados cadastrados na AAPM SENAI Brás.</p>
+        <p>Lista oficial de associados cadastrados no Portal SENAI Br?s SENAI Brás.</p>
       </div>
  
       <div class="associados-wrap reveal">
@@ -2201,7 +2201,7 @@
       const pergunta = texto.toLowerCase();
       if (pergunta.includes('produto') || pergunta.includes('loja')) {
         navigate('produtos', document.querySelectorAll('.nav-item')[1]);
-        return 'Na Loja AAPM você pode pesquisar produtos, filtrar por categoria e adicionar itens ao carrinho.';
+        return 'Na Loja Portal SENAI Br?s você pode pesquisar produtos, filtrar por categoria e adicionar itens ao carrinho.';
       }
       if (pergunta.includes('associado')) {
         navigate('associados', document.querySelectorAll('.nav-item')[2]);
@@ -3169,7 +3169,7 @@
     const heroData = [
       { title: "Liderança em Formação Técnica e Inovação Industrial", desc: "Referência nacional no desenvolvimento de talentos e soluções para a indústria. Tecnologia de ponta, infraestrutura laboratorial avançada e ecossistema integrado de aprendizagem." },
       { title: "Infraestrutura Industrial 4.0 e Manufatura Avançada", desc: "Laboratórios equipados com tecnologia real de mercado: Robótica, Células Flexíveis de Manufatura, Redes Industriais e Automação de Processos." },
-      { title: "Parceria Estratégica Entre Escola, Família e Indústria", desc: "Atuação constante da AAPM e do SENAI para assegurar a melhor jornada acadêmica, desenvolvimento humano e inserção no mercado de trabalho." }
+      { title: "Parceria Estratégica Entre Escola, Família e Indústria", desc: "Atuação constante do Portal SENAI Br?s para assegurar a melhor jornada acadêmica, desenvolvimento humano e inserção no mercado de trabalho." }
     ];
  
     let heroIndex = 0;

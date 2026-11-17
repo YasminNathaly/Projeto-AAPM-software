@@ -1,5 +1,5 @@
 """
-Router de Autenticação da AAPM
+Router de Autenticação do Portal SENAI Br?s
 Responsável por login, logout e gerenciamento de sessões
 """
 

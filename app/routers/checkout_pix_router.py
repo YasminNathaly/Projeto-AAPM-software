@@ -42,7 +42,7 @@ def _calcular_crc16_pix(payload: str) -> str:
 
 def _gerar_emv_pix(valor: float, txid: str) -> str:
     chave_pix = os.getenv("PIX_CHAVE", "aapm@sp.senai.br")
-    recebedor = os.getenv("PIX_RECEBEDOR", "AAPM SENAI BRAS")[:25]
+    recebedor = os.getenv("PIX_RECEBEDOR", "PORTAL SENAI BRAS")[:25]
     cidade = os.getenv("PIX_CIDADE", "SAO PAULO")[:15]
     valor_str = f"{valor:.2f}"
 

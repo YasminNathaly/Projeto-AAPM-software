@@ -88,7 +88,7 @@ Base.metadata.create_all(bind=engine)
 # ─────────────────────────────────────────────────────────────────────────────
 
 app = FastAPI(
-    title="Sistema AAPM - Gestão de Estoque e Vendas",
+    title="Portal SENAI Br?s - Gestão de Estoque e Vendas",
     version="1.1.0"
 )
 
