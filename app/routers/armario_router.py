@@ -69,18 +69,18 @@ def reservar_publico(dados: ReservaPublicaRequest, db: Session = Depends(get_db)
     from datetime import datetime, timedelta
     db_armario = db.query(Armario).filter(Armario.id == dados.armario_id).first()
     if not db_armario:
-        raise HTTPException(status_code=404, detail="Arm?rio n?o encontrado.")
+        raise HTTPException(status_code=404, detail="Arm\u00e1rio n\u00e3o encontrado.")
     status_atual = (db_armario.status or "").strip().lower()
-    if status_atual not in ["dispon?vel", "disponivel", "livre"]:
+    if not status_atual.startswith("dispon") and status_atual != "livre":
         raise HTTPException(
             status_code=400,
-            detail=f"Este arm?rio n?o est? dispon?vel (status atual: {db_armario.status})."
+            detail=f"Este arm\u00e1rio n\u00e3o est\u00e1 dispon\u00edvel (status atual: {db_armario.status})."
         )
     validade = (datetime.now() + timedelta(hours=24)).strftime("%d/%m %H:%M")
     nome_limpo = dados.nome.strip()
     turma_limpa = dados.turma.strip()
     db_armario.status = "Ocupado"
-    db_armario.nome_completo = f"{nome_limpo} ({turma_limpa}) ? At? {validade}"
+    db_armario.nome_completo = f"{nome_limpo} ({turma_limpa}) \u2022 At\u00e9 {validade}"
     db.commit()
     db.refresh(db_armario)
     return db_armario

@@ -3890,10 +3890,10 @@ function selecionarCanalArmario(canal) {
 async function popularSelectArmarios(numeroPreSelecionado = '') {
   const sel = document.getElementById('solArmarioSelect');
   if (!sel) return;
-  sel.innerHTML = '<option value="">Carregando arm?rios dispon?veis...</option>';
+  sel.innerHTML = '<option value="">Carregando armários disponíveis...</option>';
   let listaAtual = [];
   try {
-    const resp = await fetch('/api/armarios/');
+    const resp = await fetch('/api/armarios/?t=' + Date.now());
     if (resp.ok) {
       listaAtual = await resp.json();
       if (typeof armariosPublic !== 'undefined') armariosPublic = listaAtual;
@@ -3901,18 +3901,18 @@ async function popularSelectArmarios(numeroPreSelecionado = '') {
   } catch (e) {
     listaAtual = (typeof armariosPublic !== 'undefined' ? armariosPublic : []);
   }
-  const disponiveis = listaAtual.filter(a => {
-    const st = (a.status || '').trim().toLowerCase();
-    return st === 'dispon?vel' || st === 'disponivel' || st === 'livre';
+  const disponiveis = (Array.isArray(listaAtual) ? listaAtual : []).filter(a => {
+    const st = String(a.status || '').trim().toLowerCase();
+    return st.startsWith('dispon') || st === 'livre';
   });
   if (!disponiveis.length) {
-    sel.innerHTML = '<option value="">Nenhum arm?rio dispon?vel no momento</option>';
+    sel.innerHTML = '<option value="">Nenhum armário disponível no momento</option>';
     return;
   }
   sel.innerHTML = disponiveis.map((a, idx) => {
     const localFormatado = formatarLocalSenai(a.localizacao, idx);
     const selected = String(a.numero) === String(numeroPreSelecionado) ? 'selected' : '';
-    return `<option value="${a.id}" data-numero="${a.numero}" data-local="${localFormatado}" ${selected}>Arm?rio ${a.numero} ? ${localFormatado} (Dispon?vel)</option>`;
+    return `<option value="${a.id}" data-numero="${a.numero}" data-local="${localFormatado}" ${selected}>Armário ${a.numero} — ${localFormatado} (Disponível)</option>`;
   }).join('');
 }
 
@@ -3949,18 +3949,18 @@ function enviarCodigoArmario(e) {
   };
 
   const msgWhats = encodeURIComponent(
-    `Ol?! Solicita??o de arm?rio (24h) no Portal SENAI Br?s:\n` +
-    `- Arm?rio: ${opt.dataset.numero} (${opt.dataset.local})\n` +
+    `Olá! Solicitação de armário (24h) no Portal SENAI Brás:\n` +
+    `- Armário: ${opt.dataset.numero} (${opt.dataset.local})\n` +
     `- Aluno: ${nome}\n` +
     `- Turma/Curso: ${turma}\n` +
     `- Contato: ${tel}\n` +
-    `- C?digo de valida??o: ${codigoGeradoArmario}`
+    `- Código de validação: ${codigoGeradoArmario}`
   );
   const linkWhats = document.getElementById('btnAbrirWhatsReal');
   if (linkWhats) linkWhats.href = `https://wa.me/5511951611320?text=${msgWhats}`;
 
-  document.getElementById('otpDestinoTexto').textContent = `Enviamos um c?digo via ${canalArmarioSelecionado} para ${tel}`;
-  document.getElementById('otpPreviewAviso').textContent = `Notifica??o ${canalArmarioSelecionado}: Seu c?digo Portal SENAI Br?s ? ${codigoGeradoArmario}`;
+  document.getElementById('otpDestinoTexto').textContent = `Enviamos um código via ${canalArmarioSelecionado} para ${tel}`;
+  document.getElementById('otpPreviewAviso').textContent = `Notificação ${canalArmarioSelecionado}: Seu código Portal SENAI Brás é ${codigoGeradoArmario}`;
   document.getElementById('inputCodigoArmario').value = '';
   document.getElementById('formArmarioStep1').style.display = 'none';
   document.getElementById('formArmarioStep2').style.display = 'block';
@@ -3971,7 +3971,7 @@ async function confirmarCodigoArmario() {
   const digitado = document.getElementById('inputCodigoArmario').value.trim();
   const erroEl = document.getElementById('erroCodigoArmario');
   if (digitado !== codigoGeradoArmario) {
-    erroEl.textContent = 'C?digo incorreto. Confira os 6 d?gitos enviados e tente novamente.';
+    erroEl.textContent = 'Código incorreto. Confira os 6 dígitos enviados e tente novamente.';
     erroEl.style.display = 'block';
     return;
   }
@@ -3990,19 +3990,19 @@ async function confirmarCodigoArmario() {
 
   if (!resp.ok) {
     const errData = await resp.json().catch(() => ({}));
-    erroEl.textContent = errData.detail || 'N?o foi poss?vel concluir a reserva. Atualize e escolha outro arm?rio livre.';
+    erroEl.textContent = errData.detail || 'Não foi possível concluir a reserva. Atualize e escolha outro armário livre.';
     erroEl.style.display = 'block';
     return;
   }
 
-  const atualizado = await resp.json();
+  await resp.json();
 
   if (typeof carregarArmariosPublic === 'function') {
     await carregarArmariosPublic();
   }
 
   document.getElementById('resumoReservaArmario').innerHTML =
-    `O <strong>Arm?rio ${dadosSolicitacaoArmario.numero}</strong> (${dadosSolicitacaoArmario.localizacao}) foi reservado gratuitamente por <strong>24 horas</strong> para <strong>${dadosSolicitacaoArmario.nome}</strong> (${dadosSolicitacaoArmario.turma}) e j? consta como <strong>Ocupado</strong> no sistema.`;
+    `O <strong>Armário ${dadosSolicitacaoArmario.numero}</strong> (${dadosSolicitacaoArmario.localizacao}) foi reservado gratuitamente por <strong>24 horas</strong> para <strong>${dadosSolicitacaoArmario.nome}</strong> (${dadosSolicitacaoArmario.turma}) e já consta como <strong>Ocupado</strong> no sistema.`;
   document.getElementById('formArmarioStep2').style.display = 'none';
   document.getElementById('formArmarioStep3').style.display = 'block';
 }
@@ -4219,11 +4219,11 @@ function abrirCarteirinhaAssoc(nome, curso, matricula, turno) {
 document.addEventListener('DOMContentLoaded', () => {
   const perfisDemo = [
     { nome: 'Yasmin Nathaly', curso: 'SEDUC - Análise e Desenv. de Sistemas', turno: 'Manhã / Tarde' },
-    { nome: 'Lucas Henrique Silva', curso: 'T?cnico em Mecatrônica', turno: 'Manhã' },
-    { nome: 'Mariana Costa Oliveira', curso: 'T?cnico em Eletroeletrônica', turno: 'Tarde' },
+    { nome: 'Lucas Henrique Silva', curso: 'Técnico em Mecatrônica', turno: 'Manhã' },
+    { nome: 'Mariana Costa Oliveira', curso: 'Técnico em Eletroeletrônica', turno: 'Tarde' },
     { nome: 'Gabriel Santos Pereira', curso: 'Aprendizagem Industrial - Logística', turno: 'Manhã' },
-    { nome: 'Beatriz Almeida Souza', curso: 'T?cnico em Desenvolvimento de Sistemas', turno: 'Noite' },
-    { nome: 'Rafael Lima Ferreira', curso: 'T?cnico em Segurança do Trabalho', turno: 'Noite' }
+    { nome: 'Beatriz Almeida Souza', curso: 'Técnico em Desenvolvimento de Sistemas', turno: 'Noite' },
+    { nome: 'Rafael Lima Ferreira', curso: 'Técnico em Segurança do Trabalho', turno: 'Noite' }
   ];
 
   function enriquecerAssociados() {
@@ -4237,7 +4237,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const perfil = perfisDemo[idx % perfisDemo.length];
       const textoOriginal = tds[0].textContent.trim();
-      const temCursoReal = textoOriginal && !textoOriginal.toLowerCase().includes('n?o informado');
+      const temCursoReal = textoOriginal && !textoOriginal.toLowerCase().includes('não informado');
       const cursoFinal = temCursoReal ? textoOriginal : perfil.curso;
       const mat = `#2026-${String(idx + 1).padStart(3, '0')}`;
 
