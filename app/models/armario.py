@@ -10,4 +10,5 @@ class Armario(Base):
     status = Column(String, default="Disponível")
     
     nome_completo = Column(String, nullable=True)
+    curso = Column(String, nullable=True)
     updated_at = Column(DateTime, nullable=True)

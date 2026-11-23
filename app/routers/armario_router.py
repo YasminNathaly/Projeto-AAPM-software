@@ -15,6 +15,7 @@ class ArmarioBase(BaseModel):
     localizacao: Optional[str] = None
     status: Optional[str] = "Disponível"
     nome_completo: Optional[str] = None
+    curso: Optional[str] = None
 
 
 class ArmarioCreate(ArmarioBase):
@@ -41,7 +42,27 @@ def listar(db: Session = Depends(get_db)):
         db.commit()
     except Exception:
         db.rollback()
+    try:
+        db.execute(text("ALTER TABLE armarios ADD COLUMN curso VARCHAR"))
+        db.commit()
+    except Exception:
+        db.rollback()
     itens = armario_controller.listar(db)
+    import re
+    alterou = False
+    for item in itens:
+        if item.nome_completo:
+            txt_nc = item.nome_completo.split("\u2022")[0].split("?")[0].strip()
+            m_curso = re.match(r"^(.*?)\s*\(([^()]+)\)$", txt_nc)
+            if m_curso and not item.curso:
+                item.nome_completo = m_curso.group(1).strip()
+                item.curso = m_curso.group(2).strip()
+                alterou = True
+            elif txt_nc != item.nome_completo:
+                item.nome_completo = txt_nc
+                alterou = True
+    if alterou:
+        db.commit()
     return sorted(itens, key=lambda x: (x.updated_at or datetime.min, x.id), reverse=True)
 
 
@@ -88,9 +109,10 @@ def reservar_publico(dados: ReservaPublicaRequest, db: Session = Depends(get_db)
     validade = (datetime.now() + timedelta(hours=24)).strftime("%d/%m %H:%M")
     nome_limpo = dados.nome.strip()
     turma_limpa = dados.turma.strip()
-    db_armario.status = "Ocupado"
+        db_armario.status = "Ocupado"
     db_armario.updated_at = datetime.now()
-    db_armario.nome_completo = f"{nome_limpo} ({turma_limpa}) \u2022 At\u00e9 {validade}"
+    db_armario.nome_completo = nome_limpo
+    db_armario.curso = turma_limpa
     db.commit()
     db.refresh(db_armario)
     return db_armario

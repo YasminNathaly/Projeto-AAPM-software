@@ -179,7 +179,7 @@ function textoDoItemParaBusca(viewId, item) {
     case 'fornecedor': return [item.nome, item.documento, item.email, item.telefone].join(' ');
     case 'produto': return [item.nome, nomeCategoriaPorId(item.categoria_id), item.tamanho].join(' ');
     case 'associado': return [item.nome, item.email, item.telefone, item.endereco].join(' ');
-    case 'armario': return [item.numero, item.localizacao, item.status, item.nome_completo].join(' ');
+    case 'armario': return [item.numero, item.localizacao, item.status, item.nome_completo, item.curso].join(' ');
     case 'usuario': return [item.nome, item.email, item.perfil].join(' ');
     case 'venda': return [item.comprador || item.cliente, item.produto_nome, item.forma_pagamento].join(' ');
     case 'relatorio': return [item.tipo, item.titulo, item.sub].join(' ');
