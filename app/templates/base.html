@@ -3731,7 +3731,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div>
           <label style="display:block; font-size:0.8rem; margin-bottom:4px;">WhatsApp / Telefone *</label>
-          <input type="tel" id="solArmarioTel" class="form-control" placeholder="(11) 99999-9999" required>
+          <input type="tel" id="solArmarioTel" class="form-control" placeholder="(11) 95161-1320" required>
         </div>
       </div>
       <button type="submit" class="btn-primary" style="width:100%; margin-top:0.4rem; justify-content:center;">
@@ -3773,7 +3773,7 @@ function enviarSolicitacaoArmario(e) {
     `? Contato: ${tel}`
   );
   fecharModalArmario();
-  window.open(`https://wa.me/5511999999999?text=${texto}`, '_blank');
+  window.open(`https://wa.me/5511951611320?text=${texto}`, '_blank');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -3852,9 +3852,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+
 <!-- UX_PATCH_V2 -->
 <style>
-/* Bolinha do carrinho 100% visivel */
 .icon-btn:has(.cart-badge), .cart-btn { overflow: visible !important; position: relative !important; }
 .cart-badge {
   top: -6px !important; right: -6px !important;
@@ -3863,7 +3863,6 @@ document.addEventListener('DOMContentLoaded', () => {
   border: 2px solid var(--bg-main) !important; z-index: 30 !important;
 }
 
-/* Card moderno da secao de Armarios */
 .armario-hero-card {
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
   gap: 1.5rem; margin: 0 7vw 1.6rem; padding: 1.5rem 1.85rem;
@@ -3923,7 +3922,6 @@ document.addEventListener('DOMContentLoaded', () => {
   .armario-hero-btn { width: 100% !important; }
 }
 
-/* Modal moderno de 3 etapas */
 .modal-armario-overlay {
   position: fixed; inset: 0; background: rgba(5, 5, 10, 0.78);
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
@@ -3941,7 +3939,6 @@ document.addEventListener('DOMContentLoaded', () => {
   border: 1px solid var(--border-color) !important;
   background: var(--bg-main) !important; color: var(--text-main) !important;
   font-family: inherit !important; font-size: 0.9rem !important; outline: none !important;
-  transition: border-color 0.2s ease;
 }
 .modal-armario-card .arm-input:focus { border-color: #f3132b !important; }
 .canal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
@@ -3964,7 +3961,6 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 .otp-input:focus { border-color: #f3132b !important; outline: none !important; }
 
-/* Card informativo PIX */
 .pix-info-card {
   background: var(--bg-surface-2, rgba(128,128,140,0.08));
   border: 1px solid var(--border-color); border-radius: 14px;
@@ -3997,7 +3993,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <form id="formArmarioStep1" onsubmit="enviarCodigoArmario(event)" style="display:flex; flex-direction:column; gap:0.9rem;">
       <div>
-        <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:5px; color:var(--text-muted);">Arm\u00e1rio desejado *</label>
+        <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:5px; color:var(--text-muted);">Arm\u00e1rio desejado (Bloco e Andar) *</label>
         <select id="solArmarioSelect" class="arm-input" required></select>
       </div>
       <div>
@@ -4007,7 +4003,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
         <div>
           <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:5px; color:var(--text-muted);">Turma / Curso *</label>
-          <input type="text" id="solArmarioTurma" class="arm-input" placeholder="Ex.: 2\u00ba DS / Mecatr\u00f4nica" required>
+          <input type="text" id="solArmarioTurma" class="arm-input" placeholder="Ex.: Seduc - ADS" required>
         </div>
         <div>
           <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:5px; color:var(--text-muted);">Seu Celular *</label>
@@ -4035,7 +4031,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div id="erroCodigoArmario" style="color:#f3132b; font-size:0.78rem; text-align:center; margin-top:6px; display:none;"></div>
       </div>
       <button type="button" class="armario-hero-btn" style="width:100%;" onclick="confirmarCodigoArmario()">Confirmar Reserva do Arm\u00e1rio</button>
-      <button type="button" style="width:100%; margin-top:0.65rem; background:transparent; border:none; color:var(--text-muted); font-size:0.8rem; cursor:pointer;" onclick="voltarStep1Armario()">&larr; Voltar e editar dados</button>
+      <a id="btnAbrirWhatsReal" href="#" target="_blank" style="display:block; text-align:center; margin-top:0.75rem; font-size:0.8rem; font-weight:700; color:#25D366; text-decoration:none;">Enviar comprovante tamb\u00e9m no WhatsApp oficial (11) 95161-1320 &rarr;</a>
+      <button type="button" style="width:100%; margin-top:0.55rem; background:transparent; border:none; color:var(--text-muted); font-size:0.8rem; cursor:pointer;" onclick="voltarStep1Armario()">&larr; Voltar e editar dados</button>
     </div>
 
     <div id="formArmarioStep3" style="display:none; text-align:center; padding:0.75rem 0;">
@@ -4068,7 +4065,7 @@ function popularSelectArmarios(numeroPreSelecionado = '') {
   }
   sel.innerHTML = disponiveis.map(a => {
     const selected = String(a.numero) === String(numeroPreSelecionado) ? 'selected' : '';
-    return `<option value="${a.id}" data-numero="${a.numero}" data-local="${a.localizacao || ''}" ${selected}>Arm\u00e1rio ${a.numero} (${a.localizacao || 'Unidade Br\u00e1s'})</option>`;
+    return `<option value="${a.id}" data-numero="${a.numero}" data-local="${a.localizacao || 'Bloco 1 - T\u00e9rreo'}" ${selected}>Arm\u00e1rio ${a.numero} \u2014 ${a.localizacao || 'Bloco 1 - T\u00e9rreo'}</option>`;
   }).join('');
 }
 
@@ -4103,6 +4100,17 @@ function enviarCodigoArmario(e) {
   dadosSolicitacaoArmario = {
     id: sel.value, numero: opt.dataset.numero, localizacao: opt.dataset.local, nome, turma, tel
   };
+
+  const msgWhats = encodeURIComponent(
+    `Ol\u00e1! Solicita\u00e7\u00e3o de arm\u00e1rio no Portal SENAI Br\u00e1s:\n` +
+    `- Arm\u00e1rio: ${opt.dataset.numero} (${opt.dataset.local})\n` +
+    `- Aluno: ${nome}\n` +
+    `- Turma/Curso: ${turma}\n` +
+    `- Contato: ${tel}\n` +
+    `- C\u00f3digo de valida\u00e7\u00e3o: ${codigoGeradoArmario}`
+  );
+  const linkWhats = document.getElementById('btnAbrirWhatsReal');
+  if (linkWhats) linkWhats.href = `https://wa.me/5511951611320?text=${msgWhats}`;
 
   document.getElementById('otpDestinoTexto').textContent = `Enviamos um c\u00f3digo via ${canalArmarioSelecionado} para ${tel}`;
   document.getElementById('otpPreviewAviso').textContent = `Notifica\u00e7\u00e3o ${canalArmarioSelecionado}: Seu c\u00f3digo Portal SENAI Br\u00e1s \u00e9 ${codigoGeradoArmario}`;
@@ -4140,7 +4148,7 @@ async function confirmarCodigoArmario() {
   }
 
   document.getElementById('resumoReservaArmario').innerHTML =
-    `O <strong>Arm\u00e1rio ${dadosSolicitacaoArmario.numero}</strong> foi reservado para <strong>${dadosSolicitacaoArmario.nome}</strong> (${dadosSolicitacaoArmario.turma}) e j\u00e1 consta como <strong>Ocupado</strong> no sistema.`;
+    `O <strong>Arm\u00e1rio ${dadosSolicitacaoArmario.numero}</strong> (${dadosSolicitacaoArmario.localizacao}) foi reservado para <strong>${dadosSolicitacaoArmario.nome}</strong> (${dadosSolicitacaoArmario.turma}) e j\u00e1 consta como <strong>Ocupado</strong> no sistema.`;
   document.getElementById('formArmarioStep2').style.display = 'none';
   document.getElementById('formArmarioStep3').style.display = 'block';
 }
