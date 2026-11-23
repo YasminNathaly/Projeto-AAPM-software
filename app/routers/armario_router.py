@@ -55,3 +55,32 @@ def deletar(armario_id: int, db: Session = Depends(get_db)):
     if not sucesso:
         raise HTTPException(status_code=404, detail="Armário não encontrado.")
     return None
+
+class ReservaPublicaRequest(BaseModel):
+    armario_id: int
+    nome: str
+    turma: str
+    telefone: Optional[str] = None
+
+
+@router.post("/reservar-publico", response_model=ArmarioResponse)
+def reservar_publico(dados: ReservaPublicaRequest, db: Session = Depends(get_db)):
+    from app.models.armario import Armario
+    from datetime import datetime, timedelta
+    db_armario = db.query(Armario).filter(Armario.id == dados.armario_id).first()
+    if not db_armario:
+        raise HTTPException(status_code=404, detail="Arm?rio n?o encontrado.")
+    status_atual = (db_armario.status or "").strip().lower()
+    if status_atual not in ["dispon?vel", "disponivel", "livre"]:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Este arm?rio n?o est? dispon?vel (status atual: {db_armario.status})."
+        )
+    validade = (datetime.now() + timedelta(hours=24)).strftime("%d/%m %H:%M")
+    nome_limpo = dados.nome.strip()
+    turma_limpa = dados.turma.strip()
+    db_armario.status = "Ocupado"
+    db_armario.nome_completo = f"{nome_limpo} ({turma_limpa}) ? At? {validade}"
+    db.commit()
+    db.refresh(db_armario)
+    return db_armario

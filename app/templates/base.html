@@ -3887,26 +3887,40 @@ function selecionarCanalArmario(canal) {
   document.getElementById('optCanalSms').classList.toggle('selected', canal === 'SMS');
 }
 
-function popularSelectArmarios(numeroPreSelecionado = '') {
+async function popularSelectArmarios(numeroPreSelecionado = '') {
   const sel = document.getElementById('solArmarioSelect');
   if (!sel) return;
-  const disponiveis = (typeof armariosPublic !== 'undefined' ? armariosPublic : []).filter(a => a.status === 'Disponível');
+  sel.innerHTML = '<option value="">Carregando arm?rios dispon?veis...</option>';
+  let listaAtual = [];
+  try {
+    const resp = await fetch('/api/armarios/');
+    if (resp.ok) {
+      listaAtual = await resp.json();
+      if (typeof armariosPublic !== 'undefined') armariosPublic = listaAtual;
+    }
+  } catch (e) {
+    listaAtual = (typeof armariosPublic !== 'undefined' ? armariosPublic : []);
+  }
+  const disponiveis = listaAtual.filter(a => {
+    const st = (a.status || '').trim().toLowerCase();
+    return st === 'dispon?vel' || st === 'disponivel' || st === 'livre';
+  });
   if (!disponiveis.length) {
-    sel.innerHTML = '<option value="">Nenhum armário disponível no momento</option>';
+    sel.innerHTML = '<option value="">Nenhum arm?rio dispon?vel no momento</option>';
     return;
   }
   sel.innerHTML = disponiveis.map((a, idx) => {
     const localFormatado = formatarLocalSenai(a.localizacao, idx);
     const selected = String(a.numero) === String(numeroPreSelecionado) ? 'selected' : '';
-    return `<option value="${a.id}" data-numero="${a.numero}" data-local="${localFormatado}" ${selected}>Armário ${a.numero} — ${localFormatado}</option>`;
+    return `<option value="${a.id}" data-numero="${a.numero}" data-local="${localFormatado}" ${selected}>Arm?rio ${a.numero} ? ${localFormatado} (Dispon?vel)</option>`;
   }).join('');
 }
 
-function abrirModalArmario(numero = '') {
-  popularSelectArmarios(numero);
+async function abrirModalArmario(numero = '') {
   voltarStep1Armario();
   document.getElementById('formArmarioStep3').style.display = 'none';
   document.getElementById('modalSolicitarArmario').classList.add('active');
+  await popularSelectArmarios(numero);
 }
 
 function fecharModalArmario() {
@@ -3931,22 +3945,22 @@ function enviarCodigoArmario(e) {
 
   codigoGeradoArmario = String(Math.floor(100000 + Math.random() * 900000));
   dadosSolicitacaoArmario = {
-    id: sel.value, numero: opt.dataset.numero, localizacao: opt.dataset.local, nome, turma, tel
+    id: Number(sel.value), numero: opt.dataset.numero, localizacao: opt.dataset.local, nome, turma, tel
   };
 
   const msgWhats = encodeURIComponent(
-    `Olá! Solicitação de armário no Portal SENAI Brás:\n` +
-    `- Armário: ${opt.dataset.numero} (${opt.dataset.local})\n` +
+    `Ol?! Solicita??o de arm?rio (24h) no Portal SENAI Br?s:\n` +
+    `- Arm?rio: ${opt.dataset.numero} (${opt.dataset.local})\n` +
     `- Aluno: ${nome}\n` +
     `- Turma/Curso: ${turma}\n` +
     `- Contato: ${tel}\n` +
-    `- Código de validação: ${codigoGeradoArmario}`
+    `- C?digo de valida??o: ${codigoGeradoArmario}`
   );
   const linkWhats = document.getElementById('btnAbrirWhatsReal');
   if (linkWhats) linkWhats.href = `https://wa.me/5511951611320?text=${msgWhats}`;
 
-  document.getElementById('otpDestinoTexto').textContent = `Enviamos um código via ${canalArmarioSelecionado} para ${tel}`;
-  document.getElementById('otpPreviewAviso').textContent = `Notificação ${canalArmarioSelecionado}: Seu código Portal SENAI Brás é ${codigoGeradoArmario}`;
+  document.getElementById('otpDestinoTexto').textContent = `Enviamos um c?digo via ${canalArmarioSelecionado} para ${tel}`;
+  document.getElementById('otpPreviewAviso').textContent = `Notifica??o ${canalArmarioSelecionado}: Seu c?digo Portal SENAI Br?s ? ${codigoGeradoArmario}`;
   document.getElementById('inputCodigoArmario').value = '';
   document.getElementById('formArmarioStep1').style.display = 'none';
   document.getElementById('formArmarioStep2').style.display = 'block';
@@ -3957,31 +3971,38 @@ async function confirmarCodigoArmario() {
   const digitado = document.getElementById('inputCodigoArmario').value.trim();
   const erroEl = document.getElementById('erroCodigoArmario');
   if (digitado !== codigoGeradoArmario) {
-    erroEl.textContent = 'Código incorreto. Confira os 6 dígitos enviados e tente novamente.';
+    erroEl.textContent = 'C?digo incorreto. Confira os 6 d?gitos enviados e tente novamente.';
     erroEl.style.display = 'block';
     return;
   }
   erroEl.style.display = 'none';
 
-  try {
-    await fetch(`/api/armarios/${dadosSolicitacaoArmario.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        numero: dadosSolicitacaoArmario.numero,
-        localizacao: dadosSolicitacaoArmario.localizacao,
-        status: 'Ocupado',
-        nome_completo: `${dadosSolicitacaoArmario.nome} (${dadosSolicitacaoArmario.turma})`
-      })
-    });
-  } catch (err) {}
+  const resp = await fetch('/api/armarios/reservar-publico', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      armario_id: dadosSolicitacaoArmario.id,
+      nome: dadosSolicitacaoArmario.nome,
+      turma: dadosSolicitacaoArmario.turma,
+      telefone: dadosSolicitacaoArmario.tel
+    })
+  });
+
+  if (!resp.ok) {
+    const errData = await resp.json().catch(() => ({}));
+    erroEl.textContent = errData.detail || 'N?o foi poss?vel concluir a reserva. Atualize e escolha outro arm?rio livre.';
+    erroEl.style.display = 'block';
+    return;
+  }
+
+  const atualizado = await resp.json();
 
   if (typeof carregarArmariosPublic === 'function') {
     await carregarArmariosPublic();
   }
 
   document.getElementById('resumoReservaArmario').innerHTML =
-    `O <strong>Armário ${dadosSolicitacaoArmario.numero}</strong> (${dadosSolicitacaoArmario.localizacao}) foi reservado para <strong>${dadosSolicitacaoArmario.nome}</strong> (${dadosSolicitacaoArmario.turma}) e já consta como <strong>Ocupado</strong> no sistema.`;
+    `O <strong>Arm?rio ${dadosSolicitacaoArmario.numero}</strong> (${dadosSolicitacaoArmario.localizacao}) foi reservado gratuitamente por <strong>24 horas</strong> para <strong>${dadosSolicitacaoArmario.nome}</strong> (${dadosSolicitacaoArmario.turma}) e j? consta como <strong>Ocupado</strong> no sistema.`;
   document.getElementById('formArmarioStep2').style.display = 'none';
   document.getElementById('formArmarioStep3').style.display = 'block';
 }
