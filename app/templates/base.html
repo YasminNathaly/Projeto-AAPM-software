@@ -1815,6 +1815,40 @@
 
       <div class="armarios-summary reveal" id="armariosSummary"></div>
 
+      <div class="armario-hero-card reveal">
+        <div class="armario-hero-left">
+          <div class="armario-hero-badge">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="2" x2="12" y2="22"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/></svg>
+          </div>
+          <div>
+            <span class="armario-hero-tag">RESERVA DIGITAL</span>
+            <h3>Precisa reservar um armário na unidade?</h3>
+            <p>Escolha um armário disponível na lista abaixo, receba o código de validação por <strong>WhatsApp</strong> ou <strong>SMS</strong> e garanta sua reserva na hora.</p>
+          </div>
+        </div>
+        <button type="button" class="armario-hero-btn" onclick="abrirModalArmario()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Solicitar Armário
+        </button>
+      </div>
+
+      <div class="armario-hero-card reveal">
+        <div class="armario-hero-left">
+          <div class="armario-hero-badge">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="2" x2="12" y2="22"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/></svg>
+          </div>
+          <div>
+            <span class="armario-hero-tag">RESERVA DIGITAL</span>
+            <h3>Precisa reservar um armário na unidade?</h3>
+            <p>Escolha um armário disponível na lista abaixo, receba o código de validação por <strong>WhatsApp</strong> ou <strong>SMS</strong> e garanta sua reserva na hora.</p>
+          </div>
+        </div>
+        <button type="button" class="armario-hero-btn" onclick="abrirModalArmario()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Solicitar Armário
+        </button>
+      </div>
+
       <div class="armarios-filters reveal">
         <div class="product-search-box">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -3833,95 +3867,121 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<!-- UX_PATCH_V1 -->
+
+
+<!-- UX_PATCH_V2 -->
 <style>
+/* Bolinha do carrinho 100% visivel */
 .icon-btn:has(.cart-badge), .cart-btn { overflow: visible !important; position: relative !important; }
 .cart-badge {
   top: -6px !important; right: -6px !important;
   min-width: 20px !important; height: 20px !important;
   padding: 0 5px !important; font-size: 0.72rem !important; font-weight: 800 !important;
-  border: 2px solid var(--bg-main) !important; z-index: 25 !important;
+  border: 2px solid var(--bg-main) !important; z-index: 30 !important;
 }
 
-.armario-cta-banner {
+/* Card moderno da secao de Armarios */
+.armario-hero-card {
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
-  gap: 1.2rem; margin: 0 7vw 1.5rem; padding: 1.35rem 1.7rem;
-  border-radius: 20px; background: var(--bg-surface);
-  border: 1px solid var(--border-color); box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+  gap: 1.5rem; margin: 0 7vw 1.6rem; padding: 1.5rem 1.85rem;
+  border-radius: 22px;
+  background: linear-gradient(145deg, var(--bg-surface), rgba(243, 19, 43, 0.05));
+  border: 1px solid rgba(243, 19, 43, 0.22);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.12);
 }
-.armario-cta-info { display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 240px; }
-.armario-cta-info strong { display: block; font-size: 1.02rem; color: var(--text-main); margin-bottom: 3px; }
-.armario-cta-info span { display: block; font-size: 0.84rem; color: var(--text-muted); line-height: 1.4; }
-.armario-cta-icon {
-  width: 50px; height: 50px; border-radius: 15px;
-  background: rgba(243, 19, 43, 0.12); color: #f3132b;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+.armario-hero-left { display: flex; align-items: center; gap: 1.2rem; flex: 1; min-width: 260px; }
+.armario-hero-badge {
+  width: 56px; height: 56px; border-radius: 16px;
+  background: linear-gradient(135deg, rgba(243, 19, 43, 0.18), rgba(243, 19, 43, 0.06));
+  border: 1px solid rgba(243, 19, 43, 0.3);
+  color: #f3132b; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.btn-armario-main {
-  appearance: none !important; -webkit-appearance: none !important;
+.armario-hero-tag {
+  display: inline-block; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em;
+  color: #f3132b; background: rgba(243, 19, 43, 0.12); padding: 3px 9px;
+  border-radius: 999px; margin-bottom: 5px;
+}
+.armario-hero-left h3 { margin: 0 0 4px; font-size: 1.15rem; font-weight: 800; color: var(--text-main); }
+.armario-hero-left p { margin: 0; font-size: 0.85rem; color: var(--text-muted); line-height: 1.45; }
+
+.armario-hero-btn {
+  all: unset;
+  box-sizing: border-box !important;
   display: inline-flex !important; align-items: center !important; justify-content: center !important;
-  gap: 0.5rem !important; padding: 0.85rem 1.55rem !important;
-  border-radius: 999px !important; border: none !important; outline: none !important;
-  background: linear-gradient(135deg, #f3132b, #c90c20) !important;
+  gap: 0.55rem !important; padding: 0.92rem 1.75rem !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, #f3132b 0%, #b8081b 100%) !important;
   color: #ffffff !important; font-family: inherit !important;
-  font-size: 0.88rem !important; font-weight: 700 !important; cursor: pointer !important;
-  box-shadow: 0 8px 22px rgba(243, 19, 43, 0.32) !important;
-  transition: transform 0.2s ease, box-shadow 0.2s ease !important; white-space: nowrap !important;
+  font-size: 0.9rem !important; font-weight: 700 !important; letter-spacing: 0.02em !important;
+  cursor: pointer !important;
+  box-shadow: 0 10px 25px rgba(243, 19, 43, 0.35) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  white-space: nowrap !important;
 }
-.btn-armario-main:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(243, 19, 43, 0.42) !important; }
+.armario-hero-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 14px 30px rgba(243, 19, 43, 0.48) !important;
+}
+
 .btn-solicitar-armario {
-  appearance: none !important; display: inline-flex !important; align-items: center !important;
-  padding: 0.42rem 0.95rem !important; border-radius: 999px !important;
+  all: unset;
+  box-sizing: border-box !important;
+  display: inline-flex !important; align-items: center !important; gap: 0.35rem !important;
+  padding: 0.45rem 1rem !important; border-radius: 999px !important;
   border: 1px solid rgba(243, 19, 43, 0.45) !important;
-  background: rgba(243, 19, 43, 0.1) !important; color: #f3132b !important;
+  background: rgba(243, 19, 43, 0.12) !important; color: #f3132b !important;
   font-family: inherit !important; font-size: 0.78rem !important; font-weight: 700 !important;
   cursor: pointer !important; transition: all 0.2s ease !important;
 }
 .btn-solicitar-armario:hover { background: #f3132b !important; color: #ffffff !important; }
+
 @media (max-width: 900px) {
-  .armario-cta-banner { margin-left: 5vw; margin-right: 5vw; padding: 1.15rem; }
-  .btn-armario-main { width: 100% !important; }
+  .armario-hero-card { margin-left: 5vw; margin-right: 5vw; padding: 1.25rem; }
+  .armario-hero-btn { width: 100% !important; }
 }
 
+/* Modal moderno de 3 etapas */
 .modal-armario-overlay {
-  position: fixed; inset: 0; background: rgba(5, 5, 10, 0.75);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  z-index: 1300; display: none; align-items: center; justify-content: center; padding: 1rem;
+  position: fixed; inset: 0; background: rgba(5, 5, 10, 0.78);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  z-index: 1350; display: none; align-items: center; justify-content: center; padding: 1rem;
 }
 .modal-armario-overlay.active { display: flex; }
 .modal-armario-card {
-  width: min(94vw, 460px); background: var(--bg-surface); color: var(--text-main);
-  border: 1px solid var(--border-color); border-radius: 24px; padding: 1.75rem;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  width: min(94vw, 470px); background: var(--bg-surface); color: var(--text-main);
+  border: 1px solid var(--border-color); border-radius: 26px; padding: 1.85rem;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.5);
 }
 .modal-armario-card .arm-input {
   width: 100% !important; box-sizing: border-box !important;
-  padding: 0.78rem 1rem !important; border-radius: 12px !important;
+  padding: 0.82rem 1rem !important; border-radius: 13px !important;
   border: 1px solid var(--border-color) !important;
   background: var(--bg-main) !important; color: var(--text-main) !important;
   font-family: inherit !important; font-size: 0.9rem !important; outline: none !important;
+  transition: border-color 0.2s ease;
 }
 .modal-armario-card .arm-input:focus { border-color: #f3132b !important; }
-.canal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+.canal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
 .canal-option {
-  display: flex; align-items: center; justify-content: center; gap: 0.45rem;
-  padding: 0.7rem; border-radius: 12px; border: 1px solid var(--border-color);
-  background: var(--bg-main); cursor: pointer; font-size: 0.85rem; font-weight: 700; transition: all 0.2s ease;
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  padding: 0.75rem; border-radius: 13px; border: 1.5px solid var(--border-color);
+  background: var(--bg-main); cursor: pointer; font-size: 0.86rem; font-weight: 700; transition: all 0.2s ease;
 }
 .canal-option.selected { border-color: #f3132b; background: rgba(243, 19, 43, 0.12); color: #f3132b; }
 .otp-box {
   background: rgba(243, 19, 43, 0.08); border: 1px solid rgba(243, 19, 43, 0.32);
-  border-radius: 16px; padding: 1rem; text-align: center; margin-bottom: 1rem;
+  border-radius: 16px; padding: 1.1rem; text-align: center; margin-bottom: 1rem;
 }
 .otp-input {
   width: 100% !important; box-sizing: border-box !important; text-align: center !important;
-  letter-spacing: 0.45em !important; font-size: 1.55rem !important; font-weight: 800 !important;
+  letter-spacing: 0.45em !important; font-size: 1.6rem !important; font-weight: 800 !important;
   padding: 0.85rem !important; border-radius: 14px !important;
   border: 2px solid var(--border-color) !important;
   background: var(--bg-main) !important; color: var(--text-main) !important;
 }
 .otp-input:focus { border-color: #f3132b !important; outline: none !important; }
 
+/* Card informativo PIX */
 .pix-info-card {
   background: var(--bg-surface-2, rgba(128,128,140,0.08));
   border: 1px solid var(--border-color); border-radius: 14px;
@@ -3944,15 +4004,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <div class="modal-armario-overlay" id="modalSolicitarArmario" onclick="if(event.target===this) fecharModalArmario()">
   <div class="modal-armario-card">
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.15rem;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.2rem;">
       <div>
         <span style="font-size:0.72rem; letter-spacing:0.08em; text-transform:uppercase; color:#f3132b; font-weight:800;">Reserva de Arm\u00e1rio</span>
-        <h3 style="margin:0.2rem 0 0; font-size:1.3rem; font-weight:800;">Solicitar Arm\u00e1rio \u2014 SENAI Br\u00e1s</h3>
+        <h3 style="margin:0.2rem 0 0; font-size:1.35rem; font-weight:800;">Solicitar Arm\u00e1rio \u2014 SENAI Br\u00e1s</h3>
       </div>
       <button type="button" class="modal-close" onclick="fecharModalArmario()" aria-label="Fechar">&times;</button>
     </div>
 
-    <form id="formArmarioStep1" onsubmit="enviarCodigoArmario(event)" style="display:flex; flex-direction:column; gap:0.85rem;">
+    <form id="formArmarioStep1" onsubmit="enviarCodigoArmario(event)" style="display:flex; flex-direction:column; gap:0.9rem;">
       <div>
         <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:5px; color:var(--text-muted);">Arm\u00e1rio desejado *</label>
         <select id="solArmarioSelect" class="arm-input" required></select>
@@ -3978,28 +4038,28 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="canal-option" id="optCanalSms" onclick="selecionarCanalArmario('SMS')">SMS</div>
         </div>
       </div>
-      <button type="submit" class="btn-armario-main" style="width:100%; margin-top:0.35rem;">Enviar C\u00f3digo de Confirma\u00e7\u00e3o</button>
+      <button type="submit" class="armario-hero-btn" style="width:100%; margin-top:0.35rem;">Enviar C\u00f3digo de Confirma\u00e7\u00e3o</button>
     </form>
 
     <div id="formArmarioStep2" style="display:none;">
       <div class="otp-box">
-        <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:4px;" id="otpDestinoTexto">C\u00f3digo enviado!</div>
-        <div style="font-size:0.85rem; font-weight:800; color:#f3132b;" id="otpPreviewAviso"></div>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:5px;" id="otpDestinoTexto">C\u00f3digo enviado!</div>
+        <div style="font-size:0.88rem; font-weight:800; color:#f3132b;" id="otpPreviewAviso"></div>
       </div>
-      <div style="margin-bottom:0.9rem;">
+      <div style="margin-bottom:0.95rem;">
         <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:6px; color:var(--text-muted); text-align:center;">Digite o c\u00f3digo de 6 d\u00edgitos:</label>
         <input type="text" id="inputCodigoArmario" class="otp-input" maxlength="6" inputmode="numeric" placeholder="000000">
         <div id="erroCodigoArmario" style="color:#f3132b; font-size:0.78rem; text-align:center; margin-top:6px; display:none;"></div>
       </div>
-      <button type="button" class="btn-armario-main" style="width:100%;" onclick="confirmarCodigoArmario()">Confirmar Reserva do Arm\u00e1rio</button>
-      <button type="button" style="width:100%; margin-top:0.6rem; background:transparent; border:none; color:var(--text-muted); font-size:0.8rem; cursor:pointer;" onclick="voltarStep1Armario()">&larr; Voltar e editar dados</button>
+      <button type="button" class="armario-hero-btn" style="width:100%;" onclick="confirmarCodigoArmario()">Confirmar Reserva do Arm\u00e1rio</button>
+      <button type="button" style="width:100%; margin-top:0.65rem; background:transparent; border:none; color:var(--text-muted); font-size:0.8rem; cursor:pointer;" onclick="voltarStep1Armario()">&larr; Voltar e editar dados</button>
     </div>
 
     <div id="formArmarioStep3" style="display:none; text-align:center; padding:0.75rem 0;">
-      <div style="width:56px; height:56px; border-radius:50%; background:rgba(16,185,129,0.15); color:#10b981; display:flex; align-items:center; justify-content:center; margin:0 auto 0.9rem; font-size:1.7rem; font-weight:800;">&#10003;</div>
-      <h4 style="margin:0 0 0.4rem; font-size:1.2rem; font-weight:800;">Arm\u00e1rio Reservado com Sucesso!</h4>
-      <p id="resumoReservaArmario" style="font-size:0.86rem; color:var(--text-muted); line-height:1.5; margin-bottom:1.2rem;"></p>
-      <button type="button" class="btn-armario-main" style="width:100%;" onclick="fecharModalArmario()">Concluir</button>
+      <div style="width:58px; height:58px; border-radius:50%; background:rgba(16,185,129,0.15); color:#10b981; display:flex; align-items:center; justify-content:center; margin:0 auto 0.9rem; font-size:1.8rem; font-weight:800;">&#10003;</div>
+      <h4 style="margin:0 0 0.45rem; font-size:1.22rem; font-weight:800;">Arm\u00e1rio Reservado com Sucesso!</h4>
+      <p id="resumoReservaArmario" style="font-size:0.86rem; color:var(--text-muted); line-height:1.5; margin-bottom:1.25rem;"></p>
+      <button type="button" class="armario-hero-btn" style="width:100%;" onclick="fecharModalArmario()">Concluir</button>
     </div>
   </div>
 </div>
@@ -4166,5 +4226,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 </body>
-</html>
 </html>
