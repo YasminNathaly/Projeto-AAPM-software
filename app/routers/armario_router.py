@@ -103,13 +103,13 @@ def reservar_publico(dados: ReservaPublicaRequest, db: Session = Depends(get_db)
     status_atual = (db_armario.status or "").strip().lower()
     if not status_atual.startswith("dispon") and status_atual != "livre":
         raise HTTPException(
-            status_code=400,
-            detail=f"Este arm\u00e1rio n\u00e3o est\u00e1 dispon\u00edvel (status atual: {db_armario.status})."
+        status_code=400,
+        detail=f"Este arm\u00e1rio n\u00e3o est\u00e1 dispon\u00edvel (status atual: {db_armario.status})."
         )
     validade = (datetime.now() + timedelta(hours=24)).strftime("%d/%m %H:%M")
     nome_limpo = dados.nome.strip()
     turma_limpa = dados.turma.strip()
-        db_armario.status = "Ocupado"
+    db_armario.status = "Ocupado"
     db_armario.updated_at = datetime.now()
     db_armario.nome_completo = nome_limpo
     db_armario.curso = turma_limpa
