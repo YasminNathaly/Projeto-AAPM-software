@@ -3724,15 +3724,15 @@ document.addEventListener('DOMContentLoaded', () => {
   <div class="modal-armario-card">
     <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.2rem;">
       <div>
-        <span style="font-size:0.72rem; letter-spacing:0.08em; text-transform:uppercase; color:#f3132b; font-weight:800;">Reserva de Arm\u00e1rio</span>
-        <h3 style="margin:0.2rem 0 0; font-size:1.35rem; font-weight:800;">Solicitar Arm\u00e1rio \u2014 SENAI Br\u00e1s</h3>
+        <span style="font-size:0.72rem; letter-spacing:0.08em; text-transform:uppercase; color:#f3132b; font-weight:800;">Reserva de Armário</span>
+        <h3 style="margin:0.2rem 0 0; font-size:1.35rem; font-weight:800;">Solicitar Armário — SENAI Brás</h3>
       </div>
       <button type="button" class="modal-close" onclick="fecharModalArmario()" aria-label="Fechar">&times;</button>
     </div>
 
     <form id="formArmarioStep1" onsubmit="enviarCodigoArmario(event)" style="display:flex; flex-direction:column; gap:0.9rem;">
       <div>
-        <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:5px; color:var(--text-muted);">Arm\u00e1rio desejado (Bloco e Andar) *</label>
+        <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:5px; color:var(--text-muted);">Armário desejado (Bloco e Andar) *</label>
         <select id="solArmarioSelect" class="arm-input" required></select>
       </div>
       <div>
@@ -3750,33 +3750,33 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
       <div>
-        <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:6px; color:var(--text-muted);">Receber c\u00f3digo de confirma\u00e7\u00e3o via:</label>
+        <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:6px; color:var(--text-muted);">Receber código de confirmação via:</label>
         <div class="canal-grid">
           <div class="canal-option selected" id="optCanalWhats" onclick="selecionarCanalArmario('WhatsApp')">WhatsApp</div>
           <div class="canal-option" id="optCanalSms" onclick="selecionarCanalArmario('SMS')">SMS</div>
         </div>
       </div>
-      <button type="submit" class="armario-hero-btn" style="width:100%; margin-top:0.35rem;">Enviar C\u00f3digo de Confirma\u00e7\u00e3o</button>
+      <button type="submit" class="armario-hero-btn" style="width:100%; margin-top:0.35rem;">Enviar Código de Confirmação</button>
     </form>
 
     <div id="formArmarioStep2" style="display:none;">
       <div class="otp-box">
-        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:5px;" id="otpDestinoTexto">C\u00f3digo enviado!</div>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:5px;" id="otpDestinoTexto">Código enviado!</div>
         <div style="font-size:0.88rem; font-weight:800; color:#f3132b;" id="otpPreviewAviso"></div>
       </div>
       <div style="margin-bottom:0.95rem;">
-        <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:6px; color:var(--text-muted); text-align:center;">Digite o c\u00f3digo de 6 d\u00edgitos:</label>
+        <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:6px; color:var(--text-muted); text-align:center;">Digite o código de 6 dígitos:</label>
         <input type="text" id="inputCodigoArmario" class="otp-input" maxlength="6" inputmode="numeric" placeholder="000000">
         <div id="erroCodigoArmario" style="color:#f3132b; font-size:0.78rem; text-align:center; margin-top:6px; display:none;"></div>
       </div>
-      <button type="button" class="armario-hero-btn" style="width:100%;" onclick="confirmarCodigoArmario()">Confirmar Reserva do Arm\u00e1rio</button>
+      <button type="button" class="armario-hero-btn" style="width:100%;" onclick="confirmarCodigoArmario()">Confirmar Reserva do Armário</button>
       <a id="btnAbrirWhatsReal" href="#" target="_blank" style="display:block; text-align:center; margin-top:0.75rem; font-size:0.8rem; font-weight:700; color:#25D366; text-decoration:none;">Falar com a equipe no WhatsApp (11) 95161-1320 &rarr;</a>
       <button type="button" style="width:100%; margin-top:0.55rem; background:transparent; border:none; color:var(--text-muted); font-size:0.8rem; cursor:pointer;" onclick="voltarStep1Armario()">&larr; Voltar e editar dados</button>
     </div>
 
     <div id="formArmarioStep3" style="display:none; text-align:center; padding:0.75rem 0;">
       <div style="width:58px; height:58px; border-radius:50%; background:rgba(16,185,129,0.15); color:#10b981; display:flex; align-items:center; justify-content:center; margin:0 auto 0.9rem; font-size:1.8rem; font-weight:800;">&#10003;</div>
-      <h4 style="margin:0 0 0.45rem; font-size:1.22rem; font-weight:800;">Arm\u00e1rio Reservado com Sucesso!</h4>
+      <h4 style="margin:0 0 0.45rem; font-size:1.22rem; font-weight:800;">Armário Reservado com Sucesso!</h4>
       <p id="resumoReservaArmario" style="font-size:0.86rem; color:var(--text-muted); line-height:1.5; margin-bottom:1.25rem;"></p>
       <button type="button" class="armario-hero-btn" style="width:100%;" onclick="fecharModalArmario()">Concluir</button>
     </div>
@@ -3790,12 +3790,12 @@ let dadosSolicitacaoArmario = null;
 
 function formatarLocalSenai(loc, idx = 0) {
   const mapaAndares = [
-    'Bloco 1 - T\u00e9rreo',
-    'Bloco 1 - 1\u00ba Andar',
-    'Bloco 1 - 2\u00ba Andar',
-    'Bloco 2 - T\u00e9rreo',
-    'Bloco 2 - 1\u00ba Andar',
-    'Bloco 2 - 2\u00ba Andar'
+    'Bloco 1 - Térreo',
+    'Bloco 1 - 1º Andar',
+    'Bloco 1 - 2º Andar',
+    'Bloco 2 - Térreo',
+    'Bloco 2 - 1º Andar',
+    'Bloco 2 - 2º Andar'
   ];
   if (!loc || /Bloco [A-Z]/i.test(loc) || loc === '-') {
     return mapaAndares[idx % mapaAndares.length];
@@ -3812,15 +3812,15 @@ function selecionarCanalArmario(canal) {
 function popularSelectArmarios(numeroPreSelecionado = '') {
   const sel = document.getElementById('solArmarioSelect');
   if (!sel) return;
-  const disponiveis = (typeof armariosPublic !== 'undefined' ? armariosPublic : []).filter(a => a.status === 'Dispon\u00edvel');
+  const disponiveis = (typeof armariosPublic !== 'undefined' ? armariosPublic : []).filter(a => a.status === 'Disponível');
   if (!disponiveis.length) {
-    sel.innerHTML = '<option value="">Nenhum arm\u00e1rio dispon\u00edvel no momento</option>';
+    sel.innerHTML = '<option value="">Nenhum armário disponível no momento</option>';
     return;
   }
   sel.innerHTML = disponiveis.map((a, idx) => {
     const localFormatado = formatarLocalSenai(a.localizacao, idx);
     const selected = String(a.numero) === String(numeroPreSelecionado) ? 'selected' : '';
-    return `<option value="${a.id}" data-numero="${a.numero}" data-local="${localFormatado}" ${selected}>Arm\u00e1rio ${a.numero} \u2014 ${localFormatado}</option>`;
+    return `<option value="${a.id}" data-numero="${a.numero}" data-local="${localFormatado}" ${selected}>Armário ${a.numero} — ${localFormatado}</option>`;
   }).join('');
 }
 
@@ -3857,18 +3857,18 @@ function enviarCodigoArmario(e) {
   };
 
   const msgWhats = encodeURIComponent(
-    `Ol\u00e1! Solicita\u00e7\u00e3o de arm\u00e1rio no Portal SENAI Br\u00e1s:\n` +
-    `- Arm\u00e1rio: ${opt.dataset.numero} (${opt.dataset.local})\n` +
+    `Olá! Solicitação de armário no Portal SENAI Brás:\n` +
+    `- Armário: ${opt.dataset.numero} (${opt.dataset.local})\n` +
     `- Aluno: ${nome}\n` +
     `- Turma/Curso: ${turma}\n` +
     `- Contato: ${tel}\n` +
-    `- C\u00f3digo de valida\u00e7\u00e3o: ${codigoGeradoArmario}`
+    `- Código de validação: ${codigoGeradoArmario}`
   );
   const linkWhats = document.getElementById('btnAbrirWhatsReal');
   if (linkWhats) linkWhats.href = `https://wa.me/5511951611320?text=${msgWhats}`;
 
-  document.getElementById('otpDestinoTexto').textContent = `Enviamos um c\u00f3digo via ${canalArmarioSelecionado} para ${tel}`;
-  document.getElementById('otpPreviewAviso').textContent = `Notifica\u00e7\u00e3o ${canalArmarioSelecionado}: Seu c\u00f3digo Portal SENAI Br\u00e1s \u00e9 ${codigoGeradoArmario}`;
+  document.getElementById('otpDestinoTexto').textContent = `Enviamos um código via ${canalArmarioSelecionado} para ${tel}`;
+  document.getElementById('otpPreviewAviso').textContent = `Notificação ${canalArmarioSelecionado}: Seu código Portal SENAI Brás é ${codigoGeradoArmario}`;
   document.getElementById('inputCodigoArmario').value = '';
   document.getElementById('formArmarioStep1').style.display = 'none';
   document.getElementById('formArmarioStep2').style.display = 'block';
@@ -3879,7 +3879,7 @@ async function confirmarCodigoArmario() {
   const digitado = document.getElementById('inputCodigoArmario').value.trim();
   const erroEl = document.getElementById('erroCodigoArmario');
   if (digitado !== codigoGeradoArmario) {
-    erroEl.textContent = 'C\u00f3digo incorreto. Confira os 6 d\u00edgitos enviados e tente novamente.';
+    erroEl.textContent = 'Código incorreto. Confira os 6 dígitos enviados e tente novamente.';
     erroEl.style.display = 'block';
     return;
   }
@@ -3903,7 +3903,7 @@ async function confirmarCodigoArmario() {
   }
 
   document.getElementById('resumoReservaArmario').innerHTML =
-    `O <strong>Arm\u00e1rio ${dadosSolicitacaoArmario.numero}</strong> (${dadosSolicitacaoArmario.localizacao}) foi reservado para <strong>${dadosSolicitacaoArmario.nome}</strong> (${dadosSolicitacaoArmario.turma}) e j\u00e1 consta como <strong>Ocupado</strong> no sistema.`;
+    `O <strong>Armário ${dadosSolicitacaoArmario.numero}</strong> (${dadosSolicitacaoArmario.localizacao}) foi reservado para <strong>${dadosSolicitacaoArmario.nome}</strong> (${dadosSolicitacaoArmario.turma}) e já consta como <strong>Ocupado</strong> no sistema.`;
   document.getElementById('formArmarioStep2').style.display = 'none';
   document.getElementById('formArmarioStep3').style.display = 'block';
 }
@@ -3920,7 +3920,7 @@ function atualizarTabelaArmariosVisual() {
     tr.dataset.ctaAdded = '1';
     const texto = tr.innerText;
     const num = tds[0] ? tds[0].innerText.replace(/\D+/g, '') : '';
-    if (texto.includes('Dispon\u00edvel') && num) {
+    if (texto.includes('Disponível') && num) {
       const tdAcao = document.createElement('td');
       tdAcao.style.textAlign = 'right';
       tdAcao.innerHTML = `<button type="button" class="btn-solicitar-armario" onclick="abrirModalArmario('${num}')">Solicitar</button>`;
@@ -3944,8 +3944,8 @@ document.addEventListener('DOMContentLoaded', () => {
     infoCard.id = 'pixInfoCard';
     infoCard.className = 'pix-info-card';
     infoCard.innerHTML = `
-      <div><span>Favorecido</span><strong>Portal SENAI Br\u00e1s</strong></div>
-      <div><span>Institui\u00e7\u00e3o</span><strong>SENAI Francisco Matarazzo</strong></div>
+      <div><span>Favorecido</span><strong>Portal SENAI Brás</strong></div>
+      <div><span>Instituição</span><strong>SENAI Francisco Matarazzo</strong></div>
       <div><span>Chave PIX</span><strong>aapm@sp.senai.br</strong></div>
       <div><span>Status</span><strong>Aguardando Banco</strong></div>
     `;
@@ -3953,13 +3953,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const secNote = document.createElement('div');
     secNote.className = 'pix-security-note';
-    secNote.innerHTML = `<strong>Seguran\u00e7a Banc\u00e1ria:</strong> Em produ\u00e7\u00e3o, o estoque s\u00f3 \u00e9 baixado ap\u00f3s confirma\u00e7\u00e3o autom\u00e1tica via <em>Webhook</em> do banco (PSP). Abaixo est\u00e1 ativo o modo de simula\u00e7\u00e3o para apresenta\u00e7\u00e3o.`;
+    secNote.innerHTML = `<strong>Segurança Bancária:</strong> Em produção, o estoque só é baixado após confirmação automática via <em>Webhook</em> do banco (PSP). Abaixo está ativo o modo de simulação para apresentação.`;
     pixBox.parentNode.insertBefore(secNote, pixBox);
 
     const demoBtn = document.createElement('button');
     demoBtn.type = 'button';
     demoBtn.className = 'btn-demo-pix';
-    demoBtn.textContent = '\u26a1 Simular Webhook Banc\u00e1rio (Modo Apresenta\u00e7\u00e3o)';
+    demoBtn.textContent = '⚡ Simular Webhook Bancário (Modo Apresentação)';
     demoBtn.onclick = () => {
       pixBox.parentNode.querySelectorAll('input[type="text"]').forEach(inp => {
         if (!inp.readOnly) {
