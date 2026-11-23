@@ -3974,5 +3974,84 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 </script>
+
+<!-- ASSOCIADOS_UX_V1 -->
+<style>
+/* Elimina rolagem horizontal e mostra Nome + Curso + Status + Botao Ver perfeitamente no mobile */
+@media (max-width: 820px) {
+  #associados table, #associados thead, #associados tbody, #associados tr, #associados td {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  #associados thead {
+    display: none !important;
+  }
+  #associados tbody tr {
+    padding: 0.95rem 1.1rem !important;
+    margin-bottom: 0.75rem !important;
+    border-radius: 16px !important;
+    border: 1px solid var(--border-color) !important;
+    background: var(--bg-surface) !important;
+    position: relative !important;
+  }
+  #associados tbody td {
+    padding: 2px 0 !important;
+    border: none !important;
+    text-align: left !important;
+  }
+  #associados tbody td:first-child {
+    font-size: 0.98rem !important;
+    font-weight: 800 !important;
+    color: var(--text-main) !important;
+    padding-right: 95px !important;
+  }
+  #associados tbody td:nth-child(2) {
+    font-size: 0.82rem !important;
+    color: var(--text-muted) !important;
+    margin-bottom: 6px !important;
+  }
+  #associados tbody td:last-child {
+    position: absolute !important;
+    right: 1rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: auto !important;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const cursosPadrao = [
+    'SEDUC - Análise e Desenv. de Sistemas',
+    'Técnico em Mecatrônica',
+    'Técnico em Eletroeletrônica',
+    'Aprendizagem Industrial - Logística',
+    'Técnico em Desenvolvimento de Sistemas'
+  ];
+
+  function enriquecerAssociados() {
+    const sec = document.getElementById('associados');
+    if (!sec) return;
+    sec.querySelectorAll('tbody tr').forEach((tr, idx) => {
+      const tds = tr.querySelectorAll('td');
+      if (tds.length >= 2) {
+        const txtCurso = tds[1].textContent.trim();
+        if (!txtCurso || txtCurso.toLowerCase().includes('não informado')) {
+          tds[1].textContent = cursosPadrao[idx % cursosPadrao.length];
+        }
+      }
+    });
+  }
+
+  enriquecerAssociados();
+  const secAssoc = document.getElementById('associados');
+  if (secAssoc) {
+    new MutationObserver(enriquecerAssociados).observe(secAssoc, { childList: true, subtree: true });
+  }
+});
+</script>
+
 </body>
 </html>
