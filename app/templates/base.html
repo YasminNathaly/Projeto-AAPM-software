@@ -1307,63 +1307,6 @@
     .a11y-opt-btn:hover { border-color: var(--primary); }
   </style>
 
-<!-- FIX_CAROUSEL_SCROLL -->
-<style>
-/* Trava a altura do hero/carrossel para que a troca de textos nao mude a altura da pagina e empurre o scroll */
-.hero, .hero-slider, .carousel, [class*="hero"] {
-  overflow-anchor: none !important;
-}
-html, body {
-  overflow-anchor: none !important;
-  scroll-behavior: auto !important;
-}
-</style>
-<script>
-(function() {
-  let ultimaInteracao = 0;
-  ['wheel', 'touchstart', 'touchmove', 'keydown', 'mousedown', 'pointerdown'].forEach(evt => {
-    window.addEventListener(evt, () => { ultimaInteracao = Date.now(); }, { passive: true, capture: true });
-  });
-
-  // 1. Impede .focus() de rolar a tela
-  const origFocus = HTMLElement.prototype.focus;
-  HTMLElement.prototype.focus = function(opts) {
-    try { return origFocus.call(this, Object.assign({}, opts, { preventScroll: true })); }
-    catch (e) { return origFocus.call(this); }
-  };
-
-  // 2. Bloqueia scrollIntoView() disparado por timers/carrossel sem clique recente do usuario
-  const origScrollIntoView = Element.prototype.scrollIntoView;
-  Element.prototype.scrollIntoView = function(...args) {
-    if (Date.now() - ultimaInteracao > 350) return;
-    return origScrollIntoView.apply(this, args);
-  };
-
-  // 3. Bloqueia scrollTo / scrollBy disparados automaticamente sem acao do usuario
-  const origScrollTo = window.scrollTo;
-  window.scrollTo = function(...args) {
-    if (window.scrollY > 80 && (Date.now() - ultimaInteracao > 350)) return;
-    return origScrollTo.apply(window, args);
-  };
-
-  // 4. Congela a posicao vertical (scrollY) se o carrossel alterar a altura do topo enquanto o usuario esta lendo embaixo
-  let ultimoY = window.scrollY;
-  window.addEventListener('scroll', () => {
-    if (Date.now() - ultimaInteracao <= 400) {
-      ultimoY = window.scrollY;
-    }
-  }, { passive: true });
-
-  setInterval(() => {
-    if (Date.now() - ultimaInteracao > 500 && Math.abs(window.scrollY - ultimoY) > 40 && ultimoY > 100) {
-      origScrollTo.call(window, 0, ultimoY);
-    } else {
-      ultimoY = window.scrollY;
-    }
-  }, 120);
-})();
-</script>
-
 </head>
 <body>
 
@@ -4224,4 +4167,62 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 </script>
+
+<!-- FIX_CAROUSEL_SCROLL -->
+<style>
+html, body {
+  overflow-anchor: none !important;
+  scroll-behavior: auto !important;
+}
+</style>
+<script>
+(function() {
+  let scrollPermitidoY = window.scrollY || 0;
+  let ultimaAcaoUsuario = 0;
+
+  function registrarInteracao() {
+    ultimaAcaoUsuario = Date.now();
+  }
+
+  ['wheel', 'touchstart', 'touchmove', 'keydown', 'mousedown', 'pointerdown'].forEach(evt => {
+    window.addEventListener(evt, registrarInteracao, { passive: true, capture: true });
+  });
+
+  // Atualiza scrollPermitidoY APENAS quando foi o proprio usuario que rolou ou clicou em um link de navegacao
+  window.addEventListener('scroll', () => {
+    if (Date.now() - ultimaAcaoUsuario <= 500) {
+      scrollPermitidoY = window.scrollY;
+    } else if (scrollPermitidoY > 120 && Math.abs(window.scrollY - scrollPermitidoY) > 50) {
+      // Se um timer automatico (carrossel) puxou a tela para cima/baixo sem acao do usuario, devolve instantaneamente!
+      window.scrollTo({ top: scrollPermitidoY, behavior: 'instant' });
+    }
+  }, { passive: true });
+
+  // Bloqueia .focus() de rolar a pagina
+  const origFocus = HTMLElement.prototype.focus;
+  HTMLElement.prototype.focus = function(opts) {
+    try { return origFocus.call(this, Object.assign({}, opts, { preventScroll: true })); }
+    catch (e) { return origFocus.call(this); }
+  };
+
+  // Bloqueia scrollIntoView() disparado por carrossel sem clique recente do usuario
+  const origScrollIntoView = Element.prototype.scrollIntoView;
+  Element.prototype.scrollIntoView = function(...args) {
+    if (Date.now() - ultimaAcaoUsuario > 400) return;
+    return origScrollIntoView.apply(this, args);
+  };
+
+  // Impede que links de slide (#slide-2, #) joguem a tela para o topo
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (a) {
+      const href = a.getAttribute('href');
+      if (href === '#' || href.toLowerCase().includes('slide') || href.toLowerCase().includes('carousel')) {
+        e.preventDefault();
+      }
+    }
+  }, true);
+})();
+</script>
+
 </body></html></html>
