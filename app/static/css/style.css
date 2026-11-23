@@ -1701,3 +1701,17 @@
       }
       .detail-close, .comp-actions { display: none !important; }
     }
+
+
+/* Correcao de rolagem dos modais em dispositivos moveis */
+@media (max-width: 768px) {
+  .modal, .modal-overlay, [id*="modal"], [class*="modal"] {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    align-items: flex-start !important;
+  }
+  .modal-content, .modal-box, .modal-dialog {
+    max-height: none !important;
+    margin: 16px auto 32px auto !important;
+  }
+}
