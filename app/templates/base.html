@@ -3506,5 +3506,73 @@
       document.documentElement.classList.remove('a11y-high-contrast');
     }
   </script>
+
+<style>
+@media (max-width: 900px) {
+  .mobile-menu {
+    width: min(82vw, 310px) !important;
+    padding: 1.25rem !important;
+    transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1) !important;
+  }
+  .mobile-menu-backdrop {
+    transition: opacity 0.2s ease !important;
+  }
+  .mobile-menu .modal-close {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    font-size: 1.7rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    cursor: pointer !important;
+  }
+  .mobile-nav-item {
+    display: block !important;
+    padding: 1rem !important;
+    font-size: 1rem !important;
+    cursor: pointer !important;
+  }
+  body.mobile-menu-open {
+    overflow: hidden !important;
+  }
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const menu = document.getElementById('mobileMenu');
+  const backdrop = document.getElementById('mobileMenuBackdrop');
+  if (!menu) return;
+
+  function fecharAgora() {
+    if (typeof closeMobileMenu === 'function') closeMobileMenu();
+    menu.classList.remove('active');
+    if (backdrop) backdrop.classList.remove('active');
+    document.body.classList.remove('mobile-menu-open');
+  }
+
+  // Fecha imediatamente ao tocar em qualquer link dentro do menu
+  menu.querySelectorAll('a, button:not(.modal-close)').forEach(el => {
+    el.addEventListener('click', () => setTimeout(fecharAgora, 60));
+  });
+
+  // Permite fechar deslizando o dedo para a direita (swipe)
+  let touchStartX = 0;
+  menu.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+  menu.addEventListener('touchend', (e) => {
+    if (e.changedTouches[0].screenX - touchStartX > 45) fecharAgora();
+  }, { passive: true });
+
+  // Observa abertura do menu para travar rolagem de fundo
+  const obs = new MutationObserver(() => {
+    document.body.classList.toggle('mobile-menu-open', menu.classList.contains('active'));
+  });
+  obs.observe(menu, { attributes: true, attributeFilter: ['class'] });
+});
+</script>
 </body>
 </html>
