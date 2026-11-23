@@ -1307,6 +1307,18 @@
     .a11y-opt-btn:hover { border-color: var(--primary); }
   </style>
 
+
+<!-- FIX_CAROUSEL_SCROLL -->
+<style>
+.hero { min-height: 540px !important; }
+.hero-content, .hero-title, .hero-desc { overflow-anchor: none !important; }
+@media (max-width: 768px) {
+  .hero { min-height: 460px !important; }
+  .hero-title { min-height: 3.4em !important; }
+  .hero-desc { min-height: 4.5em !important; }
+}
+</style>
+
 </head>
 <body>
 
@@ -3041,7 +3053,7 @@
       }
     }
 
-    const dragNavigationViews = ['inicio', 'produtos', 'associados', 'fale-conosco', 'armarios'];
+    const dragNavigationViews = []; // Desativado para evitar salto acidental ao rolar a pagina
     let dragStartX = null;
     let dragMoved = false;
     let bloquearProximoClique = false;
@@ -4166,63 +4178,6 @@ document.addEventListener('DOMContentLoaded', () => {
     new MutationObserver(enriquecerAssociados).observe(secAssoc, { childList: true, subtree: true });
   }
 });
-</script>
-
-<!-- FIX_CAROUSEL_SCROLL -->
-<style>
-html, body {
-  overflow-anchor: none !important;
-  scroll-behavior: auto !important;
-}
-</style>
-<script>
-(function() {
-  let scrollPermitidoY = window.scrollY || 0;
-  let ultimaAcaoUsuario = 0;
-
-  function registrarInteracao() {
-    ultimaAcaoUsuario = Date.now();
-  }
-
-  ['wheel', 'touchstart', 'touchmove', 'keydown', 'mousedown', 'pointerdown'].forEach(evt => {
-    window.addEventListener(evt, registrarInteracao, { passive: true, capture: true });
-  });
-
-  // Atualiza scrollPermitidoY APENAS quando foi o proprio usuario que rolou ou clicou em um link de navegacao
-  window.addEventListener('scroll', () => {
-    if (Date.now() - ultimaAcaoUsuario <= 500) {
-      scrollPermitidoY = window.scrollY;
-    } else if (scrollPermitidoY > 120 && Math.abs(window.scrollY - scrollPermitidoY) > 50) {
-      // Se um timer automatico (carrossel) puxou a tela para cima/baixo sem acao do usuario, devolve instantaneamente!
-      window.scrollTo({ top: scrollPermitidoY, behavior: 'instant' });
-    }
-  }, { passive: true });
-
-  // Bloqueia .focus() de rolar a pagina
-  const origFocus = HTMLElement.prototype.focus;
-  HTMLElement.prototype.focus = function(opts) {
-    try { return origFocus.call(this, Object.assign({}, opts, { preventScroll: true })); }
-    catch (e) { return origFocus.call(this); }
-  };
-
-  // Bloqueia scrollIntoView() disparado por carrossel sem clique recente do usuario
-  const origScrollIntoView = Element.prototype.scrollIntoView;
-  Element.prototype.scrollIntoView = function(...args) {
-    if (Date.now() - ultimaAcaoUsuario > 400) return;
-    return origScrollIntoView.apply(this, args);
-  };
-
-  // Impede que links de slide (#slide-2, #) joguem a tela para o topo
-  document.addEventListener('click', (e) => {
-    const a = e.target.closest('a[href^="#"]');
-    if (a) {
-      const href = a.getAttribute('href');
-      if (href === '#' || href.toLowerCase().includes('slide') || href.toLowerCase().includes('carousel')) {
-        e.preventDefault();
-      }
-    }
-  }, true);
-})();
 </script>
 
 </body></html></html>
