@@ -1021,10 +1021,10 @@
     .mobile-nav-item:hover, .mobile-nav-item.active { background: var(--primary); color: #fff; }
     .mobile-nav-item + .mobile-nav-item { margin-top: 4px; }
 
-    .cart-btn { position: relative; }
+    .cart-btn, #cartBtn { position: relative !important; overflow: visible !important; }
     .cart-badge {
       position: absolute;
-      top: -4px; right: -4px;
+      top: -6px !important; right: -6px !important; z-index: 25 !important;
       min-width: 17px; height: 17px;
       padding: 0 4px;
       border-radius: var(--radius-pill);
@@ -3710,7 +3710,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
         <div>
           <label style="display:block; font-size:0.8rem; margin-bottom:4px;">Turma / Curso *</label>
-          <input type="text" id="solArmarioTurma" class="form-control" placeholder="Ex.: 2? DS / Mecatr?nica" required>
+          <input type="text" id="solArmarioTurma" class="form-control" placeholder="Ex.: 2º DS / Mecatrônica" required>
         </div>
         <div>
           <label style="display:block; font-size:0.8rem; margin-bottom:4px;">WhatsApp / Telefone *</label>
@@ -3832,307 +3832,302 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 </script>
+
 <!-- UX_PATCH_V1 -->
 <style>
-/* Bolinha do carrinho sem corte */
-.icon-btn:has(.cart-badge), .cart-btn {
-  overflow: visible !important;
-  position: relative !important;
-}
+.icon-btn:has(.cart-badge), .cart-btn { overflow: visible !important; position: relative !important; }
 .cart-badge {
-  top: -5px !important;
-  right: -5px !important;
-  min-width: 19px !important;
-  height: 19px !important;
-  padding: 0 5px !important;
-  font-size: 0.7rem !important;
-  font-weight: 800 !important;
-  border: 2px solid var(--bg-main) !important;
-  z-index: 15 !important;
+  top: -6px !important; right: -6px !important;
+  min-width: 20px !important; height: 20px !important;
+  padding: 0 5px !important; font-size: 0.72rem !important; font-weight: 800 !important;
+  border: 2px solid var(--bg-main) !important; z-index: 25 !important;
 }
 
-/* Card informativo do PIX + aviso de seguranca */
-.pix-info-card {
-  background: var(--bg-surface-2, rgba(128,128,140,0.08));
-  border: 1px solid var(--border-color);
-  border-radius: 14px;
-  padding: 0.85rem 1rem;
-  margin: 0.75rem 0 0.9rem;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.65rem;
-  text-align: left;
-  font-size: 0.82rem;
-}
-.pix-info-card div span {
-  display: block;
-  color: var(--text-muted);
-  font-size: 0.72rem;
-  margin-bottom: 2px;
-}
-.pix-info-card div strong {
-  color: var(--text-main);
-  font-size: 0.86rem;
-}
-.pix-security-note {
-  font-size: 0.76rem;
-  color: var(--text-muted);
-  background: rgba(243, 19, 43, 0.06);
-  border-left: 3px solid #f3132b;
-  padding: 0.55rem 0.75rem;
-  border-radius: 0 8px 8px 0;
-  text-align: left;
-  margin-bottom: 0.85rem;
-  line-height: 1.4;
-}
-.btn-demo-pix {
-  width: 100%;
-  margin-top: 0.6rem;
-  padding: 0.62rem 0.9rem;
-  border-radius: 999px;
-  border: 1px dashed rgba(243, 19, 43, 0.5);
-  background: rgba(243, 19, 43, 0.09);
-  color: #f3132b;
-  font-size: 0.78rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.btn-demo-pix:hover {
-  background: rgba(243, 19, 43, 0.18);
-}
-
-/* Banner e Botoes de Armarios (100% alinhados ao tema do site) */
 .armario-cta-banner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.2rem;
-  margin: 0 7vw 1.5rem;
-  padding: 1.25rem 1.6rem;
-  border-radius: 18px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 1.2rem; margin: 0 7vw 1.5rem; padding: 1.35rem 1.7rem;
+  border-radius: 20px; background: var(--bg-surface);
+  border: 1px solid var(--border-color); box-shadow: 0 12px 32px rgba(0,0,0,0.08);
 }
-.armario-cta-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex: 1;
-  min-width: 240px;
-}
+.armario-cta-info { display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 240px; }
+.armario-cta-info strong { display: block; font-size: 1.02rem; color: var(--text-main); margin-bottom: 3px; }
+.armario-cta-info span { display: block; font-size: 0.84rem; color: var(--text-muted); line-height: 1.4; }
 .armario-cta-icon {
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
-  background: rgba(243, 19, 43, 0.12);
-  color: #f3132b;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  width: 50px; height: 50px; border-radius: 15px;
+  background: rgba(243, 19, 43, 0.12); color: #f3132b;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 .btn-armario-main {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.78rem 1.45rem;
-  border-radius: 999px;
-  border: none;
-  background: linear-gradient(135deg, #f3132b, #c90c20);
-  color: #ffffff;
-  font-family: inherit;
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  cursor: pointer;
-  box-shadow: 0 8px 20px rgba(243, 19, 43, 0.28);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  white-space: nowrap;
+  appearance: none !important; -webkit-appearance: none !important;
+  display: inline-flex !important; align-items: center !important; justify-content: center !important;
+  gap: 0.5rem !important; padding: 0.85rem 1.55rem !important;
+  border-radius: 999px !important; border: none !important; outline: none !important;
+  background: linear-gradient(135deg, #f3132b, #c90c20) !important;
+  color: #ffffff !important; font-family: inherit !important;
+  font-size: 0.88rem !important; font-weight: 700 !important; cursor: pointer !important;
+  box-shadow: 0 8px 22px rgba(243, 19, 43, 0.32) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important; white-space: nowrap !important;
 }
-.btn-armario-main:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 26px rgba(243, 19, 43, 0.38);
-}
+.btn-armario-main:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(243, 19, 43, 0.42) !important; }
 .btn-solicitar-armario {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.42rem 0.95rem;
-  border-radius: 999px;
-  border: 1px solid rgba(243, 19, 43, 0.4);
-  background: rgba(243, 19, 43, 0.1);
-  color: #f3132b;
-  font-family: inherit;
-  font-size: 0.78rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+  appearance: none !important; display: inline-flex !important; align-items: center !important;
+  padding: 0.42rem 0.95rem !important; border-radius: 999px !important;
+  border: 1px solid rgba(243, 19, 43, 0.45) !important;
+  background: rgba(243, 19, 43, 0.1) !important; color: #f3132b !important;
+  font-family: inherit !important; font-size: 0.78rem !important; font-weight: 700 !important;
+  cursor: pointer !important; transition: all 0.2s ease !important;
 }
-.btn-solicitar-armario:hover {
-  background: #f3132b;
-  color: #ffffff;
-  border-color: #f3132b;
-}
+.btn-solicitar-armario:hover { background: #f3132b !important; color: #ffffff !important; }
 @media (max-width: 900px) {
-  .armario-cta-banner { margin-left: 5vw; margin-right: 5vw; padding: 1.1rem; }
-  .btn-armario-main { width: 100%; justify-content: center; }
+  .armario-cta-banner { margin-left: 5vw; margin-right: 5vw; padding: 1.15rem; }
+  .btn-armario-main { width: 100% !important; }
 }
 
-/* Modal Solicitar Armario */
 .modal-armario-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(5, 5, 10, 0.72);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  z-index: 1200;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
+  position: fixed; inset: 0; background: rgba(5, 5, 10, 0.75);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  z-index: 1300; display: none; align-items: center; justify-content: center; padding: 1rem;
 }
-.modal-armario-overlay.active {
-  display: flex;
-}
+.modal-armario-overlay.active { display: flex; }
 .modal-armario-card {
-  width: min(94vw, 450px);
-  background: var(--bg-surface);
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
-  border-radius: 22px;
-  padding: 1.6rem;
+  width: min(94vw, 460px); background: var(--bg-surface); color: var(--text-main);
+  border: 1px solid var(--border-color); border-radius: 24px; padding: 1.75rem;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+.modal-armario-card .arm-input {
+  width: 100% !important; box-sizing: border-box !important;
+  padding: 0.78rem 1rem !important; border-radius: 12px !important;
+  border: 1px solid var(--border-color) !important;
+  background: var(--bg-main) !important; color: var(--text-main) !important;
+  font-family: inherit !important; font-size: 0.9rem !important; outline: none !important;
+}
+.modal-armario-card .arm-input:focus { border-color: #f3132b !important; }
+.canal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+.canal-option {
+  display: flex; align-items: center; justify-content: center; gap: 0.45rem;
+  padding: 0.7rem; border-radius: 12px; border: 1px solid var(--border-color);
+  background: var(--bg-main); cursor: pointer; font-size: 0.85rem; font-weight: 700; transition: all 0.2s ease;
+}
+.canal-option.selected { border-color: #f3132b; background: rgba(243, 19, 43, 0.12); color: #f3132b; }
+.otp-box {
+  background: rgba(243, 19, 43, 0.08); border: 1px solid rgba(243, 19, 43, 0.32);
+  border-radius: 16px; padding: 1rem; text-align: center; margin-bottom: 1rem;
+}
+.otp-input {
+  width: 100% !important; box-sizing: border-box !important; text-align: center !important;
+  letter-spacing: 0.45em !important; font-size: 1.55rem !important; font-weight: 800 !important;
+  padding: 0.85rem !important; border-radius: 14px !important;
+  border: 2px solid var(--border-color) !important;
+  background: var(--bg-main) !important; color: var(--text-main) !important;
+}
+.otp-input:focus { border-color: #f3132b !important; outline: none !important; }
+
+.pix-info-card {
+  background: var(--bg-surface-2, rgba(128,128,140,0.08));
+  border: 1px solid var(--border-color); border-radius: 14px;
+  padding: 0.85rem 1rem; margin: 0.75rem 0 0.85rem;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; text-align: left; font-size: 0.82rem;
+}
+.pix-info-card div span { display: block; color: var(--text-muted); font-size: 0.72rem; margin-bottom: 2px; }
+.pix-info-card div strong { color: var(--text-main); font-size: 0.86rem; }
+.pix-security-note {
+  font-size: 0.76rem; color: var(--text-muted); background: rgba(243, 19, 43, 0.06);
+  border-left: 3px solid #f3132b; padding: 0.55rem 0.75rem; border-radius: 0 8px 8px 0;
+  text-align: left; margin-bottom: 0.85rem; line-height: 1.4;
+}
+.btn-demo-pix {
+  width: 100%; margin-top: 0.6rem; padding: 0.62rem 0.9rem; border-radius: 999px;
+  border: 1px dashed rgba(243, 19, 43, 0.5); background: rgba(243, 19, 43, 0.09);
+  color: #f3132b; font-size: 0.78rem; font-weight: 700; cursor: pointer;
 }
 </style>
 
 <div class="modal-armario-overlay" id="modalSolicitarArmario" onclick="if(event.target===this) fecharModalArmario()">
   <div class="modal-armario-card">
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.1rem;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.15rem;">
       <div>
-        <span style="font-size:0.72rem; letter-spacing:0.08em; text-transform:uppercase; color:#f3132b; font-weight:800;">Reserva de Armário</span>
-        <h3 style="margin:0.2rem 0 0; font-size:1.3rem; font-weight:800;">Solicitar Armário — SENAI Brás</h3>
+        <span style="font-size:0.72rem; letter-spacing:0.08em; text-transform:uppercase; color:#f3132b; font-weight:800;">Reserva de Arm\u00e1rio</span>
+        <h3 style="margin:0.2rem 0 0; font-size:1.3rem; font-weight:800;">Solicitar Arm\u00e1rio \u2014 SENAI Br\u00e1s</h3>
       </div>
       <button type="button" class="modal-close" onclick="fecharModalArmario()" aria-label="Fechar">&times;</button>
     </div>
-    <form id="formSolicitarArmario" onsubmit="enviarSolicitacaoArmario(event)" style="display:flex; flex-direction:column; gap:0.9rem;">
+
+    <form id="formArmarioStep1" onsubmit="enviarCodigoArmario(event)" style="display:flex; flex-direction:column; gap:0.85rem;">
       <div>
-        <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:5px; color:var(--text-muted);">Armário desejado *</label>
-        <input type="text" id="solArmarioNumero" class="form-control" placeholder="Ex.: Armário 12 (ou Qualquer disponível)" required>
+        <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:5px; color:var(--text-muted);">Arm\u00e1rio desejado *</label>
+        <select id="solArmarioSelect" class="arm-input" required></select>
       </div>
       <div>
         <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:5px; color:var(--text-muted);">Nome completo do aluno *</label>
-        <input type="text" id="solArmarioNome" class="form-control" placeholder="Digite seu nome completo" required>
+        <input type="text" id="solArmarioNome" class="arm-input" placeholder="Digite seu nome completo" required>
       </div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
         <div>
           <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:5px; color:var(--text-muted);">Turma / Curso *</label>
-          <input type="text" id="solArmarioTurma" class="form-control" placeholder="Ex.: 2º DS / Mecatrônica" required>
+          <input type="text" id="solArmarioTurma" class="arm-input" placeholder="Ex.: 2\u00ba DS / Mecatr\u00f4nica" required>
         </div>
         <div>
-          <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:5px; color:var(--text-muted);">WhatsApp / Telefone *</label>
-          <input type="tel" id="solArmarioTel" class="form-control" placeholder="(11) 99999-9999" required>
+          <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:5px; color:var(--text-muted);">Seu Celular *</label>
+          <input type="tel" id="solArmarioTel" class="arm-input" placeholder="(11) 99999-9999" required>
         </div>
       </div>
-      <button type="submit" class="btn-armario-main" style="width:100%; margin-top:0.35rem; justify-content:center;">
-        Enviar Solicitação de Armário
-      </button>
+      <div>
+        <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:6px; color:var(--text-muted);">Receber c\u00f3digo de confirma\u00e7\u00e3o via:</label>
+        <div class="canal-grid">
+          <div class="canal-option selected" id="optCanalWhats" onclick="selecionarCanalArmario('WhatsApp')">WhatsApp</div>
+          <div class="canal-option" id="optCanalSms" onclick="selecionarCanalArmario('SMS')">SMS</div>
+        </div>
+      </div>
+      <button type="submit" class="btn-armario-main" style="width:100%; margin-top:0.35rem;">Enviar C\u00f3digo de Confirma\u00e7\u00e3o</button>
     </form>
+
+    <div id="formArmarioStep2" style="display:none;">
+      <div class="otp-box">
+        <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:4px;" id="otpDestinoTexto">C\u00f3digo enviado!</div>
+        <div style="font-size:0.85rem; font-weight:800; color:#f3132b;" id="otpPreviewAviso"></div>
+      </div>
+      <div style="margin-bottom:0.9rem;">
+        <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:6px; color:var(--text-muted); text-align:center;">Digite o c\u00f3digo de 6 d\u00edgitos:</label>
+        <input type="text" id="inputCodigoArmario" class="otp-input" maxlength="6" inputmode="numeric" placeholder="000000">
+        <div id="erroCodigoArmario" style="color:#f3132b; font-size:0.78rem; text-align:center; margin-top:6px; display:none;"></div>
+      </div>
+      <button type="button" class="btn-armario-main" style="width:100%;" onclick="confirmarCodigoArmario()">Confirmar Reserva do Arm\u00e1rio</button>
+      <button type="button" style="width:100%; margin-top:0.6rem; background:transparent; border:none; color:var(--text-muted); font-size:0.8rem; cursor:pointer;" onclick="voltarStep1Armario()">&larr; Voltar e editar dados</button>
+    </div>
+
+    <div id="formArmarioStep3" style="display:none; text-align:center; padding:0.75rem 0;">
+      <div style="width:56px; height:56px; border-radius:50%; background:rgba(16,185,129,0.15); color:#10b981; display:flex; align-items:center; justify-content:center; margin:0 auto 0.9rem; font-size:1.7rem; font-weight:800;">&#10003;</div>
+      <h4 style="margin:0 0 0.4rem; font-size:1.2rem; font-weight:800;">Arm\u00e1rio Reservado com Sucesso!</h4>
+      <p id="resumoReservaArmario" style="font-size:0.86rem; color:var(--text-muted); line-height:1.5; margin-bottom:1.2rem;"></p>
+      <button type="button" class="btn-armario-main" style="width:100%;" onclick="fecharModalArmario()">Concluir</button>
+    </div>
   </div>
 </div>
 
 <script>
+let canalArmarioSelecionado = 'WhatsApp';
+let codigoGeradoArmario = '';
+let dadosSolicitacaoArmario = null;
+
+function selecionarCanalArmario(canal) {
+  canalArmarioSelecionado = canal;
+  document.getElementById('optCanalWhats').classList.toggle('selected', canal === 'WhatsApp');
+  document.getElementById('optCanalSms').classList.toggle('selected', canal === 'SMS');
+}
+
+function popularSelectArmarios(numeroPreSelecionado = '') {
+  const sel = document.getElementById('solArmarioSelect');
+  if (!sel) return;
+  const disponiveis = (typeof armariosPublic !== 'undefined' ? armariosPublic : []).filter(a => a.status === 'Dispon\u00edvel');
+  if (!disponiveis.length) {
+    sel.innerHTML = '<option value="">Nenhum arm\u00e1rio dispon\u00edvel no momento</option>';
+    return;
+  }
+  sel.innerHTML = disponiveis.map(a => {
+    const selected = String(a.numero) === String(numeroPreSelecionado) ? 'selected' : '';
+    return `<option value="${a.id}" data-numero="${a.numero}" data-local="${a.localizacao || ''}" ${selected}>Arm\u00e1rio ${a.numero} (${a.localizacao || 'Unidade Br\u00e1s'})</option>`;
+  }).join('');
+}
+
 function abrirModalArmario(numero = '') {
-  const modal = document.getElementById('modalSolicitarArmario');
-  const inputNum = document.getElementById('solArmarioNumero');
-  if (inputNum) inputNum.value = numero ? `Armário ${numero}` : '';
-  if (modal) modal.classList.add('active');
+  popularSelectArmarios(numero);
+  voltarStep1Armario();
+  document.getElementById('formArmarioStep3').style.display = 'none';
+  document.getElementById('modalSolicitarArmario').classList.add('active');
 }
 
 function fecharModalArmario() {
-  const modal = document.getElementById('modalSolicitarArmario');
-  if (modal) modal.classList.remove('active');
+  document.getElementById('modalSolicitarArmario').classList.remove('active');
 }
 
-function enviarSolicitacaoArmario(e) {
+function voltarStep1Armario() {
+  document.getElementById('formArmarioStep1').style.display = 'flex';
+  document.getElementById('formArmarioStep2').style.display = 'none';
+  document.getElementById('erroCodigoArmario').style.display = 'none';
+}
+
+function enviarCodigoArmario(e) {
   e.preventDefault();
-  const armario = document.getElementById('solArmarioNumero').value.trim();
+  const sel = document.getElementById('solArmarioSelect');
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt || !sel.value) return;
+
   const nome = document.getElementById('solArmarioNome').value.trim();
   const turma = document.getElementById('solArmarioTurma').value.trim();
   const tel = document.getElementById('solArmarioTel').value.trim();
 
-  const texto = encodeURIComponent(
-    `Olá! Gostaria de solicitar um armário no Portal SENAI Brás:
-` +
-    `• Armário: ${armario}
-` +
-    `• Aluno: ${nome}
-` +
-    `• Turma/Curso: ${turma}
-` +
-    `• Contato: ${tel}`
-  );
-  fecharModalArmario();
-  window.open(`https://wa.me/5511999999999?text=${texto}`, '_blank');
+  codigoGeradoArmario = String(Math.floor(100000 + Math.random() * 900000));
+  dadosSolicitacaoArmario = {
+    id: sel.value, numero: opt.dataset.numero, localizacao: opt.dataset.local, nome, turma, tel
+  };
+
+  document.getElementById('otpDestinoTexto').textContent = `Enviamos um c\u00f3digo via ${canalArmarioSelecionado} para ${tel}`;
+  document.getElementById('otpPreviewAviso').textContent = `Notifica\u00e7\u00e3o ${canalArmarioSelecionado}: Seu c\u00f3digo Portal SENAI Br\u00e1s \u00e9 ${codigoGeradoArmario}`;
+  document.getElementById('inputCodigoArmario').value = '';
+  document.getElementById('formArmarioStep1').style.display = 'none';
+  document.getElementById('formArmarioStep2').style.display = 'block';
+  document.getElementById('inputCodigoArmario').focus();
+}
+
+async function confirmarCodigoArmario() {
+  const digitado = document.getElementById('inputCodigoArmario').value.trim();
+  const erroEl = document.getElementById('erroCodigoArmario');
+  if (digitado !== codigoGeradoArmario) {
+    erroEl.textContent = 'C\u00f3digo incorreto. Confira os 6 d\u00edgitos enviados e tente novamente.';
+    erroEl.style.display = 'block';
+    return;
+  }
+  erroEl.style.display = 'none';
+
+  try {
+    await fetch(`/api/armarios/${dadosSolicitacaoArmario.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        numero: dadosSolicitacaoArmario.numero,
+        localizacao: dadosSolicitacaoArmario.localizacao,
+        status: 'Ocupado',
+        nome_completo: `${dadosSolicitacaoArmario.nome} (${dadosSolicitacaoArmario.turma})`
+      })
+    });
+  } catch (err) {}
+
+  if (typeof carregarArmariosPublic === 'function') {
+    await carregarArmariosPublic();
+  }
+
+  document.getElementById('resumoReservaArmario').innerHTML =
+    `O <strong>Arm\u00e1rio ${dadosSolicitacaoArmario.numero}</strong> foi reservado para <strong>${dadosSolicitacaoArmario.nome}</strong> (${dadosSolicitacaoArmario.turma}) e j\u00e1 consta como <strong>Ocupado</strong> no sistema.`;
+  document.getElementById('formArmarioStep2').style.display = 'none';
+  document.getElementById('formArmarioStep3').style.display = 'block';
+}
+
+function injetarBotoesArmariosTabela() {
+  const tbody = document.getElementById('tblArmariosPublic');
+  if (!tbody) return;
+  tbody.querySelectorAll('tr').forEach(tr => {
+    if (tr.dataset.ctaAdded) return;
+    tr.dataset.ctaAdded = '1';
+    const texto = tr.innerText;
+    const numCell = tr.querySelector('td');
+    const num = numCell ? numCell.innerText.replace(/\D+/g, '') : '';
+    if (texto.includes('Dispon\u00edvel') && num) {
+      const tdAcao = document.createElement('td');
+      tdAcao.style.textAlign = 'right';
+      tdAcao.innerHTML = `<button type="button" class="btn-solicitar-armario" onclick="abrirModalArmario('${num}')">Solicitar</button>`;
+      tr.appendChild(tdAcao);
+    }
+  });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Garante que o botao pai da bolinha do carrinho tenha overflow visible
   const badge = document.getElementById('cartBadge');
-  if (badge && badge.parentElement) {
-    badge.parentElement.style.overflow = 'visible';
-  }
+  if (badge && badge.parentElement) badge.parentElement.style.overflow = 'visible';
 
-  // 2. Banner de solicitacao na secao Armarios
-  const secArmarios = document.getElementById('armarios');
-  const filtersArmarios = secArmarios ? secArmarios.querySelector('.armarios-filters') : null;
-  if (secArmarios && filtersArmarios && !document.getElementById('bannerSolicitarArmario')) {
-    const banner = document.createElement('div');
-    banner.id = 'bannerSolicitarArmario';
-    banner.className = 'armario-cta-banner';
-    banner.innerHTML = `
-      <div class="armario-cta-info">
-        <div class="armario-cta-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="2" x2="12" y2="22"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/></svg>
-        </div>
-        <div>
-          <strong style="display:block; font-size:0.98rem; margin-bottom:2px;">Precisa reservar um armário na unidade?</strong>
-          <span style="font-size:0.83rem; color:var(--text-muted);">Escolha um armário disponível na lista abaixo ou envie sua solicitação diretamente para a equipe do Portal SENAI Brás.</span>
-        </div>
-      </div>
-      <button type="button" class="btn-armario-main" onclick="abrirModalArmario()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Solicitar Armário
-      </button>
-    `;
-    secArmarios.insertBefore(banner, filtersArmarios);
-  }
+  injetarBotoesArmariosTabela();
+  const tbody = document.getElementById('tblArmariosPublic');
+  if (tbody) new MutationObserver(injetarBotoesArmariosTabela).observe(tbody, { childList: true });
 
-  // 3. Botao "Solicitar" nas linhas disponiveis da tabela de armarios
-  const tbodyArmarios = document.getElementById('tblArmariosPublic');
-  if (tbodyArmarios) {
-    const obsArm = new MutationObserver(() => {
-      tbodyArmarios.querySelectorAll('tr').forEach(tr => {
-        if (tr.dataset.ctaAdded) return;
-        tr.dataset.ctaAdded = '1';
-        const texto = tr.innerText;
-        const numCell = tr.querySelector('td');
-        const num = numCell ? numCell.innerText.replace(/\D+/g, '') : '';
-        if (texto.includes('Disponível') && num) {
-          const tdAcao = document.createElement('td');
-          tdAcao.style.textAlign = 'right';
-          tdAcao.innerHTML = `<button type="button" class="btn-solicitar-armario" onclick="abrirModalArmario('${num}')">Solicitar</button>`;
-          tr.appendChild(tdAcao);
-        }
-      });
-    });
-    obsArm.observe(tbodyArmarios, { childList: true });
-  }
-
-  // 4. Painel PIX: resumo + nota de seguranca + botao de demonstracao
   const pixCheck = document.getElementById('pixDeclaracaoCheck');
   const pixBox = pixCheck ? pixCheck.closest('div') : null;
   if (pixBox && !document.getElementById('pixInfoCard')) {
@@ -4140,8 +4135,8 @@ document.addEventListener('DOMContentLoaded', () => {
     infoCard.id = 'pixInfoCard';
     infoCard.className = 'pix-info-card';
     infoCard.innerHTML = `
-      <div><span>Favorecido</span><strong>Portal SENAI Brás</strong></div>
-      <div><span>Instituição</span><strong>SENAI Francisco Matarazzo</strong></div>
+      <div><span>Favorecido</span><strong>Portal SENAI Br\u00e1s</strong></div>
+      <div><span>Institui\u00e7\u00e3o</span><strong>SENAI Francisco Matarazzo</strong></div>
       <div><span>Chave PIX</span><strong>aapm@sp.senai.br</strong></div>
       <div><span>Status</span><strong>Aguardando Banco</strong></div>
     `;
@@ -4149,16 +4144,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const secNote = document.createElement('div');
     secNote.className = 'pix-security-note';
-    secNote.innerHTML = `<strong>Segurança Bancária:</strong> Em produção, o estoque só é baixado após confirmação automática via <em>Webhook</em> do banco (PSP). Abaixo está ativo o modo de simulação para apresentação.`;
+    secNote.innerHTML = `<strong>Seguran\u00e7a Banc\u00e1ria:</strong> Em produ\u00e7\u00e3o, o estoque s\u00f3 \u00e9 baixado ap\u00f3s confirma\u00e7\u00e3o autom\u00e1tica via <em>Webhook</em> do banco (PSP). Abaixo est\u00e1 ativo o modo de simula\u00e7\u00e3o para apresenta\u00e7\u00e3o.`;
     pixBox.parentNode.insertBefore(secNote, pixBox);
 
     const demoBtn = document.createElement('button');
     demoBtn.type = 'button';
     demoBtn.className = 'btn-demo-pix';
-    demoBtn.textContent = '⚡ Simular Webhook Bancário (Modo Apresentação)';
+    demoBtn.textContent = '\u26a1 Simular Webhook Banc\u00e1rio (Modo Apresenta\u00e7\u00e3o)';
     demoBtn.onclick = () => {
-      const inputs = pixBox.parentNode.querySelectorAll('input[type="text"]');
-      inputs.forEach(inp => {
+      pixBox.parentNode.querySelectorAll('input[type="text"]').forEach(inp => {
         if (!inp.readOnly) {
           inp.value = 'E18236120202611231015DEMO987654';
           inp.dispatchEvent(new Event('input', { bubbles: true }));
@@ -4172,4 +4166,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 </body>
+</html>
 </html>
