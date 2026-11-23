@@ -1308,33 +1308,59 @@
   </style>
 
 <!-- FIX_CAROUSEL_SCROLL -->
+<style>
+/* Trava a altura do hero/carrossel para que a troca de textos nao mude a altura da pagina e empurre o scroll */
+.hero, .hero-slider, .carousel, [class*="hero"] {
+  overflow-anchor: none !important;
+}
+html, body {
+  overflow-anchor: none !important;
+  scroll-behavior: auto !important;
+}
+</style>
 <script>
 (function() {
-  // Impede que .focus() automatico do carrossel puxe a pagina para o topo
-  const origFocus = HTMLElement.prototype.focus;
-  HTMLElement.prototype.focus = function(options) {
-    try {
-      return origFocus.call(this, Object.assign({}, options, { preventScroll: true }));
-    } catch (e) {
-      return origFocus.call(this);
-    }
-  };
-
-  // Bloqueia qualquer scrollTo(0, 0) disparado por timers de slide enquanto o usuario ja rolou a pagina
-  const origScrollTo = window.scrollTo;
-  let ultimaInteracaoUsuario = 0;
-  ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(evt => {
-    window.addEventListener(evt, () => { ultimaInteracaoUsuario = Date.now(); }, { passive: true });
+  let ultimaInteracao = 0;
+  ['wheel', 'touchstart', 'touchmove', 'keydown', 'mousedown', 'pointerdown'].forEach(evt => {
+    window.addEventListener(evt, () => { ultimaInteracao = Date.now(); }, { passive: true, capture: true });
   });
 
+  // 1. Impede .focus() de rolar a tela
+  const origFocus = HTMLElement.prototype.focus;
+  HTMLElement.prototype.focus = function(opts) {
+    try { return origFocus.call(this, Object.assign({}, opts, { preventScroll: true })); }
+    catch (e) { return origFocus.call(this); }
+  };
+
+  // 2. Bloqueia scrollIntoView() disparado por timers/carrossel sem clique recente do usuario
+  const origScrollIntoView = Element.prototype.scrollIntoView;
+  Element.prototype.scrollIntoView = function(...args) {
+    if (Date.now() - ultimaInteracao > 350) return;
+    return origScrollIntoView.apply(this, args);
+  };
+
+  // 3. Bloqueia scrollTo / scrollBy disparados automaticamente sem acao do usuario
+  const origScrollTo = window.scrollTo;
   window.scrollTo = function(...args) {
-    const topAlvo = (typeof args[0] === 'object' && args[0] !== null) ? args[0].top : args[1];
-    // Se algum timer tentar jogar para o topo (0) sem clique recente do usuario, ignora
-    if (topAlvo === 0 && window.scrollY > 120 && (Date.now() - ultimaInteracaoUsuario > 250)) {
-      return;
-    }
+    if (window.scrollY > 80 && (Date.now() - ultimaInteracao > 350)) return;
     return origScrollTo.apply(window, args);
   };
+
+  // 4. Congela a posicao vertical (scrollY) se o carrossel alterar a altura do topo enquanto o usuario esta lendo embaixo
+  let ultimoY = window.scrollY;
+  window.addEventListener('scroll', () => {
+    if (Date.now() - ultimaInteracao <= 400) {
+      ultimoY = window.scrollY;
+    }
+  }, { passive: true });
+
+  setInterval(() => {
+    if (Date.now() - ultimaInteracao > 500 && Math.abs(window.scrollY - ultimoY) > 40 && ultimoY > 100) {
+      origScrollTo.call(window, 0, ultimoY);
+    } else {
+      ultimoY = window.scrollY;
+    }
+  }, 120);
 })();
 </script>
 
