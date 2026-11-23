@@ -3574,5 +3574,263 @@ document.addEventListener('DOMContentLoaded', () => {
   obs.observe(menu, { attributes: true, attributeFilter: ['class'] });
 });
 </script>
+
+<style>
+.cart-btn, #cartBtn, button[onclick*="openCart"] {
+  overflow: visible !important;
+  position: relative !important;
+}
+.cart-badge {
+  top: -6px !important;
+  right: -6px !important;
+  min-width: 20px !important;
+  height: 20px !important;
+  padding: 0 5px !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  border: 2px solid var(--bg-main, #0d0d12) !important;
+  box-shadow: 0 2px 8px rgba(243, 19, 43, 0.55) !important;
+  z-index: 10 !important;
+}
+</style>
+
+<style>
+.pix-info-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  margin: 0.75rem 0 1rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  text-align: left;
+  font-size: 0.82rem;
+}
+.pix-info-card div span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  margin-bottom: 2px;
+}
+.pix-info-card div strong {
+  color: var(--text-main);
+  font-size: 0.88rem;
+}
+.btn-demo-pix {
+  width: 100%;
+  margin-top: 0.55rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  border: 1px dashed rgba(243, 19, 43, 0.55);
+  background: rgba(243, 19, 43, 0.1);
+  color: #ff6b7a;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-demo-pix:hover {
+  background: rgba(243, 19, 43, 0.2);
+}
+.btn-solicitar-armario {
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(243, 19, 43, 0.45);
+  background: rgba(243, 19, 43, 0.12);
+  color: #ff5c6c;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.btn-solicitar-armario:hover {
+  background: #f3132b;
+  color: #fff;
+}
+.armario-cta-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 7vw 1.2rem;
+  padding: 1rem 1.3rem;
+  border-radius: 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+}
+@media (max-width: 900px) {
+  .armario-cta-banner { margin-left: 5vw; margin-right: 5vw; }
+}
+.modal-armario-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 5, 10, 0.72);
+  backdrop-filter: blur(8px);
+  z-index: 1200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.modal-armario-overlay.active {
+  display: flex;
+}
+.modal-armario-card {
+  width: min(94vw, 440px);
+  background: var(--bg-surface, #15151e);
+  border: 1px solid var(--border-color, rgba(255,255,255,0.12));
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+}
+</style>
+
+<div class="modal-armario-overlay" id="modalSolicitarArmario" onclick="if(event.target===this) fecharModalArmario()">
+  <div class="modal-armario-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+      <div>
+        <span style="font-size:0.72rem; letter-spacing:0.08em; text-transform:uppercase; color:#f3132b; font-weight:700;">Reserva de Arm?rio</span>
+        <h3 style="margin:0.2rem 0 0; font-size:1.25rem;">Solicitar Arm?rio ? SENAI Br?s</h3>
+      </div>
+      <button type="button" class="modal-close" onclick="fecharModalArmario()" aria-label="Fechar">&times;</button>
+    </div>
+    <form id="formSolicitarArmario" onsubmit="enviarSolicitacaoArmario(event)" style="display:flex; flex-direction:column; gap:0.85rem;">
+      <div>
+        <label style="display:block; font-size:0.8rem; margin-bottom:4px;">Arm?rio desejado *</label>
+        <input type="text" id="solArmarioNumero" class="form-control" placeholder="Ex.: Arm?rio 12 (ou Qualquer dispon?vel)" required>
+      </div>
+      <div>
+        <label style="display:block; font-size:0.8rem; margin-bottom:4px;">Nome completo do aluno *</label>
+        <input type="text" id="solArmarioNome" class="form-control" placeholder="Digite seu nome completo" required>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+        <div>
+          <label style="display:block; font-size:0.8rem; margin-bottom:4px;">Turma / Curso *</label>
+          <input type="text" id="solArmarioTurma" class="form-control" placeholder="Ex.: 2? DS / Mecatr?nica" required>
+        </div>
+        <div>
+          <label style="display:block; font-size:0.8rem; margin-bottom:4px;">WhatsApp / Telefone *</label>
+          <input type="tel" id="solArmarioTel" class="form-control" placeholder="(11) 99999-9999" required>
+        </div>
+      </div>
+      <button type="submit" class="btn-primary" style="width:100%; margin-top:0.4rem; justify-content:center;">
+        Enviar Solicita??o de Arm?rio
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+function abrirModalArmario(numero = '') {
+  const modal = document.getElementById('modalSolicitarArmario');
+  const inputNum = document.getElementById('solArmarioNumero');
+  if (inputNum) inputNum.value = numero ? `Arm?rio ${numero}` : '';
+  if (modal) modal.classList.add('active');
+}
+
+function fecharModalArmario() {
+  const modal = document.getElementById('modalSolicitarArmario');
+  if (modal) modal.classList.remove('active');
+}
+
+function enviarSolicitacaoArmario(e) {
+  e.preventDefault();
+  const armario = document.getElementById('solArmarioNumero').value.trim();
+  const nome = document.getElementById('solArmarioNome').value.trim();
+  const turma = document.getElementById('solArmarioTurma').value.trim();
+  const tel = document.getElementById('solArmarioTel').value.trim();
+
+  const texto = encodeURIComponent(
+    `Ol?! Gostaria de solicitar um arm?rio no Portal SENAI Br?s:
+` +
+    `? Arm?rio: ${armario}
+` +
+    `? Aluno: ${nome}
+` +
+    `? Turma/Curso: ${turma}
+` +
+    `? Contato: ${tel}`
+  );
+  fecharModalArmario();
+  window.open(`https://wa.me/5511999999999?text=${texto}`, '_blank');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Injeta banner e botao de Solicitar Armario na secao de armarios
+  const secArmarios = document.getElementById('armarios');
+  const filtersArmarios = secArmarios ? secArmarios.querySelector('.armarios-filters') : null;
+  if (secArmarios && filtersArmarios && !document.getElementById('bannerSolicitarArmario')) {
+    const banner = document.createElement('div');
+    banner.id = 'bannerSolicitarArmario';
+    banner.className = 'armario-cta-banner';
+    banner.innerHTML = `
+      <div>
+        <strong style="display:block; font-size:0.95rem;">Precisa reservar um arm?rio na unidade?</strong>
+        <span style="font-size:0.82rem; color:var(--text-muted);">Escolha um arm?rio dispon?vel na lista abaixo ou envie sua solicita??o diretamente para a equipe do Portal SENAI Br?s.</span>
+      </div>
+      <button type="button" class="btn-primary" onclick="abrirModalArmario()">+ Solicitar Arm?rio</button>
+    `;
+    secArmarios.insertBefore(banner, filtersArmarios);
+  }
+
+  // Adiciona botao "Solicitar" nas linhas de armarios disponiveis automaticamente
+  const tbodyArmarios = document.getElementById('tblArmariosPublic');
+  if (tbodyArmarios) {
+    const obsArm = new MutationObserver(() => {
+      tbodyArmarios.querySelectorAll('tr').forEach(tr => {
+        if (tr.dataset.ctaAdded) return;
+        tr.dataset.ctaAdded = '1';
+        const texto = tr.innerText;
+        const numCell = tr.querySelector('td');
+        const num = numCell ? numCell.innerText.replace(/\D+/g, '') : '';
+        if (texto.includes('Dispon?vel') && num) {
+          const tdAcao = document.createElement('td');
+          tdAcao.style.textAlign = 'right';
+          tdAcao.innerHTML = `<button type="button" class="btn-solicitar-armario" onclick="abrirModalArmario('${num}')">Solicitar</button>`;
+          tr.appendChild(tdAcao);
+        }
+      });
+    });
+    obsArm.observe(tbodyArmarios, { childList: true });
+  }
+
+  // 2. Melhora o modal PIX com resumo claro e botao de preenchimento rapido para demonstracao
+  const pixCheck = document.getElementById('pixDeclaracaoCheck');
+  const pixBox = pixCheck ? pixCheck.closest('div') : null;
+  if (pixBox && !document.getElementById('pixInfoCard')) {
+    const infoCard = document.createElement('div');
+    infoCard.id = 'pixInfoCard';
+    infoCard.className = 'pix-info-card';
+    infoCard.innerHTML = `
+      <div><span>Favorecido</span><strong>Portal SENAI Br?s</strong></div>
+      <div><span>Institui??o</span><strong>SENAI Francisco Matarazzo</strong></div>
+      <div><span>Chave PIX</span><strong>aapm@sp.senai.br</strong></div>
+      <div><span>Valida??o</span><strong>Autom?tica / Comprovante</strong></div>
+    `;
+    pixBox.parentNode.insertBefore(infoCard, pixBox);
+
+    const demoBtn = document.createElement('button');
+    demoBtn.type = 'button';
+    demoBtn.className = 'btn-demo-pix';
+    demoBtn.textContent = '? Simular Pagamento Banc?rio (Modo Demonstra??o)';
+    demoBtn.onclick = () => {
+      const inputs = pixBox.parentNode.querySelectorAll('input[type="text"]');
+      inputs.forEach(inp => {
+        if (!inp.readOnly) {
+          inp.value = 'E18236120202611231015DEMO987654';
+          inp.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      });
+      pixCheck.checked = true;
+      pixCheck.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+    pixBox.appendChild(demoBtn);
+  }
+});
+</script>
 </body>
 </html>
