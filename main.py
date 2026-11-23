@@ -892,21 +892,57 @@ try:
     from app.models.armario import Armario as _Armario
     _Base.metadata.create_all(bind=_eng)
     _db = _SL()
-    _exist = {str(a.numero).strip().zfill(3) for a in _db.query(_Armario).all() if a.numero}
     _locais = [
-        "Bloco 1 - T?rreo", "Bloco 1 - 1? Andar", "Bloco 1 - 2? Andar",
-        "Bloco 2 - T?rreo", "Bloco 2 - 1? Andar", "Bloco 2 - 2? Andar"
+        "Bloco 1 - T\u00e9rreo", "Bloco 1 - 1\u00ba Andar", "Bloco 1 - 2\u00ba Andar",
+        "Bloco 2 - T\u00e9rreo", "Bloco 2 - 1\u00ba Andar", "Bloco 2 - 2\u00ba Andar"
+    ]
+    _status_ciclo = [
+        "Ocupado", "Dispon\u00edvel", "Ocupado", "Dispon\u00edvel",
+        "Manuten\u00e7\u00e3o", "Ocupado", "Dispon\u00edvel"
+    ]
+    _nomes = [
+        "Alice dos Santos", "Vin\u00edcius Almeida Rocha", "Carolina Mendes Batista",
+        "Eduardo Nogueira Pinto", "Sabrina Carvalho Lopes", "Gustavo Henrique Tavares",
+        "Helo\u00edsa Martins Azevedo", "Daniel Costa Monteiro", "Priscila Fernandes Moura",
+        "Rodrigo Ribeiro Cunha", "J\u00e9ssica Oliveira Pires", "Felipe Augusto Barreto",
+        "Nat\u00e1lia Teixeira Farias", "Caio C\u00e9sar Vasconcelos", "Raquel Souza Magalh\u00e3es",
+        "Igor Santana Correia", "Monique Dias Rezende", "Matheus Silveira Borges",
+        "Let\u00edcia Cardoso Siqueira", "Henrique Pacheco Moraes", "D\u00e9bora Andrade Campos",
+        "Samuel Gomes Peixoto", "Tailane Cristina Vieira", "Murilo Duarte Nascimento",
+        "Elaine Barbosa Machado", "Ot\u00e1vio Augusto Freitas", "B\u00e1rbara Lima Queiroz",
+        "Renan Moreira Cavalcanti", "Yasmin Monteiro Aguiar", "Arthur Henrique Prado",
+        "Viviane Rocha Teles", "Lucas Gabriel Amaral", "C\u00edntia Alves Fonseca",
+        "Diego Pereira Guimar\u00e3es", "L\u00edvia Castro Medeiros", "Jo\u00e3o Victor Bastos",
+        "Aline Souza Coelho", "Fernando Dias Lacerda", "Mirella Santos Arantes",
+        "Guilherme Nunes Xavier", "Tatiana Martins Toledo", "Rafaela Gomes Chaves",
+        "Bruna Oliveira Ferraz", "Alexandre Costa Sampaio", "Evelyn Carvalho Diniz",
+        "Tiago Almeida Rangel", "K\u00e1tia Regina Brand\u00e3o", "Pedro Lucas Sales",
+        "Melissa Ferreira Paiva", "Nicolas Ribeiro Coutinho", "Camila Santos Figueiredo",
+        "Vitor Hugo Marinho", "St\u00e9fany Lima Domingues", "Leandro Souza Bezerra",
+        "Giovanna Alves Maciel", "Maur\u00edcio Rocha Vargas", "Luana Pereira Antunes",
+        "Fabr\u00edcio Dias Valente", "Daniela Costa Holanda", "Cau\u00e3 Martins Rezende",
+        "Sofia Oliveira Nobre", "Wellington Santos Paes"
     ]
     for _n in range(1, 101):
         _num = f"{_n:03d}"
-        if _num not in _exist:
-            _db.add(_Armario(
-                numero=_num,
-                localizacao=_locais[(_n - 1) % len(_locais)],
-                status="Dispon?vel",
-                nome_completo=None
-            ))
+        _arm = _db.query(_Armario).filter(_Armario.numero == _num).first()
+        _loc = _locais[(_n - 1) % len(_locais)]
+        if not _arm:
+            _arm = _Armario(numero=_num)
+            _db.add(_arm)
+        _arm.localizacao = _loc
+        if _n >= 39:
+            if _n == 39 and _arm.nome_completo:
+                _arm.status = "Ocupado"
+            else:
+                _st = _status_ciclo[(_n - 39) % len(_status_ciclo)]
+                _arm.status = _st
+                _arm.nome_completo = _nomes[(_n - 39) % len(_nomes)] if _st != "Dispon\u00edvel" else None
+        else:
+            if _arm.status and "?" in _arm.status:
+                _arm.status = "Dispon\u00edvel" if _arm.status.startswith("Dispon") else "Manuten\u00e7\u00e3o"
     _db.commit()
     _db.close()
 except Exception as _e:
     print("Aviso seed armarios:", _e)
+
