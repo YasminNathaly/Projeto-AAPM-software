@@ -3977,20 +3977,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <!-- ASSOCIADOS_UX_V1 -->
 <style>
-/* Elimina rolagem horizontal e mostra Nome + Curso + Status + Botao Ver perfeitamente no mobile */
+/* Remove qualquer rolagem horizontal na secao de Associados */
+#associados .table-responsive, #associados .table-wrapper, #associados > div {
+  overflow-x: visible !important;
+}
+
+.assoc-nome-titulo {
+  display: block;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 3px;
+}
+.assoc-curso-sub {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.assoc-mat-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #f3132b;
+  background: rgba(243, 19, 43, 0.1);
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-bottom: 5px;
+}
+
 @media (max-width: 820px) {
   #associados table, #associados thead, #associados tbody, #associados tr, #associados td {
     display: block !important;
     width: 100% !important;
+    max-width: 100% !important;
     box-sizing: border-box !important;
   }
-  #associados thead {
-    display: none !important;
-  }
+  #associados thead { display: none !important; }
   #associados tbody tr {
-    padding: 0.95rem 1.1rem !important;
-    margin-bottom: 0.75rem !important;
-    border-radius: 16px !important;
+    padding: 1rem 1.15rem !important;
+    margin-bottom: 0.8rem !important;
+    border-radius: 18px !important;
     border: 1px solid var(--border-color) !important;
     background: var(--bg-surface) !important;
     position: relative !important;
@@ -4001,46 +4028,133 @@ document.addEventListener('DOMContentLoaded', () => {
     text-align: left !important;
   }
   #associados tbody td:first-child {
-    font-size: 0.98rem !important;
-    font-weight: 800 !important;
-    color: var(--text-main) !important;
-    padding-right: 95px !important;
-  }
-  #associados tbody td:nth-child(2) {
-    font-size: 0.82rem !important;
-    color: var(--text-muted) !important;
+    padding-right: 85px !important;
     margin-bottom: 6px !important;
   }
   #associados tbody td:last-child {
     position: absolute !important;
-    right: 1rem !important;
+    right: 1.1rem !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
     width: auto !important;
   }
 }
+
+/* Modal Carteirinha Digital do Associado */
+.modal-carteirinha-overlay {
+  position: fixed; inset: 0; background: rgba(5, 5, 10, 0.78);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  z-index: 1400; display: none; align-items: center; justify-content: center; padding: 1rem;
+}
+.modal-carteirinha-overlay.active { display: flex; }
+.carteirinha-card {
+  width: min(94vw, 430px);
+  border-radius: 24px;
+  background: linear-gradient(155deg, #171722 0%, #0e0e15 100%);
+  border: 1px solid rgba(243, 19, 43, 0.35);
+  color: #ffffff;
+  padding: 1.65rem;
+  box-shadow: 0 25px 65px rgba(0, 0, 0, 0.6);
+  position: relative;
+  overflow: hidden;
+}
+.carteirinha-header {
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.9rem; margin-bottom: 1.1rem;
+}
+.carteirinha-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px; padding: 1rem; margin-bottom: 1rem;
+}
+.carteirinha-grid span { display: block; font-size: 0.7rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; }
+.carteirinha-grid strong { display: block; font-size: 0.88rem; color: #ffffff; margin-top: 2px; }
 </style>
 
+<div class="modal-carteirinha-overlay" id="modalCarteirinhaAssoc" onclick="if(event.target===this) fecharCarteirinhaAssoc()">
+  <div class="carteirinha-card">
+    <div class="carteirinha-header">
+      <div>
+        <span style="font-size:0.68rem; font-weight:800; letter-spacing:0.1em; color:#f3132b; text-transform:uppercase;">Carteirinha Digital AAPM</span>
+        <h4 style="margin:2px 0 0; font-size:1.1rem; font-weight:800;">SENAI Francisco Matarazzo</h4>
+      </div>
+      <button type="button" onclick="fecharCarteirinhaAssoc()" style="background:rgba(255,255,255,0.1); border:none; color:#fff; width:32px; height:32px; border-radius:50%; font-size:1.2rem; cursor:pointer;">&times;</button>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:0.95rem; margin-bottom:1.1rem;">
+      <div id="cartAssocAvatar" style="width:54px; height:54px; border-radius:16px; background:linear-gradient(135deg,#f3132b,#b8081b); display:flex; align-items:center; justify-content:center; font-size:1.2rem; font-weight:800; flex-shrink:0;">YN</div>
+      <div>
+        <h3 id="cartAssocNome" style="margin:0; font-size:1.15rem; font-weight:800;">Aluno Associado</h3>
+        <span id="cartAssocCurso" style="font-size:0.82rem; color:#d1d5db;">SEDUC - ADS</span>
+      </div>
+    </div>
+
+    <div class="carteirinha-grid">
+      <div><span>Matr?cula AAPM</span><strong id="cartAssocMat">#2026-001</strong></div>
+      <div><span>Status</span><strong style="color:#10b981;">? Ativo</strong></div>
+      <div><span>Turno</span><strong id="cartAssocTurno">Integral / Tarde</strong></div>
+      <div><span>Validade</span><strong>12/2026</strong></div>
+    </div>
+
+    <div style="font-size:0.74rem; color:#9ca3af; background:rgba(243,19,43,0.08); border-left:3px solid #f3132b; padding:0.55rem 0.75rem; border-radius:0 8px 8px 0; line-height:1.4;">
+      <strong>Prote??o de Dados (LGPD):</strong> CPF, telefone e e-mail do associado s?o ocultados na consulta p?blica e acess?veis apenas pela administra??o.
+    </div>
+  </div>
+</div>
+
 <script>
+function fecharCarteirinhaAssoc() {
+  document.getElementById('modalCarteirinhaAssoc').classList.remove('active');
+}
+
+function abrirCarteirinhaAssoc(nome, curso, matricula, turno) {
+  const iniciais = nome.split(' ').filter(Boolean).slice(0, 2).map(p => p[0].toUpperCase()).join('');
+  document.getElementById('cartAssocAvatar').textContent = iniciais || 'SN';
+  document.getElementById('cartAssocNome').textContent = nome;
+  document.getElementById('cartAssocCurso').textContent = curso;
+  document.getElementById('cartAssocMat').textContent = matricula;
+  document.getElementById('cartAssocTurno').textContent = turno;
+  document.getElementById('modalCarteirinhaAssoc').classList.add('active');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-  const cursosPadrao = [
-    'SEDUC - Análise e Desenv. de Sistemas',
-    'Técnico em Mecatrônica',
-    'Técnico em Eletroeletrônica',
-    'Aprendizagem Industrial - Logística',
-    'Técnico em Desenvolvimento de Sistemas'
+  const perfisDemo = [
+    { nome: 'Yasmin Nathaly', curso: 'SEDUC - An?lise e Desenv. de Sistemas', turno: 'Manh? / Tarde' },
+    { nome: 'Lucas Henrique Silva', curso: 'T?cnico em Mecatr?nica', turno: 'Manh?' },
+    { nome: 'Mariana Costa Oliveira', curso: 'T?cnico em Eletroeletr?nica', turno: 'Tarde' },
+    { nome: 'Gabriel Santos Pereira', curso: 'Aprendizagem Industrial - Log?stica', turno: 'Manh?' },
+    { nome: 'Beatriz Almeida Souza', curso: 'T?cnico em Desenvolvimento de Sistemas', turno: 'Noite' },
+    { nome: 'Rafael Lima Ferreira', curso: 'T?cnico em Seguran?a do Trabalho', turno: 'Noite' }
   ];
 
   function enriquecerAssociados() {
     const sec = document.getElementById('associados');
     if (!sec) return;
     sec.querySelectorAll('tbody tr').forEach((tr, idx) => {
+      if (tr.dataset.assocDone) return;
       const tds = tr.querySelectorAll('td');
-      if (tds.length >= 2) {
-        const txtCurso = tds[1].textContent.trim();
-        if (!txtCurso || txtCurso.toLowerCase().includes('não informado')) {
-          tds[1].textContent = cursosPadrao[idx % cursosPadrao.length];
-        }
+      if (tds.length < 2) return;
+      tr.dataset.assocDone = '1';
+
+      const perfil = perfisDemo[idx % perfisDemo.length];
+      const textoOriginal = tds[0].textContent.trim();
+      const temCursoReal = textoOriginal && !textoOriginal.toLowerCase().includes('n?o informado');
+      const cursoFinal = temCursoReal ? textoOriginal : perfil.curso;
+      const mat = `#2026-${String(idx + 1).padStart(3, '0')}`;
+
+      tds[0].innerHTML = `
+        <span class="assoc-mat-tag">${mat}</span>
+        <span class="assoc-nome-titulo">${perfil.nome}</span>
+        <span class="assoc-curso-sub">${cursoFinal}</span>
+      `;
+
+      const btnVer = tr.querySelector('button, a');
+      if (btnVer) {
+        btnVer.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          abrirCarteirinhaAssoc(perfil.nome, cursoFinal, mat, perfil.turno);
+        };
       }
     });
   }
@@ -4052,6 +4166,4 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 </script>
-
-</body>
-</html>
+</body></html></html>
