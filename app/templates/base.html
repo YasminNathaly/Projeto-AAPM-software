@@ -1,6 +1,43 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="dark">
 <head>
+<!-- FIX_CAROUSEL_SCROLL -->
+<style>
+html, body {
+  overflow-anchor: none !important;
+  scroll-behavior: auto !important;
+}
+.hero { min-height: 540px !important; }
+.hero-content, .hero-title, .hero-description { overflow-anchor: none !important; }
+.hero-title { min-height: 2.5em !important; }
+.hero-description { min-height: 3.4em !important; }
+@media (max-width: 768px) {
+  .hero { min-height: 460px !important; }
+  .hero-title { min-height: 3.6em !important; }
+  .hero-description { min-height: 4.8em !important; }
+}
+</style>
+<script>
+(function() {
+  const _origScrollTo = window.scrollTo.bind(window);
+  let cliqueMenuRecente = false;
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.nav-item, .mobile-nav-item, [onclick*="navigate"]')) {
+      cliqueMenuRecente = true;
+      setTimeout(() => { cliqueMenuRecente = false; }, 900);
+    }
+  }, true);
+
+  window.scrollTo = function(...args) {
+    const topVal = (typeof args[0] === 'object' && args[0] !== null) ? args[0].top : args[1];
+    if (topVal === 0 && !cliqueMenuRecente && window.scrollY > 50) {
+      return;
+    }
+    return _origScrollTo(...args);
+  };
+})();
+</script>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AAPM – SENAI Brás | Sistema de Gestão</title>
@@ -659,7 +696,7 @@
       color: #ffffff;
       text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
     }
-    html[data-theme="light"] .hero-description,
+    html[data-theme="light"] .hero-descriptionription,
     html[data-theme="light"] .hero-stat-label {
       color: rgba(255, 255, 255, 0.92);
       text-shadow: 0 1px 10px rgba(0, 0, 0, 0.6);
@@ -691,7 +728,7 @@
       color: #ffffff;
       max-width: 14ch;
     }
-    .hero-description { font-size: 0.98rem; color: rgba(255, 255, 255, 0.78); line-height: 1.65; font-weight: 300; max-width: 52ch; }
+    .hero-descriptionription { font-size: 0.98rem; color: rgba(255, 255, 255, 0.78); line-height: 1.65; font-weight: 300; max-width: 52ch; }
  
     .hero-cta-row { display: flex; align-items: center; gap: 1.4rem; margin-top: 0.4rem; flex-wrap: wrap; }
     .btn-hero-primary {
@@ -1213,7 +1250,7 @@
       .hero-container { height: auto; min-height: 480px; padding-top: 1rem; }
       .hero-inner { padding: 0 5vw; padding-bottom: 1.6rem; }
       .hero-tag { font-size: 0.62rem; gap: 6px; }
-      .hero-description { font-size: 0.85rem; max-width: 100%; }
+      .hero-descriptionription { font-size: 0.85rem; max-width: 100%; }
       .hero-cta-row { gap: 0.9rem; }
       .btn-hero-primary { padding: 0.8rem 1.3rem; font-size: 0.78rem; }
       .hero-indicators { gap: 1rem; flex-wrap: wrap; }
@@ -1307,17 +1344,6 @@
     .a11y-opt-btn:hover { border-color: var(--primary); }
   </style>
 
-
-<!-- FIX_CAROUSEL_SCROLL -->
-<style>
-.hero { min-height: 540px !important; }
-.hero-content, .hero-title, .hero-desc { overflow-anchor: none !important; }
-@media (max-width: 768px) {
-  .hero { min-height: 460px !important; }
-  .hero-title { min-height: 3.4em !important; }
-  .hero-desc { min-height: 4.5em !important; }
-}
-</style>
 
 </head>
 <body>
@@ -3067,7 +3093,7 @@
         if (animandoArraste || event.button !== 0 || event.target.closest('a, button, input, textarea, select, .cart-drawer')) return;
         dragStartX = event.clientX;
         dragMoved = false;
-        wrapper.setPointerCapture?.(event.pointerId);
+        // pointer capture removido
       });
 
       wrapper.addEventListener('pointermove', (event) => {
@@ -3224,7 +3250,7 @@
       const backgrounds = document.querySelectorAll('.hero-bg');
       const tabs = document.querySelectorAll('.hero-tab');
       const titleEl = document.querySelector('.hero-title');
-      const descEl = document.querySelector('.hero-description');
+      const descEl = document.querySelector('.hero-descriptionription');
  
       backgrounds.forEach((bg, idx) => bg.classList.toggle('active', idx === heroIndex));
       tabs.forEach((tab, idx) => tab.classList.toggle('active', idx === heroIndex));
