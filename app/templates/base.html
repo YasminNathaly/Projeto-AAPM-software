@@ -4206,4 +4206,45 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+<!-- FIX_REVEAL_MOBILE -->
+<style>
+/* Impede que os blocos da Unidade Bras e Suporte ao Estudante fiquem mexendo/pulando no celular */
+@media (max-width: 900px) {
+  .reveal, .reveal-stagger, .reveal-stagger > * {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
+/* Garante que qualquer bloco ja exibido nunca volte a ficar invisivel ou deslocado */
+.reveal.in-view, .reveal-stagger.in-view, .reveal-stagger.in-view > * {
+  opacity: 1 !important;
+  transform: none !important;
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. No mobile, marca todos os blocos .reveal como fixos imediatamente
+  if (window.innerWidth <= 900) {
+    document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => el.classList.add('in-view'));
+  }
+
+  // 2. Pausa a troca automatica do banner do topo enquanto o usuario esta lendo as secoes de baixo (Unidade / Suporte)
+  const origSetInterval = window.setInterval;
+  if (typeof nextHeroSlide === 'function') {
+    window.addEventListener('scroll', () => {
+      if (typeof heroTimer !== 'undefined') {
+        if (window.scrollY > 260 && heroTimer) {
+          clearInterval(heroTimer);
+          heroTimer = null;
+        } else if (window.scrollY <= 260 && !heroTimer) {
+          heroTimer = origSetInterval(nextHeroSlide, 6000);
+        }
+      }
+    }, { passive: true });
+  }
+});
+</script>
+
 </body></html></html>
