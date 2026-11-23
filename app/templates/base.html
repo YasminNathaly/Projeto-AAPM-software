@@ -1306,6 +1306,38 @@
     }
     .a11y-opt-btn:hover { border-color: var(--primary); }
   </style>
+
+<!-- FIX_CAROUSEL_SCROLL -->
+<script>
+(function() {
+  // Impede que .focus() automatico do carrossel puxe a pagina para o topo
+  const origFocus = HTMLElement.prototype.focus;
+  HTMLElement.prototype.focus = function(options) {
+    try {
+      return origFocus.call(this, Object.assign({}, options, { preventScroll: true }));
+    } catch (e) {
+      return origFocus.call(this);
+    }
+  };
+
+  // Bloqueia qualquer scrollTo(0, 0) disparado por timers de slide enquanto o usuario ja rolou a pagina
+  const origScrollTo = window.scrollTo;
+  let ultimaInteracaoUsuario = 0;
+  ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(evt => {
+    window.addEventListener(evt, () => { ultimaInteracaoUsuario = Date.now(); }, { passive: true });
+  });
+
+  window.scrollTo = function(...args) {
+    const topAlvo = (typeof args[0] === 'object' && args[0] !== null) ? args[0].top : args[1];
+    // Se algum timer tentar jogar para o topo (0) sem clique recente do usuario, ignora
+    if (topAlvo === 0 && window.scrollY > 120 && (Date.now() - ultimaInteracaoUsuario > 250)) {
+      return;
+    }
+    return origScrollTo.apply(window, args);
+  };
+})();
+</script>
+
 </head>
 <body>
 
