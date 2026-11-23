@@ -885,3 +885,28 @@ if __name__ == "__main__":
         port=int(os.getenv("PORT", "8000")),
         reload=bool(os.getenv("DEBUG", "1") == "1")
     )
+
+# SEED_ARMARIOS_001_A_100
+try:
+    from app.database import engine as _eng, Base as _Base, SessionLocal as _SL
+    from app.models.armario import Armario as _Armario
+    _Base.metadata.create_all(bind=_eng)
+    _db = _SL()
+    _exist = {str(a.numero).strip().zfill(3) for a in _db.query(_Armario).all() if a.numero}
+    _locais = [
+        "Bloco 1 - T?rreo", "Bloco 1 - 1? Andar", "Bloco 1 - 2? Andar",
+        "Bloco 2 - T?rreo", "Bloco 2 - 1? Andar", "Bloco 2 - 2? Andar"
+    ]
+    for _n in range(1, 101):
+        _num = f"{_n:03d}"
+        if _num not in _exist:
+            _db.add(_Armario(
+                numero=_num,
+                localizacao=_locais[(_n - 1) % len(_locais)],
+                status="Dispon?vel",
+                nome_completo=None
+            ))
+    _db.commit()
+    _db.close()
+except Exception as _e:
+    print("Aviso seed armarios:", _e)
