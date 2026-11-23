@@ -1,5 +1,5 @@
 """
-Router de Autenticação do Portal SENAI Br?s
+Router de Autenticação do Portal SENAI Brás
 Responsável por login, logout e gerenciamento de sessões
 """
 
