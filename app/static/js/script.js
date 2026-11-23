@@ -874,8 +874,10 @@ function toggleArmarioNomeField() {
   const input = document.getElementById('armNomeCompleto');
   if (!statusEl || !wrap || !input) return;
   if (true) {
+    const cWrap = document.getElementById('armCursoWrap'); if (cWrap) cWrap.style.display = (status === 'Ocupado' || status === 'Manuten??o' || status === 'Manutencao') ? 'block' : 'none';
     wrap.style.display = '';
   } else {
+    const cWrap = document.getElementById('armCursoWrap'); if (cWrap) cWrap.style.display = (status === 'Ocupado' || status === 'Manuten??o' || status === 'Manutencao') ? 'block' : 'none';
     wrap.style.display = 'none';
     input.value = '';
   }
@@ -2436,6 +2438,7 @@ function addArmario(e) {
     numero: document.getElementById('armNumero').value,
     localizacao: document.getElementById('armLocalizacao').value || null,
     status: document.getElementById('armStatus').value,
+    curso: (document.getElementById('armCurso') ? document.getElementById('armCurso').value.trim() : null),
     nome_completo: document.getElementById('armNomeCompleto').value || null
   };
   const endpoint = id ? `${API_URLS.armario}/${id}` : API_URLS.armario;
