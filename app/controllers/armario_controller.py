@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy.orm import Session
 from app.models.armario import Armario
 
@@ -6,8 +7,10 @@ def listar(db: Session):
 
 def criar(db: Session, armario):
     dados = armario.model_dump() if hasattr(armario, "model_dump") else armario.dict()
+    dados['updated_at'] = datetime.now()
     db_armario = Armario(**dados)
     db.add(db_armario)
+    db_armario.updated_at = datetime.now()
     db.commit()
     db.refresh(db_armario)
     return db_armario
@@ -19,6 +22,7 @@ def atualizar(db: Session, armario_id: int, armario):
     dados = armario.model_dump() if hasattr(armario, "model_dump") else armario.dict()
     for key, value in dados.items():
         setattr(db_armario, key, value)
+    db_armario.updated_at = datetime.now()
     db.commit()
     db.refresh(db_armario)
     return db_armario

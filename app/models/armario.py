@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, DateTime
 from app.database import Base
 
 class Armario(Base):
@@ -10,3 +10,4 @@ class Armario(Base):
     status = Column(String, default="Disponível")
     
     nome_completo = Column(String, nullable=True)
+    updated_at = Column(DateTime, nullable=True)

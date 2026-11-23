@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
@@ -26,6 +27,7 @@ class ArmarioUpdate(ArmarioBase):
 
 class ArmarioResponse(ArmarioBase):
     id: int
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -33,7 +35,14 @@ class ArmarioResponse(ArmarioBase):
 
 @router.get("/", response_model=List[ArmarioResponse])
 def listar(db: Session = Depends(get_db)):
-    return armario_controller.listar(db)
+    from sqlalchemy import text
+    try:
+        db.execute(text("ALTER TABLE armarios ADD COLUMN updated_at TIMESTAMP"))
+        db.commit()
+    except Exception:
+        db.rollback()
+    itens = armario_controller.listar(db)
+    return sorted(itens, key=lambda x: (x.updated_at or datetime.min, x.id), reverse=True)
 
 
 @router.post("/", response_model=ArmarioResponse, status_code=status.HTTP_201_CREATED)
@@ -80,6 +89,7 @@ def reservar_publico(dados: ReservaPublicaRequest, db: Session = Depends(get_db)
     nome_limpo = dados.nome.strip()
     turma_limpa = dados.turma.strip()
     db_armario.status = "Ocupado"
+    db_armario.updated_at = datetime.now()
     db_armario.nome_completo = f"{nome_limpo} ({turma_limpa}) \u2022 At\u00e9 {validade}"
     db.commit()
     db.refresh(db_armario)

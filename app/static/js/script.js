@@ -312,7 +312,7 @@ let ordenacaoAtual = {
   fornecedor: 'padrao',
   produto: 'padrao',
   associado: 'padrao',
-  armario: 'padrao',
+  armario: 'recentes',
   usuario: 'padrao',
   venda: 'padrao',
   relatorio: 'padrao'
@@ -348,6 +348,7 @@ function normalizarProduto(p) {
 }
 
 function normalizarArmario(a) {
+  const ts = a.updated_at ? new Date(a.updated_at).getTime() : 0;
   return {
     ...a,
     status: a.status || 'Disponível',
@@ -1589,7 +1590,24 @@ function statusArmarioClasse(status) {
 function renderArmarios() {
   const tbody = document.getElementById('tblArmarios');
   if (!tbody) return;
-  const lista = aplicarBusca('armario', armarios);
+  let baseLista = [...armarios];
+  const modoArm = (typeof ordenacaoModulos !== 'undefined' && ordenacaoModulos.armario) ? ordenacaoModulos.armario : 'recentes';
+  if (modoArm === 'recentes') {
+    baseLista.sort((a, b) => {
+      const ta = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+      const tb = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+      return (tb - ta) || (Number(b.id) - Number(a.id));
+    });
+  } else if (modoArm === 'antigos') {
+    baseLista.sort((a, b) => {
+      const ta = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+      const tb = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+      return (ta - tb) || (Number(a.id) - Number(b.id));
+    });
+  } else {
+    baseLista.sort((a, b) => String(a.numero).localeCompare(String(b.numero), undefined, { numeric: true }));
+  }
+  const lista = aplicarBusca('armario', baseLista);
   const pagina = paginarLista(lista, 'armario');
   tbody.innerHTML = pagina.length ? pagina.map((item, i) => `
     <tr style="--i:${i}">
