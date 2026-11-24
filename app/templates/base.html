@@ -1412,6 +1412,20 @@ html, body {
       background: var(--primary, #e30613); border-color: var(--primary, #e30613); color: #fff;
     }
     body.light-mode .prod-qty-box, [data-theme="light"] .prod-qty-box { border-color: #d1d5db; }
+
+    html, body {
+      touch-action: pan-y pinch-zoom !important;
+      -webkit-overflow-scrolling: touch !important;
+      overscroll-behavior-y: auto !important;
+    }
+    main, .admin-wrapper, .tab-content, .modal-body, .cart-items {
+      touch-action: pan-y !important;
+      -webkit-overflow-scrolling: touch !important;
+    }
+    .table-responsive, .category-pills, .tabs-nav, .admin-nav {
+      touch-action: pan-x pan-y !important;
+      -webkit-overflow-scrolling: touch !important;
+    }
   </style>
 
 
@@ -3346,6 +3360,7 @@ html, body {
     let animandoArraste = false;
 
     function inicializarNavegacaoPorArraste() {
+      if (navigator.maxTouchPoints > 0 || 'ontouchstart' in window) return;
       const wrapper = document.querySelector('main.wrapper');
       if (!wrapper) return;
 
