@@ -2792,7 +2792,7 @@ html, body {
       if (adicionouAlgum) {
         fecharModalProduto();
       } else {
-        alert('Quantidade indispon?vel em estoque para esta op??o.');
+        alert('Quantidade indispon?vel em estoque para esta op&ccedil;&atilde;o.');
       }
     }
 
@@ -2834,7 +2834,7 @@ html, body {
               ${getProductOptionsList(p).length ? `
               <button type="button" class="product-add-btn" data-product-id="${produtoIdNum}" onclick="abrirModalProduto(${produtoIdNum})">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                Escolher op??o
+                Escolher op&ccedil;&atilde;o
               </button>` : `
               <button type="button" class="product-add-btn" data-product-id="${produtoIdNum}" onclick="addToCartFromButton(this, ${produtoIdNum})">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
@@ -3025,7 +3025,7 @@ html, body {
       list.innerHTML = cart.map((item) => {
         const itemImg = sanitizeUrl(item.imagem_url) || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=200&auto=format&fit=crop';
         const itemNome = escapeHtml(item.nome);
-        const itemVar = item.variacao ? `<div style="font-size:0.76rem; color:var(--primary, #e30613); font-weight:600; margin:2px 0;">Op??o: ${escapeHtml(item.variacao)}</div>` : '';
+        const itemVar = item.variacao ? `<div style="font-size:0.76rem; color:var(--primary, #e30613); font-weight:600; margin:2px 0;">Op&ccedil;&atilde;o: ${escapeHtml(item.variacao)}</div>` : '';
         const itemKey = String(item.cartKey || item.id).replace(/'/g, "\'");
         return `
         <div class="cart-item">
@@ -4541,7 +4541,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <h3 class="prod-detail-title" id="prodDetailTitle"></h3>
         <div class="prod-detail-price" id="prodDetailPrice"></div>
         <div id="prodDetailOptionsWrap">
-          <span class="prod-detail-label">Selecione a op??o desejada:</span>
+          <span class="prod-detail-label">Selecione a op&ccedil;&atilde;o desejada:</span>
           <div class="prod-detail-options" id="prodDetailOptions"></div>
         </div>
         <div class="prod-detail-footer">

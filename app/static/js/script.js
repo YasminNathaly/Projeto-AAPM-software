@@ -874,10 +874,10 @@ function toggleArmarioNomeField() {
   const input = document.getElementById('armNomeCompleto');
   if (!statusEl || !wrap || !input) return;
   if (true) {
-    const cWrap = document.getElementById('armCursoWrap'); if (cWrap) cWrap.style.display = (status === 'Ocupado' || status === 'Manuten??o' || status === 'Manutencao') ? 'block' : 'none';
+    const cWrap = document.getElementById('armCursoWrap'); if (cWrap) cWrap.style.display = (status === 'Ocupado' || status === 'Manutenção' || status === 'Manutencao') ? 'block' : 'none';
     wrap.style.display = '';
   } else {
-    const cWrap = document.getElementById('armCursoWrap'); if (cWrap) cWrap.style.display = (status === 'Ocupado' || status === 'Manuten??o' || status === 'Manutencao') ? 'block' : 'none';
+    const cWrap = document.getElementById('armCursoWrap'); if (cWrap) cWrap.style.display = (status === 'Ocupado' || status === 'Manutenção' || status === 'Manutencao') ? 'block' : 'none';
     wrap.style.display = 'none';
     input.value = '';
   }
