@@ -1350,6 +1350,68 @@ html, body {
     .variation-label-hint { font-size: 0.72rem; color: var(--text-muted, #888); margin-bottom: 4px; display: block; }
     html, body { touch-action: pan-y pinch-zoom; -webkit-overflow-scrolling: touch; }
     .table-responsive, .category-pills, .tabs-nav { touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch; }
+    /* Modal de Detalhes e Escolha de Opcao do Produto */
+    .prod-detail-overlay {
+      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center; z-index: 10050; padding: 16px;
+    }
+    .prod-detail-overlay.active { display: flex; }
+    .prod-detail-card {
+      background: var(--card-bg, #181822); color: var(--text-main, #fff);
+      border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 18px;
+      width: 100%; max-width: 440px; overflow: hidden; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+      animation: fadeInScale 0.2s ease;
+    }
+    @keyframes fadeInScale { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+    .prod-detail-header { position: relative; height: 220px; background: #111118; }
+    .prod-detail-header img { width: 100%; height: 100%; object-fit: cover; }
+    .prod-detail-close {
+      position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; border-radius: 50%;
+      border: none; background: rgba(0, 0, 0, 0.65); color: #fff; font-size: 1.2rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .prod-detail-body { padding: 20px; }
+    .prod-detail-cat { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--primary, #e30613); font-weight: 700; }
+    .prod-detail-title { font-size: 1.25rem; font-weight: 700; margin: 4px 0 6px; }
+    .prod-detail-price { font-size: 1.15rem; font-weight: 800; color: #10b981; margin-bottom: 14px; }
+    .prod-detail-label { font-size: 0.8rem; font-weight: 600; opacity: 0.85; margin-bottom: 8px; display: block; }
+    .prod-detail-options { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .prod-opt-pill {
+      padding: 8px 14px; border-radius: 10px; border: 1.5px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.05); color: inherit; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; transition: all 0.16s ease;
+    }
+    .prod-opt-pill:hover:not(:disabled) { border-color: var(--primary, #e30613); }
+    .prod-opt-pill.active {
+      background: var(--primary, #e30613); border-color: var(--primary, #e30613); color: #fff;
+    }
+    .prod-opt-pill:disabled { opacity: 0.4; cursor: not-allowed; text-decoration: line-through; }
+    .prod-detail-footer { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+    .prod-qty-box {
+      display: flex; align-items: center; border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 10px; overflow: hidden; height: 42px;
+    }
+    .prod-qty-box button {
+      width: 36px; height: 100%; border: none; background: transparent; color: inherit;
+      font-size: 1.1rem; font-weight: 700; cursor: pointer;
+    }
+    .prod-qty-box span { min-width: 32px; text-align: center; font-weight: 700; font-size: 0.95rem; }
+    .prod-detail-confirm {
+      flex: 1; height: 42px; border: none; border-radius: 10px;
+      background: var(--primary, #e30613); color: #fff; font-weight: 700; font-size: 0.92rem;
+      cursor: pointer; transition: opacity 0.2s ease;
+    }
+    .prod-detail-confirm:hover { opacity: 0.92; }
+    body.light-mode .prod-detail-card, [data-theme="light"] .prod-detail-card {
+      background: #ffffff; color: #111827; border-color: #e5e7eb;
+    }
+    body.light-mode .prod-opt-pill, [data-theme="light"] .prod-opt-pill {
+      background: #f3f4f6; border-color: #d1d5db; color: #111827;
+    }
+    body.light-mode .prod-opt-pill.active, [data-theme="light"] .prod-opt-pill.active {
+      background: var(--primary, #e30613); border-color: var(--primary, #e30613); color: #fff;
+    }
+    body.light-mode .prod-qty-box, [data-theme="light"] .prod-qty-box { border-color: #d1d5db; }
   </style>
 
 
@@ -2591,66 +2653,147 @@ html, body {
     }
 
     const selectedProductVariations = {};
+    let modalProdutoAtualId = null;
+    let modalProdutoAtualQtd = 1;
+
+    function expandirNomesOpcao(texto) {
+      if (!texto) return [];
+      return String(texto)
+        .split(/,|\/|\s+ou\s+/i)
+        .map(s => s.trim())
+        .filter(Boolean);
+    }
 
     function getProductOptionsList(produto) {
       const variacoes = Array.isArray(produto.variacoes) ? produto.variacoes : [];
+      const lista = [];
+
       if (variacoes.length) {
-        return variacoes.map((v, idx) => ({
-          key: String(v.id ?? idx),
-          nome: (v.nome_variacao || v.nome || v.name || '').trim(),
-          estoque: Number(v.estoque ?? v.quantidade ?? 0) || 0,
-          precoAdicional: Number(v.preco_adicional || 0) || 0
-        })).filter(o => o.nome);
-      }
-      const extras = [];
-      [produto.cor, produto.tamanho].forEach(campo => {
-        if (campo && String(campo).trim()) {
-          String(campo).split(',').map(s => s.trim()).filter(Boolean).forEach(opt => {
-            if (!extras.some(e => e.nome.toLowerCase() === opt.toLowerCase())) {
-              extras.push({
-                key: opt,
-                nome: opt,
-                estoque: Number(produto.quantidade ?? produto.estoque ?? 99) || 99,
-                precoAdicional: 0
+        variacoes.forEach((v, idx) => {
+          const bruto = (v.nome_variacao || v.nome || v.name || '').trim();
+          const partes = expandirNomesOpcao(bruto);
+          partes.forEach((parte, pIdx) => {
+            if (!lista.some(e => e.nome.toLowerCase() === parte.toLowerCase())) {
+              lista.push({
+                key: `${v.id ?? idx}_${pIdx}`,
+                nome: parte,
+                estoque: Number(v.estoque ?? v.quantidade ?? 0) || 0,
+                precoAdicional: Number(v.preco_adicional || 0) || 0
               });
             }
           });
-        }
-      });
-      return extras;
-    }
-
-    function selectProductVariation(productId, optionNome, chipEl) {
-      selectedProductVariations[String(productId)] = optionNome;
-      const card = chipEl ? chipEl.closest('.product-item') : null;
-      if (card) {
-        card.querySelectorAll('.variation-chip').forEach(c => c.classList.remove('selected'));
-        chipEl.classList.add('selected');
+        });
+        return lista;
       }
+
+      [produto.cor, produto.tamanho].forEach(campo => {
+        expandirNomesOpcao(campo).forEach(opt => {
+          if (!lista.some(e => e.nome.toLowerCase() === opt.toLowerCase())) {
+            lista.push({
+              key: opt,
+              nome: opt,
+              estoque: Number(produto.quantidade ?? produto.estoque ?? 99) || 99,
+              precoAdicional: 0
+            });
+          }
+        });
+      });
+      return lista;
     }
 
     function renderVariationChips(produto) {
+      // Card 100% limpo: as opcoes sao exibidas no Modal de Detalhes ao clicar no botao do produto
+      return '';
+    }
+
+    function abrirModalProduto(productId) {
+      const produto = findProductById(productId);
+      if (!produto) return;
+
+      modalProdutoAtualId = produto.id;
+      modalProdutoAtualQtd = 1;
+
       const opcoes = getProductOptionsList(produto);
-      if (!opcoes.length) return '';
-
-      const pid = String(produto.id);
       const disponiveis = opcoes.filter(o => o.estoque > 0);
-      if (!selectedProductVariations[pid] || !opcoes.some(o => o.nome === selectedProductVariations[pid])) {
-        selectedProductVariations[pid] = (disponiveis[0] || opcoes[0]).nome;
+      if (opcoes.length) {
+        if (!selectedProductVariations[String(produto.id)] || !opcoes.some(o => o.nome === selectedProductVariations[String(produto.id)])) {
+          selectedProductVariations[String(produto.id)] = (disponiveis[0] || opcoes[0]).nome;
+        }
       }
-      const escolhida = selectedProductVariations[pid];
 
-      const chips = opcoes.map((o) => {
+      document.getElementById('prodDetailImg').src = sanitizeUrl(produto.imagem_url || produto.img || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=600&auto=format&fit=crop');
+      document.getElementById('prodDetailImg').alt = produto.nome || 'Produto';
+      document.getElementById('prodDetailCat').textContent = getProductCategoryLabel(produto);
+      document.getElementById('prodDetailTitle').textContent = produto.nome || 'Produto';
+      document.getElementById('prodDetailQty').textContent = '1';
+
+      const optWrap = document.getElementById('prodDetailOptionsWrap');
+      const optContainer = document.getElementById('prodDetailOptions');
+
+      if (!opcoes.length) {
+        optWrap.style.display = 'none';
+        document.getElementById('prodDetailPrice').textContent = `R$ ${Number(produto.preco || 0).toFixed(2)}`;
+      } else {
+        optWrap.style.display = 'block';
+        renderOpcoesModalProduto(produto, opcoes);
+      }
+
+      document.getElementById('prodDetailModal').classList.add('active');
+    }
+
+    function renderOpcoesModalProduto(produto, opcoes) {
+      const escolhida = selectedProductVariations[String(produto.id)];
+      const optContainer = document.getElementById('prodDetailOptions');
+      optContainer.innerHTML = opcoes.map(o => {
         const semEstoque = o.estoque <= 0;
         const ativo = !semEstoque && o.nome === escolhida;
-        const nomeEsc = escapeHtml(o.nome);
         const nomeAttr = o.nome.replace(/'/g, "\'");
-        const onclickAttr = semEstoque ? '' : `onclick="selectProductVariation(${Number(produto.id) || 0}, '${nomeAttr}', this)"`;
-        const badgeEstoque = '';
-        return `<span class="variation-chip${semEstoque ? ' out-of-stock' : ''}${ativo ? ' selected' : ''}" ${onclickAttr} title="${semEstoque ? 'Esgotado' : 'Selecionar ' + nomeEsc}">${nomeEsc}${badgeEstoque}</span>`;
+        return `<button type="button" class="prod-opt-pill${ativo ? ' active' : ''}" ${semEstoque ? 'disabled' : ''} onclick="selecionarOpcaoModalProduto('${nomeAttr}')">${escapeHtml(o.nome)}</button>`;
       }).join('');
 
-      return `<span class="variation-label-hint">Escolha a op??o:</span><div class="product-variations">${chips}</div>`;
+      const optObj = opcoes.find(o => o.nome === escolhida);
+      const precoTotal = Number(produto.preco || 0) + (optObj ? Number(optObj.precoAdicional || 0) : 0);
+      document.getElementById('prodDetailPrice').textContent = `R$ ${precoTotal.toFixed(2)}`;
+    }
+
+    function selecionarOpcaoModalProduto(nomeOpcao) {
+      if (!modalProdutoAtualId) return;
+      const produto = findProductById(modalProdutoAtualId);
+      if (!produto) return;
+      selectedProductVariations[String(produto.id)] = nomeOpcao;
+      modalProdutoAtualQtd = 1;
+      document.getElementById('prodDetailQty').textContent = '1';
+      renderOpcoesModalProduto(produto, getProductOptionsList(produto));
+    }
+
+    function alterarQtdModalProduto(delta) {
+      if (!modalProdutoAtualId) return;
+      const produto = findProductById(modalProdutoAtualId);
+      if (!produto) return;
+      const variacao = selectedProductVariations[String(produto.id)] || '';
+      const maxStock = getMaxStockForProduct(produto, variacao);
+      const novaQtd = modalProdutoAtualQtd + delta;
+      if (novaQtd < 1 || novaQtd > Math.max(1, maxStock)) return;
+      modalProdutoAtualQtd = novaQtd;
+      document.getElementById('prodDetailQty').textContent = String(modalProdutoAtualQtd);
+    }
+
+    function fecharModalProduto() {
+      document.getElementById('prodDetailModal')?.classList.remove('active');
+      modalProdutoAtualId = null;
+    }
+
+    function confirmarAdicionarModalProduto() {
+      if (!modalProdutoAtualId) return;
+      let adicionouAlgum = false;
+      for (let i = 0; i < modalProdutoAtualQtd; i++) {
+        if (addToCart(modalProdutoAtualId, 1)) adicionouAlgum = true;
+      }
+      if (adicionouAlgum) {
+        fecharModalProduto();
+      } else {
+        alert('Quantidade indispon?vel em estoque para esta op??o.');
+      }
     }
 
     let ultimaListaProdutosFiltrada = null;
@@ -2688,10 +2831,15 @@ html, body {
               <div class="product-price">R$ ${produtoPreco.toFixed(2)}</div>
               ${renderVariationChips(p)}
               <div class="product-sku">SKU: ${produtoSku}</div>
+              ${getProductOptionsList(p).length ? `
+              <button type="button" class="product-add-btn" data-product-id="${produtoIdNum}" onclick="abrirModalProduto(${produtoIdNum})">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                Escolher op??o
+              </button>` : `
               <button type="button" class="product-add-btn" data-product-id="${produtoIdNum}" onclick="addToCartFromButton(this, ${produtoIdNum})">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
                 Adicionar
-              </button>
+              </button>`}
             </div>
           </div>
         `;
@@ -4380,4 +4528,33 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+
+  <!-- MODAL DE DETALHES / ESCOLHA DE OPCAO DO PRODUTO -->
+  <div class="prod-detail-overlay" id="prodDetailModal" onclick="if(event.target===this) fecharModalProduto()">
+    <div class="prod-detail-card" role="dialog" aria-modal="true" aria-labelledby="prodDetailTitle">
+      <div class="prod-detail-header">
+        <img id="prodDetailImg" src="" alt="">
+        <button type="button" class="prod-detail-close" onclick="fecharModalProduto()" aria-label="Fechar">&times;</button>
+      </div>
+      <div class="prod-detail-body">
+        <div class="prod-detail-cat" id="prodDetailCat"></div>
+        <h3 class="prod-detail-title" id="prodDetailTitle"></h3>
+        <div class="prod-detail-price" id="prodDetailPrice"></div>
+        <div id="prodDetailOptionsWrap">
+          <span class="prod-detail-label">Selecione a op??o desejada:</span>
+          <div class="prod-detail-options" id="prodDetailOptions"></div>
+        </div>
+        <div class="prod-detail-footer">
+          <div class="prod-qty-box">
+            <button type="button" onclick="alterarQtdModalProduto(-1)">&minus;</button>
+            <span id="prodDetailQty">1</span>
+            <button type="button" onclick="alterarQtdModalProduto(1)">+</button>
+          </div>
+          <button type="button" class="prod-detail-confirm" id="prodDetailConfirmBtn" onclick="confirmarAdicionarModalProduto()">
+            Adicionar ao Carrinho
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body></html></html>
