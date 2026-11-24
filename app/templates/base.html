@@ -2646,7 +2646,7 @@ html, body {
         const nomeEsc = escapeHtml(o.nome);
         const nomeAttr = o.nome.replace(/'/g, "\'");
         const onclickAttr = semEstoque ? '' : `onclick="selectProductVariation(${Number(produto.id) || 0}, '${nomeAttr}', this)"`;
-        const badgeEstoque = Array.isArray(produto.variacoes) && produto.variacoes.length ? `<strong>${o.estoque}</strong>` : '';
+        const badgeEstoque = '';
         return `<span class="variation-chip${semEstoque ? ' out-of-stock' : ''}${ativo ? ' selected' : ''}" ${onclickAttr} title="${semEstoque ? 'Esgotado' : 'Selecionar ' + nomeEsc}">${nomeEsc}${badgeEstoque}</span>`;
       }).join('');
 
