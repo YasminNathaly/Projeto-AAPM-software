@@ -233,22 +233,22 @@
         <div class="card-title" style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem;"><span>Categorias Cadastradas</span><select id="ordem_categoria" class="form-control" onchange="alterarOrdenacao('categoria', this.value)" style="width:auto; min-width:155px; padding:0.42rem 0.75rem; font-size:0.78rem; margin-left:auto;" title="Ordenar listagem"><option value="padrao">Ordem: Padrão</option><option value="recentes">Mais recentes</option><option value="antigos">Mais antigos</option></select></div>
         <div class="table-responsive">
           
-<div id="box-pesquisa-produtos-admin" style="margin: 12px 0 16px 0; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+
+<div id="box-pesquisa-produtos-admin" style="margin: 12px 0 16px 0; display: flex; gap: 10px; align-items: center;">
   <input
     type="text"
     id="input-pesquisa-produtos-admin"
-    placeholder="?? Pesquisar produto cadastrado por nome, categoria ou varia??o..."
-    style="flex: 1; min-width: 260px; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;"
-    oninput="filtrarProdutosAdmin()"
+    placeholder="?? Pesquisar produto cadastrado..."
+    style="flex: 1; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;"
+    oninput="filtrarProdutosAdminSeguro()"
   />
   <button
     type="button"
-    onclick="document.getElementById('input-pesquisa-produtos-admin').value=''; filtrarProdutosAdmin();"
-    style="padding: 10px 14px; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 8px; cursor: pointer; font-size: 13px;"
+    onclick="document.getElementById('input-pesquisa-produtos-admin').value=''; filtrarProdutosAdminSeguro();"
+    style="padding: 10px 14px; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 8px; cursor: pointer;"
   >
     Limpar
   </button>
-  <span id="contador-produtos-admin" style="font-size: 13px; color: #64748b;"></span>
 </div>
 
 <table>
@@ -1100,53 +1100,20 @@ document.addEventListener('DOMContentLoaded', () => {
       })();
     </script>
 
+
 <script>
-  (function () {
-    const normalizar = (s) => (s || "")
-      .toString()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .trim();
-
-    window.filtrarProdutosAdmin = function () {
-      const input = document.getElementById("input-pesquisa-produtos-admin");
-      if (!input) return;
-      const termo = normalizar(input.value);
-
-      // Localiza a tabela ou lista de produtos cadastrados dentro da se??o de produtos
-      const container = input.closest("section, .tab-pane, .card, div") || document;
-      const linhas = container.querySelectorAll("tbody tr, .produto-admin-item, .product-admin-row");
-
-      let visiveis = 0;
-      linhas.forEach((linha) => {
-        const texto = normalizar(linha.innerText);
-        if (!termo || texto.includes(termo)) {
-          linha.style.display = "";
-          visiveis++;
-        } else {
-          linha.style.display = "none";
-        }
-      });
-
-      const contador = document.getElementById("contador-produtos-admin");
-      if (contador) {
-        contador.textContent = termo ? `${visiveis} encontrado(s)` : `${linhas.length} produto(s)`;
-      }
-    };
-
-    // Garante que sempre que um produto novo for adicionado ou a tabela atualizar via JS/AJAX, o filtro roda sozinho
-    document.addEventListener("DOMContentLoaded", () => {
-      const input = document.getElementById("input-pesquisa-produtos-admin");
-      if (!input) return;
-      const container = input.closest("section, .tab-pane, .card, div") || document.body;
-      const observer = new MutationObserver(() => {
-        window.filtrarProdutosAdmin();
-      });
-      observer.observe(container, { childList: true, subtree: true });
-      window.filtrarProdutosAdmin();
+  function filtrarProdutosAdminSeguro() {
+    const input = document.getElementById("input-pesquisa-produtos-admin");
+    if (!input) return;
+    const termo = input.value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    const tabela = input.parentElement.nextElementSibling;
+    const alvo = tabela && tabela.tagName === "TABLE" ? tabela : (input.closest("section, .tab-pane, .card, div") || document);
+    const linhas = alvo.querySelectorAll("tbody tr");
+    linhas.forEach((tr) => {
+      const texto = tr.innerText.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      tr.style.display = (!termo || texto.includes(termo)) ? "" : "none";
     });
-  })();
+  }
 </script>
 </body>
 </html>
