@@ -4575,14 +4575,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <script>
       (function () {
-        if (window.__touchScrollBidirecional) return;
-        window.__touchScrollBidirecional = true;
+        if (window.__touchScrollV3) return;
+        window.__touchScrollV3 = true;
         let tocando = false, inicioX = 0, inicioY = 0, scrollXInicial = 0, scrollYInicial = 0, alvoScroll = null, arrastou = false;
 
         const acharContainerHorizontal = (el) => {
           while (el && el !== document.body && el !== document.documentElement) {
             const st = window.getComputedStyle(el);
-            const podeRolarX = (st.overflowX === 'auto' || st.overflowX === 'scroll') && el.scrollWidth > el.clientWidth;
+            const podeRolarX = (st.overflowX === 'auto' || st.overflowX === 'scroll') && el.scrollWidth > el.clientWidth + 2;
             if (podeRolarX) return el;
             el = el.parentElement;
           }
@@ -4590,38 +4590,45 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const iniciar = (x, y, target) => {
-          if (target && target.closest('input, textarea, select, button, a')) return;
+          if (target && target.closest('input, textarea, select')) return;
           tocando = true;
           arrastou = false;
           inicioX = x;
           inicioY = y;
           alvoScroll = acharContainerHorizontal(target);
-          scrollXInicial = alvoScroll ? alvoScroll.scrollLeft : (window.scrollX || document.documentElement.scrollLeft);
-          scrollYInicial = window.scrollY || document.documentElement.scrollTop;
+          scrollXInicial = alvoScroll ? alvoScroll.scrollLeft : (window.scrollX || document.documentElement.scrollLeft || document.body.scrollLeft);
+          scrollYInicial = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop;
         };
 
         const mover = (x, y) => {
           if (!tocando) return;
           const diffX = x - inicioX;
           const diffY = y - inicioY;
-          if (Math.abs(diffX) > 5 || Math.abs(diffY) > 5) {
+          if (Math.abs(diffX) > 6 || Math.abs(diffY) > 6) {
             arrastou = true;
+            document.body.style.userSelect = 'none';
             window.getSelection()?.removeAllRanges();
-            if (alvoScroll) {
+            if (alvoScroll && Math.abs(diffX) >= Math.abs(diffY)) {
               alvoScroll.scrollLeft = scrollXInicial - diffX;
             } else {
               window.scrollTo(scrollXInicial - diffX, scrollYInicial - diffY);
+              document.documentElement.scrollLeft = scrollXInicial - diffX;
+              document.body.scrollLeft = scrollXInicial - diffX;
             }
           }
         };
 
-        const finalizar = () => { tocando = false; alvoScroll = null; };
+        const finalizar = () => {
+          tocando = false;
+          alvoScroll = null;
+          document.body.style.userSelect = '';
+        };
 
-        window.addEventListener('pointerdown', (e) => { if (e.button === 0) iniciar(e.clientX, e.clientY, e.target); }, { passive: true });
-        window.addEventListener('pointermove', (e) => mover(e.clientX, e.clientY), { passive: true });
-        window.addEventListener('pointerup', finalizar, { passive: true });
-        window.addEventListener('pointercancel', finalizar, { passive: true });
-        document.addEventListener('click', (e) => { if (arrastou) { e.stopPropagation(); arrastou = false; } }, true);
+        window.addEventListener('pointerdown', (e) => { if (e.button === 0) iniciar(e.clientX, e.clientY, e.target); }, true);
+        window.addEventListener('pointermove', (e) => mover(e.clientX, e.clientY), true);
+        window.addEventListener('pointerup', finalizar, true);
+        window.addEventListener('pointercancel', finalizar, true);
+        document.addEventListener('click', (e) => { if (arrastou) { e.preventDefault(); e.stopPropagation(); arrastou = false; } }, true);
       })();
     </script>
 </body></html></html>
