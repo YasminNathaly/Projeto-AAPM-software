@@ -1002,5 +1002,39 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 </style>
 
+
+    <script>
+      (function () {
+        if (window.__touchScrollAtivo) return;
+        window.__touchScrollAtivo = true;
+        let tocando = false, inicioY = 0, scrollInicial = 0, arrastou = false;
+
+        const iniciar = (y, target) => {
+          if (target && target.closest('input, textarea, select, button, a, .modal-body, .cart-items')) return;
+          tocando = true;
+          arrastou = false;
+          inicioY = y;
+          scrollInicial = window.scrollY || document.documentElement.scrollTop;
+        };
+
+        const mover = (y) => {
+          if (!tocando) return;
+          const diff = y - inicioY;
+          if (Math.abs(diff) > 5) {
+            arrastou = true;
+            window.getSelection()?.removeAllRanges();
+            window.scrollTo(0, scrollInicial - diff);
+          }
+        };
+
+        const finalizar = () => { tocando = false; };
+
+        window.addEventListener('pointerdown', (e) => { if (e.button === 0) iniciar(e.clientY, e.target); }, { passive: true });
+        window.addEventListener('pointermove', (e) => mover(e.clientY), { passive: true });
+        window.addEventListener('pointerup', finalizar, { passive: true });
+        window.addEventListener('pointercancel', finalizar, { passive: true });
+        document.addEventListener('click', (e) => { if (arrastou) { e.stopPropagation(); arrastou = false; } }, true);
+      })();
+    </script>
 </body>
 </html>
