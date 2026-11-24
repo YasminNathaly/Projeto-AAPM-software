@@ -25,6 +25,11 @@ def listar_produtos(pagina: int = 1, limite: int = 10, db: Session = Depends(get
 def buscar_produto(produto_id: int, db: Session = Depends(get_db)):
     return produto_controller.buscar_produto_por_id(db, produto_id)
 
+# 3.5 ATUALIZAR UM PRODUTO
+@router.put("/{produto_id}", response_model=ProdutoResponse)
+def atualizar_produto(produto_id: int, produto: ProdutoCreate, db: Session = Depends(get_db)):
+    return produto_controller.atualizar_produto(db, produto_id, produto)
+
 # 4. DELETAR UM PRODUTO
 @router.delete("/{produto_id}", status_code=status.HTTP_204_NO_CONTENT)
 def deletar_produto(produto_id: int, db: Session = Depends(get_db)):

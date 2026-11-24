@@ -1,15 +1,28 @@
+from typing import List, Optional
 from pydantic import BaseModel
 
-# O que a API espera RECEBER ao cadastrar/editar um produto
+class VariacaoItem(BaseModel):
+    id: Optional[int] = None
+    nome_variacao: str
+    estoque: int = 0
+    preco_adicional: float = 0.0
+
+    class Config:
+        from_attributes = True
+
 class ProdutoCreate(BaseModel):
     nome: str
-    categoria: str
-    cor: str
-    tamanho: str
+    categoria: Optional[str] = None
+    categoria_id: Optional[int] = None
+    cor: Optional[str] = ""
+    tamanho: Optional[str] = ""
     preco: float
     estoque: int = 0
+    quantidade: Optional[int] = None
+    imagem_url: Optional[str] = ""
+    disponivel: Optional[bool] = True
+    variacoes: Optional[List[VariacaoItem]] = []
 
-# O que a API vai DEVOLVER (inclui o ID do banco)
 class ProdutoResponse(ProdutoCreate):
     id: int
 

@@ -1342,6 +1342,12 @@ html, body {
       cursor: pointer; text-align: left; display: flex; align-items: center; justify-content: space-between;
     }
     .a11y-opt-btn:hover { border-color: var(--primary); }
+    .variation-chip { cursor: pointer; user-select: none; transition: all 0.18s ease; }
+    .variation-chip:hover:not(.out-of-stock) { border-color: var(--primary, #e30613); transform: translateY(-1px); }
+    .variation-chip.selected { background: var(--primary, #e30613) !important; color: #fff !important; border-color: var(--primary, #e30613) !important; font-weight: 700; }
+    .variation-chip.selected strong { color: #fff !important; }
+    .variation-chip.out-of-stock { opacity: 0.45; cursor: not-allowed; text-decoration: line-through; }
+    .variation-label-hint { font-size: 0.72rem; color: var(--text-muted, #888); margin-bottom: 4px; display: block; }
   </style>
 
 
@@ -2582,24 +2588,67 @@ html, body {
       renderProducts(filtrados);
     }
 
-    function renderVariationChips(produto) {
+    const selectedProductVariations = {};
+
+    function getProductOptionsList(produto) {
       const variacoes = Array.isArray(produto.variacoes) ? produto.variacoes : [];
-
-      if (!variacoes.length) {
-        if (produto.tamanho) {
-          return `<div class="product-variations"><span class="variation-chip">${escapeHtml(produto.tamanho)}</span></div>`;
-        }
-        return '';
+      if (variacoes.length) {
+        return variacoes.map((v, idx) => ({
+          key: String(v.id ?? idx),
+          nome: (v.nome_variacao || v.nome || v.name || '').trim(),
+          estoque: Number(v.estoque ?? v.quantidade ?? 0) || 0,
+          precoAdicional: Number(v.preco_adicional || 0) || 0
+        })).filter(o => o.nome);
       }
+      const extras = [];
+      [produto.cor, produto.tamanho].forEach(campo => {
+        if (campo && String(campo).trim()) {
+          String(campo).split(',').map(s => s.trim()).filter(Boolean).forEach(opt => {
+            if (!extras.some(e => e.nome.toLowerCase() === opt.toLowerCase())) {
+              extras.push({
+                key: opt,
+                nome: opt,
+                estoque: Number(produto.quantidade ?? produto.estoque ?? 99) || 99,
+                precoAdicional: 0
+              });
+            }
+          });
+        }
+      });
+      return extras;
+    }
 
-      const chips = variacoes.map((v) => {
-        const nome = v.nome_variacao || v.nome || v.name || '';
-        const estoque = Number(v.estoque ?? v.quantidade ?? 0) || 0;
-        const semEstoque = estoque <= 0;
-        return `<span class="variation-chip${semEstoque ? ' out-of-stock' : ''}">${escapeHtml(nome)}<strong>${estoque}</strong></span>`;
+    function selectProductVariation(productId, optionNome, chipEl) {
+      selectedProductVariations[String(productId)] = optionNome;
+      const card = chipEl ? chipEl.closest('.product-item') : null;
+      if (card) {
+        card.querySelectorAll('.variation-chip').forEach(c => c.classList.remove('selected'));
+        chipEl.classList.add('selected');
+      }
+    }
+
+    function renderVariationChips(produto) {
+      const opcoes = getProductOptionsList(produto);
+      if (!opcoes.length) return '';
+
+      const pid = String(produto.id);
+      const disponiveis = opcoes.filter(o => o.estoque > 0);
+      if (!selectedProductVariations[pid] || !opcoes.some(o => o.nome === selectedProductVariations[pid])) {
+        selectedProductVariations[pid] = (disponiveis[0] || opcoes[0]).nome;
+      }
+      const escolhida = selectedProductVariations[pid];
+
+      const chips = opcoes.map((o) => {
+        const semEstoque = o.estoque <= 0;
+        const ativo = !semEstoque && o.nome === escolhida;
+        const nomeEsc = escapeHtml(o.nome);
+        const nomeAttr = o.nome.replace(/'/g, "\'");
+        const onclickAttr = semEstoque ? '' : `onclick="selectProductVariation(${Number(produto.id) || 0}, '${nomeAttr}', this)"`;
+        const badgeEstoque = Array.isArray(produto.variacoes) && produto.variacoes.length ? `<strong>${o.estoque}</strong>` : '';
+        return `<span class="variation-chip${semEstoque ? ' out-of-stock' : ''}${ativo ? ' selected' : ''}" ${onclickAttr} title="${semEstoque ? 'Esgotado' : 'Selecionar ' + nomeEsc}">${nomeEsc}${badgeEstoque}</span>`;
       }).join('');
 
-      return `<div class="product-variations">${chips}</div>`;
+      return `<span class="variation-label-hint">Escolha a op??o:</span><div class="product-variations">${chips}</div>`;
     }
 
     let ultimaListaProdutosFiltrada = null;
@@ -2669,14 +2718,23 @@ html, body {
       return products.find((p) => String(p.id) === String(id));
     }
 
-    function getMaxStockForProduct(produto) {
+    function getMaxStockForProduct(produto, variacaoNome) {
       if (!produto) return 0;
+      const opcoes = getProductOptionsList(produto);
+      if (opcoes.length && variacaoNome) {
+        const opt = opcoes.find(o => o.nome === variacaoNome);
+        if (opt) return opt.estoque;
+      }
       if (Array.isArray(produto.variacoes) && produto.variacoes.length > 0) {
         const totalVar = produto.variacoes.reduce((acc, v) => acc + Number(v.estoque || 0), 0);
         if (totalVar > 0) return totalVar;
       }
-      const qtd = Number(produto.quantidade);
+      const qtd = Number(produto.quantidade ?? produto.estoque);
       return Number.isFinite(qtd) && qtd >= 0 ? qtd : 99;
+    }
+
+    function buildCartKey(productId, variacaoNome) {
+      return variacaoNome ? `${productId}::${variacaoNome}` : String(productId);
     }
 
     function addToCartFromButton(btnEl, productId) {
@@ -2689,9 +2747,9 @@ html, body {
         btnEl.dataset.originalLabel = original;
         if (adicionado) {
           btnEl.classList.add('added');
-          btnEl.innerHTML = '✓ Adicionado';
+          btnEl.innerHTML = '? Adicionado';
         } else {
-          btnEl.innerHTML = 'Limite atingido';
+          btnEl.innerHTML = 'Sem estoque';
         }
         setTimeout(() => {
           btnEl.classList.remove('added');
@@ -2705,22 +2763,33 @@ html, body {
     function addToCart(productId, qty) {
       const produto = findProductById(productId);
       if (!produto) return false;
-      const maxStock = getMaxStockForProduct(produto);
-      const step = 1; // Sempre adiciona 1 unidade por vez
+      const opcoes = getProductOptionsList(produto);
+      let variacaoEscolhida = '';
+      if (opcoes.length) {
+        variacaoEscolhida = selectedProductVariations[String(produto.id)] || (opcoes.find(o => o.estoque > 0) || opcoes[0]).nome;
+      }
+      const maxStock = getMaxStockForProduct(produto, variacaoEscolhida);
+      const step = 1;
+      const cartKey = buildCartKey(produto.id, variacaoEscolhida);
 
-      const existing = cart.find((item) => String(item.id) === String(productId));
+      const existing = cart.find((item) => (item.cartKey || buildCartKey(item.id, item.variacao)) === cartKey);
       const atual = existing ? existing.qty : 0;
       if (maxStock <= 0 || atual + step > maxStock) {
         return false;
       }
 
+      const optObj = opcoes.find(o => o.nome === variacaoEscolhida);
+      const precoFinal = Number(produto.preco || 0) + (optObj ? Number(optObj.precoAdicional || 0) : 0);
+
       if (existing) {
         existing.qty += step;
       } else {
         cart.push({
+          cartKey: cartKey,
           id: produto.id,
           nome: produto.nome || 'Produto',
-          preco: Number(produto.preco || 0),
+          variacao: variacaoEscolhida,
+          preco: precoFinal,
           imagem_url: produto.imagem_url || '',
           qty: step
         });
@@ -2731,25 +2800,25 @@ html, body {
       return true;
     }
 
-    function updateCartQty(productId, delta) {
-      const item = cart.find((i) => String(i.id) === String(productId));
+    function updateCartQty(cartKeyOrId, delta) {
+      const item = cart.find((i) => String(i.cartKey || i.id) === String(cartKeyOrId));
       if (!item) return;
       const step = delta > 0 ? 1 : -1;
       if (step > 0) {
-        const produto = findProductById(productId);
-        const maxStock = getMaxStockForProduct(produto);
+        const produto = findProductById(item.id);
+        const maxStock = getMaxStockForProduct(produto, item.variacao);
         if (item.qty + 1 > maxStock) return;
       }
       item.qty += step;
       if (item.qty <= 0) {
-        cart = cart.filter((i) => String(i.id) !== String(productId));
+        cart = cart.filter((i) => String(i.cartKey || i.id) !== String(cartKeyOrId));
       }
       saveCart();
       renderCart();
     }
 
-    function removeCartItem(productId) {
-      cart = cart.filter((i) => String(i.id) !== String(productId));
+    function removeCartItem(cartKeyOrId) {
+      cart = cart.filter((i) => String(i.cartKey || i.id) !== String(cartKeyOrId));
       saveCart();
       renderCart();
     }
@@ -2806,18 +2875,20 @@ html, body {
       list.innerHTML = cart.map((item) => {
         const itemImg = sanitizeUrl(item.imagem_url) || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=200&auto=format&fit=crop';
         const itemNome = escapeHtml(item.nome);
-        const itemIdNum = Number(item.id) || 0;
+        const itemVar = item.variacao ? `<div style="font-size:0.76rem; color:var(--primary, #e30613); font-weight:600; margin:2px 0;">Op??o: ${escapeHtml(item.variacao)}</div>` : '';
+        const itemKey = String(item.cartKey || item.id).replace(/'/g, "\'");
         return `
         <div class="cart-item">
           <img src="${itemImg}" class="cart-item-thumb" alt="${itemNome}">
           <div class="cart-item-info">
             <div class="cart-item-name">${itemNome}</div>
+            ${itemVar}
             <div class="cart-item-price">R$ ${item.preco.toFixed(2)} un.</div>
             <div class="cart-item-controls">
-              <button type="button" class="cart-qty-btn" onclick="updateCartQty('${itemIdNum}', -1)">&minus;</button>
+              <button type="button" class="cart-qty-btn" onclick="updateCartQty('${itemKey}', -1)">&minus;</button>
               <span class="cart-qty-value">${item.qty}</span>
-              <button type="button" class="cart-qty-btn" onclick="updateCartQty('${itemIdNum}', 1)">+</button>
-              <button type="button" class="cart-item-remove" onclick="removeCartItem('${itemIdNum}')">Remover</button>
+              <button type="button" class="cart-qty-btn" onclick="updateCartQty('${itemKey}', 1)">+</button>
+              <button type="button" class="cart-item-remove" onclick="removeCartItem('${itemKey}')">Remover</button>
             </div>
           </div>
         </div>
