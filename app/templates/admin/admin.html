@@ -1005,32 +1005,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <script>
       (function () {
-        if (window.__touchScrollAtivo) return;
-        window.__touchScrollAtivo = true;
-        let tocando = false, inicioY = 0, scrollInicial = 0, arrastou = false;
+        if (window.__touchScrollBidirecional) return;
+        window.__touchScrollBidirecional = true;
+        let tocando = false, inicioX = 0, inicioY = 0, scrollXInicial = 0, scrollYInicial = 0, alvoScroll = null, arrastou = false;
 
-        const iniciar = (y, target) => {
-          if (target && target.closest('input, textarea, select, button, a, .modal-body, .cart-items')) return;
-          tocando = true;
-          arrastou = false;
-          inicioY = y;
-          scrollInicial = window.scrollY || document.documentElement.scrollTop;
+        const acharContainerHorizontal = (el) => {
+          while (el && el !== document.body && el !== document.documentElement) {
+            const st = window.getComputedStyle(el);
+            const podeRolarX = (st.overflowX === 'auto' || st.overflowX === 'scroll') && el.scrollWidth > el.clientWidth;
+            if (podeRolarX) return el;
+            el = el.parentElement;
+          }
+          return null;
         };
 
-        const mover = (y) => {
+        const iniciar = (x, y, target) => {
+          if (target && target.closest('input, textarea, select, button, a')) return;
+          tocando = true;
+          arrastou = false;
+          inicioX = x;
+          inicioY = y;
+          alvoScroll = acharContainerHorizontal(target);
+          scrollXInicial = alvoScroll ? alvoScroll.scrollLeft : (window.scrollX || document.documentElement.scrollLeft);
+          scrollYInicial = window.scrollY || document.documentElement.scrollTop;
+        };
+
+        const mover = (x, y) => {
           if (!tocando) return;
-          const diff = y - inicioY;
-          if (Math.abs(diff) > 5) {
+          const diffX = x - inicioX;
+          const diffY = y - inicioY;
+          if (Math.abs(diffX) > 5 || Math.abs(diffY) > 5) {
             arrastou = true;
             window.getSelection()?.removeAllRanges();
-            window.scrollTo(0, scrollInicial - diff);
+            if (alvoScroll) {
+              alvoScroll.scrollLeft = scrollXInicial - diffX;
+            } else {
+              window.scrollTo(scrollXInicial - diffX, scrollYInicial - diffY);
+            }
           }
         };
 
-        const finalizar = () => { tocando = false; };
+        const finalizar = () => { tocando = false; alvoScroll = null; };
 
-        window.addEventListener('pointerdown', (e) => { if (e.button === 0) iniciar(e.clientY, e.target); }, { passive: true });
-        window.addEventListener('pointermove', (e) => mover(e.clientY), { passive: true });
+        window.addEventListener('pointerdown', (e) => { if (e.button === 0) iniciar(e.clientX, e.clientY, e.target); }, { passive: true });
+        window.addEventListener('pointermove', (e) => mover(e.clientX, e.clientY), { passive: true });
         window.addEventListener('pointerup', finalizar, { passive: true });
         window.addEventListener('pointercancel', finalizar, { passive: true });
         document.addEventListener('click', (e) => { if (arrastou) { e.stopPropagation(); arrastou = false; } }, true);
