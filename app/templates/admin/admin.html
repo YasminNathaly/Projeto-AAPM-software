@@ -234,23 +234,6 @@
         <div class="table-responsive">
           
 
-<div id="box-pesquisa-produtos-admin" style="margin: 12px 0 16px 0; display: flex; gap: 10px; align-items: center;">
-  <input
-    type="text"
-    id="input-pesquisa-produtos-admin"
-    placeholder="?? Pesquisar produto cadastrado..."
-    style="flex: 1; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;"
-    oninput="filtrarProdutosAdminSeguro()"
-  />
-  <button
-    type="button"
-    onclick="document.getElementById('input-pesquisa-produtos-admin').value=''; filtrarProdutosAdminSeguro();"
-    style="padding: 10px 14px; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 8px; cursor: pointer;"
-  >
-    Limpar
-  </button>
-</div>
-
 <table>
             <thead>
               <tr><th>Código</th><th>Nome</th><th>Descrição</th><th>Status</th><th>Ações</th></tr>
@@ -361,6 +344,14 @@
         <div class="produtos-toolbar">
           <div class="card-title" style="margin: 0;">Produtos Cadastrados</div>
           <div class="produtos-toolbar-controls">
+            <input
+              type="text"
+              id="produtoBuscaInput"
+              class="form-control"
+              placeholder="Pesquisar produto..."
+              style="min-width: 210px;"
+              oninput="pesquisarProdutosAdmin(this.value)"
+            />
             <select id="produtoFiltroCategoriaGrid" class="form-control" onchange="filtrarProdutosPorCategoria()">
               <option value="">Todas as categorias</option>
             </select>
@@ -1101,19 +1092,5 @@ document.addEventListener('DOMContentLoaded', () => {
     </script>
 
 
-<script>
-  function filtrarProdutosAdminSeguro() {
-    const input = document.getElementById("input-pesquisa-produtos-admin");
-    if (!input) return;
-    const termo = input.value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-    const tabela = input.parentElement.nextElementSibling;
-    const alvo = tabela && tabela.tagName === "TABLE" ? tabela : (input.closest("section, .tab-pane, .card, div") || document);
-    const linhas = alvo.querySelectorAll("tbody tr");
-    linhas.forEach((tr) => {
-      const texto = tr.innerText.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-      tr.style.display = (!termo || texto.includes(termo)) ? "" : "none";
-    });
-  }
-</script>
 </body>
 </html>

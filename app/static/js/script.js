@@ -164,6 +164,13 @@ let paginaAtual = {
 
 let produtoFiltroCategoriaAtiva = '';
 
+
+function pesquisarProdutosAdmin(valor) {
+  termoBuscaPorModulo['produto'] = (valor || '').trim();
+  paginaAtual.produto = 1;
+  renderProdutos();
+}
+
 function filtrarProdutosPorCategoria() {
   const sel = document.getElementById('produtoFiltroCategoriaGrid');
   produtoFiltroCategoriaAtiva = sel ? sel.value : '';
@@ -177,7 +184,7 @@ function textoDoItemParaBusca(viewId, item) {
   switch (viewId) {
     case 'categoria': return [item.codigo, item.nome, item.descricao].join(' ');
     case 'fornecedor': return [item.nome, item.documento, item.email, item.telefone].join(' ');
-    case 'produto': return [item.nome, nomeCategoriaPorId(item.categoria_id), item.tamanho].join(' ');
+    case 'produto': return [item.nome, nomeCategoriaPorId(item.categoria_id), item.tamanho, item.cor, ...(Array.isArray(item.variacoes) ? item.variacoes.map(v => `${v.nome_variacao || ''} ${v.sku || ''}`) : [])].join(' ');
     case 'associado': return [item.nome, item.email, item.telefone, item.endereco].join(' ');
     case 'armario': return [item.numero, item.localizacao, item.status, item.nome_completo, item.curso].join(' ');
     case 'usuario': return [item.nome, item.email, item.perfil].join(' ');
@@ -1477,6 +1484,8 @@ function renderProdutos() {
   const grid = document.getElementById('produtosGrid');
   if (!grid) return;
 
+  const inpBusca = document.getElementById('produtoBuscaInput');
+  if (inpBusca && inpBusca.value.trim() !== (termoBuscaPorModulo['produto'] || '')) { termoBuscaPorModulo['produto'] = inpBusca.value.trim(); }
   let lista = aplicarBusca('produto', produtos);
   if (produtoFiltroCategoriaAtiva) {
     lista = lista.filter(p => String(p.categoria_id) === String(produtoFiltroCategoriaAtiva));
