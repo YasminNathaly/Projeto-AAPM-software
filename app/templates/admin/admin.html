@@ -1005,62 +1005,79 @@ document.addEventListener('DOMContentLoaded', () => {
 
     
 
+    
+
     <script>
       (function () {
-        if (window.__touchScrollV3) return;
-        window.__touchScrollV3 = true;
-        let tocando = false, inicioX = 0, inicioY = 0, scrollXInicial = 0, scrollYInicial = 0, alvoScroll = null, arrastou = false;
+        if (window.__touchScrollV4) return;
+        window.__touchScrollV4 = true;
 
-        const acharContainerHorizontal = (el) => {
+        // 1. Impede que o navegador tente "arrastar arquivo/link" ao deslizar o dedo sobre botoes ou imagens
+        document.addEventListener('dragstart', (e) => e.preventDefault(), true);
+
+        let ativo = false, startX = 0, startY = 0, sLeft = 0, sTop = 0, alvoX = null, moveu = false;
+
+        const acharAlvoHorizontal = (el) => {
           while (el && el !== document.body && el !== document.documentElement) {
-            const st = window.getComputedStyle(el);
-            const podeRolarX = (st.overflowX === 'auto' || st.overflowX === 'scroll') && el.scrollWidth > el.clientWidth + 2;
-            if (podeRolarX) return el;
+            if (el.scrollWidth > el.clientWidth + 4) {
+              const st = window.getComputedStyle(el);
+              if (st.overflowX !== 'visible') return el;
+            }
             el = el.parentElement;
           }
           return null;
         };
 
-        const iniciar = (x, y, target) => {
+        const onStart = (x, y, target) => {
           if (target && target.closest('input, textarea, select')) return;
-          tocando = true;
-          arrastou = false;
-          inicioX = x;
-          inicioY = y;
-          alvoScroll = acharContainerHorizontal(target);
-          scrollXInicial = alvoScroll ? alvoScroll.scrollLeft : (window.scrollX || document.documentElement.scrollLeft || document.body.scrollLeft);
-          scrollYInicial = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop;
+          ativo = true;
+          moveu = false;
+          startX = x;
+          startY = y;
+          alvoX = acharAlvoHorizontal(target);
+          sLeft = alvoX ? alvoX.scrollLeft : (window.scrollX || document.documentElement.scrollLeft || 0);
+          sTop = window.scrollY || document.documentElement.scrollTop || 0;
         };
 
-        const mover = (x, y) => {
-          if (!tocando) return;
-          const diffX = x - inicioX;
-          const diffY = y - inicioY;
-          if (Math.abs(diffX) > 6 || Math.abs(diffY) > 6) {
-            arrastou = true;
+        const onMove = (x, y) => {
+          if (!ativo) return;
+          const dx = x - startX;
+          const dy = y - startY;
+          if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+            moveu = true;
             document.body.style.userSelect = 'none';
             window.getSelection()?.removeAllRanges();
-            if (alvoScroll && Math.abs(diffX) >= Math.abs(diffY)) {
-              alvoScroll.scrollLeft = scrollXInicial - diffX;
+            if (alvoX && Math.abs(dx) > Math.abs(dy)) {
+              alvoX.scrollLeft = sLeft - dx;
             } else {
-              window.scrollTo(scrollXInicial - diffX, scrollYInicial - diffY);
-              document.documentElement.scrollLeft = scrollXInicial - diffX;
-              document.body.scrollLeft = scrollXInicial - diffX;
+              window.scrollTo(sLeft - dx, sTop - dy);
             }
           }
         };
 
-        const finalizar = () => {
-          tocando = false;
-          alvoScroll = null;
+        const onEnd = () => {
+          ativo = false;
+          alvoX = null;
           document.body.style.userSelect = '';
         };
 
-        window.addEventListener('pointerdown', (e) => { if (e.button === 0) iniciar(e.clientX, e.clientY, e.target); }, true);
-        window.addEventListener('pointermove', (e) => mover(e.clientX, e.clientY), true);
-        window.addEventListener('pointerup', finalizar, true);
-        window.addEventListener('pointercancel', finalizar, true);
-        document.addEventListener('click', (e) => { if (arrastou) { e.preventDefault(); e.stopPropagation(); arrastou = false; } }, true);
+        // Suporta tanto tela touch reconhecida como pointer/mouse quanto touch nativo
+        window.addEventListener('pointerdown', (e) => { if (e.button === 0) onStart(e.clientX, e.clientY, e.target); }, true);
+        window.addEventListener('pointermove', (e) => onMove(e.clientX, e.clientY), true);
+        window.addEventListener('pointerup', onEnd, true);
+        window.addEventListener('pointercancel', onEnd, true);
+
+        window.addEventListener('touchstart', (e) => { if (e.touches[0]) onStart(e.touches[0].clientX, e.touches[0].clientY, e.target); }, { capture: true, passive: true });
+        window.addEventListener('touchmove', (e) => { if (e.touches[0]) onMove(e.touches[0].clientX, e.touches[0].clientY); }, { capture: true, passive: true });
+        window.addEventListener('touchend', onEnd, true);
+
+        document.addEventListener('click', (e) => {
+          if (moveu) {
+            e.preventDefault();
+            e.stopPropagation();
+            moveu = false;
+          }
+        }, true);
       })();
     </script>
 </body>
