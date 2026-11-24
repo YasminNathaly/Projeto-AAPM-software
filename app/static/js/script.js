@@ -1485,8 +1485,18 @@ function renderProdutos() {
   if (!grid) return;
 
   const inpBusca = document.getElementById('produtoBuscaInput');
-  if (inpBusca && inpBusca.value.trim() !== (termoBuscaPorModulo['produto'] || '')) { termoBuscaPorModulo['produto'] = inpBusca.value.trim(); }
-  let lista = aplicarBusca('produto', produtos);
+  const termoDireto = (inpBusca ? inpBusca.value : (termoBuscaPorModulo['produto'] || ''))
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+  termoBuscaPorModulo['produto'] = inpBusca ? inpBusca.value.trim() : (termoBuscaPorModulo['produto'] || '');
+
+  let lista = produtos;
+  if (termoDireto) {
+    lista = lista.filter((item) =>
+      textoDoItemParaBusca('produto', item)
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+        .includes(termoDireto)
+    );
+  }
   if (produtoFiltroCategoriaAtiva) {
     lista = lista.filter(p => String(p.categoria_id) === String(produtoFiltroCategoriaAtiva));
   }
